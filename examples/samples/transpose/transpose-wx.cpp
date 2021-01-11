@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -171,16 +171,9 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated bitmap to be
-    //used by the previously defined View.
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap.
+    //Here we define the wxImage to be used as rendering buffer
     wxImage*            m_buffer;		//the image to serve as buffer
-	unsigned char*      m_pdata;		//ptr to the bitmap
-    int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
-
 
     //some additinal variables
     bool    m_view_needs_redraw;      //to control when the View must be re-drawn
@@ -316,7 +309,7 @@ END_EVENT_TABLE()
 
 //---------------------------------------------------------------------------------------
 MyFrame::MyFrame()
-	: wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+	: wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
 			  wxDefaultPosition, wxSize(850, 600))
 {
     create_menu();
@@ -493,8 +486,8 @@ END_EVENT_TABLE()
 MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse)
     : wxWindow(frame, wxID_ANY)
     , m_lomse(lomse)
-	, m_pPresenter(NULL)
-	, m_buffer(NULL)
+	, m_pPresenter(nullptr)
+	, m_buffer(nullptr)
 	, m_view_needs_redraw(true)
 {
 }
@@ -518,17 +511,14 @@ void MyCanvas::open_file(const wxString& fullname)
     m_pPresenter = m_lomse.open_document(k_view_vertical_book,
                                          filename);
 
-    //get the pointer to the interactor, set the rendering buffer, register for
-    //receiving desired events and enable edition
+    //get the pointer to the interactor, register to receive desired events and
+    //enable edition
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spIntor->set_rendering_buffer(&m_rbuf_window);
-
         //ask to receive desired events
         spIntor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
-        //set in edition mode
+        //set edition mode
         spIntor->set_operating_mode(Interactor::k_mode_edition);
     }
 
@@ -577,22 +567,22 @@ void MyCanvas::delete_rendering_buffer()
 //---------------------------------------------------------------------------------------
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
-    //buffer for the view. Any existing buffer is automatically deleted
+    //creates a bitmap of specified size and defines it s the rendering
+    //buffer for the view.
+
+    delete_rendering_buffer();
 
     // allocate a new rendering buffer
-	delete_rendering_buffer();
-    m_nBufWidth = width;
-    m_nBufHeight = height;
     m_buffer = new wxImage(width, height);
 
     //get pointer to wxImage internal bitmap
-    m_pdata = m_buffer->GetData();
+    unsigned char* pdata = m_buffer->GetData();
 
-    //Attach this bitmap to Lomse rendering buffer
-    #define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this bitmap as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(pdata, width, height);
+    }
 
     m_view_needs_redraw = true;
 }
@@ -619,17 +609,14 @@ void MyCanvas::open_test_document()
         ")))",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer, register for
-    //receiving desired events and enable edition
+    //get the pointer to the interactor, register to receive desired events
+    //and enable edition
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spIntor->set_rendering_buffer(&m_rbuf_window);
-
         //ask to receive desired events
         spIntor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
-        //set in edition mode
+        //set edition mode
         spIntor->set_operating_mode(Interactor::k_mode_edition);
     }
 
@@ -1012,9 +999,9 @@ DlgTransposeNotes::DlgTransposeNotes(wxWindow* parent, FIntval* interval, int* s
 DlgTransposeNotes::~DlgTransposeNotes()
 {
 	// Disconnect Events
-	m_radMethod->Disconnect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), NULL, this );
-	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), NULL, this );
-	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), NULL, this );
+	m_radMethod->Disconnect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), nullptr, this );
+	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), nullptr, this );
+	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), nullptr, this );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1040,7 +1027,7 @@ void DlgTransposeNotes::create_controls()
 	wxStaticBoxSizer* szrInterval;
 	szrInterval = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Interval ") ), wxVERTICAL );
 
-	m_cboInterval = new wxComboBox( szrInterval->GetStaticBox(), wxID_ANY, _("Unison"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_cboInterval = new wxComboBox( szrInterval->GetStaticBox(), wxID_ANY, _("Unison"), wxDefaultPosition, wxDefaultSize, 0, nullptr, 0 );
 	szrInterval->Add( m_cboInterval, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 
@@ -1072,9 +1059,9 @@ void DlgTransposeNotes::create_controls()
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_radMethod->Connect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), NULL, this );
-	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), NULL, this );
-	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), NULL, this );
+	m_radMethod->Connect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), nullptr, this );
+	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), nullptr, this );
+	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), nullptr, this );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1199,8 +1186,8 @@ DlgTransposeKey::DlgTransposeKey(wxWindow* parent, EKeySignature oldKey,
 DlgTransposeKey::~DlgTransposeKey()
 {
 	// Disconnect Events
-	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), NULL, this );
-	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), NULL, this );
+	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), nullptr, this );
+	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), nullptr, this );
 
 }
 
@@ -1221,7 +1208,7 @@ void DlgTransposeKey::create_controls()
 	wxStaticBoxSizer* szrNewKey;
 	szrNewKey = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("New key signature") ), wxVERTICAL );
 
-	m_cboKeySignature = new wxComboBox( szrNewKey->GetStaticBox(), wxID_ANY, "", wxDefaultPosition, wxSize( 200,-1 ), 0, NULL, 0 );
+	m_cboKeySignature = new wxComboBox( szrNewKey->GetStaticBox(), wxID_ANY, "", wxDefaultPosition, wxSize( 200,-1 ), 0, nullptr, 0 );
 	szrNewKey->Add( m_cboKeySignature, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 
@@ -1253,8 +1240,8 @@ void DlgTransposeKey::create_controls()
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), NULL, this );
-	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), NULL, this );
+	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), nullptr, this );
+	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), nullptr, this );
 }
 
 //---------------------------------------------------------------------------------------

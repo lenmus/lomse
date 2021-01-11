@@ -20,17 +20,17 @@ For understanding Lomse API you should know about a very few important classes a
 
 
 
-@section overview-doorway Class LomseDoorway
+@section overview-doorway Initializing the Lomse library
 
-It is the access point to the Lomse library. It must be used by your application at two points:
+LomseDoorway is the access point to the Lomse library and the main interface with the library. It must be used by your application at two points:
 
-  -# Before using the Lomse library it is necessary to initialize it. This means setting up certain options about rendering and event handling.
+  -# Before using the Lomse library it is necessary to initialize it. This means setting up certain global options about rendering and events handling.
 
   -# Later, your application has to use it for:
     - Opening and creating Document objects.
     - Accessing global objects and variables in Lomse library.
 
-See description and usage in documentation for class LomseDoorway.
+Details about Lomse initialization can be found in  @ref page-render-overview-init-lomse.
 
 
 

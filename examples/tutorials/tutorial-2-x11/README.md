@@ -63,12 +63,7 @@ Now we can proceed adding extra code to the main handling loop. For dealing with
 case KeyPress:
 {
     KeySym key = XLookupKeysym(&event.xkey, 0);
-    on_key(event.xkey.x,
-           m_flip_y ?
-               m_rbuf_window.height() - event.xkey.y :
-               event.xkey.y,
-           key,
-           0);
+    on_key(event.xkey.x, event.xkey.y, key, 0);
     break;
 }
 ```
@@ -123,8 +118,7 @@ Next, we invoke function `get_mouse_position(event)` to get the mouse coordinate
 void get_mouse_position(XEvent& event)
 {
     m_xMouse = event.xbutton.x;
-    m_yMouse = m_flip_y ? m_rbuf_window.height() - event.xbutton.y
-                        : event.xbutton.y;
+    m_yMouse = event.xbutton.y;
 }
 ```
 

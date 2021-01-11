@@ -25,6 +25,16 @@
 // For more information, please refer to <http:unlicense.org>
 //---------------------------------------------------------------------------------------
 
+//lomse headers
+#include <lomse_doorway.h>
+#include <lomse_document.h>
+#include <lomse_graphic_view.h>
+#include <lomse_interactor.h>
+#include <lomse_presenter.h>
+#include <lomse_events.h>
+#include <lomse_tasks.h>
+using namespace lomse;
+
 // header files required for X11. The order is important:
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -34,17 +44,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//lomse headers
-#include <lomse_doorway.h>
-#include <lomse_document.h>
-#include <lomse_graphic_view.h>
-#include <lomse_interactor.h>
-#include <lomse_presenter.h>
-#include <lomse_events.h>
-#include <lomse_tasks.h>
-
-using namespace lomse;
-
 
 //---------------------------------------------------------------------------------------
 // In this first tutorial we are just going to display an score on the main window.
@@ -53,14 +52,11 @@ using namespace lomse;
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;	//relates the View, the Document and the Interactor
 
-//the Lomse View renders its content on a bitmap. To manage it, Lomse
-//associates the bitmap to a RenderingBuffer object.
-//It is your responsibility to render the bitmap on a window.
-//Here you define the rendering buffer and its associated bitmap to be
-//used by the previously defined View.
-RenderingBuffer     m_rbuf_window;      //Lomse struct to contain the bitmap
-unsigned char*      m_buf_window;       //memory for the bitmap
-//some X11 related variables
+//the Lomse View renders its content on a bitmap. Here we define some variables
+//to manage the bitmap
+unsigned char*      m_buf_window = nullptr;     //memory for the bitmap
+int                 m_bufWidth, m_bufHeight;    //bitmap size
+//some related variables for X11
 XImage*             m_ximg_window;      //the image to display
 int                 m_depth;            //color depth
 Visual*             m_visual;           //X11 Visual to use
@@ -70,7 +66,6 @@ Visual*             m_visual;           //X11 Visual to use
 int              m_byte_order;
 EPixelFormat     m_format;      //bitmap format
 unsigned         m_bpp;         //bits per pixel
-bool             m_flip_y;      //true if y axis is reversed
 
 //All typical X stuff needed to run the program and the main events handler loop,
 //as well as for handling windows:
@@ -92,7 +87,7 @@ int           m_yMouse;
 
 
 //---------------------------------------------------------------------------------------
-void display_view_content(const rendering_buffer* rbuf)
+void display_view_content()
 {
     if(m_ximg_window == 0) return;
 
@@ -105,8 +100,8 @@ void display_view_content(const rendering_buffer* rbuf)
               m_gc,
               m_ximg_window,
               0, 0, 0, 0,
-              rbuf->width(),
-              rbuf->height()
+              m_bufWidth,
+              m_bufHeight
              );
 }
 
@@ -117,7 +112,7 @@ void do_update_window()
     // of the currently rendered buffer to the window without neither calling
     // any lomse methods nor generating platform related events (i.e. window on_paint)
 
-    display_view_content(&m_rbuf_window);
+    display_view_content();
     XSync(m_pDisplay, false);
 }
 
@@ -181,14 +176,9 @@ void open_document()
         ")))",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, update_window);
     }
 }
@@ -201,7 +191,10 @@ void update_view_content()
     if (!m_pPresenter) return;
 
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(m_buf_window, m_bufWidth, m_bufHeight);
         spInteractor->redraw_bitmap();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -264,8 +257,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
 void get_mouse_position(XEvent& event)
 {
     m_xMouse = event.xbutton.x;
-    m_yMouse = m_flip_y ? m_rbuf_window.height() - event.xbutton.y
-                        : event.xbutton.y;
+    m_yMouse = event.xbutton.y;
 }
 
 //---------------------------------------------------------------------------------------
@@ -403,12 +395,10 @@ bool determine_suitable_bitmap_format()
 bool create_rendering_buffer(unsigned width, unsigned height, unsigned flags)
 {
     //allocate memory for the bitmap, fill it with 1's
+    m_bufWidth = width;
+    m_bufHeight = height;
     m_buf_window = new unsigned char[width * height * (m_bpp / 8)];
     memset(m_buf_window, 255, width * height * (m_bpp / 8));
-
-    //attach this memory to the rendering buffer
-    m_rbuf_window.attach(m_buf_window, width, height,
-                         (m_flip_y ? -width * (m_bpp / 8) : width * (m_bpp / 8)) );
 
     //create an X11 image using the allocated memory as buffer
     m_ximg_window = XCreateImage(m_pDisplay,
@@ -482,8 +472,8 @@ int handle_events()
             //--------------------------------------------------------------------
             case ConfigureNotify:
             {
-                if(event.xconfigure.width  != int(m_rbuf_window.width()) ||
-                   event.xconfigure.height != int(m_rbuf_window.height()))
+                if(event.xconfigure.width  != m_bufWidth ||
+                   event.xconfigure.height != m_bufHeight)
                 {
                     int width  = event.xconfigure.width;
                     int height = event.xconfigure.height;
@@ -498,7 +488,7 @@ int handle_events()
             case Expose:
                 if (event.xexpose.count == 0)
                 {
-                    display_view_content(&m_rbuf_window);
+                    display_view_content();
                     XFlush(m_pDisplay);
                     XSync(m_pDisplay, false);
                 }
@@ -508,12 +498,7 @@ int handle_events()
             case KeyPress:
             {
                 KeySym key = XLookupKeysym(&event.xkey, 0);
-                on_key(event.xkey.x,
-                       m_flip_y ?
-                           m_rbuf_window.height() - event.xkey.y :
-                           event.xkey.y,
-                       key,
-                       0);
+                on_key(event.xkey.x, event.xkey.y, key, 0);
                 break;
             }
 
@@ -658,11 +643,11 @@ void close_x()
 void initialize_lomse()
 {
     //initialize the Lomse library
-    m_flip_y = false;               //y axis is not reversed
-    m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
+    bool flip_y = false;               //y axis is not reversed
+    m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
 
     //initialize lomse related variables
-    m_pPresenter = NULL;
+    m_pPresenter = nullptr;
 }
 
 //---------------------------------------------------------------------------------------

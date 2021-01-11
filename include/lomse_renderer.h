@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -158,6 +158,9 @@ public:
     void remove_shift();
     inline TransAffine& get_transform() { return m_mtx; }
     void set_transform(TransAffine& transform);
+
+    //information
+    static int bytesPerPixel(int pixFmt);
 
 protected:
     TransAffine& set_transformation();

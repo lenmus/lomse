@@ -144,16 +144,13 @@ Presenter*      m_pPresenter;   //relates the View, the Document and the Interac
 
 `m_lomse` is the main interface with the Lomse library. It was created by `MyFrame` and `MyCanvas` receives it, as parameter, in the constructor. The two other variables, `m_pPresenter` and `m_pInteractor` are pointers to two important components of the Lomse Model-View-Controller (MVC) architecture. The `Interactor` is a kind of controller for the view. And the `Presenter` is responsible for maintaining the relationships between a Document and its different Views and associated interactors. Later, we will learn more about them.
 
-Next we are going to declare a rendering buffer and its associated bitmap:
+Next we are going to declare the wxImage that is going to be used as Lomse rendering buffer:
 
 ```c++
-RenderingBuffer     m_rbuf_window;
 wxImage*            m_buffer;       //the image to serve as buffer
-unsigned char*      m_pdata;        //ptr to the bitmap
-int                 m_nBufWidth, m_nBufHeight;  //size of the bitmap
 ```
 
-As learn, Lomse knows nothing about wxWidgets, so the Lomse View renders the music scores on a bitmap. To manage the bitmap, Lomse associates the it to a `RenderingBuffer` object. As Lomse only renders on bitmaps, it is your application responsibility to do whatever is needed with it: rendering it on a wxWindow, exporting it as a file, printing it, etc. In our simple application, we are going to render the bitmap on the `MyCanvas` window. And to simplify bitmap management, we are going to use an wxImage as bitmap. Therefore, we had defined a variable, `m_pdata`, that will point to the internal wxImage bitmap, and we will use variables `m_nBufWidth` and `m_nBufHeight` to store the size of the needed bitmap.
+As learn, Lomse knows nothing about wxWidgets, so the Lomse View renders the music scores on a bitmap. To manage the bitmap, Lomse associates the it to a `RenderingBuffer` object. As Lomse only renders on bitmaps, it is your application responsibility to do whatever is needed with it: rendering it on a wxWindow, exporting it as a file, printing it, etc. In our simple application, we are going to render the bitmap on the `MyCanvas` window. And to simplify bitmap management, we are going save a ptr to the current wxImage used as bitmap.
 
 With this we have finished declaring `MyCanvas`. Here is the code:
 
@@ -184,15 +181,9 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated bitmap to be
-    //used by the previously defined View.
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap.
+    //Here we define wxImage to be used as the rendering buffer
     wxImage*            m_buffer;       //the image to serve as buffer
-    unsigned char*      m_pdata;        //ptr to the bitmap
-    int                 m_nBufWidth, m_nBufHeight;  //size of the bitmap
 
     //some additional variables
     bool    m_view_needs_redraw;      //to control when the View must be re-drawn
@@ -230,7 +221,7 @@ bool MyApp::OnInit()
 
 ```c++
 MyFrame::MyFrame()
-    : wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+    : wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
               wxDefaultPosition, wxSize(850, 600))
 {
     create_menu();
@@ -371,12 +362,12 @@ void MyCanvas::open_test_document()
         ")",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
+        //In this example we are not going to set event handlers but this is
+        //the right place to do it, once the document is created.
+        //spInteractor->add_event_handler(......);
     }
 }
 ```
@@ -387,7 +378,7 @@ For creating the Presenter (and associated objects) we invoke LomseDoorway metho
 
 The View type is just a Lomse enum. In this example, value `ViewFactory::k_view_vertical_book` means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 
-The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with simple scores.
+The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language, but Lomse also supports other formats, such as MusicXML.
 
 Let's analyse the string with the score. Fort this, I will split it into lines:
 
@@ -418,20 +409,16 @@ For a detailed description of the LDP language see the [LDP Reference Manual](ht
 Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
 
 ```c++
-//get the pointer to the interactor, set the rendering buffer and register for
-//receiving desired events
+//get the pointer to the interactor and register for receiving desired events
 if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 {
+    //In this example we are not going to set event handlers but this is
+    //the right place to do it, once the document is created.
+    //spInteractor->add_event_handler(......);
+}
 ```
 
 Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter `'0'` in `get_interactor(0)` refers to first <tt>Interactor</tt>, in this case, the only one created.
-
-Once we've got the <tt>Interactor</tt> we only have just one **important** task to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
-
-```c++
-//connect the View with the window buffer
-spInteractor->set_rendering_buffer(&m_rbuf_window);
-```
 
 
 
@@ -442,22 +429,22 @@ In the previous step, in last line of `open_test_document()` we passed to the in
 ```c++
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
-    //buffer for the view. Any existing buffer is automatically deleted
+    //creates a bitmap of specified size and defines it s the rendering
+    //buffer for the view.
+
+    delete_rendering_buffer();
 
     // allocate a new rendering buffer
-    delete m_buffer;            //delete any previous wxImage
-    m_nBufWidth = width;
-    m_nBufHeight = height;
     m_buffer = new wxImage(width, height);
 
     //get pointer to wxImage internal bitmap
-    m_pdata = m_buffer->GetData();
+    unsigned char* pdata = m_buffer->GetData();
 
-    //Attach this bitmap to Lomse rendering buffer
-    #define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this bitmap as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(pdata, width, height);
+    }
 
     m_view_needs_redraw = true;
 }
@@ -468,8 +455,6 @@ In this method we start allocating a new wxImage:
 ```c++
 // allocate a new rendering buffer
 delete_rendering_buffer();
-m_nBufWidth = width;
-m_nBufHeight = height;
 m_buffer = new wxImage(width, height);
 ```
 
@@ -477,16 +462,17 @@ Next, we get a pointer to wxImage internal buffer, so that we can access it and 
 
 ```c++
 //get pointer to wxImage internal bitmap
-m_pdata = m_buffer->GetData();
+unsigned char* pdata = m_buffer->GetData();
 ```
 
 Now, we attach this bitmap to the Lomse rendering buffer:
 
 ```c++
-//Attach this bitmap to Lomse rendering buffer
-#define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+//Use this bitmap to Lomse rendering buffer
+if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+{
+    spInteractor->set_rendering_buffer(pdata, width, height);
+}
 ```
 
 The need to create a new rendering buffer comes from two events: either because the window is being created or because the window size has changed. And in any case, before displaying this new bitmap we need to ask Lomse to paint something on it! So, as a final step we raise a flag to signal that the window has to be repainted:

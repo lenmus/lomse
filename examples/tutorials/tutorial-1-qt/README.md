@@ -168,15 +168,14 @@ Presenter*      m_pPresenter;   //relates the View, the Document and the Interac
 
 `m_lomse` is the main interface with the Lomse library. It was created by `MainWindow`, and `MyCanvas` receives it as parameter in the constructor. The other variable, `m_pPresenter` is a pointers to one important component of the Lomse Model-View-Controller (MVC) architecture. The `Presenter` is responsible for maintaining the relationships between a Document and its different Views and associated interactors. Later, we will learn more about them.
 
-Next we are going to declare a rendering buffer and its associated bitmap:
+Next we are going to declare here the pointer to the memory area to be used by Lomse to render the score and create the bitmap:
 
 ```c++
-RenderingBuffer     m_rbuf_window;
 unsigned char*      m_pdata;                    //ptr to the bitmap
 int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
 ```
 
-As learn, Lomse knows nothing about Qt, so the Lomse View renders the music scores on a raw bitmap in memory. To manage this bitmap, Lomse associates it to a `RenderingBuffer` object. It is responsibility of the application using Lomse to provide this RenderingBuffer object and its associated memory for the bitmap. Therefore, we had defined a variable, `m_pdata`, that will point to the memory that we will allocate for the raw bitmap, and we will use variables `m_nBufWidth` and `m_nBufHeight` to store the size of the needed bitmap.
+As learn, Lomse knows nothing about Qt, so the Lomse View renders the music scores on a raw bitmap in memory. To manage this bitmap, we had defined a variable, `m_pdata`, that will point to the memory that we will allocate for the raw bitmap, and we will use variables `m_nBufWidth` and `m_nBufHeight` to store the size of the needed bitmap.
 
 With this we have finished declaring `MyCanvas`. Here is the code:
 ```c++
@@ -208,12 +207,8 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated memory
-    //for this View
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap. We define here the
+    //memory area to be used to create the bitmap
     unsigned char*      m_pdata;                    //ptr to the bitmap
     int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
 
@@ -361,12 +356,12 @@ void MyCanvas::open_test_document()
         Document::k_format_ldp
     );
 
-    //get the pointer to the interactor, set the rendering buffer and 
-    //register for receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
+        //In this example we are not going to set event handlers but this is
+        //the right place to do it, once the document is created.
+        //spInteractor->add_event_handler(......);
     }
 }
 ```
@@ -376,7 +371,7 @@ For creating the Presenter (and associated objects) we invoke LomseDoorway metho
 
 The View type is just a Lomse enum. In this example, value `ViewFactory::k_view_vertical_book` means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 
-The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in which this score is written. In this example it is written in LenMus LDP language. Currently, also scores in MusicXML format are supported, although the MusicXML importer is not yet finished and currently it only can deal with very very simple scores.
+The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in which this score is written. In this example it is written in LenMus LDP language, but Lomse also supports other formats, such as MusicXML.
 
 Let's analyse the string with the score. Fort this, I will split it into lines:
 ```
@@ -412,13 +407,6 @@ Once the Document and a View for it are created, we just get pointers to the Int
 
 Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated `Interactor` are created. So, parameter `'0'` in `get_interactor(0)` refers to first `Interactor`, in this case, the only one created.
 
-Once we've got the `Interactor` we only have one **important** tasks to do: to inform the `Interactor` about the rendering buffer that must be used for its associated View:
-
-```c++
-    //connect the View with the window buffer
-    spInteractor->set_rendering_buffer(&m_rbuf_window);
-```
-
 
 
 ## <a name="bitmap" />Creating the bitmap for the rendering buffer
@@ -432,40 +420,47 @@ void MyCanvas::create_rendering_buffer(int width, int height)
 
 {
     //allocate memory for the Lomse rendering buffer.
-    //Any existing buffer is automatically deleted by Lomse.
 
     #define BYTES_PER_PIXEL 4   //the chosen format is RGBA, 32 bits
 
-    // allocate a new rendering buffer
+    //delete current buffer
     delete_rendering_buffer();
+
+    // allocate a new rendering buffer
     m_nBufWidth = width;
     m_nBufHeight = height;
     m_pdata = (unsigned char*)malloc(m_nBufWidth * m_nBufHeight * BYTES_PER_PIXEL);
 
-    //Attach this memory to be used as Lomse rendering buffer
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this memory as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(m_pdata, m_nBufWidth, m_nBufHeight);
+    }
 
     m_view_needs_redraw = true;
 }
 ```
 
-In this method we start allocating memory for the bitmap:
+In this method we start by deleting the previous buffer and allocating memory for the new bitmap:
 
 ```c++
-    // allocate a new rendering buffer
+    //delete current buffer
     delete_rendering_buffer();
+
+    // allocate a new rendering buffer
     m_nBufWidth = width;
     m_nBufHeight = height;
     m_pdata = (unsigned char*)malloc(m_nBufWidth * m_nBufHeight * BYTES_PER_PIXEL);
 ```
 
-And then we attach this memory to the Lomse rendering buffer:
+And then we tell Lomse to use this memory as rendering buffer:
 
 ```c++
-    //Attach this memory to be used as Lomse rendering buffer
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this memory as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(m_pdata, m_nBufWidth, m_nBufHeight);
+    }
 ```
 
 The need to create a new rendering buffer comes from two events: either because the window is being created or because the window size has changed. And in any case, before displaying this new bitmap we need to ask Lomse to paint something on it! So, as a final step we raise a flag to signal that the window has to be repainted:

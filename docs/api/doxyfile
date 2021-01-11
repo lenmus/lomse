@@ -643,6 +643,7 @@ INPUT     = mainpages \
 			../../include/lomse_events.h \
 			../../include/lomse_fragment_mark.h \
 			../../include/lomse_graphic_view.h \
+			../../include/lomse_half_page_view.h \
 			../../include/lomse_im_attributes.h \
 			../../include/lomse_import_options.h \
 			../../include/lomse_interactor.h \

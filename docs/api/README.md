@@ -49,8 +49,8 @@ Building the documentation
 ----------------------------
 
 First, make sure you have a the required version of Doxygen installed in
-your system (currently Doxygen 1.8.6 is used). Different versions of 
-Doxygen are practically never compatible and using them would require
+your system (currently Doxygen 1.8.13 is used). Different versions of 
+Doxygen are practically never compatible and using a later version could require
 adapting the configuration file.
 
 For building the API documentation you can run the script:

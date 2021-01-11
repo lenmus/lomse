@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -181,9 +181,12 @@ protected:
     DocCursor*      m_pCursor;
     SelectionSet*   m_pSelections;
     DocCommandExecuter* m_pExec;
+    RenderingBuffer*    m_pScreenBuf;
+    RenderingBuffer*    m_pPrintBuf;
     GmoRef          m_grefLastMouseOver;
     int             m_operatingMode;
     bool            m_fEditionEnabled;
+    bool            m_fViewAreaDefined;     //set_view_area has been invoked
 
     //for controlling repaints
     bool        m_fViewParamsChanged;       //viewport, scale, ... have been modified
@@ -428,59 +431,88 @@ public:
         //@{
 
 
-    /** Associate a rendering buffer to the View related to this %Interactor.
-        @param rbuf A ptr to the memory to be used as rendering buffer.
+    /** Associate a rendering buffer to the View related to this %Interactor. This
+        function takes three parameters:
+        @param buf    A ptr to the memory to be used as rendering buffer.
+        @param width  The width of the buffer in pixels.
+        @param height The height of the buffer in pixels.
 
         Invoking this method is mandatory before doing any operation that would require
-        to render the view. Normally this method is invoked when creating a new view.
+        to render the view, and the view area will be the whole rendering bitmap.
+
+        Once invoked, it is not necessary to allocate a new buffer and invoke again this
+        method, unless the application window is resized. So, normally, the creation of
+        the rendering buffer is done in the window resize event handler.
         Example:
 
         @code
-        void DocumentWindow::display_document(const string& filename, int viewType)
+        if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
         {
-            //stop playback (just in case an score is being played in another window)
-            ScorePlayer* pPlayer  = m_appScope.get_score_player();
-            pPlayer->stop();
-
-            //get lomse reporter
-            ostringstream& reporter = m_appScope.get_lomse_reporter();
-            reporter.str(std::string());      //remove any previous content
-
-            //delete current document, view, etc. associated to this window
-            delete m_pPresenter;
-            //and load file
-            m_pPresenter = m_lomse.new_document(viewType, filename, reporter);
-
-            set_zoom_mode(k_zoom_fit_width);
-            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
-            {
-                //connect the View with the window buffer
-                spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-                //register to receive the desired events
-                spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
-                spInteractor->add_event_handler(k_do_play_score_event, this, wrapper_play_score);
-                spInteractor->add_event_handler(k_pause_score_event, this, wrapper_play_score);
-                spInteractor->add_event_handler(k_stop_playback_event, this, wrapper_play_score);
-                spInteractor->add_event_handler(k_control_point_moved_event, this, wrapper_on_command_event);
-                Document* pDoc = m_pPresenter->get_document_raw_ptr();
-                pDoc->add_event_handler(k_on_click_event, this, wrapper_on_click_event);
-
-                // display any errors
-                if (!reporter.str().empty())
-                {
-                    string errorMsg = reporter.str();
-                    ...
-                    ErrorDlg dlg(this, errorMsg, ...);
-                    dlg.ShowModal();
-                }
-                reporter.str(std::string());      //remove any previous content
-
-            }
+            wxImage* buffer = new wxImage(width, height);
+            unsigned char* pdata = buffer->GetData();       //ptr to the real bytes buffer
+            spInteractor->set_print_buffer(pdata, width, height);
         }
         @endcode
+
+        For applications having special requirements, it is possible to restrict
+        Lomse to use only a sub-area of the rendering buffer. See set_view_area()
+        method.
+
     */
+    virtual void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height);
+
+///@cond INTERNAL
+    LOMSE_DEPRECATED_MSG("use instead overloaded version taking bitmap ptr, width and height")
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
+///@endcond
+
+
+    /** Define a sub-region of the rendering bitmap for the View. This
+        function takes four parameters:
+        @param width  The width of the view area in pixels.
+        @param height The height of the view area in pixels.
+        @param xShift Horizontal shift, in pixels, for view area origin.
+        @param yShift Vertical shift, in pixels, for view area origin.
+
+        Invoking this method is optional. If not invoked, the view area will be the
+        whole rendering bitmap.
+
+        The view area cannot be redefined, so once this method is invoked, if your
+        application would like to use a different sub-region, it is necessary to
+        invoke again the set_rendering_buffer() method.
+
+        For instance, if you have a 200x100 bitmap and you want to draw
+        only on the 80x50 top-right corner:
+
+        @code
+        if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        {
+            wxImage* buffer = LENMUS_NEW wxImage(200, 100);
+            unsigned char* pdata = buffer->GetData();       //ptr to the real bytes buffer
+            spInteractor->set_rendering_buffer(pdata, 200, 100);
+            spInteractor->set_view_area(80, 50);
+        }
+        @endcode
+
+        Parameters <i>xShift</i> and <i>yShift</i> allows to change the origin of the
+        view area. For example, if you have a 200x100 bitmap and you want to draw
+        only an area of 100x50 pixels in the center, you can shift the view area top
+        corner:
+
+        @code
+        if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        {
+            wxImage* buffer = LENMUS_NEW wxImage(200, 100);
+            unsigned char* pdata = buffer->GetData();       //ptr to the real bytes buffer
+            spInteractor->set_rendering_buffer(pdata, 200, 100);
+            spInteractor->set_view_area(100, 50, 50, 25);
+        }
+        @endcode
+
+    */
+    virtual void set_view_area(unsigned width, unsigned height,
+                               unsigned xShift=0, unsigned yShift=0);
+
 
     /** Set/reset a rendering option for the view associated to this %Interactor.
 
@@ -1099,6 +1131,17 @@ public:
 
         See @subpage page-printing
     */
+//        buf;    // Pointer to renrdering buffer
+//        width;  // Width in pixels
+//        height; // Height in pixels
+//        stride; // Number of bytes per row. Can be < 0
+//          m_start;  // Pointer to first pixel to render
+//          m_start = (stride > 0 ? buf : buf - int(height - 1) * stride;
+
+
+    virtual void set_print_buffer(unsigned char* buf, unsigned width, unsigned height);
+
+    LOMSE_DEPRECATED_MSG("use instead overloaded version taking bitmap ptr, width and height")
     virtual void set_print_buffer(RenderingBuffer* rbuf);
 
 
@@ -1654,6 +1697,7 @@ protected:
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();
     bool is_operating_mode_allowed(int mode);
+    void delete_rendering_buffer();
 
     //To select mode for do_move_tempo_line_and_scroll()
     enum { k_only_tempo_line=0, k_scroll_and_tempo_line, k_only_scroll };

@@ -190,7 +190,7 @@ Implementation is very simple. The constructor is just initializing variables an
 ```c++
 MidiServer::MidiServer()
     : m_pMidiSystem( wxMidiSystem::GetInstance() )
-    , m_pMidiOut(NULL)
+    , m_pMidiOut(nullptr)
     , m_nOutDevId(-1)
     , m_nVoiceChannel(0)    // 0 based. So this is channel 1
 {
@@ -240,7 +240,7 @@ void MidiServer::set_out_device(int nOutDevId)
          {
             nErr = m_pMidiOut->Close();
             delete m_pMidiOut;
-            m_pMidiOut = NULL;
+            m_pMidiOut = nullptr;
             if (nErr)
             {
                 wxMessageBox( wxString::Format(
@@ -257,7 +257,7 @@ void MidiServer::set_out_device(int nOutDevId)
             try
             {
                 m_pMidiOut = new wxMidiOutDevice(m_nOutDevId);
-                nErr = m_pMidiOut->Open(0, NULL);        // 0 latency, no driver user info
+                nErr = m_pMidiOut->Open(0, nullptr);        // 0 latency, no driver user info
             }
             catch(...)      //handle all exceptions
             {
@@ -352,7 +352,7 @@ protected:
     ...
 ```
 
-And now the implementation. First, we modify <tt>MyFrame</tt> constructor to initialize <tt>m_pMidi</tt> to <tt>NULL</tt>. and we modify destructor to delete it. Finally, we define the accessor method:
+And now the implementation. First, we modify <tt>MyFrame</tt> constructor to initialize <tt>m_pMidi</tt> to <tt>nullptr</tt>. and we modify destructor to delete it. Finally, we define the accessor method:
 
 ```c++
 MidiServer* MyFrame::get_midi_server()
@@ -414,9 +414,9 @@ Now, I will modify <tt>MyFrame</tt> constructor to invoke this method:
 
 ```c++
 MyFrame::MyFrame()
-    : wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+    : wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
               wxDefaultPosition, wxSize(850, 600))
-    , m_pMidi(NULL)
+    , m_pMidi(nullptr)
 {
     create_menu();
     initialize_lomse();
@@ -536,7 +536,7 @@ protected:
     ...
 ```
 
-In <tt>MyFrame</tt> constructor the new variable <tt>m_pPlayer</tt> is initialized to <tt>NULL</tt>, and the <tt>ScorePlayer</tt> creation is delayed until really needed:
+In <tt>MyFrame</tt> constructor the new variable <tt>m_pPlayer</tt> is initialized to <tt>nullptr</tt>, and the <tt>ScorePlayer</tt> creation is delayed until really needed:
 
 ```c++
 ScorePlayer* MyFrame::get_score_player()
@@ -566,8 +566,8 @@ protected:
 MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     : wxWindow(frame, wxID_ANY)
     , m_lomse(lomse)
-    , m_pPresenter(NULL)
-    , m_buffer(NULL)
+    , m_pPresenter(nullptr)
+    , m_buffer(nullptr)
     , m_pPlayer(pPlayer)
     , m_view_needs_redraw(true)
 {
@@ -578,10 +578,10 @@ And we modify the code for passing the <tt>ScorePlayer</tt> object when <tt>MyCa
 
 ```c++
 MyFrame::MyFrame()
-    : wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+    : wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
               wxDefaultPosition, wxSize(850, 600))
-    , m_pMidi(NULL)
-    , m_pPlayer(NULL)
+    , m_pMidi(nullptr)
+    , m_pPlayer(nullptr)
 {
     ...
     // create our one and only child -- it will take our entire client area
@@ -643,7 +643,7 @@ The returned value will be, for now, ignored by Lomse as only normal playback us
 
 <tt>on_end_of_playback()</tt> is a method that will be invoked by Lomse when playback has finished, either because the last note has been played or because the user stopped the playback. In this method your application should do whatever you need, and it is mainly intended for ensuring GUI coherence with playback status. For instance, imagine an application having a "Play" button for starting playback. When the user clicks on it, the application will render the button as 'pushed' and invokes the Lomse <tt>play</tt> method. The "Play" button will remain pushed forever and the application could use the <tt>on_end_of_playback()</tt> for render again the button as 'released'.
 
-I will not comment on the purpose of method <tt>Metronome* get_metronome()</tt> as it is intended for more advanced uses. So, for now, just code a method returning <tt>NULL</tt>.
+I will not comment on the purpose of method <tt>Metronome* get_metronome()</tt> as it is intended for more advanced uses. So, for now, just code a method returning <tt>nullptr</tt>.
 
 Now that we understand the purpose of <tt>PlayerGui</tt> interface it is time for deciding how to do it in our sample application. As I wouldn't like to create a complex tutorial, the only GUI controls for controlling playback are the menu items 'Play', 'Pause' and 'Stop', in the 'Sound' submenu. Therefore, there are no ways for the user to decide on options. Instead, the application has a fized set of values that the user can not change. Let's decide the following values for the options:
 
@@ -668,8 +668,8 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     : wxWindow(frame, wxID_ANY)
     , PlayerNoGui(60L /*tempo 60 MM*/, true /*count off*/, true /*metronome clicks*/)
     , m_lomse(lomse)
-	, m_pPresenter(NULL)
-	, m_buffer(NULL)
+	, m_pPresenter(nullptr)
+	, m_buffer(nullptr)
 	, m_pPlayer(pPlayer)
 	, m_view_needs_redraw(true)
 {
@@ -698,17 +698,14 @@ void MyCanvas::play_start()
 {
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        Document* pDoc = m_pPresenter->get_document_raw_ptr();
-
-        //AWARE: Then next line of code is just an example, in which it is assumed that
-        //the score to play is the first element in the document.
-        //In a real application, as the document could contain texts, images and many
-        //scores, you shoud get the pointer to the score to play in a suitable way.
-        ImoScore* pScore = static_cast<imoscore*>( pDoc->get_im_root()->get_content_item(0) );
-
-        if (pScore)
+        //AWARE: It is assumed that the score to play is the first score in
+        //the document. For a real application, as the document could contain
+        //texts, images and many scores, you shoud get the right score to play.
+        ADocument doc = m_pPresenter->get_document();
+        AScore score = doc.first_score();
+        if (score.is_valid())
         {
-            m_pPlayer->load_score(pScore, this);
+            m_pPlayer->load_score(score, this);
             m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
         }
     }

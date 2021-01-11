@@ -88,14 +88,14 @@ LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;   //relates the View, the Document and the Interactor
 ```
 
-Lomse knows nothing about X11 windows, so the Lomse View renders its content on a bitmap. To manage it, Lomse associates the bitmap to a RenderingBuffer object, and it is your responsibility to render the bitmap on a window (or doing with the bitmap whatever you like: exporting it, printing it, etc.). Here you define the rendering buffer and its associated bitmap to be used by the View associated to the previously defined Interactor:
+Lomse knows nothing about X11 windows, so the Lomse View renders its content on a bitmap. To manage it, we define a pointer to the memory that we will use for the bitmap, and variables to save its size:
 
 ```c++
-RenderingBuffer     m_rbuf_window;      //Lomse struct to contain the bitmap
-unsigned char*      m_buf_window;       //memory for the bitmap
+unsigned char*      m_buf_window = nullptr;     //memory for the bitmap
+int                 m_bufWidth, m_bufHeight;    //bitmap size
 ```
 
-Next, we define some X11 related variables:
+Next, we define some X11 related variables for managing the bitmap:
 
 ```c++
 XImage*             m_ximg_window;      //the image to display
@@ -109,7 +109,6 @@ Lomse can manage a lot of bitmap formats and pixel formats. Therefore, you must 
 int              m_byte_order;  //endian (platform byte ordering)
 EPixelFormat     m_format;      //bitmap format (Lomse enum)
 unsigned         m_bpp;         //bits per pixel
-bool             m_flip_y;      //true if y axis is reversed
 ```
 
 Finally, we will define other variables that our program will use:
@@ -183,7 +182,7 @@ bool init_x()
     //returns false if an error occurs
 
     //create X connection
-    m_pDisplay = XOpenDisplay(NULL);
+    m_pDisplay = XOpenDisplay(nullptr);
     if(m_pDisplay == 0)
     {
         fprintf(stderr, "Unable to open DISPLAY!\n");
@@ -225,18 +224,16 @@ create_main_window(850, 600);       //850 x 600 pixels
 create_rendering_buffer(850, 600, 0);
 ```
 
-`create_main_window()` is just typical X11 stuff. But the following line, `create_rendering_buffer()`, requires some explanation. As said, Lomse does not deal with X11 windows. Lomse just renders bitmaps. In our application, what we are going to do is to create a bitmap having the same size than the window and, then, when Lomse renders the score in the provided bitmap, we will just copy it to the window. Method `create_rendering_buffer()` takes care of creating a bitmap with the same size than the window, and associates this bitmap to the Lomse rendering buffer. Whenever the window is resized, we need to create a new bitmap of the new size. For this reason, we will also invoke this method when the window is resized. Here is the code:
+`create_main_window()` is just typical X11 stuff. But the following line, `create_rendering_buffer()`, requires some explanation. As said, Lomse does not deal with X11 windows. Lomse just renders bitmaps. In our application, what we are going to do is to create a bitmap having the same size than the window and, then, when Lomse renders the score in the provided bitmap, we will just copy it to the window. Method `create_rendering_buffer()` takes care of creating a bitmap with the same size than the window. For this reason, we will also invoke this method when the window is resized. Here is the code:
 
 ```c++
 bool create_rendering_buffer(unsigned width, unsigned height, unsigned flags)
 {
     //allocate memory for the bitmap, fill it with 1's
+    m_bufWidth = width;
+    m_bufHeight = height;
     m_buf_window = new unsigned char[width * height * (m_bpp / 8)];
     memset(m_buf_window, 255, width * height * (m_bpp / 8));
-
-    //attach this memory to the rendering buffer
-    m_rbuf_window.attach(m_buf_window, width, height,
-                         (m_flip_y ? -width * (m_bpp / 8) : width * (m_bpp / 8)) );
 
     //create an X11 image using the allocated memory as buffer
     m_ximg_window = XCreateImage(m_pDisplay,
@@ -259,7 +256,7 @@ bool create_rendering_buffer(unsigned width, unsigned height, unsigned flags)
 }
 ```
 
-In it, we basically allocate memory for the bitmap, and associate it to the Lomse rendering buffer and to the X11 image to be displayed in the window.
+In it, we basically allocate memory for the bitmap, and associate it to the X11 image to be displayed in the window.
 
 
 
@@ -269,8 +266,8 @@ Once X11 is initialized and the main window and the rendering buffer are created
 
 ```c++
 //initialize the Lomse library
-m_flip_y = false;               //y axis is not reversed
-m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
+bool flip_y = false;               //y axis is not reversed
+m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
 ```
 
 Finally, we will initialize the Lomse related variables that we defined at start. With this, we finish Lomse initialization. Here is the full code:
@@ -279,12 +276,12 @@ Finally, we will initialize the Lomse related variables that we defined at start
 void initialize_lomse()
 {
     //initialize the Lomse library
-    m_flip_y = false;               //y axis is not reversed
-    m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
+    bool flip_y = false;               //y axis is not reversed
+    m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
 
     //initialize Lomse related variables
-    m_pInteractor = NULL;
-    m_pPresenter = NULL;
+    m_pInteractor = nullptr;
+    m_pPresenter = nullptr;
 }
 ```
 
@@ -314,14 +311,9 @@ void open_document()
         ")",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, update_window);
     }
 }
@@ -333,7 +325,7 @@ For creating the Presenter (and associated objects) we invoke LomseDoorway metho
 
 The View type is just a Lomse enum. In this example, value `k_view_vertical_book` means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 
-The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with simple scores.
+The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language, but Lomse also supports other formats, such as MusicXML.
 
 Let's analyse the string with the score. Fort this, I will split it into lines:
 
@@ -372,17 +364,9 @@ if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 
 Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated Interactor are created. So, parameter `'0'` in `get_interactor(0)` refers to first Interactor, in this case, the only one created.
 
-Once we've got the Interactor we have two **important** tasks to do, The first one is to inform the Interactor about the rendering buffer that must be used for its associated View:
+Once we've got the Interactor we have to set up a handler for receiving Lomse events related to the associated View:
 
 ```c++
-//connect the View with the window buffer
-spInteractor->set_rendering_buffer(&m_rbuf_window);
-```
-
-And the other one is to set up a handler for receiving Lomse events related to the associated View:
-
-```c++
-//ask to receive desired events
 spInteractor->add_event_handler(k_update_window_event, update_window);
 ```
 
@@ -422,8 +406,8 @@ int handle_events()
             //--------------------------------------------------------------------
             case ConfigureNotify:
             {
-                if(event.xconfigure.width  != int(m_rbuf_window.width()) ||
-                   event.xconfigure.height != int(m_rbuf_window.height()))
+                if(event.xconfigure.width  != m_bufWidth ||
+                   event.xconfigure.height != m_bufHeight)
                 {
                     int width  = event.xconfigure.width;
                     int height = event.xconfigure.height;
@@ -438,7 +422,7 @@ int handle_events()
             case Expose:
                 if (event.xexpose.count == 0)
                 {
-                    display_view_content(&m_rbuf_window);
+                    display_view_content();
                     XFlush(m_pDisplay);
                     XSync(m_pDisplay, false);
                 }
@@ -476,7 +460,7 @@ if(m_view_needs_redraw)
 }
 ```
 
-Function `update_view_content` is just asking Lomse to update the bitmap:
+Function `update_view_content` is just informing Lomse about the rendering buffer and ask it update the bitmap:
 
 ```c++
 void update_view_content()
@@ -486,7 +470,10 @@ void update_view_content()
     if (!m_pPresenter) return;
 
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(m_buf_window, m_bufWidth, m_bufHeight);
         spInteractor->redraw_bitmap();
+    }
 }
 ```
 
@@ -499,7 +486,7 @@ void do_update_window()
     // of the currently rendered buffer to the window without neither calling
     // any Lomse methods nor generating platform related events (i.e. window on_paint)
 
-    display_view_content(&m_rbuf_window);
+    display_view_content();
     XSync(m_pDisplay, false);
 }
 
@@ -528,7 +515,7 @@ As you can see, we just copy the bitmap onto the X11 image and put this image in
 case Expose:
     if (event.xexpose.count == 0)
     {
-        display_view_content(&m_rbuf_window);
+        display_view_content();
         XFlush(m_pDisplay);
         XSync(m_pDisplay, false);
     }

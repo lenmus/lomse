@@ -102,11 +102,7 @@ private:
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;
 
-//the Lomse View renders its content on a bitmap. To manage it, Lomse
-//associates the bitmap to a RenderingBuffer object.
-//It is your responsibility to render the bitmap on a window.
-//Here you define the rendering buffer and its associated bitmap
-RenderingBuffer     m_rbuf_window;
+//the Lomse View renders its content on a bitmap
 Bitmap              m_bitmap;
 
 //Lomse can manage a lot of bitmap formats and pixel formats. You must
@@ -128,15 +124,10 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 //---------------------------------------------------------------------------------------
 void create_bitmap_for_the_rendering_buffer(unsigned width, unsigned height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
+    //creates a bitmap of specified size to be used a the rendering
     //buffer for the view. Any existing buffer is automatically deleted
 
     m_bitmap.create(width, height, m_bpp);
-    m_rbuf_window.attach(m_bitmap.buf(), 
-                         m_bitmap.width(),
-                         m_bitmap.height(),
-                         m_bitmap.stride()
-                        );
     m_view_needs_redraw = true;
 }
 
@@ -166,12 +157,12 @@ void open_test_document()
         ")",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
+        //In this example we are not going to set event handlers but this is
+        //the right place to do it, once the document is created.
+        //spInteractor->add_event_handler(......);
     }
 }
 
@@ -185,7 +176,11 @@ void update_rendering_buffer_if_needed()
     if (m_view_needs_redraw)
     {
         if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        {
+            spInteractor->set_rendering_buffer(m_bitmap.buf(), m_bitmap.width(),
+                                               m_bitmap.height();
             spInteractor->force_redraw();
+        }
         m_view_needs_redraw = false;
     }
 }

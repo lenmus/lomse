@@ -4,7 +4,7 @@
 
 @tableofcontents
 
-@section print-overview The print API
+@section page-printing-overview The print API
 
 Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.
 
@@ -14,7 +14,7 @@ The Lomse print API is four methods, invoked in sequence:
 
 -# In order to not interfere with screen display, a different rendering buffer and resolution are used by Lomse for printing. Therefore, you will have to:
     - Determine the current settings for printer resolution and inform Lomse by invoking Interactor::set_print_ppi().
-    - Determine the bitmap size to used (see @ref print-buffer-size), allocate memory for this buffer and inform Lomse by invoking Interactor::set_printing_buffer().
+    - Determine the bitmap size to used (see @ref page-printing-buffer-size), allocate memory for this buffer and inform Lomse by invoking Interactor::set_printing_buffer().
     
 -# Now, invoke Interactor::print_page() to request Lomse to render a page in the provided buffer. 
 
@@ -22,7 +22,7 @@ The Lomse print API is four methods, invoked in sequence:
 
 Normally, your application will have to do the last two steps as many times as pages to print.
 
-Example:
+Example (using wxWidgets, adapt for your framework/OS):
 
 @code
 void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
@@ -48,15 +48,9 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
         spInteractor->set_print_ppi( double(dpi) );
 
         //allocate print buffer
-        RenderingBuffer rbuf_print;
-        #define BYTES_PP 3      //3 bytes per pixel (RGB 24-bits). This must be the
-                                //same format that was set when initializing Lomse
-        int stride = paperWidthPixels * BYTES_PP;          //number of bytes per row
-
         Bitmap img(paperWidthPixels, paperHeightPixels);
         unsigned char* pdata = img.GetBuffer();    //ptr to the real bytes buffer
-        rbuf_print.attach(pdata, paperWidthPixels, paperHeightPixels, stride);
-        spInteractor->set_print_buffer(&rbuf_print);
+        spInteractor->set_print_buffer(pdata, paperWidthPixels, paperHeightPixels);
 
         //render page on bitmap
         spInteractor->print_page(page-1);
@@ -68,11 +62,9 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
 @endcode
 
 
-@section print-buffer-size Determining print buffer size
+@section page-printing-buffer-size Determining print buffer size
 
-The necesary bitmap size depends on the desired printing resolution and paper size.
-
-For instance, a sheet of DIN A4 paper measures 210mm X 297mm. For printing on it the necessary bitmap size will depend on the required resolution, as given by this formula:
+The necesary bitmap size depends on the desired printing resolution and paper size. Take, for example, a sheet of DIN A4 paper; it measures 210mm X 297mm. For printing on it, the necessary bitmap size will depend on the required resolution, as given by this formula:
 
     pixels = size(mm) * resolution (dpi) / 25,4 
 
@@ -90,9 +82,9 @@ A list of paper sizes can be found <a href='https://en.wikipedia.org/wiki/Paper_
 Probably, when a print operation is requested, your operating system has methods for determining the required buffer size and printer resolution, so your application will not have to do the computations.
 
 
-@section print-tiles Save memory by tiling
+@section page-printing-tiles Save memory by tiling
 
-Using large size papers or printing at very high resolutions can require huge bitmaps. A technique for avoiding this is to split the page in tiles and print tile by tile. To avoid artifacts in the borders of each tile (due to anti-aliasing) it is recommended to add a border to each tile and discard it once Lomse has rendered on the tile. Here you have an example:
+Using large size papers or printing at very high resolutions can require huge bitmaps. A technique for avoiding this is to split the page in tiles and print tile by tile. To avoid artifacts in the borders of each tile (due to anti-aliasing) it is recommended to add a border to each tile and discard it once Lomse has rendered on the tile. Here you have an example using the wxWidgets framework:
 
 @code
 void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
@@ -143,15 +135,9 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
         int lastH = paperHeightPixels - tileH * (rows - 1);
 
         //allocate print buffer
-        RenderingBuffer rbuf_print;
-        #define BYTES_PP 3      //3 bytes per pixel (RGB 24-bits). This must be the
-                                //same format that was set when initializing Lomse
-        int stride = width * BYTES_PP;          //number of bytes per row
-
         Bitmap img(width, height);
         unsigned char* pdata = img.GetBuffer();    //ptr to the real bytes buffer
-        rbuf_print.attach(pdata, width, height, stride);
-        spInteractor->set_print_buffer(&rbuf_print);
+        spInteractor->set_print_buffer(pdata, width, height);
 
         //loop to print tiles.
         MemoryDC memoryDC;

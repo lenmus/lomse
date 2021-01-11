@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@
 #include "lomse_score_utilities.h"
 #include "lomse_shape_staff.h"
 #include "lomse_score_algorithms.h"
+#include "lomse_renderer.h"
 
 #include <sstream>
 #include <chrono>
@@ -82,9 +83,12 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
     , m_pCursor(nullptr)
     , m_pSelections(nullptr)
     , m_pExec(pExec)
+    , m_pScreenBuf(nullptr)
+    , m_pPrintBuf(nullptr)
     , m_grefLastMouseOver(k_no_gmo_ref)
     , m_operatingMode(k_mode_read_only)
     , m_fEditionEnabled(false)
+    , m_fViewAreaDefined(false)
     , m_fViewParamsChanged(false)
     , m_fViewUpdatesEnabled(true)
     , m_idControlledImo(k_no_imoid)
@@ -113,10 +117,12 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
 Interactor::~Interactor()
 {
     delete_graphic_model();
+    delete_rendering_buffer();
     delete m_pTask;
     delete m_pView;
     delete m_pCursor;
     delete m_pSelections;
+    delete m_pPrintBuf;
     LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor is deleted");
 }
 
@@ -1035,9 +1041,67 @@ void Interactor::set_viewport_at_page_center(Pixels screenWidth)
 //---------------------------------------------------------------------------------------
 void Interactor::set_rendering_buffer(RenderingBuffer* rbuf)
 {
+    //DEPRECATED method
+
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_rendering_buffer(rbuf);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height)
+{
+    delete_rendering_buffer();
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        int pixFmt = m_libScope.get_pixel_format();
+        int stride = Renderer::bytesPerPixel(pixFmt) * width;
+        m_pScreenBuf = LOMSE_NEW RenderingBuffer;
+        m_pScreenBuf->attach(buf, width, height, stride);
+        pGView->set_rendering_buffer(m_pScreenBuf);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_view_area(unsigned width, unsigned height, unsigned xShift,
+                               unsigned yShift)
+{
+    if (m_fViewAreaDefined)
+    {
+        LOMSE_LOG_ERROR("View area cannot be redefined. Use a new rendering buffer.");
+        return;
+    }
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (m_pScreenBuf && pGView)
+    {
+        unsigned bufWidth = m_pScreenBuf->width();
+        unsigned bufHeight = m_pScreenBuf->height();
+        if (width > (bufWidth - xShift) || height > (bufHeight - yShift))
+        {
+            LOMSE_LOG_ERROR("Invalid view area. Too big. Ignored.");
+            return;
+        }
+
+        int bytesPerPixel = Renderer::bytesPerPixel( m_libScope.get_pixel_format() );
+
+        unsigned shift = yShift * bufWidth + xShift;
+        unsigned char* start = m_pScreenBuf->buf() + shift * bytesPerPixel;
+        int stride = m_pScreenBuf->stride();
+        m_pScreenBuf->attach(start, width, height, stride);
+
+        m_fViewAreaDefined = true;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::delete_rendering_buffer()
+{
+    delete m_pScreenBuf;
+    m_pScreenBuf = nullptr;
+    m_fViewAreaDefined = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1488,9 +1552,27 @@ void Interactor::select_voice(int voice)
 //---------------------------------------------------------------------------------------
 void Interactor::set_print_buffer(RenderingBuffer* rbuf)
 {
+    //DEPRECATED method
+
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_print_buffer(rbuf);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_print_buffer(unsigned char* buf, unsigned width, unsigned height)
+{
+    delete m_pPrintBuf;
+    m_pPrintBuf = nullptr;
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        int pixFmt = m_libScope.get_pixel_format();
+        int stride = Renderer::bytesPerPixel(pixFmt) * width;
+        m_pPrintBuf = LOMSE_NEW RenderingBuffer;
+        m_pPrintBuf->attach(buf, width, height, stride);
+        pGView->set_print_buffer(m_pPrintBuf);
+    }
 }
 
 //---------------------------------------------------------------------------------------

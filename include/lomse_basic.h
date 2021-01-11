@@ -52,6 +52,27 @@ using namespace std;
 #endif
 
 
+//---------------------------------------------------------------------------------------
+// macro to mark functions as being deprecated and generate a warning message,
+// e.g.:
+//    LOMSE_DEPRECATED_MSG("use get_distance() instead")
+//    LUnits get_approximate_distance() const;
+
+#if defined(__GNUC__)
+    #define LOMSE_DEPRECATED_MSG(msg) __attribute__((deprecated(msg)))
+#elif defined(__clang__) && defined(__has_extension)
+    #if __has_extension(attribute_deprecated_with_message)
+        #define LOMSE_DEPRECATED_MSG(msg) __attribute__((deprecated(msg)))
+    #else
+        #define LOMSE_DEPRECATED_MSG(msg) __attribute__((deprecated))
+    #endif
+#elif defined(__VISUALC__)
+    #define LOMSE_DEPRECATED_MSG(msg) __declspec(deprecated("deprecated: " msg))
+#else
+    #define LOMSE_DEPRECATED_MSG(msg)
+#endif
+
+
 namespace lomse
 {
 

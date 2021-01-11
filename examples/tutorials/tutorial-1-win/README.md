@@ -76,9 +76,9 @@ As Lomse works by rendering the scores on a bitmap buffer, there are two tasks y
 1.  Create a new empty bitmap when necessary, and
 2.  Drawing the bitmap on your window
 
-For performing these tasks I opted for creating a <tt>Bitmap</tt> class, enclosing the necessary methods and knowledge. Although the Windows API provides many functions for creating and managing bitmaps, my knowledge of managing bitmaps using the Windows API is null. So to write this tutorial I opted to borrow code from the AGG project, instead of finding documentation and studying how to use the Windows API functions. If you have good knowledge of the Windows API probably you would prefer a different solution for managing bitmaps. In that case, I would appreciate if you could help me to improve this tutorial by sharing your cleaner code. Thank you.
+For the bitmap, in other platforms it is normally used one of the available image objects. But although the Windows API provides many functions for creating and managing bitmaps, my knowledge of using the Windows API is null. So, to write this tutorial I opted to borrow code from the AGG project, instead of finding documentation and studying how to use the Windows API functions. If you have good knowledge of the Windows API probably you would prefer a different solution for managing bitmaps. In that case, I would appreciate if you could help me to improve this tutorial by sharing your cleaner code. Thank you. So, I choose to create a <tt>Bitmap</tt> class, enclosing the necessary methods and knowledge in it.
 
-So, after the Lomse headers I have declared the auxiliary <tt>Bitmap</tt> class for creating and managing bitmaps. The code is borrowed from AGG project, but I simplified the class removing all methods not needed for using Lomse.
+After the Lomse headers I have declared the auxiliary <tt>Bitmap</tt> class for creating and managing bitmaps. The code is borrowed from AGG project, but I simplified the class removing all methods not needed for using Lomse.
 
 Next, after <tt>Bitmap</tt> class declaration, our real tutorial example starts.
 
@@ -95,14 +95,13 @@ Presenter*      m_pPresenter;   //relates the View, the Document and the Interac
 
 `m_lomse` is an important variable as it is the main interface with the Lomse library. As we will see later, we have to use it for specifying certain Lomse initialization options. The two other variables, `m_pPresenter` and `m_pInteractor` are pointers to two important components of the Lomse Model-View-Controller (MVC) architecture. The `Interactor` is a kind of controller for the view. And the `Presenter` is responsible for maintaining the relationships between a Document and its different Views and associated interactors. Later, we will learn more about them.
 
-Next we are going to declare a rendering buffer and its associated bitmap:
+Next we are going to declare the bitmap to be used as Lomse rendering buffer:
 
 ```c++
-RenderingBuffer     m_rbuf_window;
 Bitmap              m_bitmap;
 ```
 
-As you know, Lomse knows nothing about MS Windows, so the Lomse View renders the music scores on a bitmap. To manage the bitmap, Lomse associates it to a `RenderingBuffer` object. As Lomse only renders on bitmaps, it is your application responsibility to do whatever is needed with it: rendering it on a window, exporting it as a file, printing it, etc. In our simple application, we are going to render the bitmap on the application main window.
+As you know, Lomse knows nothing about MS Windows, so the Lomse View renders the music scores on a bitmap. and it is your application responsibility to do whatever is needed with it: rendering it on a window, exporting it as a file, printing it, etc. In our simple application, we are going to render the bitmap on the application main window.
 
 There are some more variables defined but we will see them later, when having to use them. After the variables, I've also forward declared the main function. With this, we have finished the declarations. Lets's now move to the implementation.
 
@@ -110,7 +109,7 @@ There are some more variables defined but we will see them later, when having to
 
 ## <a name="main" />The application: main function
 
-Let's move to near line 690 for looking at the `WinMain` function. It is the main entry point and it is very simple:
+Let's move to near line 338 for looking at the `WinMain` function. It is the main entry point and it is very simple:
 
 ```c++
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -216,12 +215,12 @@ void open_test_document()
         ")",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
+        //In this example we are not going to set event handlers but this is
+        //the right place to do it, once the document is created.
+        //spInteractor->add_event_handler(......);
     }
 }
 ```
@@ -232,7 +231,7 @@ For creating the Presenter (and associated objects) we invoke LomseDoorway metho
 
 The View type is just a Lomse enum. In this example, value `k_view_vertical_book` means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 
-The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with simple scores.
+The next parameter is a C string containing the score, and the last parameter is a constant `Document::k_format_ldp` that specifies the language in this score is written. In this example it is written in LenMus LDP language, but Lomse also supports other formats, such as MusicXML.
 
 Let's analyse the string with the score. Fort this, I will split it into lines:
 
@@ -269,16 +268,6 @@ m_pInteractor = m_pPresenter->get_interactor(0);
 
 Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter `'0'` in `get_interactor(0)` refers to first <tt>Interactor</tt>, in this case, the only one created.
 
-Once we've got the Interactor we have one **important** task to do. It is to inform the Interactor about the rendering buffer that must be used for its associated View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
-
-```c++
-//get the pointer to the interactor, set the rendering buffer and register for
-//receiving desired events
-if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
-{
-```
-
-In the previous line, we pass to the interactor the address of the rendering buffer but, we have not yet created any bitmap. Don't worry, the bitmap will not be used until we ask Lomse to render something, so we can delay its creation until really needed. We will see later hao the bitmap is created.
 
 
 
@@ -329,20 +318,15 @@ The only thing we have to do is to create the bitmap for lomse. We couldn't crea
 ```c++
 void create_bitmap_for_the_rendering_buffer(unsigned width, unsigned height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
+    //creates a bitmap of specified size to be used a the rendering
     //buffer for the view. Any existing buffer is automatically deleted
 
     m_bitmap.create(width, height, m_bpp);
-    m_rbuf_window.attach(m_bitmap.buf(),
-                         m_bitmap.width(),
-                         m_bitmap.height(),
-                         -m_bitmap.stride()
-                        );
     m_view_needs_redraw = true;
 }
 ```
 
-The code is simple: we create a new bitmap, ask the rendering buffer to use it, raise a flag to signal that the bitmap is empty, that is, that Lomse has to paint something on it before displaying the bitmap on the window. Painting the bitmap takes place when a <tt>WM_PAINT</tt> event arrives to our <tt>WndProc</tt> function. We will see this in next section.
+The code is simple: we create a new bitmap and raise a flag to signal that the bitmap is empty, that is, that Lomse has to paint something on it before displaying the bitmap on the window. Painting the bitmap takes place when a <tt>WM_PAINT</tt> event arrives to our <tt>WndProc</tt> function. We will see this in next section.
 
 
 
@@ -375,7 +359,11 @@ void update_rendering_buffer_if_needed()
     if (m_view_needs_redraw)
     {
         if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        {
+            spInteractor->set_rendering_buffer(m_bitmap.buf(), m_bitmap.width(),
+                                               m_bitmap.height();
             spInteractor->force_redraw();
+        }
         m_view_needs_redraw = false;
     }
 }

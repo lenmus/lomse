@@ -118,12 +118,8 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated memory
-    //for this View
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap. We define here the
+    //memory area to be used to create the bitmap
     unsigned char*      m_pdata;                    //ptr to the bitmap
     int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
 

@@ -113,7 +113,7 @@ typedef void (wxEvtHandler::*UpdateViewportEventFunction)(MyUpdateViewportEvent&
 #define MY_EVT_UPDATE_VIEWPORT(fn) \
     DECLARE_EVENT_TABLE_ENTRY( MY_EVT_UPDATE_VIEWPORT_TYPE, wxID_ANY, -1, \
     (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
-    wxStaticCastEvent( UpdateViewportEventFunction, & fn ), (wxObject *) NULL ),
+    wxStaticCastEvent( UpdateViewportEventFunction, & fn ), (wxObject *) nullptr ),
 
 
 
@@ -195,16 +195,9 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated bitmap to be
-    //used by the previously defined View.
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap.
+    //Here we define the wxImage to be used as rendering buffer
     wxImage*            m_buffer;		//the image to serve as buffer
-	unsigned char*      m_pdata;		//ptr to the bitmap
-    int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
-
 
     //some additinal variables
     bool    m_view_needs_redraw;      //to control when the View must be re-drawn
@@ -298,7 +291,7 @@ END_EVENT_TABLE()
 
 //---------------------------------------------------------------------------------------
 MyFrame::MyFrame()
-	: wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+	: wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
 			  wxDefaultPosition, wxSize(850, 600))
 {
     create_menu();
@@ -465,8 +458,8 @@ END_EVENT_TABLE()
 MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse)
     : wxWindow(frame, wxID_ANY)
     , m_lomse(lomse)
-	, m_pPresenter(NULL)
-	, m_buffer(NULL)
+	, m_pPresenter(nullptr)
+	, m_buffer(nullptr)
 	, m_view_needs_redraw(true)
     , m_playbackTimer(this, k_id_tempo_line_timer)
     , m_nBeatTime(1000)     //1000 milliseconds = 1 sec.
@@ -527,22 +520,22 @@ void MyCanvas::delete_rendering_buffer()
 //---------------------------------------------------------------------------------------
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
-    //buffer for the view. Any existing buffer is automatically deleted
+    //creates a bitmap of specified size and defines it s the rendering
+    //buffer for the view.
+
+    delete_rendering_buffer();
 
     // allocate a new rendering buffer
-	delete_rendering_buffer();
-    m_nBufWidth = width;
-    m_nBufHeight = height;
     m_buffer = new wxImage(width, height);
 
     //get pointer to wxImage internal bitmap
-    m_pdata = m_buffer->GetData();
+    unsigned char* pdata = m_buffer->GetData();
 
-    //Attach this bitmap to Lomse rendering buffer
-    #define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this bitmap as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(pdata, width, height);
+    }
 
     m_view_needs_redraw = true;
 }
@@ -646,13 +639,9 @@ void MyCanvas::open_test_document()
         ")))",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register to receive desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
