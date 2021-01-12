@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -78,7 +78,7 @@ SUITE(RestEngraverTest)
 
         ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
-        RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
+        RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,
                                         UPoint(10.0f, 15.0f)));
@@ -102,7 +102,7 @@ SUITE(RestEngraverTest)
 
         ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
-        RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
+        RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,
                                         UPoint(10.0f, 15.0f)));

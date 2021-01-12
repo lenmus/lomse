@@ -4222,9 +4222,9 @@ SUITE(MxlAnalyserTest)
 
     //@ rest --------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_rest_01)
+    TEST_FIXTURE(MxlAnalyserTestFixture, rest_01)
     {
-        //@01 staff
+        //@01. staff number
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -4248,6 +4248,39 @@ SUITE(MxlAnalyserTest)
         CHECK( pRest->get_note_type() == k_quarter );
         CHECK( pRest->get_duration() == k_duration_quarter );
         CHECK( pRest->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, rest_02)
+    {
+        //@02. placement on the staff
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<rest><display-step>E</display-step><display-octave>4</display-octave></rest>"
+                "<duration>1</duration><type>quarter</type>"
+                "<staff>2</staff>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_rest() == true );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
+        CHECK( pRest != nullptr );
+        CHECK( pRest->get_step() == k_step_E );
+        CHECK( pRest->get_octave() == k_octave_4 );
 
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;

@@ -92,7 +92,7 @@ public:
 
     //static methods
     static Tenths get_standard_stem_length(int nPosOnStaff, bool fStemDown);
-    static int pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octaveShift);
+    static int pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octaveShift);
 
 protected:
     void create_shape();

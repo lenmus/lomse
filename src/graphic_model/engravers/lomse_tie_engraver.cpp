@@ -211,7 +211,7 @@ void TieEngraver::compute_default_control_points(UPoint* points)
     LUnits D = (points+ImoBezierInfo::k_end)->x - (points+ImoBezierInfo::k_start)->x;
     LUnits d = D / 5.8f;
     m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
-    LUnits hc = m_thickness * 3.88f;
+    LUnits hc = m_thickness * 2.5f; //3.88f;
     (points+ImoBezierInfo::k_ctrol1)->x = (points+ImoBezierInfo::k_start)->x + d;
     (points+ImoBezierInfo::k_ctrol1)->y = (points+ImoBezierInfo::k_start)->y + (m_fTieBelowNote ? hc : -hc);
 
@@ -226,7 +226,7 @@ void TieEngraver::compute_start_point()
 	m_points[ImoBezierInfo::k_start].x = (m_pStartNoteShape->get_notehead_right() +
                           m_pStartNoteShape->get_notehead_left()) / 2.0f;
 
-    //y pos: 5 tenths apart from notehead
+    //y pos: some distance apart from notehead
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
 
     m_points[ImoBezierInfo::k_start].y = (m_fTieBelowNote ?
@@ -241,7 +241,7 @@ void TieEngraver::compute_end_point(UPoint* point)
 	point->x = (m_pEndNoteShape->get_notehead_right() +
                 m_pEndNoteShape->get_notehead_left()) / 2.0f;
 
-    //y pos: 5 tenths apart from notehead
+    //y pos: some distance apart from notehead
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
 
     point->y = (m_fTieBelowNote ?

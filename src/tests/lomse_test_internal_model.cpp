@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -124,8 +124,8 @@ SUITE(InternalModelTest)
         CHECK( pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_no_pitch );
+        CHECK( pNote->get_octave() == k_octave_undefined );
+        CHECK( pNote->get_step() == k_step_undefined );
 
         delete pNote;
     }
