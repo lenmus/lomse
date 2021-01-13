@@ -2,17 +2,21 @@
 #------------------------------------------------------------------------------
 # Lomse library visual regression test
 # This script MUST BE RUN from 'lomse/scripts/' folder
-# It creates a folder 'lomse/zz_regression/' with the following content:
+# It creates a folder 'zz_regression/' at the same level than lomse root folder
+# with the following content:
 #
-#   lomse/
-#     ├── src/
-#     ├── scripts/
-#     ┆
-#     └── zz_regression/
-#              ├── generated/
-#              ├── failures/
-#              ├── regression.htm
-#              └── regression.css
+#  lomse-project
+#       │
+#       ├── lomse/
+#       │     ├── src/
+#       │     ├── scripts/
+#       │     ┆
+#       │
+#       └── zz_regression/
+#               ├── generated/
+#               ├── failures/
+#               ├── regression.htm
+#               └── regression.css
 #
 # - Folder 'generated' contains the images for the rendered scores
 # - Folder 'failures' contains the GIF images for the test failures
@@ -116,19 +120,29 @@ if [[ ! -e "${root_path}/src" ]]; then
 fi
 
 #paths
+root_parent_path=$(dirname "${root_path}")
+vregress_path="${root_parent_path}/vregress"
 scores_path="${root_path}/test-scores/"
-css_path="${root_path}/test-scores/regression"
-target_path="${root_path}/test-scores/regression/target/"
-outpath="${root_path}/zz_regression"
+extra_scores_path="${vregress_path}/scores"
+css_path="${vregress_path}"
+target_path="${vregress_path}/target/"
+outpath="${root_parent_path}/zz_regression"
 generated_path="${outpath}/generated/"
 results_path="${outpath}/failures/"
 
-#paths for local website
-#website_regression_images="content/lenmus/lomse/images/regression/"
-#website_images_prefix="content/lomse/images/regression/"
-#website_root="/datos/cecilio/WebSite/mws"
-#website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
-website_pages="${outpath}/"
+#path for generated html page
+html_path="${outpath}"
+
+#echo "root_parent_path=${root_parent_path}"
+#echo "vregress_path=${vregress_path}"
+#echo "scores_path=${scores_path}"
+#echo "extra_scores_path=${extra_scores_path}"
+#echo "css_path=${css_path}"
+#echo "target_path=${target_path}"
+#echo "outpath=${outpath}"
+#echo "generated_path=${generated_path}"
+#echo "results_path=${results_path}"
+#echo "html_path=${html_path}"
 
 fDisplayMessages=0
 
@@ -193,10 +207,9 @@ shopt -s nullglob
 cd "${scores_path}"
 GenerateImages "0*"
 GenerateImages "5*"
-cd "./regression/scores/lilypond"
+cd "${extra_scores_path}/lilypond"
 GenerateImages "*.xml"
-cd "${scores_path}"
-cd "./regression/scores/recordare"
+cd "${extra_scores_path}/recordare"
 GenerateImages "*.musicxml"
 cd "${scores_path}"
 cd "./mnx"
@@ -475,6 +488,6 @@ else
 fi
 
 #echo "Results at http://localhost/en/lomse/regression"
-echo "Results at file://${website_pages}/regression.htm"
+echo "Results at file://${html_path}/regression.htm"
 
 exit $E_SUCCESS
