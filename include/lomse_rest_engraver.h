@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,13 +52,16 @@ class RestEngraver : public Engraver
 protected:
     int m_restType;
     int m_numDots;
+    int m_clefType;
+    int m_octaveShift;
     ImoRest* m_pRest;
     Color m_color;
     double m_fontSize;
 
 public:
     RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 EngraversMap* pEngravers, int iInstr, int iStaff);
+                 EngraversMap* pEngravers, int iInstr, int iStaff, int clefType,
+                 int octaveShift);
     ~RestEngraver() {}
 
     GmoShapeRest* create_shape(ImoRest* pRest, UPoint uPos, Color color=Color(0,0,0));

@@ -103,7 +103,7 @@ namespace lomse
 #define LOMSE_TUPLET_NESTED_DISTANCE    20.0f
 
 //ties
-#define LOMSE_TIE_VERTICAL_SPACE         3.0f   //vertical distance from notehead
+#define LOMSE_TIE_VERTICAL_SPACE         2.0f   //vertical distance (tenths) from notehead
 #define LOMSE_TIE_MAX_THICKNESS          4.0f   //tie thickness at center
 
 //volta brackets

@@ -267,7 +267,7 @@ done
 #-------------------------------------------------------------------
 
 #set output page filename
-html_page="${scripts_path}/regression.htm"
+html_page="${outpath}/regression.htm"
 
 #create page from template
 cd "${scripts_path}"

@@ -1102,6 +1102,60 @@ protected:
         return noteType;
     }
 
+    //-----------------------------------------------------------------------------------
+    int mxl_step_to_step(const string& step, int nDefault=k_step_C)
+    {
+        switch (step[0])
+        {
+            case 'A':	return k_step_A;
+            case 'B':	return k_step_B;
+            case 'C':	return k_step_C;
+            case 'D':	return k_step_D;
+            case 'E':	return k_step_E;
+            case 'F':	return k_step_F;
+            case 'G':	return k_step_G;
+            default:
+            {
+                if (nDefault == k_step_C)
+                    error_msg2("Unknown note step '" + step + "'. Replaced by 'C'.");
+                else
+                    error_msg2("Unknown note step '" + step + "'. Ignored.");
+
+                return nDefault;
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    int mxl_octave_to_octave(const string& octave, int nDefault=4)
+    {
+        //@ MusicXML octaves are represented by the numbers 0 to 9, where 4
+        //@ indicates the octave started by middle C.
+
+        switch (octave[0])
+        {
+            case '0':	return 0;
+            case '1':	return 1;
+            case '2':	return 2;
+            case '3':	return 3;
+            case '4':	return 4;
+            case '5':	return 5;
+            case '6':	return 6;
+            case '7':	return 7;
+            case '8':	return 8;
+            case '9':	return 9;
+            default:
+            {
+                if (nDefault == 4)
+                    error_msg2( "Unknown octave '" + octave + "'. Replaced by '4'.");
+                else
+                    error_msg2( "Unknown octave '" + octave + "'. Ignored.");
+
+                return nDefault;
+            }
+        }
+    }
+
 };
 
 
@@ -4149,7 +4203,7 @@ public:
             fIsRest = true;
             pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
             pNR = pRest;
-            pRest->mark_as_full_measure( analyse_rest() );
+            m_pAnalyser->analyse_node(&m_childToAnalyse, pRest);
         }
         else
         {
@@ -4323,24 +4377,6 @@ public:
     }
 
 protected:
-
-    //----------------------------------------------------------------------------------
-    bool analyse_rest()
-    {
-        //@ <!ELEMENT rest ((display-step, display-octave)?)>
-        //@ <!ATTLIST rest
-        //@      measure %yes-no; #IMPLIED
-        //@ >
-
-        //returns value of measure attrib. (true or false)
-        if (has_attribute(&m_childToAnalyse, "measure"))
-        {
-            const string& measure = m_childToAnalyse.attribute_value("measure");
-            return measure == "yes";
-        }
-        else
-            return false;
-    }
 
     //----------------------------------------------------------------------------------
     void set_type_duration(ImoNoteRest* pNR, const string& type, int dots,
@@ -5402,54 +5438,6 @@ public:
 
 protected:
 
-    int mxl_step_to_step(const string& step)
-    {
-        switch (step[0])
-        {
-            case 'A':	return k_step_A;
-            case 'B':	return k_step_B;
-            case 'C':	return k_step_C;
-            case 'D':	return k_step_D;
-            case 'E':	return k_step_E;
-            case 'F':	return k_step_F;
-            case 'G':	return k_step_G;
-            default:
-            {
-                //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                error_msg2(
-                    "Unknown note step '" + step + "'. Replaced by 'C'.");
-                return k_step_C;
-            }
-        }
-    }
-
-    int mxl_octave_to_octave(const string& octave)
-    {
-        //@ MusicXML octaves are represented by the numbers 0 to 9, where 4
-        //@ indicates the octave started by middle C.
-
-        switch (octave[0])
-        {
-            case '0':	return 0;
-            case '1':	return 1;
-            case '2':	return 2;
-            case '3':	return 3;
-            case '4':	return 4;
-            case '5':	return 5;
-            case '6':	return 6;
-            case '7':	return 7;
-            case '8':	return 8;
-            case '9':	return 9;
-            default:
-            {
-                //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                error_msg2(
-                    "Unknown octave '" + octave + "'. Replaced by '4'.");
-                return 4;
-            }
-        }
-    }
-
     float mxl_alter_to_accidentals(const string& accidentals)
     {
         //@ The <alter> element is needed for the sounding pitch, whether the
@@ -5959,6 +5947,66 @@ protected:
     }
 
 };
+
+
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT rest ((display-step, display-octave)?)>
+//@ <!ATTLIST rest
+//@      measure %yes-no; #IMPLIED
+//@ >
+//@
+class RestMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    RestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                    LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoRest* pRest = nullptr;
+        if (m_pAnchor && m_pAnchor->is_rest())
+            pRest = static_cast<ImoRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoRest");
+            return nullptr;
+        }
+
+		//attrb: measure %yes-no
+        pRest->mark_as_full_measure( get_optional_yes_no_attribute(&m_childToAnalyse, "measure", false) );
+
+        // <display-step>
+        if (get_optional("display-step"))
+        {
+            pRest->set_step( analyse_display_step() );
+
+            // <display-octave>
+            if (get_mandatory("display-octave"))
+                pRest->set_octave( analyse_display_octave() );
+        }
+
+        error_if_more_elements();
+
+
+
+        return pRest;
+    }
+
+protected:
+
+    int analyse_display_step()
+    {
+        return mxl_step_to_step(get_child_value_string(), k_step_undefined);
+    }
+
+    int analyse_display_octave()
+    {
+        return mxl_octave_to_octave(get_child_value_string(), k_octave_undefined);
+    }
+
+};
+
 
 //@--------------------------------------------------------------------------------------
 //@ <scordatura>
@@ -8143,6 +8191,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_mxl_tag_principal_voice:      return LOMSE_NEW PrincipalVoiceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_print:                return LOMSE_NEW PrintMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_rehearsal:            return LOMSE_NEW RehearsalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_rest:                 return LOMSE_NEW RestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_scordatura:           return LOMSE_NEW ScordaturaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_instrument:     return LOMSE_NEW ScoreInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);

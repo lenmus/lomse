@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -115,7 +115,7 @@ public:
         list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
 
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
-        m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
+        m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0, 0, 0);
         for (it = notes.begin(); it != notes.end(); ++it)
         {
             ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );

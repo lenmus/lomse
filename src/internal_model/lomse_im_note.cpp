@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,21 +39,6 @@ namespace lomse
 //=======================================================================================
 // ImoNoteRest implementation
 //=======================================================================================
-ImoNoteRest::ImoNoteRest(int objtype)
-    : ImoStaffObj(objtype)
-    , m_nNoteType(k_quarter)
-    , m_nDots(0)
-    , m_nVoice(1)
-    , m_timeModifierTop(1)
-    , m_timeModifierBottom(1)
-    , m_duration(k_duration_quarter)
-    , m_playDuration(m_duration)
-    , m_eventDuration(m_duration)
-    , m_playTime(0.0)
-{
-}
-
-//---------------------------------------------------------------------------------------
 int ImoNoteRest::get_beam_type(int level)
 {
     ImoBeam* pBeam = static_cast<ImoBeam*>( find_relation(k_imo_beam) );
@@ -208,8 +193,6 @@ list<TIntAttribute> ImoNoteRest::get_supported_attributes()
 //=======================================================================================
 ImoNote::ImoNote(int type)
     : ImoNoteRest(type)
-    , m_step(k_no_pitch)
-    , m_octave(4)
     , m_actual_acc(k_acc_not_computed)
     , m_notated_acc(k_invalid_accidentals)
     , m_options(0)
@@ -224,8 +207,6 @@ ImoNote::ImoNote(int type)
 ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, int dots,
                  int staff, int voice, int stem)
     : ImoNoteRest(k_imo_note_regular)
-    , m_step(step)
-    , m_octave(octave)
     , m_actual_acc(k_acc_not_computed)
     , m_notated_acc(accidentals)
     , m_options(0)
@@ -233,6 +214,8 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_pTieNext(nullptr)
     , m_pTiePrev(nullptr)
 {
+    m_step = step;
+    m_octave = octave;
     m_nVoice = voice;
     m_staff = staff;
     set_note_type_and_dots(noteType, dots);

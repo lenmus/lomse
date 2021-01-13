@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,6 +29,7 @@
 
 #include "lomse_rest_engraver.h"
 
+#include "lomse_note_engraver.h"
 #include "lomse_im_note.h"
 #include "lomse_engraving_options.h"
 #include "lomse_glyphs.h"
@@ -46,10 +47,13 @@ namespace lomse
 // RestEngraver implementation
 //---------------------------------------------------------------------------------------
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           EngraversMap* UNUSED(pEngravers), int iInstr, int iStaff)
+                           EngraversMap* UNUSED(pEngravers), int iInstr, int iStaff,
+                           int clefType, int octaveShift)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_restType(k_quarter)
     , m_numDots(0)
+    , m_clefType(clefType)
+    , m_octaveShift(octaveShift)
     , m_pRest(nullptr)
     , m_fontSize(0.0)
     , m_uxLeft(0.0f)
@@ -162,15 +166,23 @@ int RestEngraver::find_glyph()
 //---------------------------------------------------------------------------------------
 LUnits RestEngraver::get_glyph_offset(int iGlyph)
 {
-    //AWARE: Rest registration is as follows:
-    // * Rests are registered on the center line of a five-line staff.
-    // * with the exception of the whole note rest, which should hang from the font baseline.
-
+    //default placement: rests are placed on the center line of a five-line staff,
+    //with the exception of the whole note rest, which should hang from the
+    //font baseline.
     Tenths offset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph);
     if (iGlyph == k_glyph_whole_rest)
-        return tenths_to_logical(offset + 10.0f);
+        offset += 10.0f;
     else
-        return tenths_to_logical(offset + 20.0f);
+        offset += 20.0f;
+
+    //if rest placement is defined, it is controlled by step and octave values
+    if (m_pRest->get_step() != k_step_undefined)
+    {
+        int pos = NoteEngraver::pitch_to_pos_on_staff(m_pRest, m_clefType, m_octaveShift);
+        offset += (6 - pos)*5.0f;
+    }
+
+    return tenths_to_logical(offset);
 }
 
 //---------------------------------------------------------------------------------------

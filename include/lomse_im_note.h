@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -73,18 +73,20 @@ enum ENoteStem
 class ImoNoteRest : public ImoStaffObj
 {
 protected:
-    int         m_nNoteType;
-    int         m_nDots;
-    int         m_nVoice;
-    int         m_timeModifierTop;
-    int         m_timeModifierBottom;
-    TimeUnits   m_duration;             //nominal duration implied by note type and dots
-    TimeUnits   m_playDuration;         //playback duration: nominal duration for playback
-    TimeUnits   m_eventDuration;        //event duration: real duration for playback
-    TimeUnits   m_playTime;             //playback time: on-set time for playback
+    int         m_nNoteType = k_quarter;
+    int         m_step = k_step_undefined;      //when rest for placement on the staff
+    int         m_octave = k_octave_undefined;  //when rest for placement on the staff
+    int         m_nDots = 0;
+    int         m_nVoice = 1;                   //1..n
+    int         m_timeModifierTop = 1;          //for tuplets
+    int         m_timeModifierBottom = 1;
+    TimeUnits   m_duration = k_duration_quarter;        //nominal duration implied by note type and dots
+    TimeUnits   m_playDuration = k_duration_quarter;    //playback duration: nominal duration for playback
+    TimeUnits   m_eventDuration = k_duration_quarter;   //event duration: real duration for playback
+    TimeUnits   m_playTime = 0.0;                       //playback time: on-set time for playback
 
 public:
-    ImoNoteRest(int objtype);
+    ImoNoteRest(int objtype) : ImoStaffObj(objtype) {}
     virtual ~ImoNoteRest() {}
 
     //overrides to ImoStaffObj
@@ -115,6 +117,20 @@ public:
     inline void set_event_duration(TimeUnits value) { m_eventDuration = value; }
     inline void set_playback_time(TimeUnits value) { m_playTime = value; }
 
+    //pitch (notes) or placement on the staff (rests)
+    inline int get_step() { return m_step; }
+    inline int get_octave() { return m_octave; }
+    inline bool is_pitch_defined() { return m_step != k_step_undefined; }
+
+    /** Methods for doing atomic changes in ImoNote/ImoRest internal variables.
+        For rests these methods are used to control placement on the staff and there are
+        no problems in using them.
+        For notes, these methods are intended for notes's construction/modification and
+        should not be used by your application unless you understand well what you are doing.
+    */
+    inline void set_step(int step) { m_step = step; }
+    inline void set_octave(int octave) { m_octave = octave; }
+
     //beam
     ImoBeam* get_beam();
     void set_beam_type(int level, int type);
@@ -143,20 +159,23 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+/** ImoRest represents a rest in the score.
+**/
 class ImoRest : public ImoNoteRest
 {
 protected:
-    bool m_fGoFwd;
-    bool m_fFullMeasureRest;
+    bool m_fGoFwd = false;
+    bool m_fFullMeasureRest = false;
 
     friend class ImFactory;
-    ImoRest() : ImoNoteRest(k_imo_rest), m_fGoFwd(false), m_fFullMeasureRest(false) {}
+    ImoRest() : ImoNoteRest(k_imo_rest) {}
 
     friend class GoBackFwdAnalyser;
     friend class GoBackFwdLmdAnalyser;
     friend class FwdBackMxlAnalyser;
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
 
+    friend class RestMxlAnalyser;
     friend class NoteRestMxlAnalyser;
     friend class EventMnxAnalyser;
     inline void mark_as_full_measure(bool value) { m_fFullMeasureRest = value; }
@@ -171,6 +190,7 @@ public:
 
     inline bool is_go_fwd() { return m_fGoFwd; }
     inline bool is_full_measure() { return m_fFullMeasureRest; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -180,8 +200,6 @@ class ImoNote : public ImoNoteRest
 {
 protected:
     //pitch (step, octave, actual_acc) represents the sound, not what is notated.
-    int     m_step;
-    int     m_octave;
     float   m_actual_acc;           //number of semitones (i.e, -1 for flat). Decimal
                                     //values like 0.5 (quarter tone sharp) are also valid.
 
@@ -224,10 +242,7 @@ public:
 
 
     //pitch
-    inline int get_step() { return m_step; }
-    inline int get_octave() { return m_octave; }
     inline float get_actual_accidentals() { return m_actual_acc; }
-    inline bool is_pitch_defined() { return m_step != k_no_pitch; }
 
     /** Using this method could create inconsistencies between new pitch and notated
         accidentals unless it is used in conjunction with set_actual_accidentals()
@@ -270,8 +285,6 @@ public:
         These methods are intended for notes's construction/modification and should not
         be used by your application unless you understand well what you are doing.
     */
-    inline void set_step(int step) { m_step = step; }
-    inline void set_octave(int octave) { m_octave = octave; }
     inline void set_actual_accidentals(float value) { m_actual_acc = value; }
     inline void set_notated_accidentals(EAccidentals accidentals) { m_notated_acc = accidentals; }
     inline void request_pitch_recomputation() { m_actual_acc = k_acc_not_computed; }

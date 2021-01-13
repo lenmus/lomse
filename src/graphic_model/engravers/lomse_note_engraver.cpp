@@ -414,7 +414,7 @@ int NoteEngraver::get_pos_on_staff()
 }
 
 //---------------------------------------------------------------------------------------
-int NoteEngraver::pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octaveShift)
+int NoteEngraver::pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octaveShift)
 {
     // Returns the position on the staff (line/space) referred to the first ledger line of
     // the staff. Depends on clef:
@@ -426,10 +426,10 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octave
     //        5 - on second space
     //        etc.
 
-    if (!pNote->is_pitch_defined())
+    if (!pNR->is_pitch_defined())
         return 0;   //first bottom ledger line
 
-    DiatonicPitch dpitch(pNote->get_step(), pNote->get_octave());
+    DiatonicPitch dpitch(pNR->get_step(), pNR->get_octave());
     dpitch += octaveShift;
 
 	// pitch is defined. Position will depend on key
