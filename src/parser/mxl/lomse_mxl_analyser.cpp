@@ -4171,9 +4171,6 @@ public:
 
         // [<cue>]
         bool fIsCue = get_optional("cue");
-//        //for now, ignore cue notes
-//        if (fIsCue)
-//            return nullptr;
 
         // [<grace>]
         bool fIsGrace = get_optional("grace");
@@ -4207,7 +4204,8 @@ public:
         }
         else
         {
-            int type = (fIsGrace ? k_imo_note_grace : k_imo_note_regular);
+            int type = (fIsGrace ? k_imo_note_grace
+                                 : (fIsCue ? k_imo_note_cue : k_imo_note_regular));
             pNote = static_cast<ImoNote*>(ImFactory::inject(type, pDoc));
             pNR = pNote;
             if (get_optional("unpitched"))

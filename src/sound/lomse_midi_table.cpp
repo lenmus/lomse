@@ -162,7 +162,8 @@ void SoundEventsTable::create_events()
         pSO = cursor.get_staffobj();
         if (pSO->is_note_rest())
         {
-            add_noterest_events(cursor, measure);
+            if (!pSO->is_cue_note())
+                add_noterest_events(cursor, measure);
         }
         else if (pSO->is_barline())
         {

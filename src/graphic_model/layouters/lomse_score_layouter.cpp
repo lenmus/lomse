@@ -1133,6 +1133,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         }
         case k_imo_note_regular:
         case k_imo_note_grace:
+        case k_imo_note_cue:
         {
             ImoNote* pImo = static_cast<ImoNote*>(pSO);
             NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_engravers,
