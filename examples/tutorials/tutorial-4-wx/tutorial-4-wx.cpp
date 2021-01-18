@@ -444,6 +444,11 @@ void MyFrame::initialize_lomse()
 
     //set required callbacks
     m_lomse.set_notify_callback(this, wrapper_lomse_event);
+    
+#ifdef __APPLE__
+    // Set fonts path manually on OSX, not using fontconfig
+    m_lomse.set_default_fonts_path("../../../fonts/");
+#endif
 }
 
 //---------------------------------------------------------------------------------------

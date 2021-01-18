@@ -300,6 +300,11 @@ void MyFrame::initialize_lomse()
 
     //initialize the library with these values
     m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+    
+#ifdef __APPLE__
+    // Set fonts path manually on OSX, not using fontconfig
+    m_lomse.set_default_fonts_path("../../../fonts/");
+#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -601,10 +606,13 @@ void MyCanvas::on_key(int x, int y, unsigned key, unsigned flags)
                 spInteractor->switch_task(TaskFactory::k_task_selection);
                 break;
             case '+':
+            case '=':  // '+' is SHIFT = in UK & US
+            case WXK_NUMPAD_ADD:  // support numpad +
                 spInteractor->zoom_in(x, y);
                 force_redraw();
                 break;
             case '-':
+            case WXK_NUMPAD_SUBTRACT:  // support numpad -
                 spInteractor->zoom_out(x, y);
                 force_redraw();
                 break;
