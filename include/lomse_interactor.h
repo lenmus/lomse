@@ -181,12 +181,9 @@ protected:
     DocCursor*      m_pCursor;
     SelectionSet*   m_pSelections;
     DocCommandExecuter* m_pExec;
-    RenderingBuffer*    m_pScreenBuf;
-    RenderingBuffer*    m_pPrintBuf;
     GmoRef          m_grefLastMouseOver;
     int             m_operatingMode;
     bool            m_fEditionEnabled;
-    bool            m_fViewAreaDefined;     //set_view_area has been invoked
 
     //for controlling repaints
     bool        m_fViewParamsChanged;       //viewport, scale, ... have been modified
@@ -462,6 +459,7 @@ public:
     virtual void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height);
 
 ///@cond INTERNAL
+    //deprecated Jan/2021
     LOMSE_DEPRECATED_MSG("use instead overloaded version taking bitmap ptr, width and height")
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
 ///@endcond
@@ -545,7 +543,6 @@ public:
             m_pPresenter = lomse.open_document(k_view_single_system, filename);
             if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
             {
-                spInteractor->set_rendering_buffer(&m_rbuf_window);
                 spInteractor->set_view_background( Color(255,255,255) );  //white
                 ...
         @endcode
@@ -595,14 +592,14 @@ public:
             double y = 2700.0;
             if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
             {
-                spInteractor->model_point_to_screen(&x, &y, iPage);
+                spInteractor->model_point_to_device(&x, &y, iPage);
 
                 //Here @a x and @a y contains pixels relative to
                 //view origin
             }
         @endcode
     */
-    virtual void model_point_to_screen(double* x, double* y, int iPage);
+    virtual void model_point_to_device(double* x, double* y, int iPage);
 
 
     /** Returns the page number (0 .. num_pages - 1) that contains the
@@ -1128,28 +1125,35 @@ public:
 
         In order to not interfere with screen display, a different
         rendering buffer is used for printing.
+        @param buf  Pointer to the memory area to be used as rendering buffer
+        @param width    Rendering buffer width, in pixels
+        @param height   Rendering buffer height, in pixels
 
         See @subpage page-printing
     */
-//        buf;    // Pointer to renrdering buffer
-//        width;  // Width in pixels
-//        height; // Height in pixels
-//        stride; // Number of bytes per row. Can be < 0
-//          m_start;  // Pointer to first pixel to render
-//          m_start = (stride > 0 ? buf : buf - int(height - 1) * stride;
-
-
     virtual void set_print_buffer(unsigned char* buf, unsigned width, unsigned height);
 
+
+///@cond INTERNAL
+    //deprecated Jan/2021
     LOMSE_DEPRECATED_MSG("use instead overloaded version taking bitmap ptr, width and height")
     virtual void set_print_buffer(RenderingBuffer* rbuf);
+///@endcond
 
 
-    /** Sets the resolution (in dots per inch, dpi) to use for printing.
+    /** Sets the resolution to use for printing.
+        @param width    Paper width, in pixels
+        @param height   Paper height, in pixels
 
         See @subpage page-printing
     */
+    virtual void set_print_page_size(Pixels width, Pixels height);
+
+///@cond INTERNAL
+    //deprecated Jan/2021
+    LOMSE_DEPRECATED_MSG("use instead set_print_page_size() method")
     virtual void set_print_ppi(double ppi);
+///@endcond
 
 
     /** Request Lomse to render a page on current print buffer.
@@ -1697,7 +1701,6 @@ protected:
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();
     bool is_operating_mode_allowed(int mode);
-    void delete_rendering_buffer();
 
     //To select mode for do_move_tempo_line_and_scroll()
     enum { k_only_tempo_line=0, k_scroll_and_tempo_line, k_only_scroll };

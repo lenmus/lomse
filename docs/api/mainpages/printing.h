@@ -6,16 +6,17 @@
 
 @section page-printing-overview The print API
 
-Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.
+Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. The default solution offered by Lomse for implementing printing in your application is based on printing bitmaps.
 
 The Lomse print API is four methods, invoked in sequence:
 
 -# First, determine how many pages to print. To know how many pages the document has, just call Interactor::get_num_pages().
 
 -# In order to not interfere with screen display, a different rendering buffer and resolution are used by Lomse for printing. Therefore, you will have to:
-    - Determine the current settings for printer resolution and inform Lomse by invoking Interactor::set_print_ppi().
+    - Determine the current settings for printer resolution.
+    - Determine the paper size, in pixels, based on printer resolution and the paper size that is going to be used, and inform Lomse by invoking Interactor::set_print_paper_size(). Lomse will automatically scale the score pages so that the fit on the specified size.
     - Determine the bitmap size to used (see @ref page-printing-buffer-size), allocate memory for this buffer and inform Lomse by invoking Interactor::set_printing_buffer().
-    
+
 -# Now, invoke Interactor::print_page() to request Lomse to render a page in the provided buffer. 
 
 -# Finally, print the bitmap using the facilities of your operating system.
@@ -36,16 +37,8 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
         pDC->SetBackground(*WHITE_BRUSH);
         pDC->Clear();
 
-        //adjust size to take into account content scaling factor
-        Document* pDoc = m_pPresenter->get_document_raw_ptr();
-        float scale = pDoc->get_page_content_scale();
-        pDC->SetUserScale(scale, scale);
-        paperWidthPixels = int(float(paperWidthPixels) / scale);
-        paperHeightPixels = int(float(paperHeightPixels) / scale);
-
         //inform Lomse about printer resolution
-        int dpi = pDC->GetPPI();
-        spInteractor->set_print_ppi( double(dpi) );
+        spInteractor->set_print_page_size(paperWidthPixels, paperHeightPixels);
 
         //allocate print buffer
         Bitmap img(paperWidthPixels, paperHeightPixels);
@@ -98,16 +91,8 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
         pDC->SetBackground(*WHITE_BRUSH);
         pDC->Clear();
 
-        //adjust size to take into account content scaling factor
-        Document* pDoc = m_pPresenter->get_document_raw_ptr();
-        float scale = pDoc->get_page_content_scale();
-        pDC->SetUserScale(scale, scale);
-        paperWidthPixels = int(float(paperWidthPixels) / scale);
-        paperHeightPixels = int(float(paperHeightPixels) / scale);
-
         //inform Lomse about printer resolution
-        int dpi = pDC->GetPPI();
-        spInteractor->set_print_ppi( double(dpi) );
+        spInteractor->set_print_page_size(paperWidthPixels, paperHeightPixels);
 
         //determine tile size (pixels)
         int width = min(1024, paperWidthPixels);
@@ -174,6 +159,12 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
     }
 }
 @endcode
+
+
+@section page-printing-other Other ways of printing
+
+If you do not like the idea of using bitmaps for printing it is feasible to write a Driver class to perform printing using methods specific to your application and operating system. See @ref page-drawer-user-drawers
+
 
 */
 

@@ -43,7 +43,7 @@ namespace lomse
 {
 
 //forward declarations
-class ScreenDrawer;
+class BitmapDrawer;
 class GraphicView;
 class GmoBoxSystem;
 
@@ -62,7 +62,7 @@ public:
     virtual ~TimeGrid() {}
 
     //operations
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override { return m_bounds; }
 
     //getters

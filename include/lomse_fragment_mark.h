@@ -81,7 +81,7 @@ public:
         : VisualEffect(view, libraryScope) {}
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override =0;
+    void on_draw(BitmapDrawer* pDrawer) override =0;
     URect get_bounds() override =0;
 
 protected:
@@ -353,7 +353,7 @@ public:
     FragmentMark(GraphicView* view, LibraryScope& libraryScope);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 
     //initial data for position and context
@@ -364,7 +364,7 @@ protected:
     virtual ~FragmentMark() {}
 
     //debug
-    void draw_bounding_box(ScreenDrawer* pDrawer);
+    void draw_bounding_box(BitmapDrawer* pDrawer);
 
 ///@endcond
 

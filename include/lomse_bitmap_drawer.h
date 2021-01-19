@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -58,9 +58,10 @@ namespace lomse
 class Renderer;
 
 
-// ScreenDrawer: a Drawer that renders on screen using agg
 //---------------------------------------------------------------------------------------
-class LOMSE_EXPORT ScreenDrawer : public Drawer
+/** %BitmapDrawer: a Drawer that renders on a bitmap using agg
+*/
+class LOMSE_EXPORT BitmapDrawer : public Drawer
 {
 private:
     AttrStorage     m_attr_storage;
@@ -69,10 +70,19 @@ private:
     TextMeter*      m_pTextMeter;
     Calligrapher*   m_pCalligrapher;
     int             m_numPaths;
+    RenderingBuffer m_rbuf;
+    unsigned char*  m_pBuf;         //the memory for the bitmap. Owned by user app.
+    unsigned        m_bufWidth;
+    unsigned        m_bufHeight;
 
 public:
-    ScreenDrawer(LibraryScope& libraryScope);
-    virtual ~ScreenDrawer();
+    BitmapDrawer(LibraryScope& libraryScope);
+    virtual ~BitmapDrawer();
+
+
+    //===================================================================
+    // Implementation of pure virtual methods in Drawer base class
+    //===================================================================
 
     // SVG path commands
     // http://www.w3.org/TR/SVG/paths.html#PathData
@@ -149,36 +159,13 @@ public:
                             const std::string& fontName, double height,
                             bool fBold=false, bool fItalic=false) override;
 
-    //inline void FtSetFontSize(double rPoints) { return m_pMFM->SetFontSize(rPoints); }
-    //inline void FtSetFontHeight(double rPoints) { return m_pMFM->SetFontHeight(rPoints); }
-    //inline void FtSetFontWidth(double rPoints) { return m_pMFM->SetFontWidth(rPoints); }
-    //void font_family();
-    //void font_size();
-    //void font_style();  // normal | italic
-    //void font_weight(); // normal | bold
-
-    //// text settings
-    ////-----------------------
-    ////void flip_text(bool flip);
-    //void set_text_alignment(ETextAlignment align_x, ETextAlignment align_y);
-    //bool get_text_hints() const;
-    //void set_text_hints(bool hints);
-    //double get_text_width(const char* str);
-
-    // text attributes
 
     // text rederization
-    void gsv_text(double x, double y, const char* str);
+    //-----------------------
     int draw_text(double x, double y, const std::string& str) override;
     int draw_text(double x, double y, const wstring& str) override;
     void draw_glyph(double x, double y, unsigned int ch) override;
 
-    //void FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos);
-    //void FtSetTextPositionPixels(lmPixels vxPos, lmPixels vyPos);
-    //void FtGetTextExtent(const wxString& sText, lmLUnits* pWidth, lmLUnits* pHeight,
-    //                     lmLUnits* pDescender = nullptr, lmLUnits* pAscender = nullptr);
-    //lmURect FtGetGlyphBounds(unsigned int nGlyph);
-    //wxRect FtGetGlyphBoundsInPixels(unsigned int nGlyph);
 
     //copy/blend a bitmap
     //-----------------------
@@ -199,24 +186,52 @@ public:
                            ELineCap startCap, ELineCap endCap) override;
 
 
-    // point conversion
-    //-----------------------
-    void screen_point_to_model(double* x, double* y) const;
-    void model_point_to_screen(double* x, double* y) const;
-
-    //units conversion
-    LUnits Pixels_to_LUnits(Pixels value);
-    Pixels LUnits_to_Pixels(double value);
-
     // settings
     //-----------------------
-    void reset(RenderingBuffer& buf, Color bgcolor);
-    void set_viewport(Pixels x, Pixels y);
-    void set_transform(TransAffine& transform);
     void set_shift(LUnits x, LUnits y) override;
     void remove_shift() override;
     void render() override;
-    void render(FontRasterizer& ras, FontScanline& sl, Color color);
+    void set_affine_transformation(TransAffine& transform) override;
+
+    /** Set the background color and prepare to render a new image.  */
+    void reset(Color bgcolor) override;
+
+
+    // device - model units conversion
+    //-------------------------------------
+    void device_point_to_model(double* x, double* y) const override;
+    void model_point_to_device(double* x, double* y) const override;
+    LUnits device_units_to_model(double value) const override;
+    double model_to_device_units(LUnits value) const override;
+
+
+    //info
+    //---------------------------------------
+    bool is_ready() const override;
+
+
+    //Viewport info
+    //---------------------------------------
+    //coordinates in device units (e.g. Pixel)
+    void new_viewport_origin(double x, double y) override;
+    void new_viewport_size(double x, double y) override;
+
+
+    //===================================================================
+    // Specific methods not in Drawer base class
+    //===================================================================
+
+    //Inform about the RenderingBuffer to use and clear it with the desired color.
+    void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height,
+                              Color bgcolor=Color(255,255,255));
+
+    //The view area is the region to which drawing is restricted. View area must be
+    //given in device coordinates (e.g. Pixel).
+    void set_view_area(unsigned width, unsigned height, unsigned xShift, unsigned yShift);
+
+    unsigned char* get_rendering_buffer() { return m_pBuf; };
+    unsigned get_rendering_buffer_width() const { return m_bufWidth; };
+    unsigned get_rendering_buffer_height() const { return m_bufHeight; };
 
 
 protected:

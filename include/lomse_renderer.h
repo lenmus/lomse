@@ -115,7 +115,7 @@ public:
     virtual void initialize(RenderingBuffer& buf, Color bgcolor) = 0;
     virtual void render() = 0;
     virtual void render(FontRasterizer& ras, FontScanline& sl, Color color) = 0;
-    virtual void render_gsv_text(double x, double y, const char* str) = 0;
+//    virtual void render_gsv_text(double x, double y, const char* str) = 0;
     virtual void copy_from(RenderingBuffer& img, const AggRectInt* srcRect,
                            int xDest, int yDest) = 0;
     virtual void blend_from(RenderingBuffer& bmap, const AggRectInt* srcRect,
@@ -142,10 +142,10 @@ public:
 
     virtual void get_bounding_rect(double* x1, double* y1, double* x2, double* y2) = 0;
 
-    inline void set_viewport(Pixels x, Pixels y)
+    inline void set_viewport(double x, double y)
     {
-        m_vxOrg = double(x);
-        m_vyOrg = double(y);
+        m_vxOrg = x;
+        m_vyOrg = y;
     }
 
     inline void set_scale(double scale) { m_userScale = scale; }
@@ -273,28 +273,6 @@ public:
 
         //clear paths
         reset();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void render_gsv_text(double x, double y, const char* str) override
-    {
-        agg::gsv_text t;
-        t.size(10.0);
-        t.flip(true);
-
-        agg::conv_stroke<agg::gsv_text> pt(t);
-        pt.width(1.5);
-
-        t.start_point(x, y);
-        t.text(str);
-
-        agg::rasterizer_scanline_aa<> ras;
-        agg::scanline_p8 sl;
-
-        ras.gamma(agg::gamma_power(m_gamma));
-        ras.add_path(pt);
-        m_renSolid.color(agg::rgba(0,0,0));
-        agg::render_scanlines(ras, sl, m_renSolid);
     }
 
     //-----------------------------------------------------------------------------------

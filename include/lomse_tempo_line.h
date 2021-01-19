@@ -94,7 +94,7 @@ public:
     void remove_tempo_line();
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override { return m_bounds; }
 
 protected:

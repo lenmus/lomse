@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2018. All rights reserved.
+// Lomse is copyrighted work (c) 2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include "lomse_tempo_line.h"
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_graphic_view.h"
 #include "lomse_logger.h"
 #include "lomse_box_system.h"
@@ -67,7 +67,7 @@ void TempoLine::move_to(LUnits xPos, GmoBoxSystem* pBoxSystem, int iPage)
 }
 
 //---------------------------------------------------------------------------------------
-void TempoLine::on_draw(ScreenDrawer* pDrawer)
+void TempoLine::on_draw(BitmapDrawer* pDrawer)
 {
     if (!m_pBoxSystem)
         return;

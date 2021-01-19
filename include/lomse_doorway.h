@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,15 +31,12 @@
 #define __LOMSE_DOORWAY_H__
 
 #include "lomse_build_options.h"
-
-#include "lomse_reader.h"
+#include "lomse_basic.h"
 #include "lomse_pixel_formats.h"
-#include "lomse_events.h"
-
 
 #include <string>
 #include <iostream>
-using namespace std;
+#include <memory>   //shared_ptr
 
 ///@cond INTERNAL
 namespace lomse
@@ -61,6 +58,10 @@ class MidiServerBase;
 class Metronome;
 class MusicXmlOptions;
 
+class EventInfo;
+typedef std::shared_ptr<EventInfo>  SpEventInfo;
+class Request;
+class LdpReader;
 
 
 typedef void (*pt2NotifyFunction)(void*, SpEventInfo);
@@ -108,18 +109,16 @@ public:
         Lomse for reporting errors.
 
         @param pixel_format A value from the global enumeration type #EPixelFormat
-        @param ppi The required resolution in pixels per inch (e.g., 72)
-        @param reverse_y_axis Lomse needs to know if the presentation device in which
-            the bitmaps are going to be rendered follows the standard convention
-            used in screen displays in which the y coordinates increases downwards,
-            that is, y-axis coordinate 0 is at top of screen and increases downwards
-            to bottom of screen. This convention is just the opposite of the normal
-            convention for geometry, in which 0 coordinate is at bottom of paper and
-            increases upwards. Lomse follows the standard convention used in
-            displays (y-axis 0 coordinate at top and increases downwards).
-            Therefore, we have to inform Lomse if the y-axis follows the standard
-            convention for screens (reverse_y_axis = @false) or, by the contrary,
-            Lomse has to reverse the y axis (reverse_y_axis = @true).
+        @param ppi The display resolution in pixels per inch (e.g. 96). Lomse uses
+            vectorial graphics for all, typography included and, thus, screen
+            resolution is no required as your application can always scale the image
+            to as much resolution as you like. The real resolution is determined
+            by the provided bitmap size (pixels) to be used as rendering buffer.
+            Nevertheless, Lomse requires a screen resolution value to adjust
+            internal scaling factors so that when the user scale is set to
+            1.0 (100%) the document get displayed on the screen at real size.
+            If this is not a
+            requirement for your application, any value can be used (e.g. 72 or 96).
         @param reporter The ostream to be used by Lomse for reporting errors. By default,
             all errors will be send to cout.
 
@@ -129,15 +128,20 @@ public:
         @code
         LomseDoorway m_lomse;                   //the only instance, representing the lomse library
         int pixel_format = k_pix_format_rgb24;  //pixel format: RGB 24bits
-        int resolution = 96;                    //96 ppi
-        bool reverse_y_axis = false;            //y-axis coordinate 0 is at top of screen and increases downwards
+        int resolution = 96;                    //typical resolution
 
         //initialize the library with these values
-        m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+        m_lomse.init_library(pixel_format, resolution);
         @endcode
 	*/
+    void init_library(int pixel_format, int ppi, std::ostream& reporter=std::cout);
+
+///@cond INTERNAL
+    //deprecated Jan/2021
+    LOMSE_DEPRECATED_MSG("use instead version without 'reverse_y_axis' param.")
     void init_library(int pixel_format, int ppi, bool reverse_y_axis,
-                      ostream& reporter=cout);
+                      std::ostream& reporter=std::cout);
+///@endcond
 
 	/** This method is used by for informing Lomse about the callback method that Lomse
         should invoke when having to communicate an event to your application.
@@ -250,7 +254,7 @@ public:
             for fonts other than Lomse default fonts. Please note that Lomse will not
             look into sub-folders in the passed path.
 	*/
-    void set_default_fonts_path(const string& fontsPath);
+    void set_default_fonts_path(const std::string& fontsPath);
 
     //playback related
 	/** This method is used for informing Lomse about the metronome control to use to
@@ -319,8 +323,8 @@ public:
 
         @see @subpage page-render-overview
 	*/
-    Presenter* new_document(int viewType, const string& source, int format,
-                            ostream& reporter = cout);
+    Presenter* new_document(int viewType, const std::string& source, int format,
+                            std::ostream& reporter = std::cout);
 
 	/** Open a document. Its content is read from a file.
         Also creates a View for rendering it as well as all additional
@@ -341,8 +345,8 @@ public:
 
         @see @subpage page-render-overview
 	*/
-    Presenter* open_document(int viewType, const string& filename,
-                             ostream& reporter = cout);
+    Presenter* open_document(int viewType, const std::string& filename,
+                             std::ostream& reporter = std::cout);
 
 	/** Open a document. Its content is provided by an LdpReader object.
         Also creates a View for rendering it as well as all additional
@@ -365,7 +369,7 @@ public:
         @see @subpage page-render-overview
 	*/
     Presenter* open_document(int viewType, LdpReader& reader,
-                             ostream& reporter = cout);
+                             std::ostream& reporter = std::cout);
 
     //access to global objects
 
@@ -411,17 +415,17 @@ public:
     //library info
 
 	/** Returns Lomse version as string "major.minor.patch" e.g., "0.17.20"    */
-    string get_version_string();
+    std::string get_version_string();
 
 	/** Returns Lomse version and build information as string. e.g., "0.17.20+aaf5e23"  */
-    string get_version_long_string();
+    std::string get_version_long_string();
 
 	/** Returns the build date and time of the Lomse library. The string is twenty
         characters long and looks like "12-Feb-2016 17:54:03". Date and time are
         separated by one space. Date is in format dd-mm-yyyy and time in format hh:mm:ss.
         Day, hour, minutes and seconds are always padded with zero if only one digit
         e.g., "02-Mar-2016 07:54:03"    */
-    string get_build_date();
+    std::string get_build_date();
 
 	/** Returns Lomse major version as integer number. For instance, if version string
         is "0.17.20" this method will return 0.    */
@@ -443,8 +447,8 @@ public:
     static void null_request_function(void* pObj, Request* event);
 
     //communication with user application
-    inline void post_event(SpEventInfo pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
-    inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
+    void post_event(SpEventInfo pEvent);
+    void post_request(Request* pRequest);
 
 ///@endcond
 };

@@ -196,11 +196,11 @@ set(PARSER_FILES
 )
 
 set(RENDER_FILES
+    ${LOMSE_SRC_DIR}/render/lomse_bitmap_drawer.cpp
     ${LOMSE_SRC_DIR}/render/lomse_calligrapher.cpp
     ${LOMSE_SRC_DIR}/render/lomse_font_freetype.cpp
     ${LOMSE_SRC_DIR}/render/lomse_font_storage.cpp
     ${LOMSE_SRC_DIR}/render/lomse_renderer.cpp
-    ${LOMSE_SRC_DIR}/render/lomse_screen_drawer.cpp
 )
 
 set(SCORE_FILES

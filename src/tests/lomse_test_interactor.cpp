@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,7 +68,7 @@ public:
     MyDoorway()
         : LomseDoorway()
     {
-        init_library(k_pix_format_rgba32, 96, false);
+        init_library(k_pix_format_rgba32, 96);
     }
     virtual ~MyDoorway() {}
 
@@ -191,8 +191,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
-                                            spDoc.get());
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
 
         CHECK( pIntor != nullptr );
@@ -206,8 +205,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
-                                            spDoc.get());
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         GraphicModel* pModel = pIntor->get_graphic_model();
@@ -234,11 +232,11 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
-        RenderingBuffer rbuf;
-        pView->set_rendering_buffer(&rbuf);
+        unsigned char buf[400];
+        pView->set_rendering_buffer(buf, 10, 10);
         pView->redraw_bitmap();
 
         GraphicModel* pModel = pIntor->get_graphic_model();
@@ -255,7 +253,7 @@ SUITE(InteractorTest)
 
         double vx = x;
         double vy = y;
-        pIntor->model_point_to_screen(&vx, &vy, 0);
+        pIntor->model_point_to_device(&vx, &vy, 0);
 
         pIntor->task_action_select_object_and_show_contextual_menu(Pixels(vx), Pixels(vy), 0);
 
@@ -271,11 +269,11 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
-        RenderingBuffer rbuf;
-        pView->set_rendering_buffer(&rbuf);
+        unsigned char buf[400];
+        pView->set_rendering_buffer(buf, 10, 10);
         pView->redraw_bitmap();
 
         GraphicModel* pModel = pIntor->get_graphic_model();
@@ -294,10 +292,10 @@ SUITE(InteractorTest)
 
         double x1 = xLeft;
         double y1 = yTop;
-        pIntor->model_point_to_screen(&x1, &y1, 0);
+        pIntor->model_point_to_device(&x1, &y1, 0);
         double x2 = xRight;
         double y2 = yBottom;
-        pIntor->model_point_to_screen(&x2, &y2, 0);
+        pIntor->model_point_to_device(&x2, &y2, 0);
 
         pIntor->task_action_select_objects_in_screen_rectangle(Pixels(x1), Pixels(y1),
                                                    Pixels(x2), Pixels(y2), 0);
@@ -312,8 +310,7 @@ SUITE(InteractorTest)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
-                                            spDoc.get());
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
@@ -326,8 +323,7 @@ SUITE(InteractorTest)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
-                                            spDoc.get());
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
@@ -350,8 +346,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( LOMSE_NEW Document(libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(libraryScope, k_view_simple,
-                                            spDoc.get());
+        View* pView = Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
@@ -377,7 +372,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
@@ -395,7 +390,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
@@ -417,7 +412,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
@@ -436,7 +431,7 @@ SUITE(InteractorTest)
 //        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
 //        SpDocument spDoc( new Document(libraryScope) );
 //        spDoc->create_empty();
-//        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+//        GraphicView* pView = Injector::inject_View(libraryScope, k_view_simple);
 //        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, WpDocument(spDoc), pView);
 //        SpInteractor sp(pIntor);
 //        pView->set_interactor(pIntor);
@@ -459,7 +454,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor( Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr) );
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
@@ -481,7 +476,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
@@ -499,7 +494,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        GraphicView* pView = (GraphicView*)Injector::inject_View(libraryScope, k_view_simple);
         MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, WpDocument(spDoc), pView);
         SpInteractor sp(pIntor);
         pView->set_interactor(pIntor);

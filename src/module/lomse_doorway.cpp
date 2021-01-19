@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,11 +35,13 @@
 #include "lomse_import_options.h"
 #include "lomse_graphic_view.h"
 
+#include "lomse_reader.h"
+#include "lomse_events.h"
+
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"
 #include "agg_trans_viewport.h"
-//#include "lomse_tasks.h"
 #include "lomse_agg_types.h"
 using namespace agg;
 
@@ -105,8 +107,21 @@ Presenter* LomseDoorway::open_document(int viewType, LdpReader& reader,
 void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
                                ostream& reporter)
 {
+    //DEPRECATED method Jan/2021
+
     m_platform.pixel_format = EPixelFormat(pixel_format);
     m_platform.flip_y = reverse_y_axis;
+    m_platform.screen_ppi = float(ppi);
+
+    delete m_pLibraryScope;
+    m_pLibraryScope = LOMSE_NEW LibraryScope(reporter, this);
+//    m_pLibraryScope->get_threads_poll();        //force to create the threads
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::init_library(int pixel_format, int ppi, ostream& reporter)
+{
+    m_platform.pixel_format = EPixelFormat(pixel_format);
     m_platform.screen_ppi = float(ppi);
 
     delete m_pLibraryScope;
@@ -202,6 +217,18 @@ void LomseDoorway::set_global_metronome_and_replace_local(Metronome* pMtr)
 MusicXmlOptions* LomseDoorway::get_musicxml_options()
 {
     return m_pLibraryScope->get_musicxml_options();
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::post_event(SpEventInfo pEvent)
+{
+    m_pFunc_notify(m_pObj_notify, pEvent);
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::post_request(Request* pRequest)
+{
+    m_pFunc_request(m_pObj_request, pRequest);
 }
 
 

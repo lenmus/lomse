@@ -73,7 +73,7 @@ class Interactor;
 class Presenter;
 class LomseDoorway;
 class Drawer;
-class ScreenDrawer;
+class BitmapDrawer;
 class Task;
 class Request;
 class ScorePlayer;
@@ -290,18 +290,8 @@ public:
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
     static Document* inject_Document(LibraryScope& libraryScope,
                                      ostream& reporter = cout);
-    static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
-    static View* inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc);
-    static SimpleView* inject_SimpleView(LibraryScope& libraryScope, Document* pDoc);
-    static VerticalBookView* inject_VerticalBookView(LibraryScope& libraryScope,
-                                                     Document* pDoc);
-    static HorizontalBookView* inject_HorizontalBookView(LibraryScope& libraryScope,
-                                                         Document* pDoc);
-    static SingleSystemView* inject_SingleSystemView(LibraryScope& libraryScope,
-                                                     Document* pDoc);
-    static SinglePageView* inject_SinglePageView(LibraryScope& libraryScope, Document* pDoc);
-    static FreeFlowView* inject_FreeFlowView(LibraryScope& libraryScope, Document* pDoc);
-    static HalfPageView* inject_HalfPageView(LibraryScope& libraryScope, Document* pDoc);
+    static BitmapDrawer* inject_BitmapDrawer(LibraryScope& libraryScope);
+    static View* inject_View(LibraryScope& libraryScope, int viewType);
 
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
                                          WpDocument wpDoc, View* pView,

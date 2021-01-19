@@ -39,7 +39,7 @@ namespace lomse
 //forward declarations
 class Drawer;
 struct RenderOptions;
-class ScreenDrawer;
+class BitmapDrawer;
 
 //---------------------------------------------------------------------------------------
 // Base class for controls used for interacting and re-shaping objects
@@ -79,7 +79,7 @@ public:
     virtual ~HandlerCircle();
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 
     //mandatory overrides from Handler
@@ -88,7 +88,7 @@ public:
 
 
 protected:
-    void compute_radius(ScreenDrawer* pDrawer);
+    void compute_radius(BitmapDrawer* pDrawer);
 
 };
 

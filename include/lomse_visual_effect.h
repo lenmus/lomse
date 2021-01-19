@@ -44,7 +44,7 @@ namespace lomse
 ///@endcond
 
 //forward declarations
-class ScreenDrawer;
+class BitmapDrawer;
 class GraphicView;
 class GmoShape;
 class GmoObj;
@@ -82,7 +82,7 @@ public:
     inline void enable(bool fEnabled) { m_fEnabled = fEnabled; }
 
     //drawing
-    virtual void on_draw(ScreenDrawer* pDrawer) = 0;
+    virtual void on_draw(BitmapDrawer* pDrawer) = 0;
 
     //size when rendered
     virtual URect get_bounds() = 0;
@@ -123,7 +123,7 @@ public:
     void move_to(LUnits x, LUnits y);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 
 protected:
@@ -152,7 +152,7 @@ public:
     void set_end_point(LUnits x, LUnits y);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 };
 ///@endcond
@@ -192,7 +192,7 @@ public:
     void remove_all_highlight();
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 
 ///@endcond
@@ -215,7 +215,7 @@ public:
     virtual ~SelectionHighlight() {}
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override;
 
     //other

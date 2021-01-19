@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,7 +50,7 @@
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
 #include "lomse_doorway.h"
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_tasks.h"
 #include "lomse_events.h"
 #include "lomse_score_player.h"
@@ -378,76 +378,17 @@ Document* Injector::inject_Document(LibraryScope& libraryScope, ostream& reporte
 }
 
 //---------------------------------------------------------------------------------------
-ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
+BitmapDrawer* Injector::inject_BitmapDrawer(LibraryScope& libraryScope)
 {
-    return LOMSE_NEW ScreenDrawer(libraryScope);
-}
-
-////---------------------------------------------------------------------------------------
-//UserCommandExecuter* Injector::inject_UserCommandExecuter(Document* pDoc)
-//{
-//    return LOMSE_NEW UserCommandExecuter(pDoc);
-//}
-
-//---------------------------------------------------------------------------------------
-SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)
-{
-    return static_cast<SimpleView*>(
-                        inject_View(libraryScope, k_view_simple, pDoc) );
+    return LOMSE_NEW BitmapDrawer(libraryScope);
 }
 
 //---------------------------------------------------------------------------------------
-VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
-                                                    Document* pDoc)
+View* Injector::inject_View(LibraryScope& libraryScope, int viewType)
 {
-    return static_cast<VerticalBookView*>(
-                        inject_View(libraryScope, k_view_vertical_book, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& libraryScope,
-                                                        Document* pDoc)
-{
-    return static_cast<HorizontalBookView*>(
-                        inject_View(libraryScope, k_view_horizontal_book, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-SingleSystemView* Injector::inject_SingleSystemView(LibraryScope& libraryScope,
-                                                    Document* pDoc)
-{
-    return static_cast<SingleSystemView*>(
-                        inject_View(libraryScope, k_view_single_system, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-SinglePageView* Injector::inject_SinglePageView(LibraryScope& libraryScope,
-                                                Document* pDoc)
-{
-    return static_cast<SinglePageView*>(
-                        inject_View(libraryScope, k_view_single_page, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-FreeFlowView* Injector::inject_FreeFlowView(LibraryScope& libraryScope, Document* pDoc)
-{
-    return static_cast<FreeFlowView*>(
-                        inject_View(libraryScope, k_view_free_flow, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-HalfPageView* Injector::inject_HalfPageView(LibraryScope& libraryScope, Document* pDoc)
-{
-    return static_cast<HalfPageView*>(
-                        inject_View(libraryScope, k_view_half_page, pDoc) );
-}
-
-//---------------------------------------------------------------------------------------
-View* Injector::inject_View(LibraryScope& libraryScope, int viewType,
-                            Document* UNUSED(pDoc))
-{
-    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
-    return ViewFactory::create_view(libraryScope, viewType, pDrawer);
+    BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
+    BitmapDrawer* pPrintDrawer = Injector::inject_BitmapDrawer(libraryScope);
+    return ViewFactory::create_view(libraryScope, viewType, pDrawer, pPrintDrawer);
 }
 
 //---------------------------------------------------------------------------------------
@@ -464,7 +405,7 @@ Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
 Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
                                       int viewType, Document* pDoc)
 {
-    View* pView = Injector::inject_View(libraryScope, viewType, pDoc);
+    View* pView = Injector::inject_View(libraryScope, viewType);
     DocCommandExecuter* pExec = Injector::inject_DocCommandExecuter(pDoc);
     SpDocument spDoc(pDoc);
     WpDocument wpDoc(spDoc);

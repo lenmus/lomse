@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -248,17 +248,34 @@ struct RenderOptions
 
 
 //---------------------------------------------------------------------------------------
-// Drawer: Abstract class for drawers
-// A drawer is responsible for transforming drawing commands into a final
-// product (bitmap, svg file, paths, etc.)
-//
-// Implementation is in file lomse_screen_drawer.cpp
+/** Drawer: Abstract base class for any drawer object.
+    A drawer is responsible for transforming drawing commands into something
+    understandable by the underlying rendering engine (e.g.: a bitmap, svg file, paths,
+    etc.), to display the sheet music.
+
+    The %Drawer class is equivalent to the typical “Device Context” (DC) that is part
+    of the “Graphics Device Interface” (GDI) in the Microsoft Windows API. Similar
+    drawing interfaces are present in other operating systems' graphics libraries,
+    for example macOS' “Quartz” and X Window System's “Xlib/XCB”.
+
+    As Lomse aims to be platform independent, it cannot use any platform specific
+    graphics interface. Instead it was decided to create an abstract interface
+    class: %Drawer. This solution allows any user application to implement its own
+    drawer class and do all drawing natively without having to relay on the
+    rendition facilities provided by Lomse.
+
+    The commands interface of %Drawer class mimics SVG commands.
+*/
 class Drawer
 {
 protected:
     LibraryScope& m_libraryScope;
     FontStorage* m_pFonts;
     Color m_textColor;
+
+    //current viewport origin and size, in device units (e.g. Pixel)
+    Point<double> m_viewportOrg;
+    Size<double>  m_viewportSize;
 
 public:
     Drawer(LibraryScope& libraryScope);
@@ -308,6 +325,24 @@ public:
     // not the same but similar to SVG path command
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;
 
+
+    // Attribute setting functions.
+    virtual void fill(Color color) = 0;
+    virtual void stroke(Color color) = 0;
+    virtual void even_odd(bool flag) = 0;
+    virtual void stroke_width(double w) = 0;
+    virtual void fill_none() = 0;
+    virtual void stroke_none() = 0;
+    virtual void fill_opacity(unsigned op) = 0;
+    virtual void stroke_opacity(unsigned op) = 0;
+    virtual void line_join(line_join_e join) = 0;
+    virtual void line_cap(line_cap_e cap) = 0;
+    virtual void miter_limit(double ml) = 0;
+    virtual void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2) = 0;
+    virtual void gradient_color(Color c1, Color c2, double start, double stop) = 0;
+    virtual void gradient_color(Color c1, double start, double stop) = 0;
+
+
     // current font
     virtual bool select_font(const std::string& language,
                              const std::string& fontFile,
@@ -346,28 +381,49 @@ public:
                                    ELineCap startCap, ELineCap endCap) = 0;
 
 
-    // Attribute setting functions.
-    virtual void fill(Color color) = 0;
-    virtual void stroke(Color color) = 0;
-    virtual void even_odd(bool flag) = 0;
-    virtual void stroke_width(double w) = 0;
-    virtual void fill_none() = 0;
-    virtual void stroke_none() = 0;
-    virtual void fill_opacity(unsigned op) = 0;
-    virtual void stroke_opacity(unsigned op) = 0;
-    virtual void line_join(line_join_e join) = 0;
-    virtual void line_cap(line_cap_e cap) = 0;
-    virtual void miter_limit(double ml) = 0;
-    virtual void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2) = 0;
-    virtual void gradient_color(Color c1, Color c2, double start, double stop) = 0;
-    virtual void gradient_color(Color c1, double start, double stop) = 0;
-
 
     // settings
     //-----------------------
     virtual void set_shift(LUnits x, LUnits y) = 0;
     virtual void remove_shift() = 0;
-    virtual void render()= 0;
+    virtual void render() = 0;
+    //Set the affine transformation matrix to apply
+    virtual void set_affine_transformation(TransAffine& transform) = 0;
+
+    /** Set the background color and prepare to render a new image.  */
+    virtual void reset(Color bgcolor) = 0;
+
+
+    // device - model units conversion
+    //-------------------------------------
+    //In Lomse, there are two types of coordinates: those defined in the device space,
+    //that is, the Drawer space (e.g. pixels) and those defined in the model space, that
+    //is, real world units (tenths of one millimeter). Any Drawer needs method to know
+    //the conversion factors (can be different for x and y axis) and to convert units.
+
+    virtual void device_point_to_model(double* x, double* y) const = 0;
+    virtual void model_point_to_device(double* x, double* y) const = 0;
+    virtual LUnits device_units_to_model(double value) const = 0;
+    virtual double model_to_device_units(LUnits value) const = 0;
+
+
+    //info
+    //---------------------------------------
+    /** Returns @TRUE if the Drawer can be used */
+    virtual bool is_ready() const = 0;
+
+
+    //Viewport info
+    //---------------------------------------
+    //Viewport is a concept related to the View, not to the Drawer. But for some Drawer
+    //implementations, the Drawer can speed up rendition if it knows the area that
+    //is currently visible, so that it can ignore non-visible areas.
+    //Therefore, the View always informs the Drawer when any change
+    //coordinates in device units (e.g. Pixel)
+
+    virtual void new_viewport_origin(double x, double y);
+    virtual void new_viewport_size(double x, double y);
+
 
 
 };
