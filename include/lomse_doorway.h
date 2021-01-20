@@ -57,11 +57,12 @@ class ScorePlayer;
 class MidiServerBase;
 class Metronome;
 class MusicXmlOptions;
-
+class BitmapDrawer;
 class EventInfo;
 typedef std::shared_ptr<EventInfo>  SpEventInfo;
 class Request;
 class LdpReader;
+class Drawer;
 
 
 typedef void (*pt2NotifyFunction)(void*, SpEventInfo);
@@ -297,7 +298,35 @@ public:
 
         @see @subpage page-render-overview
 	*/
-    Presenter* new_document(int viewType);
+    Presenter* new_document(int viewType);      //assumes BitmapDrawer for screen and for printing
+
+    /** Creates a empty document, as well as a View for rendering it and all additional
+        components (Interactor, Presenter, etc.) necessary for managing this document and
+        interacting with it. And allows to use any Drawer objects created by your
+        application.
+
+        @param viewType     The view type that will be used for rendering this document.
+        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
+            is transferred to the View. You must not delete it.
+        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+
+        @return A pointer to the Presenter to be used for interacting with this document.
+
+        @attention As Presenter ownership is transferred to user application, you have
+            to take care of deleting the Presenter when no longer needed. Deleting the
+            Presenter will automatically cause deletion of all MVC involved objects:
+            the Document, all existing Views and Interactors, etc., as well as any
+            passed Drawer objects.
+
+        @see @subpage page-render-overview,
+	*/
+
+    //Presenter* new_document(int viewType, int drawerType=k_drawer_bitmap, int printDrawer=k_drawer_bitmap);
+    Presenter* new_document(int viewType, Drawer* screenDrawer,
+                            Drawer* printDrawer=nullptr);
+
 
 	/** Create a new document initialized with the passed content.
         Also creates a View for rendering it as well as all additional

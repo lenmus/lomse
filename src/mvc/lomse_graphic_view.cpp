@@ -70,33 +70,43 @@ ViewFactory::~ViewFactory()
 
 //---------------------------------------------------------------------------------------
 View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
-                               Drawer* pDrawer, BitmapDrawer* pPrintDrawer)
+                               Drawer* screenDrawer, Drawer* printDrawer)
 {
-    BitmapDrawer* pBmpDrawer = dynamic_cast<BitmapDrawer*>(pDrawer);
+    BitmapDrawer* pScrDrawer = dynamic_cast<BitmapDrawer*>(screenDrawer);
+    BitmapDrawer* pPrtDrawer = dynamic_cast<BitmapDrawer*>(printDrawer);
+    if (!pPrtDrawer)
+    {
+        stringstream msg;
+        msg << "For printing, a BitmapDrawer if for now required. Replaced.";
+        LOMSE_LOG_ERROR(msg.str());
+        delete printDrawer;
+        pPrtDrawer = Injector::inject_BitmapDrawer(libraryScope);
+    }
+
     switch(viewType)
     {
         case k_view_simple:
-            return LOMSE_NEW SimpleView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW SimpleView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_vertical_book:
-            return LOMSE_NEW VerticalBookView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW VerticalBookView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_horizontal_book:
-            return LOMSE_NEW HorizontalBookView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW HorizontalBookView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_single_system:
-            return LOMSE_NEW SingleSystemView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW SingleSystemView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_single_page:
-            return LOMSE_NEW SinglePageView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW SinglePageView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_free_flow:
-            return LOMSE_NEW FreeFlowView(libraryScope, pDrawer, pPrintDrawer);
+            return LOMSE_NEW FreeFlowView(libraryScope, screenDrawer, pPrtDrawer);
 
         case k_view_half_page:
         {
-            if (pBmpDrawer)
-                return LOMSE_NEW HalfPageView(libraryScope, pBmpDrawer, pPrintDrawer);
+            if (pScrDrawer)
+                return LOMSE_NEW HalfPageView(libraryScope, pScrDrawer, pPrtDrawer);
             else
             {
                 stringstream msg;

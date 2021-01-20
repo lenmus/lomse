@@ -678,13 +678,13 @@ void BitmapDrawer::vline_to_rel(double y)
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::cubic_bezier(double x1, double y1, double x,  double y)
+void BitmapDrawer::quadratic_bezier(double x1, double y1, double x,  double y)
 {
     m_path.curve3(x1, y1, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::cubic_bezier_rel(double x1, double y1, double x,  double y)
+void BitmapDrawer::quadratic_bezier_rel(double x1, double y1, double x,  double y)
 {
     m_path.rel_to_abs(&x1, &y1);
     m_path.rel_to_abs(&x,  &y);
@@ -692,25 +692,25 @@ void BitmapDrawer::cubic_bezier_rel(double x1, double y1, double x,  double y)
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::cubic_bezier(double x, double y)
+void BitmapDrawer::quadratic_bezier(double x, double y)
 {
     m_path.curve3(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::cubic_bezier_rel(double x, double y)
+void BitmapDrawer::quadratic_bezier_rel(double x, double y)
 {
     m_path.curve3_rel(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::quadratic_bezier(double x1, double y1, double x2, double y2,
+void BitmapDrawer::cubic_bezier(double x1, double y1, double x2, double y2,
                                  double x,  double y)
 {
     m_path.curve4(x1, y1, x2, y2, x, y);
 }
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::quadratic_bezier_rel(double x1, double y1, double x2, double y2,
+void BitmapDrawer::cubic_bezier_rel(double x1, double y1, double x2, double y2,
                                      double x,  double y)
 {
     m_path.rel_to_abs(&x1, &y1);
@@ -720,19 +720,19 @@ void BitmapDrawer::quadratic_bezier_rel(double x1, double y1, double x2, double 
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::quadratic_bezier(double x2, double y2, double x,  double y)
+void BitmapDrawer::cubic_bezier(double x2, double y2, double x,  double y)
 {
     m_path.curve4(x2, y2, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::quadratic_bezier_rel(double x2, double y2, double x,  double y)
+void BitmapDrawer::cubic_bezier_rel(double x2, double y2, double x,  double y)
 {
     m_path.curve4_rel(x2, y2, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::close_subpath()
+void BitmapDrawer::close_path()
 {
     m_path.end_poly(path_flags_close);
 }
@@ -754,12 +754,6 @@ void BitmapDrawer::stroke(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-void BitmapDrawer::even_odd(bool flag)
-{
-    cur_attr().even_odd_flag = flag;
-}
-
-//---------------------------------------------------------------------------------------
 void BitmapDrawer::stroke_width(double w)
 {
     cur_attr().stroke_width = w;
@@ -775,6 +769,13 @@ void BitmapDrawer::fill_none()
 void BitmapDrawer::stroke_none()
 {
     cur_attr().stroke_flag = false;
+}
+
+#if (0)
+//---------------------------------------------------------------------------------------
+void BitmapDrawer::even_odd(bool flag)
+{
+    cur_attr().even_odd_flag = flag;
 }
 
 //---------------------------------------------------------------------------------------
@@ -806,6 +807,7 @@ void BitmapDrawer::miter_limit(double ml)
 {
     cur_attr().miter_limit = ml;
 }
+#endif
 
 //---------------------------------------------------------------------------------------
 void BitmapDrawer::add_path(VertexSource& vs,  unsigned path_id,
@@ -823,25 +825,25 @@ bool BitmapDrawer::select_font(const std::string& language,
     return m_pFonts->select_font(language, fontFile, fontName, height, fBold, fItalic);
 }
 
-//---------------------------------------------------------------------------------------
-bool BitmapDrawer::select_raster_font(const std::string& language,
-                                      const std::string& fontFile,
-                                      const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
-{
-    return m_pFonts->select_raster_font(language, fontFile, fontName,
-                                         height, fBold, fItalic);
-}
-
-//---------------------------------------------------------------------------------------
-bool BitmapDrawer::select_vector_font(const std::string& language,
-                                      const std::string& fontFile,
-                                      const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
-{
-    return m_pFonts->select_vector_font(language, fontFile, fontName,
-                                         height, fBold, fItalic);
-}
+////---------------------------------------------------------------------------------------
+//bool BitmapDrawer::select_raster_font(const std::string& language,
+//                                      const std::string& fontFile,
+//                                      const std::string& fontName, double height,
+//                                      bool fBold, bool fItalic)
+//{
+//    return m_pFonts->select_raster_font(language, fontFile, fontName,
+//                                         height, fBold, fItalic);
+//}
+//
+////---------------------------------------------------------------------------------------
+//bool BitmapDrawer::select_vector_font(const std::string& language,
+//                                      const std::string& fontFile,
+//                                      const std::string& fontName, double height,
+//                                      bool fBold, bool fItalic)
+//{
+//    return m_pFonts->select_vector_font(language, fontFile, fontName,
+//                                         height, fBold, fItalic);
+//}
 
 //---------------------------------------------------------------------------------------
 void BitmapDrawer::draw_glyph(double x, double y, unsigned int ch)

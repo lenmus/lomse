@@ -34,6 +34,7 @@
 #include "lomse_presenter.h"
 #include "lomse_import_options.h"
 #include "lomse_graphic_view.h"
+#include "lomse_bitmap_drawer.h"
 
 #include "lomse_reader.h"
 #include "lomse_events.h"
@@ -77,6 +78,20 @@ Presenter* LomseDoorway::new_document(int viewType)
 {
     PresenterBuilder builder(*m_pLibraryScope);
     return builder.new_document(viewType);
+}
+
+//---------------------------------------------------------------------------------------
+Presenter* LomseDoorway::new_document(int viewType, Drawer* screenDrawer,
+                                      Drawer* printDrawer)
+{
+    if (screenDrawer == nullptr)
+        screenDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
+    if (printDrawer == nullptr)
+        printDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
+    PresenterBuilder builder(*m_pLibraryScope);
+    return builder.new_document(viewType, screenDrawer, printDrawer);
 }
 
 //---------------------------------------------------------------------------------------

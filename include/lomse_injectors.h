@@ -291,13 +291,21 @@ public:
     static Document* inject_Document(LibraryScope& libraryScope,
                                      ostream& reporter = cout);
     static BitmapDrawer* inject_BitmapDrawer(LibraryScope& libraryScope);
+
     static View* inject_View(LibraryScope& libraryScope, int viewType);
+    static View* inject_View(LibraryScope& libraryScope, int viewType,
+                             Drawer* screenDrawer, Drawer* printDrawer);
 
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
                                          WpDocument wpDoc, View* pView,
                                          DocCommandExecuter* pExec);
+
     static Presenter* inject_Presenter(LibraryScope& libraryScope,
                                        int viewType, Document* pDoc);
+    static Presenter* inject_Presenter(LibraryScope& libraryScope,
+                                       int viewType, Document* pDoc,
+                                       Drawer* screenDrawer, Drawer* printDrawer);
+
     static Task* inject_Task(int taskType, Interactor* pIntor);
     static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope,
                                            MidiServerBase* pSoundServer);

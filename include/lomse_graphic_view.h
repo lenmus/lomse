@@ -138,7 +138,7 @@ public:
     virtual ~ViewFactory();
 
     static View* create_view(LibraryScope& libraryScope, int viewType,
-                             Drawer* pDrawer, BitmapDrawer* pPrintDrawer);
+                             Drawer* pDrawer, Drawer* pPrintDrawer);
 
 };
 

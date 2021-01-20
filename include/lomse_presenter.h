@@ -84,6 +84,11 @@ public:
     Presenter* new_document(int viewType, const std::string& content="",
                             ostream& reporter = cout,
                             int format=Document::k_format_lmd);
+    Presenter* new_document(int viewType, Drawer* screenDrawer, Drawer* printDrawer,
+                            const std::string& content="",
+                            ostream& reporter = cout,
+                            int format=Document::k_format_lmd);
+
     Presenter* open_document(int viewType, const std::string& filename,
                              ostream& reporter = cout);
     Presenter* open_document(int viewType, LdpReader& reader,

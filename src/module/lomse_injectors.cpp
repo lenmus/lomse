@@ -107,7 +107,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     if (!m_pDoorway)
     {
         m_pNullDoorway = LOMSE_NEW LomseDoorway();
-        m_pNullDoorway->init_library(k_pix_format_rgba32, 96, false);
+        m_pNullDoorway->init_library(k_pix_format_rgba32, 96);
         m_pDoorway = m_pNullDoorway;
     }
 }
@@ -392,6 +392,13 @@ View* Injector::inject_View(LibraryScope& libraryScope, int viewType)
 }
 
 //---------------------------------------------------------------------------------------
+View* Injector::inject_View(LibraryScope& libraryScope, int viewType,
+                            Drawer* screenDrawer, Drawer* printDrawer)
+{
+    return ViewFactory::create_view(libraryScope, viewType, screenDrawer, printDrawer);
+}
+
+//---------------------------------------------------------------------------------------
 Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
                                         WpDocument wpDoc, View* pView,
                                         DocCommandExecuter* pExec)
@@ -406,6 +413,20 @@ Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
                                       int viewType, Document* pDoc)
 {
     View* pView = Injector::inject_View(libraryScope, viewType);
+    DocCommandExecuter* pExec = Injector::inject_DocCommandExecuter(pDoc);
+    SpDocument spDoc(pDoc);
+    WpDocument wpDoc(spDoc);
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, wpDoc, pView, pExec);
+    pView->set_interactor(pInteractor);
+    return LOMSE_NEW Presenter(spDoc, pInteractor, pExec);
+}
+
+//---------------------------------------------------------------------------------------
+Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
+                                      int viewType, Document* pDoc,
+                                      Drawer* screenDrawer, Drawer* printDrawer)
+{
+    View* pView = Injector::inject_View(libraryScope, viewType, screenDrawer, printDrawer);
     DocCommandExecuter* pExec = Injector::inject_DocCommandExecuter(pDoc);
     SpDocument spDoc(pDoc);
     WpDocument wpDoc(spDoc);
