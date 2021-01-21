@@ -486,14 +486,14 @@ public:
         Define the attributes for current open path.
     */
     //@{
-    /** Set the color to be used for current open path. Color can have alpha value,
+    /** Set the color to fill current open path. Color can have alpha value,
         if transparency is desired. */
     virtual void fill(Color color) = 0;
 
     /** Do not fill current open path. */
     virtual void fill_none() = 0;
 
-    /** Set the color to be used for current open path. Color can have alpha value,
+    /** Set the color to stroke current open path. Color can have alpha value,
         if transparency is desired. */
     virtual void stroke(Color color) = 0;
 
@@ -521,7 +521,7 @@ public:
         pDrawer->stroke_width(15.0);
         Color white(255, 255, 255);
         Color dark(40, 30, 20);
-        dark.a = 45;        //set alpha channel. Could have been
+        dark.a = 45;        //set alpha channel. It could have been included in color creation
         Color light(dark);
         light = light.gradient(white, 0.2);
         pDrawer->gradient_color(white, 0.0, 0.1);
@@ -624,11 +624,12 @@ public:
     //@}    //Text redering methods
 
 
-    /** @name Copy/blend a bitmap
-        Methods to render a bitmap. They are somehow equivalent to the "image" SVG
-        element.
+    /** @name Render a bitmap
     */
     //@{
+    //Not currently used by Lomse. Probably should be removed
+///@cond INTERNALS
+    #if (0)
     /** Render a full bitmap.
         @param img  The struct RenderingBuffer containing the pointer to the bitmap
             and its dimensions in pixels.
@@ -652,8 +653,11 @@ public:
     virtual void copy_bitmap(RenderingBuffer& bmap,
                              Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                              UPoint dest) = 0;
+    #endif
+///@endcond
 
-    /** Render part of a bitmap.
+    /** Render part of a bitmap. It is somehow equivalent to the "image" SVG
+        element.
         @param bmap  The struct RenderingBuffer containing the pointer to the bitmap
             and its dimensions in pixels.
         @param hasAlpha   @TRUE when the bitmap has alpha channel information.
@@ -673,7 +677,7 @@ public:
                              LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
                              EResamplingQuality resamplingMode,
                              double alpha=1.0) = 0;
-    //@}    //Copy/blend a bitmap
+    //@}    //Render a bitmap
 
 
 

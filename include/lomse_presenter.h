@@ -90,8 +90,10 @@ public:
                             int format=Document::k_format_lmd);
 
     Presenter* open_document(int viewType, const std::string& filename,
+                             Drawer* screenDrawer, Drawer* printDrawer,
                              ostream& reporter = cout);
     Presenter* open_document(int viewType, LdpReader& reader,
+                             Drawer* screenDrawer, Drawer* printDrawer,
                              ostream& reporter = cout);
 
 };

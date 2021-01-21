@@ -201,10 +201,12 @@ public:
 
     //copy/blend a bitmap
     //-----------------------
+    #if (0)
     void copy_bitmap(RenderingBuffer& bmap, UPoint pos) override;
     void copy_bitmap(RenderingBuffer& bmap,
                      Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                      UPoint dest) override;
+    #endif
     void draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
                      Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                      LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,

@@ -256,16 +256,11 @@ void MyFrame::initialize_lomse()
         //the pixel format
         int pixel_format = k_pix_format_rgb24;  //RGB 24bits
 
-        //the desired resolution. For Linux and Windows 96 pixels per inch works ok.
-        int resolution = 96;    //96 ppi
-
-        //Normal y axis direction is 0 coordinate at top and increase downwards. You
-        //must specify if you would like just the opposite behaviour. For Windows and
-        //Linux the default behaviour is the right behaviour.
-        bool reverse_y_axis = false;
+        //the desired resolution: 96 pixels per inch
+        int resolution = 96;
 
     //initialize the library with these values
-    m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 
 //---------------------------------------------------------------------------------------

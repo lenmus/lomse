@@ -69,9 +69,7 @@ typedef void (*pt2NotifyFunction)(void*, SpEventInfo);
 typedef void (*pt2RequestFunction)(void*, Request*);
 
 //---------------------------------------------------------------------------------------
-// LomseDoorway
-/**
-    LomseDoorway is the main interface with the Lomse library. This class represent
+/** %LomseDoorway is the main interface with the Lomse library. This class represent
     the gate between Lomse and your application:
     - For your application it is entry point for interacting with the library: the way
         for configuring Lomse, for accessing Lomse version information and for
@@ -102,7 +100,9 @@ public:
                           std::ostream* forensicLogStream = nullptr);
     virtual ~LomseDoorway();
 
-    //library initialization and configuration
+    /** @name Library initialization and configuration  */
+    //@{
+
 	/** Before using the library, method init_library() **must** be invoked for
         initializing the library and providing the necessary information. As Lomse
         renders scores and documents on a bitmap it is necessary to inform Lomse about
@@ -112,7 +112,7 @@ public:
         @param pixel_format A value from the global enumeration type #EPixelFormat
         @param ppi The display resolution in pixels per inch (e.g. 96). Lomse uses
             vectorial graphics for all, typography included and, thus, screen
-            resolution is no required as your application can always scale the image
+            resolution is no required and your application can always scale the image
             to as much resolution as you like. The real resolution is determined
             by the provided bitmap size (pixels) to be used as rendering buffer.
             Nevertheless, Lomse requires a screen resolution value to adjust
@@ -257,7 +257,162 @@ public:
 	*/
     void set_default_fonts_path(const std::string& fontsPath);
 
-    //playback related
+	/** Returns settings for rendering bitmap resolution. This is the value set
+        when method init_library() was called.    */
+    inline double get_screen_ppi() { return m_platform.screen_ppi; }
+
+	/** Returns settings for rendering bitmap format. This is the value set
+        when method init_library() was called. The meaning of the returned value is
+        given by enum #EPixelFormat.    */
+    inline int get_pixel_format() { return m_platform.pixel_format; }
+
+    //@}    //Library initialization and configuration
+
+
+
+     /** @name Document creation methods */
+    //@{
+
+    //common operations on documents
+    /** Create a new empty document, as well as a View for rendering it and all
+        additional components (Interactor, Presenter, etc.) necessary for managing this
+        document and interacting with it. Optionally, default BitmapDrawer objects
+        used by Lomse can be replaced by any Drawer objects created by your
+        application.
+
+        @param viewType     The view type that will be used for rendering this document.
+        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+
+        @return A pointer to the Presenter to be used for interacting with this document.
+
+        @attention As Presenter ownership is transferred to user application, you have
+            to take care of deleting the Presenter when no longer needed. Deleting the
+            Presenter will automatically cause deletion of all MVC involved objects:
+            the Document, all existing Views and Interactors, etc., as well as any
+            passed Drawer objects.
+
+        @see @subpage page-render-overview, @subpage page-user-drawers
+	*/
+    Presenter* new_document(int viewType, Drawer* screenDrawer=nullptr,
+                            Drawer* printDrawer=nullptr);
+
+
+	/** Create a new document initialized with the passed content.
+        Also creates a View for rendering it as well as all additional
+        components (Interactor, Presenter, etc.) necessary for managing this document
+        and interacting with it. Optionally, default BitmapDrawer objects
+        used by Lomse can be replaced by any Drawer objects created by your
+        application.
+
+        @param viewType The view type that will be used for rendering this document.
+        @param source A string with the content for the document to create.
+        @param format A value specifying the format for the source content. Valid values
+            are defined in Document class. Valid values are:
+            - Document::k_format_ldp = 0, for LenMus documents in LDP syntax.
+            - Document::k_format_lmd = 1, for LenMus documents in XML syntax (LMD format).
+            - Document::k_format_mxl = 2, for MusicXML documents
+        @param reporter The ostream to be used for reporting any errors. By default,
+            all errors will be send to cout.
+        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+
+        @return A pointer to the Presenter to be used for interacting with this document.
+
+        @attention As Presenter ownership is transferred to user application, you have to
+            take care of deleting the Presenter when no longer needed. Deleting the
+            Presenter will automatically cause deletion of all MVC involved objects:
+            the Document, all existing Views and Interactors, etc., as well as any
+            passed Drawer objects.
+
+        @see @subpage page-render-overview
+	*/
+    Presenter* new_document(int viewType, const std::string& source, int format,
+                            std::ostream& reporter = std::cout,
+                            Drawer* screenDrawer=nullptr, Drawer* printDrawer=nullptr);
+
+	/** Open a document. Its content is read from a file.
+        Also creates a View for rendering it as well as all additional
+        components (Interactor, Presenter, etc.) necessary for managing this document and
+        interacting with it. Optionally, default BitmapDrawer objects
+        used by Lomse can be replaced by any Drawer objects created by your
+        application. Optionally, default BitmapDrawer objects
+        used by Lomse can be replaced by any Drawer objects created by your
+        application.
+
+        @param viewType The view type that will be used for rendering this document.
+        @param filename A string with the absolute path to the file containing the document.
+        @param reporter The ostream to be used for reporting any errors. By default, all
+            errors will be send to cout.
+        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+
+        @return A pointer to the Presenter to be used for interacting with this document.
+
+        @attention As Presenter ownership is transferred to user application, you have to
+            take care of deleting the Presenter when no longer needed. Deleting the
+            Presenter will automatically cause deletion of all MVC involved objects:
+            the Document, all existing Views and Interactors, etc., as well as any
+            passed Drawer objects.
+
+        @see @subpage page-render-overview
+	*/
+    Presenter* open_document(int viewType, const std::string& filename,
+                             std::ostream& reporter = std::cout,
+                             Drawer* screenDrawer=nullptr, Drawer* printDrawer=nullptr);
+
+	/** Open a document. Its content is provided by an LdpReader object.
+        Also creates a View for rendering it as well as all additional
+        components (Interactor, Presenter, etc.) necessary for managing this document and
+        interacting with it. Optionally, default BitmapDrawer objects
+        used by Lomse can be replaced by any Drawer objects created by your
+        application.
+
+        @param viewType The view type that will be used for rendering this document.
+        @param reader An object of class LdpReader that will be used for reading the
+            content of the document.
+        @param reporter The ostream to be used for reporting any errors. By default,
+            all errors will be send to cout.
+        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
+            is transferred to the View. You must not delete it. If not specified or
+            @nullptr a BitmapDrawer will be used.
+
+        @return A pointer to the Presenter to be used for interacting with this document.
+
+        @attention As Presenter ownership is transferred to user application, you have
+            to take care of deleting the Presenter when no longer needed. Deleting the
+            Presenter will automatically cause deletion of all MVC involved objects:
+            the Document, all existing Views and Interactors, etc., as well as any
+            passed Drawer objects.
+
+        @see @subpage page-render-overview
+	*/
+    Presenter* open_document(int viewType, LdpReader& reader,
+                             std::ostream& reporter = std::cout,
+                             Drawer* screenDrawer=nullptr, Drawer* printDrawer=nullptr);
+
+    //@}    //Document creation methods
+
+
+
+     /** @name Playback related methods  */
+    //@{
+
 	/** This method is used for informing Lomse about the metronome control to use to
         determine tempo in playback.
         By default, Lomse takes metronome settings from ?. But your application
@@ -281,167 +436,12 @@ public:
 	*/
     ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
 
-    //common operations on documents
-	/** Creates a empty document.
-        Also creates a View for rendering it as well as all additional
-        components (Interactor, Presenter, etc.) necessary for managing this document and
-        interacting with it.
-
-        @param viewType The view type that will be used for rendering this document.
-
-        @return A pointer to the Presenter to be used for interacting with this document.
-
-        @attention As Presenter ownership is transferred to user application, you have
-            to take care of deleting the Presenter when no longer needed. Deleting the
-            Presenter will automatically cause deletion of all MVC involved objects:
-            the Document, all existing Views and Interactors, etc.
-
-        @see @subpage page-render-overview
-	*/
-    Presenter* new_document(int viewType);      //assumes BitmapDrawer for screen and for printing
-
-    /** Creates a empty document, as well as a View for rendering it and all additional
-        components (Interactor, Presenter, etc.) necessary for managing this document and
-        interacting with it. And allows to use any Drawer objects created by your
-        application.
-
-        @param viewType     The view type that will be used for rendering this document.
-        @param screenDrawer  The Drawer to use as main drawer. Ownership of this Drawer
-            is transferred to the View. You must not delete it.
-        @param printDrawer   The Drawer to use for printing. Ownership of this Drawer
-            is transferred to the View. You must not delete it. If not specified or
-            @nullptr a BitmapDrawer will be used.
-
-        @return A pointer to the Presenter to be used for interacting with this document.
-
-        @attention As Presenter ownership is transferred to user application, you have
-            to take care of deleting the Presenter when no longer needed. Deleting the
-            Presenter will automatically cause deletion of all MVC involved objects:
-            the Document, all existing Views and Interactors, etc., as well as any
-            passed Drawer objects.
-
-        @see @subpage page-render-overview,
-	*/
-
-    //Presenter* new_document(int viewType, int drawerType=k_drawer_bitmap, int printDrawer=k_drawer_bitmap);
-    Presenter* new_document(int viewType, Drawer* screenDrawer,
-                            Drawer* printDrawer=nullptr);
+    //@}    //Playback related methods
 
 
-	/** Create a new document initialized with the passed content.
-        Also creates a View for rendering it as well as all additional
-        components (Interactor, Presenter, etc.) necessary for managing this document and
-        interacting with it.
 
-        @param viewType The view type that will be used for rendering this document.
-        @param source A string with the content for the document to create.
-        @param format A value specifying the format for the source content. Valid values
-            are defined in Document class. Valid values are:
-            - Document::k_format_ldp = 0, for LenMus documents in LDP syntax.
-            - Document::k_format_lmd = 1, for LenMus documents in XML syntax (LMD format).
-            - Document::k_format_mxl = 2, for MusicXML documents
-        @param reporter The ostream to be used for reporting any errors. By default,
-            all errors will be send to cout.
-
-        @return A pointer to the Presenter to be used for interacting with this document.
-
-        @attention As Presenter ownership is transferred to user application, you have to
-            take care of deleting the Presenter when no longer needed. Deleting the
-            Presenter will automatically cause deletion of all MVC involved objects:
-            the Document, all existing Views and Interactors, etc.
-
-        @see @subpage page-render-overview
-	*/
-    Presenter* new_document(int viewType, const std::string& source, int format,
-                            std::ostream& reporter = std::cout);
-
-	/** Open a document. Its content is read from a file.
-        Also creates a View for rendering it as well as all additional
-        components (Interactor, Presenter, etc.) necessary for managing this document and
-        interacting with it.
-
-        @param viewType The view type that will be used for rendering this document.
-        @param filename A string with the absolute path to the file containing the document.
-        @param reporter The ostream to be used for reporting any errors. By default, all
-            errors will be send to cout.
-
-        @return A pointer to the Presenter to be used for interacting with this document.
-
-        @attention As Presenter ownership is transferred to user application, you have to
-            take care of deleting the Presenter when no longer needed. Deleting the
-            Presenter will automatically cause deletion of all MVC involved objects:
-            the Document, all existing Views and Interactors, etc.
-
-        @see @subpage page-render-overview
-	*/
-    Presenter* open_document(int viewType, const std::string& filename,
-                             std::ostream& reporter = std::cout);
-
-	/** Open a document. Its content is provided by an LdpReader object.
-        Also creates a View for rendering it as well as all additional
-        components (Interactor, Presenter, etc.) necessary for managing this document and
-        interacting with it.
-
-        @param viewType The view type that will be used for rendering this document.
-        @param reader An object of class LdpReader that will be used for reading the
-            content of the document.
-        @param reporter The ostream to be used for reporting any errors. By default,
-            all errors will be send to cout.
-
-        @return A pointer to the Presenter to be used for interacting with this document.
-
-        @attention As Presenter ownership is transferred to user application, you have
-            to take care of deleting the Presenter when no longer needed. Deleting the
-            Presenter will automatically cause deletion of all MVC involved objects:
-            the Document, all existing Views and Interactors, etc.
-
-        @see @subpage page-render-overview
-	*/
-    Presenter* open_document(int viewType, LdpReader& reader,
-                             std::ostream& reporter = std::cout);
-
-    //access to global objects
-
-	/** Get the pointer to an object of class LibraryScope. This object gives access to
-        all Lomse global functions and information.    */
-    inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
-
-    //access to platform info
-
-	/** Returns current settings for rendering bitmap resolution. This is the value set
-        in last call to method init_library().    */
-    inline double get_screen_ppi() { return m_platform.screen_ppi; }
-
-	/** Returns current settings for rendering bitmap format. This is the value set
-        in last call to method init_library(). The meaning of the returned value is
-        given by enum #EPixelFormat.    */
-    inline int get_pixel_format() { return m_platform.pixel_format; }
-
-    //options
-
-	/** Returns the current options object with the settings to use for dealing and
-        fixing errors and malformed
-        MusicXML files. The import options can be changed multiple times, whenever
-        it is needed. For example:
-
-        @code
-            LomseDoorway* pLomse = ...
-            MusicXmlOptions* opt = pLomse->get_musicxml_options();
-            opt->fix_beams(true);
-            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
-                                                          "my_score.xml");
-            ...
-            opt->fix_beams(false);
-            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
-                                                          "other_score.xml");
-
-        @endcode
-
-        @see class @ref MusicXmlOptions
-	*/
-    MusicXmlOptions* get_musicxml_options();
-
-    //library info
+     /** @name Library information  */
+    //@{
 
 	/** Returns Lomse version as string "major.minor.patch" e.g., "0.17.20"    */
     std::string get_version_string();
@@ -467,6 +467,40 @@ public:
 	/** Returns Lomse patch version as integer number. For instance, if version string
         is "0.17.20" this method will return 20.    */
     int get_version_patch();
+
+    //@}    //Library information
+
+
+     /** @name Other methods  */
+    //@{
+
+	/** Returns the current options object with the settings to use for dealing and
+        fixing errors and malformed
+        MusicXML files. The import options can be changed multiple times, whenever
+        it is needed. For example:
+
+        @code
+            LomseDoorway* pLomse = ...
+            MusicXmlOptions* opt = pLomse->get_musicxml_options();
+            opt->fix_beams(true);
+            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
+                                                          "my_score.xml");
+            ...
+            opt->fix_beams(false);
+            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
+                                                          "other_score.xml");
+
+        @endcode
+
+        @see class @ref MusicXmlOptions
+	*/
+    MusicXmlOptions* get_musicxml_options();
+
+	/** Get the pointer to an object of class LibraryScope. This object gives access to
+        all Lomse global functions and information.    */
+    inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
+
+    //@}    //Other methods
 
 
 ///@cond INTERNAL       //excluded from public API. Only for internal use.

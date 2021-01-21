@@ -194,23 +194,18 @@ void initialize_lomse()
     // using the Lomse library you MUST specify which bitmap formap to use.
     //
     // For native MS Windows applications you can use, for instance, pixel format
-    // BGRA, 32 bits. Screen resolution, in MS Windows, is 96 pixels per inch.
+    // BGRA, 32 bits.
     // Let's define the requiered information:
 
         //the pixel format
         int pixel_format = k_pix_format_bgra32;  //BGRA, 32 bits
         m_bpp = 32;                              //32 bits per pixel
 
-        //the desired resolution. For MS Windows use 96 pixels per inch
-        int resolution = 96;    //96 ppi
-
-        //Lomse default y axis direction is 0 coordinate at top and increases
-        //downwards. You must specify if you would like just the opposite behaviour.
-        //For MS Windows the Lomse default behaviour is the right behaviour.
-        bool reverse_y_axis = false;
+        //the desired resolution: 96 pixels per inch
+        int resolution = 96;
 
     //initialize the Lomse library with these values
-    m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 
 //---------------------------------------------------------------------------------------

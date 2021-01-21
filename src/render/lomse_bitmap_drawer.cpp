@@ -1097,6 +1097,7 @@ void BitmapDrawer::render_existing_paths()
         render();
 }
 
+#if (0)
 //------------------------------------------------------------------------
 void BitmapDrawer::copy_bitmap(RenderingBuffer& bmap, UPoint dest)
 {
@@ -1122,6 +1123,7 @@ void BitmapDrawer::copy_bitmap(RenderingBuffer& bmap,
     AggRectInt r(srcX1, srcY1, srcX2, srcY2);
     m_pRenderer->copy_from(bmap, &r, int(x)-srcX1, int(y)-srcY1);
 }
+#endif
 
 //---------------------------------------------------------------------------------------
 void BitmapDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,

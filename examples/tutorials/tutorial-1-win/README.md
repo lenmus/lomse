@@ -150,13 +150,11 @@ Let's see in detail these steps.
 
 ## <a name="init-lomse" />Initializing the Lomse library
 
-The first interesting line in `WinProc` function is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format to use, the resolution and the y-axis orientation.
+The first interesting line in `WinProc` function is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format and the screen resolution to use.
 
 So, the first thing to do is to decide which bitmap format we are going to use. For MS Windows applications you can use, for instance, pixel format BGRA, 32 bits per pixel, as this is one of the native formats for MS Windows.
 
-Next, we have to decide about resolution. As in our application the scores are going to be shown on screen, we can use a value of 96ppi, typical for MS Windows systems. In a real application, probably you should get this value by invoking some operating system related method to get the screen resolution.
-
-As to the y-axis orientation, Lomse needs to know if your presentation device follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, in our application, we have to inform Lomse that the y-axis follows the standard convention for screens and, therefore, we won't Lomse to reverse it.
+Next, we have to decide about screen resolution. As in our application the scores are going to be shown on screen, we can use a typical value of 96ppi. In a real application, probably you should get this value by invoking some operating system related method to get the screen resolution. In any case, this value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...).
 
 One we have decided on the values to use, let's see the code to initialize Lomse:
 
@@ -169,23 +167,18 @@ void initialize_lomse()
     // using the Lomse library you MUST specify which bitmap formap to use.
     //
     // For native MS Windows applications you can use, for instance, pixel format
-    // BGRA, 32 bits. Screen resolution, in MS Windows, is 96 pixels per inch.
+    // BGRA, 32 bits.
     // Let's define the requiered information:
 
         //the pixel format
         int pixel_format = k_pix_format_bgra32;  //BGRA, 32 bits
         m_bpp = 32;                              //32 bits per pixel
 
-        //the desired resolution. For MS Windows use 96 pixels per inch
-        int resolution = 96;    //96 ppi
-
-        //Lomse default y axis direction is 0 coordinate at top and increases
-        //downwards. You must specify if you would like just the opposite behaviour.
-        //For MS Windows the Lomse default behaviour is the right behaviour.
-        bool reverse_y_axis = false;
+        //the desired resolution: 96 pixels per inch
+        int resolution = 96;
 
     //initialize the Lomse library with these values
-    m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 ```
 

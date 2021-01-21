@@ -1,6 +1,6 @@
 /**
 
-@page page-file-formats File formats supoported by Lomse
+@page page-file-formats File formats supported by Lomse
 
 @tableofcontents
 
@@ -9,12 +9,12 @@
 Lomse supports the following file formats:
 
 - <b>LMS: LenMus Score (.lms extension):</b>
-    Plain txt file containing only a music score writen in LDP language. LDP is the acronym for Spanish <i>Lenguaje De Partituras</i> (<i>Language for music scores</i>). It was the initial language which started LenMus project.
+    Plain txt file containing only a music score written in LDP language. LDP is the acronym for Spanish <i>Lenguaje De Partituras</i> (<i>Language for music scores</i>). It was the initial language which started LenMus project.
 
 - <b>LMD: LenMus Document (.lmd extension):</b>
     Plain XML file containing a full document with headers, paragraphs, images, tables lists, scores, etc. It is similar to an HTML or DocBook file with scores in LDP language (tag \<ldpmusic\>) or MusicXML (tag \<mxlmusic\>)
     
-- <b>MusicXML:  (.xml extension):</b>
+- <b>MusicXML:  (usually .xml extension for uncompressed files or .musicxml for compressed files):</b>
     An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.
 
 
@@ -51,7 +51,7 @@ For more information see the LDP manual at https://lenmus.github.io/ldp/ .
 
 @subsection lmd-format LMD format
 
-As LenMus project evolved, LDP was insuficient as it was necessary to describe not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tag for each format is created. For instance, tag \<ldpmusic\> is used to include LDP scores.
+As LenMus project evolved, LDP was insufficient as it was necessary to describe not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tag for each format is created. For instance, tag \<ldpmusic\> is used to include LDP scores.
 
 @image html lmd-sample-document.png "Image: Rendering of the following LMD document."
 

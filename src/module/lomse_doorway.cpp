@@ -74,13 +74,6 @@ LomseDoorway::~LomseDoorway()
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* LomseDoorway::new_document(int viewType)
-{
-    PresenterBuilder builder(*m_pLibraryScope);
-    return builder.new_document(viewType);
-}
-
-//---------------------------------------------------------------------------------------
 Presenter* LomseDoorway::new_document(int viewType, Drawer* screenDrawer,
                                       Drawer* printDrawer)
 {
@@ -96,26 +89,49 @@ Presenter* LomseDoorway::new_document(int viewType, Drawer* screenDrawer,
 
 //---------------------------------------------------------------------------------------
 Presenter* LomseDoorway::new_document(int viewType, const string& source, int format,
-                                      ostream& reporter)
+                                      ostream& reporter, Drawer* screenDrawer,
+                                      Drawer* printDrawer)
+
 {
+    if (screenDrawer == nullptr)
+        screenDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
+    if (printDrawer == nullptr)
+        printDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.new_document(viewType, source, reporter, format);
+    return builder.new_document(viewType, screenDrawer, printDrawer, source,
+                                reporter, format);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter* LomseDoorway::open_document(int viewType, const string& filename,
-                                       ostream& reporter)
+                                       ostream& reporter, Drawer* screenDrawer,
+                                       Drawer* printDrawer)
 {
+    if (screenDrawer == nullptr)
+        screenDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
+    if (printDrawer == nullptr)
+        printDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.open_document(viewType, filename, reporter);
+    return builder.open_document(viewType, filename, screenDrawer, printDrawer, reporter);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter* LomseDoorway::open_document(int viewType, LdpReader& reader,
-                                       ostream& reporter)
+                                       ostream& reporter, Drawer* screenDrawer,
+                                       Drawer* printDrawer)
 {
+    if (screenDrawer == nullptr)
+        screenDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
+    if (printDrawer == nullptr)
+        printDrawer = Injector::inject_BitmapDrawer(*m_pLibraryScope);
+
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.open_document(viewType, reader, reporter);
+    return builder.open_document(viewType, reader, screenDrawer, printDrawer, reporter);
 }
 
 //---------------------------------------------------------------------------------------
