@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@
 
 #include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_interactor.h"
 #include "lomse_box_system.h"
 #include "private/lomse_internal_model_p.h"
@@ -48,11 +48,13 @@ const int k_splitLineHeight = 2;      //line heigth = 2px
 const Color k_splitLineColor = Color(128, 128, 200);
 
 //---------------------------------------------------------------------------------------
-HalfPageView::HalfPageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
-    : SinglePageView(libraryScope, pDrawer)
+HalfPageView::HalfPageView(LibraryScope& libraryScope, BitmapDrawer* pDrawer,
+                           BitmapDrawer* pPrintDrawer)
+    : SinglePageView(libraryScope, pDrawer, pPrintDrawer)
     , m_fPlaybackMode(false)
     , m_fSplitMode(false)
     , m_pScore(nullptr)
+    , m_pBmpDrawer(pDrawer)
     , m_buf(nullptr)
     , m_vxOrgPlay{0,0}
     , m_vyOrgPlay{0,0}
@@ -75,40 +77,20 @@ bool HalfPageView::is_valid_for_this_view(Document* pDoc)
 //---------------------------------------------------------------------------------------
 void HalfPageView::compute_buffer_split()
 {
-    unsigned char* buf =  m_pRenderBuf->buf();
-    unsigned width = m_pRenderBuf->width();
-    unsigned height = m_pRenderBuf->height();
+    //This only is needed:
+    //- the first time:  (m_buf == nullptr)
+    //- or when a new rendering buffer has been set due to a window resize:
+    //      (width != m_bufWidth || height != m_bufHeight)
+    // but it takes more time to check this than to re-compute the split
 
-    if (buf != nullptr)
-    {
-        if (m_buf == nullptr || width != m_bufWidth)
-        {
-            LOMSE_LOG_DEBUG(Logger::k_mvc, "New buffer: first buffer or different width");
-        }
-        else if (height == m_bufHeight && buf == m_buf)
-            return;
-        else if (buf == m_TopBuf && height == m_usedHeight[0])
-            return;
-        else if (buf == m_BottomBuf && height == m_usedHeight[1])
-            return;
-        else if (height == m_SplitHeight && (buf == m_TopBuf || buf == m_BottomBuf))
-            return;
-        else
-        {
-            LOMSE_LOG_DEBUG(Logger::k_mvc, "New buffer: different height");
-        }
+    //save buffer info
+    m_buf = m_pBmpDrawer->get_rendering_buffer();
+    m_bufWidth = m_pBmpDrawer->get_rendering_buffer_width();
+    m_bufHeight = m_pBmpDrawer->get_rendering_buffer_height();
 
-        //save new buffer info
-        m_buf = buf;
-        m_bufWidth = width;
-        m_bufHeight = height;
-        m_bufStride = m_pRenderBuf->stride();
-
-        //compute window split
-        m_SplitHeight = (m_bufHeight - k_splitLineHeight) / 2;
-        m_BottomBuf = m_buf + ((m_bufHeight + k_splitLineHeight) / 2) * m_bufStride;
-        m_TopBuf = m_buf;
-    }
+    //compute window split
+    m_SplitHeight = (m_bufHeight - k_splitLineHeight) / 2;
+    m_yShiftBottom = (m_bufHeight + k_splitLineHeight) / 2;
 }
 
 //---------------------------------------------------------------------------------------
@@ -127,7 +109,7 @@ void HalfPageView::do_draw_all()
     if (!m_fSplitMode)
     {
         //single page view
-        m_pRenderBuf->attach(m_buf, m_bufWidth, m_bufHeight, m_bufStride);
+        m_pBmpDrawer->set_view_area(m_bufWidth, m_bufHeight, 0, 0);
         GraphicView::draw_all();
     }
     else
@@ -152,13 +134,16 @@ void HalfPageView::do_draw_all()
 //---------------------------------------------------------------------------------------
 void HalfPageView::draw_bottom_window()
 {
-    m_pRenderBuf->attach(m_BottomBuf, m_bufWidth, m_SplitHeight, m_bufStride);
-    m_pDrawer->reset(*m_pRenderBuf, Color(255,255,255));
+    //clear bottom half
+    m_pBmpDrawer->set_view_area(m_bufWidth, m_SplitHeight, 0, m_yShiftBottom);
+    m_pBmpDrawer->reset(Color(255,255,255));
 
+    //determine space occupied by the system
     m_usedHeight[1] = (m_nSys[1] == 0 ? m_SplitHeight
-                                      : unsigned( m_pDrawer->LUnits_to_Pixels(m_height[1]) ));
+                                      : unsigned( m_pBmpDrawer->model_to_device_units(m_height[1]) ));
 
-    m_pRenderBuf->attach(m_BottomBuf, m_bufWidth, m_usedHeight[1], m_bufStride);
+    //trim view area to avoid drawing part of next system
+    m_pBmpDrawer->set_view_area(m_bufWidth, m_usedHeight[1], 0, m_yShiftBottom);
     GraphicView::do_change_viewport(m_vxOrgPlay[1], m_vyOrgPlay[1]);
     GraphicView::draw_all();
 }
@@ -166,21 +151,23 @@ void HalfPageView::draw_bottom_window()
 //---------------------------------------------------------------------------------------
 void HalfPageView::draw_separation_line()
 {
-    unsigned char* buf = m_buf + m_SplitHeight * m_bufStride;
-    m_pRenderBuf->attach(buf, m_bufWidth, k_splitLineHeight, m_bufStride);
-    m_pDrawer->reset(*m_pRenderBuf, k_splitLineColor);
+    m_pBmpDrawer->set_view_area(m_bufWidth, k_splitLineHeight, 0, m_SplitHeight);
+    m_pBmpDrawer->reset(k_splitLineColor);
 }
 
 //---------------------------------------------------------------------------------------
 void HalfPageView::draw_top_window()
 {
-    m_pRenderBuf->attach(m_TopBuf, m_bufWidth, m_SplitHeight, m_bufStride);
-    m_pDrawer->reset(*m_pRenderBuf, Color(255,255,255));
+    //clear top half
+    m_pBmpDrawer->set_view_area(m_bufWidth, m_SplitHeight, 0 , 0);
+    m_pBmpDrawer->reset(Color(255,255,255));
 
+    //determine space occupied by the system
     m_usedHeight[0] = (m_nSys[0] == 0 ? m_SplitHeight
-                                      : unsigned( m_pDrawer->LUnits_to_Pixels(m_height[0]) ));
+                                      : unsigned( m_pBmpDrawer->model_to_device_units(m_height[0]) ));
 
-    m_pRenderBuf->attach(m_TopBuf, m_bufWidth, m_usedHeight[0], m_bufStride);
+    //trim view area to avoid drawing part of next system
+    m_pBmpDrawer->set_view_area(m_bufWidth, m_usedHeight[0], 0, 0);
     GraphicView::do_change_viewport(m_vxOrgPlay[0], m_vyOrgPlay[0]);
     GraphicView::draw_all();
 }
@@ -238,7 +225,7 @@ void HalfPageView::decide_split_or_normal_view()
     if (m_pScore && m_fPlaybackMode)
     {
         //convert buffer height to LUnits
-        LUnits bufHeight = m_pDrawer->Pixels_to_LUnits(m_bufHeight);
+        LUnits bufHeight = m_pBmpDrawer->device_units_to_model( double(m_bufHeight) );
 
         //get maximum system height
         GraphicModel* pGModel = get_graphic_model();
@@ -258,7 +245,7 @@ void HalfPageView::decide_split_or_normal_view()
 
         //Do not split window if width lower than system width
         GmoBoxSystem* pSys = m_pBSP->get_system(0);
-        LUnits bufWidth = m_pDrawer->Pixels_to_LUnits(m_bufWidth);
+        LUnits bufWidth = m_pBmpDrawer->device_units_to_model( double(m_bufWidth) );
         if (bufWidth < pSys->get_width())
             return;
 
@@ -294,13 +281,13 @@ void HalfPageView::decide_systems_to_display()
     GraphicModel* pGModel = get_graphic_model();
     GmoBoxDocPage* pPage = pGModel->get_page(0);
     URect rect = pPage->get_bounds();
-    Pixels pageWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+    Pixels pageWidth = Pixels(m_pBmpDrawer->model_to_device_units(rect.width));
     Pixels left = (pageWidth - int(m_bufWidth)) / 2;
     m_vxOrgPlay[0] = m_vxOrgPlay[1] = left;
 
     //set viewport for first window. Viewport is in pixels
     GmoBoxSystem* pSys = m_pBSP->get_system( m_curSystem );
-    m_vyOrgPlay[m_iPlayWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
+    m_vyOrgPlay[m_iPlayWindow] = Pixels(m_pBmpDrawer->model_to_device_units(pSys->get_origin().y));
 
     //now in top window there are m_nSys[0] systems displayed, starting with m_curSystem
     //display systems in the other window
@@ -404,7 +391,7 @@ void HalfPageView::set_viewport_for_next(int iNextWindow)
 
         //display m_nSys[iNextWindow] systems, starting with iFirst
         GmoBoxSystem* pSys = m_pBSP->get_system(iFirst);
-        m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
+        m_vyOrgPlay[iNextWindow] = Pixels(m_pBmpDrawer->model_to_device_units(pSys->get_origin().y));
         LOMSE_LOG_DEBUG(Logger::k_mvc, "Display system=%d in window=%d", iFirst, iNextWindow);
     }
     else
@@ -413,7 +400,7 @@ void HalfPageView::set_viewport_for_next(int iNextWindow)
         int iLast = m_pBSP->get_num_last_system();
         GmoBoxSystem* pSys = m_pBSP->get_system(iLast);
         LUnits yAfter = pSys->get_origin().y + pSys->get_height() + 2000.0f;    //2cm
-        m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(yAfter);
+        m_vyOrgPlay[iNextWindow] = Pixels(m_pBmpDrawer->model_to_device_units(yAfter));
 
         m_nSys[iNextWindow] = 0;     //nothing displayed
         LOMSE_LOG_DEBUG(Logger::k_mvc, "Clear window=%d, iLast=%d", iNextWindow, iLast);
@@ -437,7 +424,7 @@ void HalfPageView::remove_split()
         LOMSE_LOG_DEBUG(Logger::k_mvc, "Last system is displayed in bottom window");
 
         GmoBoxSystem* pSys = m_pBSP->get_system(m_systems.back());
-        Pixels y = m_pDrawer->LUnits_to_Pixels( pSys->get_origin().y );
+        Pixels y = Pixels(m_pBmpDrawer->model_to_device_units( pSys->get_origin().y ));
         m_vyOrgPlay[0] = y - m_SplitHeight - 10;
         GraphicView::do_change_viewport(m_vxOrgPlay[0], m_vyOrgPlay[0]);
     }

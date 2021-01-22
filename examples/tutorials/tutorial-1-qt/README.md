@@ -293,9 +293,7 @@ void MainWindow::create_menu()
 
 ## <a name="init-lomse">Initializing the Lomse library
 
-The interesting part in `MainWindow` constructor is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format to use, and about other related parameters that are platform dependent. As explained, for this Qt application I will use bitmaps in RGBA, 32 bits format (Lomse format k_pix_format_rgba32). Apart of specifying the bitmap format to use, Lomse needs to know the resolution to use and the y-axis orientation. In our application, the scores are going to be shown on screen. Therefore, we can use a value of 96ppi, typical for Linux and Windows systems. In a real application, probably you should get this value by invoking some operating system related methods.
-
-As to the y-axis orientation, Lomse needs to know if your presentation device follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, in our application, we have to inform Lomse that the y-axis follows the standard convention for screens and, therefore, we won't Lomse to reverse it.
+The interesting part in `MainWindow` constructor is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format to use, and about other related parameters that are platform dependent. As explained, for this Qt application I will use bitmaps in RGBA, 32 bits format (Lomse format k_pix_format_rgba32). Apart of specifying the bitmap format to use, Lomse needs to know the screen resolution to use. This value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...). Therefore, we can use a value of 96ppi, typical for Linux and Windows systems. In a real application, probably you should get this value by invoking some operating system related methods.
 
 One we have decided on the values to use, let's write the code:
 
@@ -305,16 +303,11 @@ void MainWindow::initialize_lomse()
     //the pixel format
     int pixel_format = k_pix_format_rgba32;
 
-    //the desired resolution. For Linux and Windows 96 pixels per inch works ok.
+    //the desired resolution: 96 pixels per inch
     int resolution = 96;    //96 ppi
 
-    //Normal y axis direction is 0 coordinate at top and increase downwards. You
-    //must specify if you would like just the opposite behavior. For Windows and
-    //Linux the default behavior is the right behavior.
-    bool reverse_y_axis = false;
-
     //Now, initialize the library with these values
-    m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 ```
 

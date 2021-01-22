@@ -260,29 +260,9 @@ void MyFrame::create_menu()
 
 The interesting part in `MyFrame` constructor is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format to use, and about other related parameters that are platform dependent. As explained, for wxWidgets applications I've found that using a wxImage as bitmap buffer is a good strategy, as <tt>wxImage</tt> is a platform independent class and contains a buffer for a bitmap in RGB, 24 bits format.
 
-Apart of specifying the bitmap format to use, Lomse needs to know the resolution to use and the y-axis orientation. In our application, the scores are going to be shown on screen. Therefore, we can use a value of 96ppi, typical for Linux and Windows systems. In a real application, probably you should get this value by invoking some operating system related methods (i.e. `wxDC::GetPPI()` method).
-
-As to the y-axis orientation, Lomse needs to know if your presentation device follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, in our application, we have to inform Lomse that the y-axis follows the standard convention for screens and, therefore, we won't Lomse to reverse it.
+Next, we have to decide about screen resolution. As in our application the scores are going to be shown on screen, we can use a typical value of 96ppi. In a real application, probably you should get this value by invoking some operating system related method to get the screen resolution. In any case, this value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...).
 
 One we have decided on the values to use, let's write the code:
-
-```c++
-//the pixel format
-int pixel_format = k_pix_format_rgb24;  //RGB 24bits
-
-//the desired resolution. For Linux and Windows 96 pixels per inch works ok.
-int resolution = 96;    //96 ppi
-
-//Normal y axis direction is 0 coordinate at top and increase downwards. You
-//must specify if you would like just the opposite behavior. For Windows and
-//Linux the default behavior is the right behavior.
-bool reverse_y_axis = false;
-
-//initialize the library with these values
-m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
-```
-
-With this, we have finished Lomse initialization. Here is the full code:
 
 ```c++
 void MyFrame::initialize_lomse()
@@ -306,16 +286,11 @@ void MyFrame::initialize_lomse()
         //the pixel format
         int pixel_format = k_pix_format_rgb24;  //RGB 24bits
 
-        //the desired resolution. For Linux and Windows 96 pixels per inch works ok.
+        //the desired resolution: 96 pixels per inch
         int resolution = 96;    //96 ppi
 
-        //Normal y axis direction is 0 coordinate at top and increase downwards. You
-        //must specify if you would like just the opposite behavior. For Windows and
-        //Linux the default behavior is the right behavior.
-        bool reverse_y_axis = false;
-
     //initialize the library with these values
-    m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 ```
 

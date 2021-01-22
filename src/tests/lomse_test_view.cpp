@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,7 +37,7 @@
 #include "private/lomse_document_p.h"
 #include "lomse_graphic_view.h"
 #include "lomse_doorway.h"
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_interactor.h"
 
 using namespace UnitTest;
@@ -58,7 +58,7 @@ public:
     MyDoorway()
         : LomseDoorway()
     {
-        init_library(k_pix_format_rgba32, 96, false);
+        init_library(k_pix_format_rgba32, 96);
     }
     virtual ~MyDoorway() {}
 
@@ -83,8 +83,8 @@ public:
 class MyVerticalView : public VerticalBookView
 {
 public:
-    MyVerticalView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
-        : VerticalBookView(libraryScope, pDrawer)
+    MyVerticalView(LibraryScope& libraryScope, BitmapDrawer* pDrawer)
+        : VerticalBookView(libraryScope, pDrawer, nullptr)
     {
     }
     virtual ~MyVerticalView() {}
@@ -149,11 +149,11 @@ SUITE(GraphicViewTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
-        RenderingBuffer rbuf;
-        pView->set_rendering_buffer(&rbuf);
+        unsigned char buf[400];
+        pView->set_rendering_buffer(buf, 10, 10);
         pView->redraw_bitmap();
 
         //page top-left corner is placed, in vertical book view, at (0+, 0+) pixels
@@ -170,11 +170,11 @@ SUITE(GraphicViewTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
-        RenderingBuffer rbuf;
-        pView->set_rendering_buffer(&rbuf);
+        unsigned char buf[57600];
+        pView->set_rendering_buffer(buf, 120, 120);
         pView->redraw_bitmap();
 
         VPoint screen(100, 100);
@@ -210,7 +210,7 @@ SUITE(GraphicViewTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
@@ -221,7 +221,7 @@ SUITE(GraphicViewTest)
         double vx = 0.0;
         double vy = 0.0;
         int iPage = 0;
-        pIntor->model_point_to_screen(&vx, &vy, iPage);
+        pIntor->model_point_to_device(&vx, &vy, iPage);
         Pixels x = Pixels(vx);
         Pixels y = Pixels(vy);
 
@@ -239,11 +239,11 @@ SUITE(GraphicViewTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        VerticalBookView* pView = (VerticalBookView*)Injector::inject_View(libraryScope, k_view_vertical_book);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
-        RenderingBuffer rbuf;
-        pView->set_rendering_buffer(&rbuf);
+        unsigned char buf[6400];
+        pView->set_rendering_buffer(buf, 40, 40);
         pView->redraw_bitmap();
 
         //page top-left corner is placed, in vertical book view, at (0+, 0+)
@@ -264,7 +264,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
 
         double xLeft = 10.0;
@@ -283,7 +283,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
 
         double xLeft = 14.0;
@@ -302,7 +302,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
 
         double xLeft = 10.0;
@@ -321,7 +321,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
 
         double xLeft = 14.0;
@@ -340,7 +340,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -364,7 +364,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -388,7 +388,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -416,7 +416,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -444,7 +444,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -467,7 +467,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -490,7 +490,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );
@@ -537,7 +537,7 @@ SUITE(GraphicViewTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        BitmapDrawer* pDrawer = Injector::inject_BitmapDrawer(libraryScope);
         MyVerticalView view(libraryScope, pDrawer);
         list<URect>& pageBounds = view.my_get_page_bounds();
         pageBounds.push_back( URect(0, 0, 100, 200) );

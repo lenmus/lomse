@@ -44,7 +44,7 @@ namespace lomse
 {
 
 //forward declarations
-class ScreenDrawer;
+class BitmapDrawer;
 class GraphicView;
 class GmoBoxSystem;
 
@@ -76,7 +76,7 @@ public:
     inline void hide_caret() { m_fVisible = false; }
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer) override;
+    void on_draw(BitmapDrawer* pDrawer) override;
     URect get_bounds() override { return m_bounds; }
 
     //caret shapes
@@ -105,13 +105,13 @@ public:
     inline bool is_displayed() const { return m_fBlinkStateOn; }
 
 protected:
-    void draw_caret(ScreenDrawer* pDrawer);
+    void draw_caret(BitmapDrawer* pDrawer);
 
-    void draw_caret_as_top_level(ScreenDrawer* pDrawer);
-    void draw_caret_as_block(ScreenDrawer* pDrawer);
-    void draw_caret_as_box(ScreenDrawer* pDrawer);
-    void draw_caret_as_line(ScreenDrawer* pDrawer);
-    void draw_top_level_box(ScreenDrawer* pDrawer);
+    void draw_caret_as_top_level(BitmapDrawer* pDrawer);
+    void draw_caret_as_block(BitmapDrawer* pDrawer);
+    void draw_caret_as_box(BitmapDrawer* pDrawer);
+    void draw_caret_as_line(BitmapDrawer* pDrawer);
+    void draw_top_level_box(BitmapDrawer* pDrawer);
 
 };
 

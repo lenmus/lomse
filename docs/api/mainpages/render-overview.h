@@ -6,9 +6,11 @@
 
 @section mvc-rendering How to render a document
 
-The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for asking for services to the operating system (e.g. creating windows, receiving mouse events, etc.) and for requesting Lomse the appropiate services, such as rendering the document in the windows buffer or handling the passed events.
+The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for asking for services to the operating system (e.g. creating windows, receiving mouse events, etc.) and for requesting Lomse the appropriate services, such as rendering the document in the windows buffer or handling the passed events.
 
-Lomse works by rendering the documents on a bitmap buffer, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:
+As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, Drawer, and implements a specific derived class, BitmapDrawer, that renders on a bitmap. This solution allows any user application to implement its own drawer classes and do all drawing natively without having to use the BitmapDrawer class implemented by Lomse. See @subpage page-user-drawers.
+
+By default, Lomse renders the documents on a bitmap buffer, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:
     -# Create a new empty bitmap when necessary (i.e when the window is created or resized),
     -# Ask Lomse to render the desired portion of the document on this bitmap, and
     -# Copy the bitmap onto the window.
@@ -27,7 +29,7 @@ Lomse MVC model has four components: the ``Model`` (the document), the ``View`` 
 
 - The View object takes care of rendering the document so that it can be displayed by your application. The %View is responsible for providing the rendered document, usually by providing a bitmap, and it is your application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output). The rendering type depends on the specific %View class used. For instance, class GraphicView renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of GraphicView (VerticalBookView, HorizontalBookView, and SingleSystemView).
 
-- A Document can have many View objects. For instance, your application can display two windows, one for presenting a music score as a music sheet, and another window for displaying the same music score but as MusicXML source code. This behaviour can be achived by associating two simultaneous views to the document.
+- A Document can have many View objects. For instance, your application can display two windows, one for presenting a music score as a music sheet, and another window for displaying the same music score but as MusicXML source code. This behavior can be achieved by associating two simultaneous views to the document.
 
 - The Interactor object plays the role of the Controller in the MVC model. Each %View has an associated %Interactor (in fact the %View is owned by the %Interactor). The %Interactor is the interface between your application, the associated %View and the %Document. It is responsible for translating your application requests into commands that manipulate the associated %View and/or the %Document, coordinating all the necessary actions.
 
@@ -40,7 +42,7 @@ The %Presenter and most associated objects are created when your application inv
     Presenter*      m_pPresenter = m_lomse.new_document(...);
 @endcode
 
-Your application will take ownership of the %Presenter and will have to delete it when no longer needed. Deleting the %Presenter will automaticall cause deletion of all MVC involved objets: the %Document, all existing %Views and their %Interactors, selection sets, undo/redo stacks, etc.
+Your application will take ownership of the %Presenter and will have to delete it when no longer needed. Deleting the %Presenter will automatically cause deletion of all MVC involved objects: the %Document, all existing %Views and their %Interactors, selection sets, undo/redo stacks, etc.
 
 By default, when the presented is created a View and its Interactor are created. Method Presenter::get_interactor() provides a [smart pointer](https://en.wikipedia.org/wiki/Smart_pointer) to the desired %Interactor:
 
@@ -149,19 +151,14 @@ LomseDoorway&   m_lomse;        //the Lomse library doorway
 
 The most important aspect to consider to initialize Lomse is the format of the images to be generated. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about:
 
--# the bitmap format to use,
--# the resolution to use (pixels per inch), and
--# the y-axis orientation.
+-# the bitmap format to use, and
+-# the resolution to use (pixels per inch)
 
-Lets start with the y-axis orientation. Lomse needs to know if your presentation device follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). If your application is going to display the documents on screen then the standard convention is follwed and you don't have to reverse the y-axis. Otherwise, you will have to set this parameter as necessary.
+The <b>most important</b> decision is how your application will allocate memory for the rendering buffer and the bitmap format to use, and how this bitmap will be rendered (or converted to a image format to be exported to a file or embedded in a document). Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decisions by analyzing the most convenient and fast method for rendering the bitmaps and to avoid format conversions. Sometimes the options are very limited.
 
-Also Lomse needs to know the resolution to use. If you the scores are going to be displayed on screen, you should use the appropriate screen resolution for the intended device. A value of 96ppi is typical for Linux and Windows systems. But, probably you should get this value by invoking some operating system related methods (i.e. wxDC::GetPPI() method, in wxWidgets framework).
-
-The next and <b>most important</b> decision is how your application will allocate memory for the rendering buffer and the bitmap format to use, and how this bitmap will be rendered (or converted to a image format to be exported to a file or embedded in a document). Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decissions by analyzing the most convenient and fast method for rendering the bitmaps and to avoid format conversions. Sometimes the options are very limited.
-
-One you have decided on the values to use, the code to write is simple:
-
-With this, we have finished Lomse initialization. Here is the full code:
+Once you have decided the most suitable bitmap format to use, the next parameter to decide is the intended screen resolution. This value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...). Otherwise, probably you should get this value by invoking some operating system related methods (i.e. wxDC::GetPPI() method, in wxWidgets framework). 
+            
+With this, we can proceed to initialize Lomse. Here is the full code:
 
 @code
 void MyApp::initialize_lomse()
@@ -172,19 +169,12 @@ void MyApp::initialize_lomse()
     //the desired resolution, e.g.: 96 pixels per inch
     int resolution = 96;
 
-    //For most systems y axis direction is 0 coordinate at top and increases
-    //downwards. This is the this the assumed behaviour unless you 
-    // specify 'reverse_y_axis = true'
-    bool reverse_y_axis = false;    //y increases downwards
-
     //initialize the library with these values
-    m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+    m_lomse.init_library(pixel_format, resolution);
 }
 @endcode
 
-@attention Two important points:
--# The library must be always initialized, even if your application will not use Lomse to render scores, e.g.: uses it only for playback or other. In these cases any values for pixel format, resolution and reverse_y_axis will be valid. But your application will have to invoke the init_library() method. 
--# The library can be safely re-initialized if you would like to change currently defined values.
+@attention The library must be always initialized, even if your application will not use Lomse to render scores (e.g.: uses it only for playback or other), or uses an application specific Drawer class. In these cases any values for pixel format and resolution will be valid. But your application will have to invoke the init_library() method. 
 
 At end of this chapter there are summary cards with information about using Lomse in different frameworks and operating systems. See page @ref page-examples for full application code samples.
 
@@ -256,7 +246,7 @@ This is the typical view used to display scores in e.g. Finale or Sibelius.
 
 <b>Single Page View</b>. View type <i>k_view_single_page</i> is similar to an HTML page having a body of fixed width. All the
 document is rendered in a single page having the required height to contain the full document. Is a kind of %k_view_vertical_book
-but without gaps in the content for separting pages. As with %k_view_vertical_book the user will have to scroll down for advancing.
+but without gaps in the content for separating pages. As with %k_view_vertical_book the user will have to scroll down for advancing.
 
 @image html view-single-page.png "Image: The 'real world' when using a 'k_view_single_page' View"
 
@@ -269,7 +259,7 @@ height, so that only paper width is meaningful and the document has just one pag
 @image html view-free-flow.png "Image: The 'real world' when using a 'k_view_free_flow' View"
 
 
-<b>Half Page View</b>. View type <i>k_view_half_page</i> has a double behaviour. In normal mode (no playback) it behaves as
+<b>Half Page View</b>. View type <i>k_view_half_page</i> has a double behavior. In normal mode (no playback) it behaves as
 SinglePageView, that is the score is rendered on a single page as high as necessary
 to contain all the score (e.g., an HTML page having a body of fixed size).
 But when in playback mode, the bitmap to be rendered in the application window is
@@ -286,7 +276,7 @@ marks and jumps during playback. See HalfPageView for more details.
 
 When Lomse renders the document, it uses a graphic representation of the document defined by the chosen view type. When requesting Lomse to render the document onto your application window it is not expected that Lomse will squeeze all the document pages into that window, but just the specific part of the document that the user wants to visualize, as it is expected that the users can pan and zoom to see different areas of the document.
 
-The portion of the document that is rendered on the bitmap is controlled by the viewport and the scale that your application defines (see @ref page-coordinates-viewport). Initialy, the viewport is set at the top left corner of the view, and it width and height is defined by the bitmap size, scaled by the current scaling factor (initially 1.0).
+The portion of the document that is rendered on the bitmap is controlled by the viewport and the scale that your application defines (see @ref page-coordinates-viewport). Initially, the viewport is set at the top left corner of the view, and it width and height is defined by the bitmap size, scaled by the current scaling factor (initially 1.0).
 
 @image html viewport.png "Image: The 'viewport' and the 'device window'"
 
@@ -294,11 +284,13 @@ The portion of the document that is rendered on the bitmap is controlled by the 
 Your application can use %Interactor specific methods for changing the viewport so that the user can choose what to display and to implement scrolling. 
 See: Interactor::new_viewport(), Interactor::set_viewport_at_page_center(), Interactor::get_viewport(), Interactor::get_view_size().
 
-Also there are methods for adjusting the scaling factor, so that the user can zoom in and out, or adjust the scale so that a whloe page fits in the display. See: Interactor::get_scale(), Interactor::set_scale(), Interactor::zoom_in(), Interactor::zoom_out(), Interactor::zoom_fit_full(), Interactor::zoom_fit_width().
+Also there are methods for adjusting the scaling factor, so that the user can zoom in and out, or adjust the scale so that a whole page fits in the display. See: Interactor::get_scale(), Interactor::set_scale(), Interactor::zoom_in(), Interactor::zoom_out(), Interactor::zoom_fit_full(), Interactor::zoom_fit_width().
 
 As these concepts are common and widely used in computer graphics theory, I will not enter here into more details, but your application have full control of what to render on the bitmap passed to Lomse as rendering buffer.
 
 You have also the possibility of defining a view clip area so that only part of the passed rendering buffer will be used by Lomse. See Interactor::set_view_area().
+
+
 
 
 
@@ -324,12 +316,8 @@ Lomse library initialization
 	//pixel format RGBA, 32 bits 
 	int pixel_format = k_pix_format_rgba32;
 
-	//Lomse default y axis direction is 0 coordinate at top and increases
-	//downwards. For Qt the Lomse default behaviour is the right behaviour.
-	bool reverse_y_axis = false;
-
 	//initialize the Lomse library with these values
-	m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+	m_lomse.init_library(pixel_format, resolution);
 
 
 Creating the rendering buffer
@@ -373,12 +361,8 @@ Lomse library initialization
 	//pixel format RGB 24bits 
 	int pixel_format = k_pix_format_rgb24;
 
-	//Lomse default y axis direction is 0 coordinate at top and increases
-	//downwards. For wxWidgets the Lomse default behaviour is the right behaviour.
-	bool reverse_y_axis = false;
-
 	//initialize the Lomse library with these values
-	m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+	m_lomse.init_library(pixel_format, resolution);
 
 
 Creating the rendering buffer
@@ -423,12 +407,8 @@ Lomse library initialization
 	//pixel format
 	int pixel_format = k_pix_format_rgba32;
 
-	//Lomse default y axis direction is 0 coordinate at top and increases
-	//downwards. For JUCE the Lomse default behaviour is the right behaviour.
-	bool reverse_y_axis = false;
-
 	//initialize the Lomse library with these values
-	m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+	m_lomse.init_library(pixel_format, resolution);
 
 
 Creating the rendering buffer
@@ -480,12 +460,8 @@ Lomse library initialization
     determine_suitable_bitmap_format();
 	int pixel_format = m_format;
 
-	//Lomse default y axis direction is 0 coordinate at top and increases
-	//downwards. For X11 the Lomse default behaviour is the right behaviour.
-	bool reverse_y_axis = false;
-
 	//initialize the Lomse library with these values
-	m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+	m_lomse.init_library(pixel_format, resolution);
 
 
 Creating the rendering buffer
@@ -533,7 +509,7 @@ Paint event
 
 @subsection page-render-overview-windows Using Lomse in MS Windows
 
-My knowledge of using the Microsoft Windows API is nullptr. In other platforms normally your application uses one of the available image objects. Although the Windows API provides many functions for creating and managing bitmaps, as my lack of knowledge about Windows, I opted to to some tests by borrwing code from the AGG project, instead of finding documentation and studying how to use the Windows API functions. So, I choose to create a <tt>Bitmap</tt> class, enclosing the necessary methods and knowledge in it. See tutorial 1 for Windows. If you have good knowledge of the Windows API probably you would prefer a different solution for managing bitmaps. In that case, I would appreciate if you could help me to improve this documentation. Open an issue in lomse repo or send a PR (the source of this document is at 'lomse/docs/api/mainpages/render-overview.h'). Thank you. This is a summary of how I used it in the tutorials and samples:
+My knowledge of using the Microsoft Windows API is nullptr. In other platforms normally your application uses one of the available image objects. Although the Windows API provides many functions for creating and managing bitmaps, as my lack of knowledge about Windows, I opted to to some tests by borrowing code from the AGG project, instead of finding documentation and studying how to use the Windows API functions. So, I choose to create a <tt>Bitmap</tt> class, enclosing the necessary methods and knowledge in it. See tutorial 1 for Windows. If you have good knowledge of the Windows API probably you would prefer a different solution for managing bitmaps. In that case, I would appreciate if you could help me to improve this documentation. Open an issue in lomse repo or send a PR (the source of this document is at 'lomse/docs/api/mainpages/render-overview.h'). Thank you. This is a summary of how I used it in the tutorials and samples:
 
 @code
 Operating system:       Microsoft Windows
@@ -548,12 +524,8 @@ Lomse library initialization
 	//pixel format BGRA, 32 bits
 	int pixel_format = k_pix_format_bgra32;
 
-	//Lomse default y axis direction is 0 coordinate at top and increases
-	//downwards. For MS Windows the Lomse default behaviour is the right behaviour.
-	bool reverse_y_axis = false;
-
 	//initialize the Lomse library with these values
-	m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
+	m_lomse.init_library(pixel_format, resolution);
 
 
 Creating the rendering buffer

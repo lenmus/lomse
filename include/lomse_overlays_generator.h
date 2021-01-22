@@ -44,7 +44,7 @@ namespace lomse
 
 //forward declarations
 class GraphicView;
-class ScreenDrawer;
+class BitmapDrawer;
 class VisualEffect;
 class GmoObj;
 
@@ -59,7 +59,7 @@ protected:
     LibraryScope& m_libraryScope;
     GraphicView* m_pView;               //the owner of this generator
     list<VisualEffect*> m_effects;      //managed visual effects
-    RenderingBuffer* m_pCanvasBuffer;   //the rendering buffer
+    RenderingBuffer m_canvasBuffer;    //the rendering buffer
     RenderingBuffer m_savedBuffer;      //clean copy of rendering buffer
     bool m_fBackgroundDirty;            //overlays already applied to rendering buffer
     bool m_fFullRectangle;              //damaged rectangle is all screen
@@ -73,9 +73,9 @@ public:
     ~OverlaysGenerator();
 
     //operations
-    void update_all_visual_effects(ScreenDrawer* pDrawer);
-    void update_visual_effect(VisualEffect* pEffect, ScreenDrawer* pDrawer);
-    void set_rendering_buffer(RenderingBuffer* rbuf);
+    void update_all_visual_effects(BitmapDrawer* pDrawer);
+    void update_visual_effect(VisualEffect* pEffect, BitmapDrawer* pDrawer);
+    void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height);
     void on_new_background();
     void add_visual_effect(VisualEffect* pEffect);
     void remove_visual_effect(VisualEffect* pEffect);

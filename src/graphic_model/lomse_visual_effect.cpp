@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include "lomse_visual_effect.h"
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_gm_basic.h"
 #include "lomse_logger.h"
 #include "lomse_graphic_view.h"
@@ -92,7 +92,7 @@ void DraggedImage::move_to(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void DraggedImage::on_draw(ScreenDrawer* pDrawer)
+void DraggedImage::on_draw(BitmapDrawer* pDrawer)
 {
    if (m_pShape && m_fEnabled)
     {
@@ -165,14 +165,14 @@ void SelectionRectangle::set_end_point(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void SelectionRectangle::on_draw(ScreenDrawer* pDrawer)
+void SelectionRectangle::on_draw(BitmapDrawer* pDrawer)
 {
     double x1 = double( m_left );
     double y1 = double( m_top );
     double x2 = double( m_right );
     double y2 = double( m_bottom );
 
-    double line_width = double( pDrawer->Pixels_to_LUnits(1) );
+    double line_width = pDrawer->device_units_to_model(1.0);
 
     pDrawer->begin_path();
     pDrawer->fill( Color(0, 0, 255, 16) );        //background blue transparent
@@ -223,7 +223,7 @@ void PlaybackHighlight::remove_all_highlight()
 }
 
 //---------------------------------------------------------------------------------------
-void PlaybackHighlight::on_draw(ScreenDrawer* pDrawer)
+void PlaybackHighlight::on_draw(BitmapDrawer* pDrawer)
 {
     m_bounds = URect(0.0, 0.0, 0.0, 0.0);
     RenderOptions options;
@@ -268,7 +268,7 @@ SelectionHighlight::SelectionHighlight(GraphicView* view, LibraryScope& libraryS
 }
 
 //---------------------------------------------------------------------------------------
-void SelectionHighlight::on_draw(ScreenDrawer* pDrawer)
+void SelectionHighlight::on_draw(BitmapDrawer* pDrawer)
 {
     m_bounds = URect(0.0, 0.0, 0.0, 0.0);
     RenderOptions options;

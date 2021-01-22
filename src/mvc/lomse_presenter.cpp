@@ -107,24 +107,43 @@ Presenter* PresenterBuilder::new_document(int viewType, const std::string& conte
 }
 
 //---------------------------------------------------------------------------------------
+Presenter* PresenterBuilder::new_document(int viewType, Drawer* screenDrawer,
+                                          Drawer* printDrawer, const std::string& content,
+                                          ostream& reporter, int format)
+{
+    Document* pDoc = Injector::inject_Document(m_libScope, reporter);
+    if (content != "")
+        pDoc->from_string(content, format);
+    else
+        pDoc->create_empty();
+
+    return Injector::inject_Presenter(m_libScope, viewType, pDoc, screenDrawer,
+                                      printDrawer);
+}
+
+//---------------------------------------------------------------------------------------
 Presenter* PresenterBuilder::open_document(int viewType, const std::string& filename,
+                                           Drawer* screenDrawer, Drawer* printDrawer,
                                            ostream& reporter)
 {
     Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     int format = FileFormatFinder::determine_format(filename);
     pDoc->from_file(filename, format);
 
-    return Injector::inject_Presenter(m_libScope, viewType, pDoc);
+    return Injector::inject_Presenter(m_libScope, viewType, pDoc, screenDrawer,
+                                      printDrawer);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
+                                           Drawer* screenDrawer, Drawer* printDrawer,
                                            ostream& reporter)
 {
     Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     pDoc->from_input(reader);
 
-    return Injector::inject_Presenter(m_libScope, viewType, pDoc);
+    return Injector::inject_Presenter(m_libScope, viewType, pDoc, screenDrawer,
+                                      printDrawer);
 }
 
 

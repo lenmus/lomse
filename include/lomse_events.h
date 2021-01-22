@@ -257,9 +257,6 @@ typedef std::shared_ptr<EventDoc>  SpEventDoc;
 		...
 		if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 		{
-		    //connect the View with the window buffer
-		    spInteractor->set_rendering_buffer(&m_rbuf_window);
-
 		    //register to receive desired events
 		    spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 		...
@@ -813,9 +810,6 @@ typedef std::shared_ptr<EventMouse>  SpEventMouse;
 		...
 		if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 		{
-		    //connect the View with the window buffer
-		    spInteractor->set_rendering_buffer(&m_rbuf_window);
-
 		    //register to receive desired events
 		    spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 		    spInteractor->add_event_handler(k_do_play_score_event, this, wrapper_play_score);
@@ -1197,9 +1191,6 @@ typedef std::shared_ptr<EventVisualTracking>  SpEventVisualTracking;
 		...
 		if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 		{
-		    //connect the View with the window buffer
-		    spInteractor->set_rendering_buffer(&m_rbuf_window);
-
 		    //register to receive desired events
 		    spInteractor->add_event_handler(k_control_point_moved_event, this, wrapper_on_action_event);
 		...

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1098,7 +1098,7 @@ SUITE(ChordEngraverTest)
         //       chord: d4,g4 - f4,c5
 
         LomseDoorway doorway;
-        doorway.init_library(k_pix_format_rgba32, 96, false);
+        doorway.init_library(k_pix_format_rgba32, 96);
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Presenter* pPresenter = doorway.open_document(k_view_vertical_book,

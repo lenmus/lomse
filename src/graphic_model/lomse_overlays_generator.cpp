@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,11 +29,10 @@
 
 #include "lomse_overlays_generator.h"
 
-#include "lomse_screen_drawer.h"
-//#include "lomse_graphic_view.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_logger.h"
 #include "lomse_visual_effect.h"
-
+#include "lomse_renderer.h"
 
 namespace lomse
 {
@@ -44,7 +43,6 @@ namespace lomse
 OverlaysGenerator::OverlaysGenerator(GraphicView* view, LibraryScope& libraryScope)
     : m_libraryScope(libraryScope)
     , m_pView(view)
-    , m_pCanvasBuffer(nullptr)
     , m_fBackgroundDirty(false)
     , m_fFullRectangle(true)
     , m_pSaveBytes(nullptr)
@@ -82,10 +80,10 @@ void OverlaysGenerator::remove_visual_effect(VisualEffect* pEffect)
 }
 
 //---------------------------------------------------------------------------------------
-void OverlaysGenerator::update_all_visual_effects(ScreenDrawer* pDrawer)
+void OverlaysGenerator::update_all_visual_effects(BitmapDrawer* pDrawer)
 {
     if (m_fBackgroundDirty)
-        m_pCanvasBuffer->copy_from(m_savedBuffer);
+        m_canvasBuffer.copy_from(m_savedBuffer);
 
     m_damagedRect = URect(0.0, 0.0, 0.0, 0.0);
     int overlays = 0;
@@ -110,7 +108,7 @@ void OverlaysGenerator::update_all_visual_effects(ScreenDrawer* pDrawer)
 
 //---------------------------------------------------------------------------------------
 void OverlaysGenerator::update_visual_effect(VisualEffect* pEffect,
-                                             ScreenDrawer* pDrawer)
+                                             BitmapDrawer* pDrawer)
 {
     update_all_visual_effects(pDrawer);
     if (pEffect->is_visible())
@@ -123,9 +121,12 @@ void OverlaysGenerator::update_visual_effect(VisualEffect* pEffect,
 }
 
 //---------------------------------------------------------------------------------------
-void OverlaysGenerator::set_rendering_buffer(RenderingBuffer* rbuf)
+void OverlaysGenerator::set_rendering_buffer(unsigned char* buf, unsigned width,
+                                             unsigned height)
 {
-    m_pCanvasBuffer = rbuf;
+    int pixFmt = m_libraryScope.get_pixel_format();
+    int stride = Renderer::bytesPerPixel(pixFmt) * width;
+    m_canvasBuffer.attach(buf, width, height, stride);
     m_fBackgroundDirty = false;
     m_fFullRectangle = true;
 }
@@ -141,9 +142,9 @@ void OverlaysGenerator::on_new_background()
 void OverlaysGenerator::save_rendering_buffer()
 {
     //if necessary, allocate buffer for saving screen buffer
-    unsigned w = m_pCanvasBuffer->width();
-    unsigned h = m_pCanvasBuffer->height();
-    int stride = m_pCanvasBuffer->stride();
+    unsigned w = m_canvasBuffer.width();
+    unsigned h = m_canvasBuffer.height();
+    int stride = m_canvasBuffer.stride();
     size_t bytes = size_t(h) * size_t(abs(stride));
     if (bytes == 0)
         return;     //in Unit Tests
@@ -160,7 +161,7 @@ void OverlaysGenerator::save_rendering_buffer()
 //        LOMSE_LOG_INFO(msg.str());
     }
 
-    m_savedBuffer.copy_from(*m_pCanvasBuffer);
+    m_savedBuffer.copy_from(m_canvasBuffer);
     m_fBackgroundDirty = false;
 }
 

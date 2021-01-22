@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include "lomse_time_grid.h"
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_graphic_view.h"
 #include "lomse_logger.h"
 #include "lomse_box_system.h"
@@ -50,7 +50,7 @@ TimeGrid::TimeGrid(GraphicView* view, LibraryScope& libraryScope)
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGrid::on_draw(ScreenDrawer* pDrawer)
+void TimeGrid::on_draw(BitmapDrawer* pDrawer)
 {
     m_bounds = URect(0.0, 0.0, 0.0, 0.0);
     if (!m_pBoxSystem)

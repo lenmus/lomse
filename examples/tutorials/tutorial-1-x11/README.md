@@ -262,22 +262,15 @@ In it, we basically allocate memory for the bitmap, and associate it to the X11 
 
 ## <a name="init-Lomse" />Lomse initialization
 
-Once X11 is initialized and the main window and the rendering buffer are created, the next step is to initialize the Lomse library. This is just informing Lomse about the bitmap format to use and other options. In our example, we are going to use a display with a resolution of 96 ppi and with y-axis not reversed (this means that y coordinate goes down from top of screen). These are typical values valid for most Linux systems. So let's start coding this values:
+Once X11 is initialized and the main window and the rendering buffer are created, the next step is to initialize the Lomse library. This is just informing Lomse about the bitmap format to use and other options. In our example, we are going to use a display with a resolution of 96 ppi. In a real application, probably you should get this value by invoking some operating system related method to get the screen resolution. In any case, this value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...).
 
-```c++
-//initialize the Lomse library
-bool flip_y = false;               //y axis is not reversed
-m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
-```
-
-Finally, we will initialize the Lomse related variables that we defined at start. With this, we finish Lomse initialization. Here is the full code:
+ So let's initialize Lomse. Here is the full code:
 
 ```c++
 void initialize_lomse()
 {
     //initialize the Lomse library
-    bool flip_y = false;               //y axis is not reversed
-    m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
+    m_lomse.init_library(m_format, 96);   //resolution=96 ppi
 
     //initialize Lomse related variables
     m_pInteractor = nullptr;

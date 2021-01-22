@@ -426,21 +426,16 @@ void MyFrame::initialize_lomse()
     // with second row following after it and so on.
     // Therefore, the pixel format is RGB 24 bits.
     //
-    // Let's define the required information:
+    // Let's define the requiered information:
 
         //the pixel format
         int pixel_format = k_pix_format_rgb24;  //RGB 24bits
 
-        //the desired resolution. For Linux and Windows 96 pixels per inch works ok.
-        int resolution = 96;    //96 ppi
+        //the desired resolution: 96 pixels per inch
+        int resolution = 96;
 
-        //Normal y axis direction is 0 coordinate at top and increase downwards. You
-        //must specify if you would like just the opposite behavior. For Windows and
-        //Linux the default behavior is the right behavior.
-        bool reverse_y_axis = false;
-
-    //Now, initialize the library with these values
-    m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+    //initialize the library with these values
+    m_lomse.init_library(pixel_format, resolution);
 
     //set required callbacks
     m_lomse.set_notify_callback(this, wrapper_lomse_event);
@@ -658,7 +653,8 @@ void MyCanvas::open_file(const wxString& fullname)
     }
 
     //render the new score
-    m_view_needs_redraw = true;
+    wxSize size = this->GetClientSize();
+    create_rendering_buffer(size.GetWidth(), size.GetHeight());
     Refresh(false /* don't erase background */);
 }
 
@@ -766,6 +762,11 @@ void MyCanvas::open_test_document()
     {
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
+
+    //render the new score
+    wxSize size = this->GetClientSize();
+    create_rendering_buffer(size.GetWidth(), size.GetHeight());
+    Refresh(false /* don't erase background */);
 }
 
 //---------------------------------------------------------------------------------------

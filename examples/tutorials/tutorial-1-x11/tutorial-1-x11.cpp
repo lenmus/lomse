@@ -467,8 +467,7 @@ void close_x()
 void initialize_lomse()
 {
     //initialize the Lomse library
-    bool flip_y = false;               //y axis is not reversed
-    m_lomse.init_library(m_format, 96, flip_y);   //resolution=96 ppi
+    m_lomse.init_library(m_format, 96);   //resolution=96 ppi
 
     //initialize lomse related variables
     m_pPresenter = nullptr;

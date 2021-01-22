@@ -91,7 +91,7 @@ public:
 ///@cond INTERNALS
 //excluded from public API because the View methods are managed from Interactor
 
-    HalfPageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
+    HalfPageView(LibraryScope& libraryScope, BitmapDrawer* pDrawer, BitmapDrawer* pPrintDrawer);
     virtual ~HalfPageView() {}
 
     //overrides for SinglePageView
@@ -129,6 +129,7 @@ protected:
     bool    m_fPlaybackMode;    //true during playback (pause also included)
     bool    m_fSplitMode;       //true when the view must be split
     ImoScore* m_pScore;         //if the document is only one score; otherwise, nullptr
+    BitmapDrawer* m_pBmpDrawer;     //m_pDrawer casted to BitmapDrawer
 
     //temporary data: last processed rendering buffer.
     //User app. can change the buffer but the view does not receive notifications.
@@ -136,12 +137,10 @@ protected:
     unsigned char* m_buf;
     unsigned m_bufWidth;
     unsigned m_bufHeight;
-    int m_bufStride;
 
     //temporary data: split buffer parameters
     unsigned m_SplitHeight;
-    unsigned char* m_BottomBuf;
-    unsigned char* m_TopBuf;
+    unsigned m_yShiftBottom;
     unsigned m_usedHeight[2];   //real used height by sub-window
 
     //temporary data: for controlling real used heigh

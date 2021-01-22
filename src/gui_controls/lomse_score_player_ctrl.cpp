@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -215,7 +215,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 //            pDrawer->move_to(x + 360.0f, y + 130.0f);
 //            pDrawer->line_to(x + 640.0f, y + 300.0f);
 //            pDrawer->line_to(x + 360.0f, y + 470.0f);
-//            pDrawer->close_subpath();
+//            pDrawer->close_path();
 //            pDrawer->end_path();
 //            break;
 
@@ -229,7 +229,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
                 pDrawer->move_to(x + 360.0f, y + 130.0f);
                 pDrawer->line_to(x + 640.0f, y + 300.0f);
                 pDrawer->line_to(x + 360.0f, y + 470.0f);
-                pDrawer->close_subpath();
+                pDrawer->close_path();
                 pDrawer->end_path();
             }
             else
@@ -244,7 +244,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
                 pDrawer->move_to(x + 360.0f - 50.0f, y + 130.0f - 80.0f);
                 pDrawer->line_to(x + 640.0f + 100.0f, y + 300.0f);
                 pDrawer->line_to(x + 360.0f - 50.0f, y + 470.0f + 80.0f);
-                pDrawer->close_subpath();
+                pDrawer->close_path();
                 pDrawer->end_path();
 
                 pDrawer->begin_path();
@@ -254,7 +254,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
                 pDrawer->move_to(x + 360.0f - 25.0f, y + 130.0f - 40.0f);
                 pDrawer->line_to(x + 640.0f + 50.0f, y + 300.0f);
                 pDrawer->line_to(x + 360.0f - 25.0f, y + 470.0f + 40.0f);
-                pDrawer->close_subpath();
+                pDrawer->close_path();
                 pDrawer->end_path();
 
 //                pDrawer->begin_path();
@@ -263,7 +263,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 //                pDrawer->move_to(x + 360.0f, y + 130.0f);
 //                pDrawer->line_to(x + 640.0f, y + 300.0f);
 //                pDrawer->line_to(x + 360.0f, y + 470.0f);
-//                pDrawer->close_subpath();
+//                pDrawer->close_path();
 //                pDrawer->end_path();
 
 
@@ -284,7 +284,7 @@ void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
                 pDrawer->move_to(x + 360.0f, y + 130.0f);
                 pDrawer->line_to(x + 640.0f, y + 300.0f);
                 pDrawer->line_to(x + 360.0f, y + 470.0f);
-                pDrawer->close_subpath();
+                pDrawer->close_path();
                 pDrawer->end_path();
 
             }

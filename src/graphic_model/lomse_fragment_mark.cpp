@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include "lomse_fragment_mark.h"
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 #include "lomse_gm_basic.h"
 #include "lomse_logger.h"
 #include "lomse_graphic_view.h"
@@ -63,13 +63,13 @@ public:
     virtual ~RawShape() {};
 
 //    ///Draw the shape
-//    void on_draw(ScreenDrawer* pDrawer, Color color=Color(0,0,0)) = 0;
+//    void on_draw(BitmapDrawer* pDrawer, Color color=Color(0,0,0)) = 0;
     ///Return the shape bounding box
     virtual URect get_bounds() { return m_bounds; }
 
 protected:
     //debug
-    void draw_bounding_box(ScreenDrawer* pDrawer);
+    void draw_bounding_box(BitmapDrawer* pDrawer);
 
 };
 
@@ -102,7 +102,7 @@ protected:
 public:
     RawShapeRoundedBracket();
 
-    void draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+    void draw(BitmapDrawer* pDrawer, LUnits xLeft, LUnits yTop,
               LUnits xRight, LUnits yBottom, bool fOpen, Color color = Color(0,0,0));
 
 //    //RawShape
@@ -150,7 +150,7 @@ protected:
 public:
     RawShapeCurlyBracket();
 
-    void draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+    void draw(BitmapDrawer* pDrawer, LUnits xLeft, LUnits yTop,
               LUnits xRight, LUnits yBottom, bool fOpen, Color color = Color(0,0,0));
 
     //URect get_bounds();
@@ -287,7 +287,7 @@ FragmentMark* FragmentMark::thickness(Tenths value)
 }
 
 //---------------------------------------------------------------------------------------
-void FragmentMark::on_draw(ScreenDrawer* pDrawer)
+void FragmentMark::on_draw(BitmapDrawer* pDrawer)
 {
     if (!m_pBoxSystem)
         return;
@@ -418,7 +418,7 @@ URect FragmentMark::get_bounds()
 }
 
 //---------------------------------------------------------------------------------------
-void FragmentMark::draw_bounding_box(ScreenDrawer* pDrawer)
+void FragmentMark::draw_bounding_box(BitmapDrawer* pDrawer)
 {
     pDrawer->begin_path();
     pDrawer->fill(Color(0, 0, 0, 0));
@@ -437,7 +437,7 @@ void FragmentMark::draw_bounding_box(ScreenDrawer* pDrawer)
 //=======================================================================================
 // RawShape implementation
 //=======================================================================================
-void RawShape::draw_bounding_box(ScreenDrawer* pDrawer)
+void RawShape::draw_bounding_box(BitmapDrawer* pDrawer)
 {
     pDrawer->begin_path();
     pDrawer->fill(Color(0, 0, 0, 0));
@@ -595,7 +595,7 @@ unsigned RawShapeRoundedBracket::vertex(double* px, double* py)
 }
 
 //---------------------------------------------------------------------------------------
-void RawShapeRoundedBracket::draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+void RawShapeRoundedBracket::draw(BitmapDrawer* pDrawer, LUnits xLeft, LUnits yTop,
                                LUnits xRight, LUnits yBottom, bool fOpen, Color color)
 {
     set_position_bounds(xLeft, yTop, xRight, yBottom, fOpen);
@@ -785,7 +785,7 @@ unsigned RawShapeCurlyBracket::vertex(double* px, double* py)
 }
 
 //---------------------------------------------------------------------------------------
-void RawShapeCurlyBracket::draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+void RawShapeCurlyBracket::draw(BitmapDrawer* pDrawer, LUnits xLeft, LUnits yTop,
                                LUnits xRight, LUnits yBottom, bool fOpen, Color color)
 {
     set_position_bounds(xLeft, yTop, xRight, yBottom, fOpen);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@
 //---------------------------------------------------------------------------------------
 
 //  This file is based on Anti-Grain Geometry version 2.4 examples' code and on
-//  ScreenDrawer version 1.0 code.
+//  BitmapDrawer version 1.0 code.
 //
 //  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed as follows:
@@ -39,7 +39,7 @@
 //
 //---------------------------------------------------------------------------------------
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 
 #include "lomse_logger.h"
 #include "lomse_renderer.h"
@@ -518,22 +518,40 @@ void Drawer::set_text_color(Color color)
     m_textColor = color;
 }
 
+//---------------------------------------------------------------------------------------
+void Drawer::new_viewport_origin(double x, double y)
+{
+    //coordinates in device units (e.g. Pixel)
+    m_viewportOrg.x = x;
+    m_viewportOrg.y = y;
+}
+
+//---------------------------------------------------------------------------------------
+void Drawer::new_viewport_size(double x, double y)
+{
+    //in device units (e.g. Pixel)
+    m_viewportSize.width = x;
+    m_viewportSize.height = y;
+}
+
 
 
 //=======================================================================================
-// ScreenDrawer implementation
+// BitmapDrawer implementation
 //=======================================================================================
-ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
+BitmapDrawer::BitmapDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
     , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage, m_path) )
     , m_pTextMeter(nullptr)
     , m_pCalligrapher( LOMSE_NEW Calligrapher(m_pFonts, m_pRenderer) )
     , m_numPaths(0)
+    , m_rbuf(nullptr, 0, 0, 0)
+    , m_pBuf(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
-ScreenDrawer::~ScreenDrawer()
+BitmapDrawer::~BitmapDrawer()
 {
     delete m_pRenderer;
     delete m_pCalligrapher;
@@ -541,7 +559,7 @@ ScreenDrawer::~ScreenDrawer()
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::delete_paths()
+void BitmapDrawer::delete_paths()
 {
     //AttrStorage objects are typedef for pod_bvector<PathAttributes>
     //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore, it
@@ -560,7 +578,7 @@ void ScreenDrawer::delete_paths()
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::begin_path()
+void BitmapDrawer::begin_path()
 {
     unsigned idx = m_path.start_new_path();
     m_attr_storage.add( m_numPaths==0 ? PathAttributes(idx) : PathAttributes(cur_attr(), idx) );
@@ -568,49 +586,49 @@ void ScreenDrawer::begin_path()
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::end_path()
+void BitmapDrawer::end_path()
 {
     if(m_attr_storage.size() == 0)
     {
-        LOMSE_LOG_ERROR("[ScreenDrawer::end_path] The path was not begun!");
-        throw runtime_error("[ScreenDrawer::end_path] The path was not begun!");
+        LOMSE_LOG_ERROR("[BitmapDrawer::end_path] The path was not begun!");
+        throw runtime_error("[BitmapDrawer::end_path] The path was not begun!");
     }
 }
 
 //---------------------------------------------------------------------------------------
-PathAttributes& ScreenDrawer::cur_attr()
+PathAttributes& BitmapDrawer::cur_attr()
 {
     return m_attr_storage[m_numPaths - 1];
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::move_to(double x, double y)
+void BitmapDrawer::move_to(double x, double y)
 {
     m_path.move_to(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::move_to_rel(double x, double y)
+void BitmapDrawer::move_to_rel(double x, double y)
 {
     m_path.rel_to_abs(&x, &y);
     m_path.move_to(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line_to(double x,  double y)
+void BitmapDrawer::line_to(double x,  double y)
 {
     m_path.line_to(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line_to_rel(double x,  double y)
+void BitmapDrawer::line_to_rel(double x,  double y)
 {
     m_path.rel_to_abs(&x, &y);
     m_path.line_to(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::hline_to(double x)
+void BitmapDrawer::hline_to(double x)
 {
     double x2 = 0.0;
     double y2 = 0.0;
@@ -622,7 +640,7 @@ void ScreenDrawer::hline_to(double x)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::hline_to_rel(double x)
+void BitmapDrawer::hline_to_rel(double x)
 {
     double x2 = 0.0;
     double y2 = 0.0;
@@ -635,7 +653,7 @@ void ScreenDrawer::hline_to_rel(double x)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::vline_to(double y)
+void BitmapDrawer::vline_to(double y)
 {
     double x2 = 0.0;
     double y2 = 0.0;
@@ -647,7 +665,7 @@ void ScreenDrawer::vline_to(double y)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::vline_to_rel(double y)
+void BitmapDrawer::vline_to_rel(double y)
 {
     double x2 = 0.0;
     double y2 = 0.0;
@@ -660,13 +678,13 @@ void ScreenDrawer::vline_to_rel(double y)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::cubic_bezier(double x1, double y1, double x,  double y)
+void BitmapDrawer::quadratic_bezier(double x1, double y1, double x,  double y)
 {
     m_path.curve3(x1, y1, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::cubic_bezier_rel(double x1, double y1, double x,  double y)
+void BitmapDrawer::quadratic_bezier_rel(double x1, double y1, double x,  double y)
 {
     m_path.rel_to_abs(&x1, &y1);
     m_path.rel_to_abs(&x,  &y);
@@ -674,25 +692,25 @@ void ScreenDrawer::cubic_bezier_rel(double x1, double y1, double x,  double y)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::cubic_bezier(double x, double y)
+void BitmapDrawer::quadratic_bezier(double x, double y)
 {
     m_path.curve3(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::cubic_bezier_rel(double x, double y)
+void BitmapDrawer::quadratic_bezier_rel(double x, double y)
 {
     m_path.curve3_rel(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::quadratic_bezier(double x1, double y1, double x2, double y2,
+void BitmapDrawer::cubic_bezier(double x1, double y1, double x2, double y2,
                                  double x,  double y)
 {
     m_path.curve4(x1, y1, x2, y2, x, y);
 }
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::quadratic_bezier_rel(double x1, double y1, double x2, double y2,
+void BitmapDrawer::cubic_bezier_rel(double x1, double y1, double x2, double y2,
                                      double x,  double y)
 {
     m_path.rel_to_abs(&x1, &y1);
@@ -702,25 +720,25 @@ void ScreenDrawer::quadratic_bezier_rel(double x1, double y1, double x2, double 
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::quadratic_bezier(double x2, double y2, double x,  double y)
+void BitmapDrawer::cubic_bezier(double x2, double y2, double x,  double y)
 {
     m_path.curve4(x2, y2, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::quadratic_bezier_rel(double x2, double y2, double x,  double y)
+void BitmapDrawer::cubic_bezier_rel(double x2, double y2, double x,  double y)
 {
     m_path.curve4_rel(x2, y2, x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::close_subpath()
+void BitmapDrawer::close_path()
 {
     m_path.end_poly(path_flags_close);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill(Color color)
+void BitmapDrawer::fill(Color color)
 {
     PathAttributes& attr = cur_attr();
     attr.fill_color = color;
@@ -728,7 +746,7 @@ void ScreenDrawer::fill(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke(Color color)
+void BitmapDrawer::stroke(Color color)
 {
     PathAttributes& attr = cur_attr();
     attr.stroke_color = color;
@@ -736,84 +754,70 @@ void ScreenDrawer::stroke(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::even_odd(bool flag)
-{
-    cur_attr().even_odd_flag = flag;
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke_width(double w)
+void BitmapDrawer::stroke_width(double w)
 {
     cur_attr().stroke_width = w;
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill_none()
+void BitmapDrawer::fill_none()
 {
     cur_attr().fill_mode = k_fill_none;
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke_none()
+void BitmapDrawer::stroke_none()
 {
     cur_attr().stroke_flag = false;
 }
 
+#if (0)
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill_opacity(unsigned op)
+void BitmapDrawer::even_odd(bool flag)
+{
+    cur_attr().even_odd_flag = flag;
+}
+
+//---------------------------------------------------------------------------------------
+void BitmapDrawer::fill_opacity(unsigned op)
 {
     cur_attr().fill_color.opacity(op);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke_opacity(unsigned op)
+void BitmapDrawer::stroke_opacity(unsigned op)
 {
     cur_attr().stroke_color.opacity(op);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line_join(line_join_e join)
+void BitmapDrawer::line_join(line_join_e join)
 {
     cur_attr().line_join = join;
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line_cap(line_cap_e cap)
+void BitmapDrawer::line_cap(line_cap_e cap)
 {
     cur_attr().line_cap = cap;
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::miter_limit(double ml)
+void BitmapDrawer::miter_limit(double ml)
 {
     cur_attr().miter_limit = ml;
 }
+#endif
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::add_path(VertexSource& vs,  unsigned path_id,
+void BitmapDrawer::add_path(VertexSource& vs,  unsigned path_id,
                             bool UNUSED(solid_path))
 {
     m_path.concat_path(vs, path_id);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::render(FontRasterizer& ras, FontScanline& sl, Color color)
-{
-    //if(m_blendMode == BlendAlpha)
-        m_pRenderer->render(ras, sl, color);
-    //else
-    //    m_pRenderer->render(*this, m_renBaseComp, m_renSolidComp, ras, sl);
-    delete_paths();
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::gsv_text(double x, double y, const char* str)
-{
-    m_pRenderer->render_gsv_text(x, y, str);
-}
-
-//---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_font(const std::string& language,
+bool BitmapDrawer::select_font(const std::string& language,
                                const std::string& fontFile,
                                const std::string& fontName, double height,
                                bool fBold, bool fItalic)
@@ -821,28 +825,28 @@ bool ScreenDrawer::select_font(const std::string& language,
     return m_pFonts->select_font(language, fontFile, fontName, height, fBold, fItalic);
 }
 
-//---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_raster_font(const std::string& language,
-                                      const std::string& fontFile,
-                                      const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
-{
-    return m_pFonts->select_raster_font(language, fontFile, fontName,
-                                         height, fBold, fItalic);
-}
+////---------------------------------------------------------------------------------------
+//bool BitmapDrawer::select_raster_font(const std::string& language,
+//                                      const std::string& fontFile,
+//                                      const std::string& fontName, double height,
+//                                      bool fBold, bool fItalic)
+//{
+//    return m_pFonts->select_raster_font(language, fontFile, fontName,
+//                                         height, fBold, fItalic);
+//}
+//
+////---------------------------------------------------------------------------------------
+//bool BitmapDrawer::select_vector_font(const std::string& language,
+//                                      const std::string& fontFile,
+//                                      const std::string& fontName, double height,
+//                                      bool fBold, bool fItalic)
+//{
+//    return m_pFonts->select_vector_font(language, fontFile, fontName,
+//                                         height, fBold, fItalic);
+//}
 
 //---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_vector_font(const std::string& language,
-                                      const std::string& fontFile,
-                                      const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
-{
-    return m_pFonts->select_vector_font(language, fontFile, fontName,
-                                         height, fBold, fItalic);
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::draw_glyph(double x, double y, unsigned int ch)
+void BitmapDrawer::draw_glyph(double x, double y, unsigned int ch)
 {
     render_existing_paths();
 
@@ -852,7 +856,7 @@ void ScreenDrawer::draw_glyph(double x, double y, unsigned int ch)
 }
 
 //---------------------------------------------------------------------------------------
-int ScreenDrawer::draw_text(double x, double y, const std::string& str)
+int BitmapDrawer::draw_text(double x, double y, const std::string& str)
 {
     //returns the number of chars drawn
 
@@ -864,7 +868,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 }
 
 //---------------------------------------------------------------------------------------
-int ScreenDrawer::draw_text(double x, double y, const wstring& str)
+int BitmapDrawer::draw_text(double x, double y, const wstring& str)
 {
     //returns the number of chars drawn
 
@@ -875,171 +879,130 @@ int ScreenDrawer::draw_text(double x, double y, const wstring& str)
     return m_pCalligrapher->draw_text(x, y, str, m_textColor, m_pRenderer->get_scale());
 }
 
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::FtSetTextPosition(LUnits uxPos, LUnits uyPos)
-//{
-//    m_vCursorX = WorldToDeviceX(uxPos);
-//    m_vCursorY = WorldToDeviceY(uyPos);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::FtSetTextPositionPixels(lmPixels vxPos, lmPixels vyPos)
-//{
-//    m_vCursorX = (double)vxPos;
-//    m_vCursorY = (double)vyPos;
-//}
-
-////---------------------------------------------------------------------------------------
-//VRect ScreenDrawer::FtGetGlyphBoundsInPixels(unsigned int nGlyph)
-//{
-//    //returns glyph bounding box. In pixels
-//
-//    VRect boxRect;
-//    if (!m_pFonts->is_font_valid()) return boxRect;
-//
-//    const agg::glyph_cache* glyph = m_pFonts->get_glyph_cache(nGlyph);
-//    if(glyph)
-//    {
-//        //m_pFonts->init_adaptors(glyph, x, y);
-//        agg::AggRectInt bbox = glyph->bounds;        //AggRectInt is a rectangle with integer values
-//        boxRect.x = bbox.x1;
-//        boxRect.y = bbox.y1;
-//        boxRect.width = bbox.x2-bbox.x1;
-//        boxRect.height = bbox.y2-bbox.y1;
-//    }
-//    return boxRect;
-//}
-
-////---------------------------------------------------------------------------------------
-//URect ScreenDrawer::FtGetGlyphBounds(unsigned int nGlyph)
-//{
-//    //returns glyph bounding box. In LUnits
-//
-//    VRect vBox = FtGetGlyphBoundsInPixels(nGlyph);
-//    return lmURect(DeviceToLogicalX(vBox.x), DeviceToLogicalY(vBox.y),
-//                   DeviceToLogicalX(vBox.width), DeviceToLogicalY(vBox.height) );
-//}
-
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::FtGetTextExtent(const std::string& sText,
-//                                         LUnits* pWidth, LUnits* pHeight,
-//                                         LUnits* pDescender, LUnits* pAscender)
-//{
-//    //Gets the dimensions of the string using the currently selected font.
-//    //Parameters:
-//    //  sText is the text string to measure,
-//    //  descent is the dimension from the baseline of the font to the bottom of
-//    //          the descender,
-//    //  externalLeading is any extra vertical space added to the font by the
-//    //          font designer (usually is zero).
-//    //
-//    //The text extent is returned in w and h pointers.
-//    //
-//    //The currently selected font is used to compute dimensions.
-//    //Note that this function only works with single-line strings.
-//
-//    //convert text to utf-32
-//    size_t nLength = sText.Length();
-//    wxMBConvUTF32 oConv32;
-//    wxCharBuffer s32Text = sText.mb_str(oConv32);
-//
-//    double x  = 0.0;
-//    double y  = m_pFonts->get_font_heught();
-//    const unsigned int* p = (unsigned int*)s32Text.data();
-//
-//    while(*p && nLength--)
-//    {
-//        const agg::glyph_cache* glyph = m_pFonts->get_glyph_cache(*p);
-//        if(glyph)
-//        {
-//            if(m_fKerning)
-//                m_pFonts->add_kerning(&x, &y);
-//
-//            x += glyph->advance_x;
-//        }
-//        ++p;
-//    }
-//
-//    //return results
-//    *pWidth = DeviceToWorldX(x);
-//    *pHeight = DeviceToWorldY(y);
-//
-//    if (pAscender)
-//        *pAscender = DeviceToWorldY(m_pFonts->get_ascender());
-//
-//    if (pDescender)
-//        *pDescender = DeviceToWorldY(m_pFonts->get_descender());
-//}
-
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::screen_point_to_model(double* x, double* y) const
+void BitmapDrawer::device_point_to_model(double* x, double* y) const
 {
+    //e.g. Pixels to LUnits
     TransAffine& mtx = m_pRenderer->get_transform();
     mtx.inverse_transform(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::model_point_to_screen(double* x, double* y) const
+void BitmapDrawer::model_point_to_device(double* x, double* y) const
 {
+    //e.g. LUnits to Pixels
     TransAffine& mtx = m_pRenderer->get_transform();
     mtx.transform(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ScreenDrawer::Pixels_to_LUnits(Pixels value)
+LUnits BitmapDrawer::device_units_to_model(double value) const
 {
+    //e.g. Pixels to LUnits
     TransAffine& mtx = m_pRenderer->get_transform();
-    return LUnits(double(value) / mtx.scale());
+    return value / mtx.scale();
 }
 
 //---------------------------------------------------------------------------------------
-Pixels ScreenDrawer::LUnits_to_Pixels(double value)
+double BitmapDrawer::model_to_device_units(LUnits value) const
 {
+    //e.g. LUnits to Pixels
     TransAffine& mtx = m_pRenderer->get_transform();
-    return Pixels( value * mtx.scale() );
+    return value * mtx.scale();
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::reset(RenderingBuffer& buf, Color bgcolor)
+void BitmapDrawer::reset(Color bgcolor)
 {
-    m_pRenderer->initialize(buf, bgcolor);
+    m_pRenderer->initialize(m_rbuf, bgcolor);
     delete_paths();
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::set_viewport(Pixels x, Pixels y)
+void BitmapDrawer::set_rendering_buffer(unsigned char* buf, unsigned width,
+                                        unsigned height, Color bgcolor)
 {
+    if (buf && width > 0 && height > 0)
+    {
+        int pixFmt = m_libraryScope.get_pixel_format();
+        int stride = Renderer::bytesPerPixel(pixFmt) * width;
+        m_rbuf.attach(buf, width, height, stride);
+        m_pBuf = buf;
+        m_bufWidth = width;
+        m_bufHeight = height;
+
+        reset(bgcolor);
+    }
+    else
+    {
+        m_rbuf.attach(nullptr, 0, 0, 0);
+        m_pBuf = nullptr;
+        m_bufWidth = 0;
+        m_bufHeight = 0;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void BitmapDrawer::set_view_area(unsigned width, unsigned height, unsigned xShift,
+                                 unsigned yShift)
+{
+    if (width > (m_bufWidth - xShift) || height > (m_bufHeight - yShift))
+    {
+        LOMSE_LOG_ERROR("Invalid view area. Too big. Ignored.");
+        return;
+    }
+
+    int bytesPerPixel = Renderer::bytesPerPixel( m_libraryScope.get_pixel_format() );
+
+    unsigned shift = yShift * m_bufWidth + xShift;
+    unsigned char* start = m_pBuf + shift * bytesPerPixel;
+    int stride = m_rbuf.stride();
+    m_rbuf.attach(start, width, height, stride);
+}
+
+//---------------------------------------------------------------------------------------
+void BitmapDrawer::new_viewport_origin(double x, double y)
+{
+    //coordinates in device units (e.g. Pixel)
+    Drawer::new_viewport_origin(x, y);
     m_pRenderer->set_viewport(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::set_transform(TransAffine& transform)
+void BitmapDrawer::new_viewport_size(double x, double y)
+{
+    //in device units (e.g. Pixel)
+    Drawer::new_viewport_size(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void BitmapDrawer::set_affine_transformation(TransAffine& transform)
 {
     m_pRenderer->set_transform(transform);
     //m_pRenderer->set_scale(transform.scale());
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::render()
+void BitmapDrawer::render()
 {
     m_pRenderer->render();
     delete_paths();
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::set_shift(LUnits x, LUnits y)
+void BitmapDrawer::set_shift(LUnits x, LUnits y)
 {
     m_pRenderer->set_shift(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::remove_shift()
+void BitmapDrawer::remove_shift()
 {
     m_pRenderer->remove_shift();
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::circle(LUnits xCenter, LUnits yCenter, LUnits radius)
+void BitmapDrawer::circle(LUnits xCenter, LUnits yCenter, LUnits radius)
 {
     double x = double(xCenter);
     double y = double(yCenter);
@@ -1051,7 +1014,7 @@ void ScreenDrawer::circle(LUnits xCenter, LUnits yCenter, LUnits radius)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
+void BitmapDrawer::line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
                         LUnits width, ELineEdge nEdge)
 {
     double alpha = atan((y2 - y1) / (x2 - x1));
@@ -1104,7 +1067,7 @@ void ScreenDrawer::line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::polygon(int n, UPoint points[])
+void BitmapDrawer::polygon(int n, UPoint points[])
 {
     move_to(points[0].x, points[0].y);
     int i;
@@ -1115,7 +1078,7 @@ void ScreenDrawer::polygon(int n, UPoint points[])
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::rect(UPoint pos, USize size, LUnits radius)
+void BitmapDrawer::rect(UPoint pos, USize size, LUnits radius)
 {
     double x1 = double(pos.x);
     double y1 = double(pos.y);
@@ -1127,77 +1090,27 @@ void ScreenDrawer::rect(UPoint pos, USize size, LUnits radius)
     m_path.concat_path<agg::rounded_rect>(rr);
 }
 
-////------------------------------------------------------------------------
-//void ScreenDrawer::blendImage(Image& img,
-//                       int imgX1, int imgY1, int imgX2, int imgY2,
-//                       double dstX, double dstY, unsigned alpha)
-//{
-//    model_point_to_screen(dstX, dstY);
-//    PixFormat pixF(img.renBuf);
-//    // JME
-//    //agg::rect r(imgX1, imgY1, imgX2, imgY2);
-//    AggRectInt r(imgX1, imgY1, imgX2, imgY2);
-//    if(m_blendMode == BlendAlpha)
-//    {
-//        m_renBasePre.blend_from(pixF, &r, int(dstX)-imgX1, int(dstY)-imgY1, alpha);
-//    }
-//    else
-//    {
-//        m_renBaseCompPre.blend_from(pixF, &r, int(dstX)-imgX1, int(dstY)-imgY1, alpha);
-//    }
-//}
-//
-//
-////------------------------------------------------------------------------
-//void ScreenDrawer::blendImage(Image& img, double dstX, double dstY, unsigned alpha)
-//{
-//    model_point_to_screen(dstX, dstY);
-//    PixFormat pixF(img.renBuf);
-//    m_renBasePre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
-//    if(m_blendMode == BlendAlpha)
-//    {
-//        m_renBasePre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
-//    }
-//    else
-//    {
-//        m_renBaseCompPre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
-//    }
-//}
-//
-//
-////------------------------------------------------------------------------
-//void ScreenDrawer::copyImage(RenderingBuffer& img,
-//                      VPoint srcOrg, VSize srcSize
-                        //int imgX1, int imgY1, int imgX2, int imgY2,
-//                      UPoint dest)
-//{
-    //double x = double(dest.x);
-    //double y = double(dest.y);
-    //model_point_to_screen(&x, &y);
-//    AggRectInt r(imgX1, imgY1, imgX2, imgY2);
-//    m_renBase.copy_from(img.renBuf, &r, int(dstX)-imgX1, int(dstY)-imgY1);
-//}
-
 //------------------------------------------------------------------------
-void ScreenDrawer::render_existing_paths()
+void BitmapDrawer::render_existing_paths()
 {
     if (m_path.total_vertices() > 0)
         render();
 }
 
+#if (0)
 //------------------------------------------------------------------------
-void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap, UPoint dest)
+void BitmapDrawer::copy_bitmap(RenderingBuffer& bmap, UPoint dest)
 {
     render_existing_paths();
 
     double x = double(dest.x);
     double y = double(dest.y);
-    model_point_to_screen(&x, &y);
+    model_point_to_device(&x, &y);
     m_pRenderer->copy_from(bmap, nullptr, int(x), int(y));
 }
 
 //------------------------------------------------------------------------
-void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap,
+void BitmapDrawer::copy_bitmap(RenderingBuffer& bmap,
                                Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                                UPoint dest)
 {
@@ -1205,14 +1118,15 @@ void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap,
 
     double x = double(dest.x);
     double y = double(dest.y);
-    model_point_to_screen(&x, &y);
+    model_point_to_device(&x, &y);
 
     AggRectInt r(srcX1, srcY1, srcX2, srcY2);
     m_pRenderer->copy_from(bmap, &r, int(x)-srcX1, int(y)-srcY1);
 }
+#endif
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+void BitmapDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
                                Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                                LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
                                EResamplingQuality resamplingMode,
@@ -1224,8 +1138,8 @@ void ScreenDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
     double y1 = double(dstY1);
     double x2 = double(dstX2);
     double y2 = double(dstY2);
-    model_point_to_screen(&x1, &y1);
-    model_point_to_screen(&x2, &y2);
+    model_point_to_device(&x1, &y1);
+    model_point_to_device(&x2, &y2);
 
     m_pRenderer->render_bitmap(bmap, hasAlpha, double(srcX1), double(srcY1),
                                double(srcX2), double(srcY2), x1, y1, x2, y2,
@@ -1233,7 +1147,7 @@ void ScreenDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2)
+void BitmapDrawer::fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2)
 {
     PathAttributes& attr = cur_attr();
     if (!attr.fill_gradient)
@@ -1251,7 +1165,7 @@ void ScreenDrawer::fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits 
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::gradient_color(Color c1, Color c2, double start, double stop)
+void BitmapDrawer::gradient_color(Color c1, Color c2, double start, double stop)
 {
     PathAttributes& attr = cur_attr();
     if (!attr.fill_gradient)
@@ -1271,7 +1185,7 @@ void ScreenDrawer::gradient_color(Color c1, Color c2, double start, double stop)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::gradient_color(Color c1, double start, double stop)
+void BitmapDrawer::gradient_color(Color c1, double start, double stop)
 {
     PathAttributes& attr = cur_attr();
     if (!attr.fill_gradient)
@@ -1290,7 +1204,7 @@ void ScreenDrawer::gradient_color(Color c1, double start, double stop)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::line_with_markers(UPoint start, UPoint end, LUnits width,
+void BitmapDrawer::line_with_markers(UPoint start, UPoint end, LUnits width,
                                      ELineCap startCap, ELineCap endCap)
 {
     //add paths for antialiased line with head/tail markers
@@ -1303,6 +1217,13 @@ void ScreenDrawer::line_with_markers(UPoint start, UPoint end, LUnits width,
     //width = 100.0f;       //100 = 1 mm
     MyConverter converter(line, double(width), startCap, endCap);
     m_path.concat_path<MyConverter>(converter);
+}
+
+//---------------------------------------------------------------------------------------
+bool BitmapDrawer::is_ready() const
+{
+    return (m_pBuf != nullptr) && (m_viewportSize.width > 0.0)
+           && (m_viewportSize.height > 0.0);
 }
 
 

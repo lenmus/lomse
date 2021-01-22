@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include "lomse_handler.h"
 
-#include "lomse_screen_drawer.h"
+#include "lomse_bitmap_drawer.h"
 
 #include <math.h>
 
@@ -68,7 +68,7 @@ HandlerCircle::~HandlerCircle()
 }
 
 //---------------------------------------------------------------------------------------
-void HandlerCircle::on_draw(ScreenDrawer* pDrawer)
+void HandlerCircle::on_draw(BitmapDrawer* pDrawer)
 {
     compute_radius(pDrawer);
 
@@ -83,7 +83,7 @@ void HandlerCircle::on_draw(ScreenDrawer* pDrawer)
 }
 
 //---------------------------------------------------------------------------------------
-void HandlerCircle::compute_radius(ScreenDrawer* UNUSED(pDrawer))
+void HandlerCircle::compute_radius(BitmapDrawer* UNUSED(pDrawer))
 {
     //TODO. The idea is to compute the needed value so that it is at least painted
     // with 0.7 mm radius
