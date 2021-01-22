@@ -2,8 +2,10 @@ var searchData=
 [
   ['channel',['channel',['../classAMidiInfo.html#a1ce6da5ff54686fbe6515581868764fd',1,'AMidiInfo']]],
   ['child_5fat',['child_at',['../classADocument.html#aa92be2769c5c81803e694c6688d64bc9',1,'ADocument']]],
+  ['circle',['circle',['../classDrawer.html#adfce8eafa5c94bbf9ed4ea5e1f9638e1',1,'Drawer']]],
   ['classid',['classid',['../classADynamic.html#a1fcc4cb51bb26973713d57a05e3b36dd',1,'ADynamic']]],
   ['click_5fevent_5fto_5fcursor_5fstate',['click_event_to_cursor_state',['../classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2',1,'Interactor']]],
+  ['close_5fpath',['close_path',['../classDrawer.html#ac87cc9f050eca7a482a14f27d45da04e',1,'Drawer']]],
   ['cmdaddchordnote',['CmdAddChordNote',['../classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b',1,'CmdAddChordNote']]],
   ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309',1,'CmdAddNoteRest']]],
   ['cmdaddtie',['CmdAddTie',['../classCmdAddTie.html#a45dbe6f9f689921bca0c1e6231d25e27',1,'CmdAddTie']]],
@@ -29,5 +31,7 @@ var searchData=
   ['cmdtransposekey',['CmdTransposeKey',['../classCmdTransposeKey.html#a255d20c7fdef759570d747f5f6753ba5',1,'CmdTransposeKey']]],
   ['color',['color',['../classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455',1,'FragmentMark']]],
   ['create_5fobject',['create_object',['../classADocument.html#a507f50b48cc1e64d0f8a695aaff17b65',1,'ADocument']]],
-  ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]]
+  ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],
+  ['cubic_5fbezier',['cubic_bezier',['../classDrawer.html#a1cf3c3e8fe86e721921be5d93dacc051',1,'Drawer::cubic_bezier(double x1, double y1, double x2, double y2, double x, double y)=0'],['../classDrawer.html#a25c0cb2716ef093eb2ce7a867e08eb34',1,'Drawer::cubic_bezier(double x2, double y2, double x, double y)=0']]],
+  ['cubic_5fbezier_5frel',['cubic_bezier_rel',['../classDrawer.html#a58b2e500c9a2e5101c9413d098067b51',1,'Drawer::cubic_bezier_rel(double x1, double y1, double x2, double y2, double x, double y)=0'],['../classDrawer.html#a62dfeb94c471e0189b6873cc126dbf6c',1,'Drawer::cubic_bezier_rel(double x2, double y2, double x, double y)=0']]]
 ];

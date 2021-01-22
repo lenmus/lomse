@@ -4,6 +4,7 @@ var searchData=
   ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],
   ['enable_5fforced_5fview_5fupdates',['enable_forced_view_updates',['../classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b',1,'Interactor']]],
   ['end_5fof_5fchanges',['end_of_changes',['../classAScore.html#a9fcc07057e7d0c9bddd69d99463709fa',1,'AScore::end_of_changes()'],['../classADocument.html#a9fcc07057e7d0c9bddd69d99463709fa',1,'ADocument::end_of_changes()']]],
+  ['end_5fpath',['end_path',['../classDrawer.html#af9166e74c77d82ca1d72c6adc06a11e0',1,'Drawer']]],
   ['eventcontrolpointmoved',['EventControlPointMoved',['../classEventControlPointMoved.html#a9917ebb90bbf5b166472fb6ed6cee6d0',1,'EventControlPointMoved']]],
   ['eventdoc',['EventDoc',['../classEventDoc.html#a2c007512dbef8c1954640ddd6ff277e7',1,'EventDoc']]],
   ['eventendofplayback',['EventEndOfPlayback',['../classEventEndOfPlayback.html#a23fdfa2fb3fc3c793bbb53d5aa54723b',1,'EventEndOfPlayback']]],

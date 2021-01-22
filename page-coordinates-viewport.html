@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.28.0</span>
+   &#160;<span id="projectnumber">0.28.1</span>
    </div>
   </td>
  </tr>
@@ -99,7 +99,7 @@ Device and logical units</h1>
 <p>But as the document is going to be displayed on a screen (or other device) it is necesary to transform real world dimensions into device dimensions. <b>Device</b> units are the units native to a particular device; e.g. for a screen, a device unit is a <em>pixel</em>. For a printer, the device unit is defined by the resolution of the printer (usually given in <code>DPI:</code> dots-per-inch).</p>
 <h1><a class="anchor" id="scale-factor"></a>
 Scaling</h1>
-<p>Logical units are mapped to device units (pixels) using the current rendering resolution. For screen oriented method, this resolution is set at Lomse initialization, in method <a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">LomseDoorway::init_library()</a>. For printing, the resolution is set in method <a class="el" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">Interactor::set_print_ppi()</a>. Nevertheless, this mapping can be modified by using an scale factor.</p>
+<p>Logical units are mapped to device units (pixels) using the current rendering resolution. For screen oriented method, this resolution is set at Lomse initialization, in method <a class="el" href="classLomseDoorway.html#af65c535236e088710cf055c9180f34fa">LomseDoorway::init_library()</a>. For printing, the resolution is set in method Interactor::set_print_ppi(). Nevertheless, this mapping can be modified by using an scale factor.</p>
 <p>See: <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">Interactor::get_scale()</a>, <a class="el" href="classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37">Interactor::set_scale()</a>, <a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">Interactor::zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">Interactor::zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">Interactor::zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">Interactor::zoom_fit_width()</a>.</p>
 <h1><a class="anchor" id="viewport-concept"></a>
 Scrolling: the Viewport</h1>
@@ -124,7 +124,7 @@ Image: The 'viewport' and the 'device window'</div></div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Jan 11 2021 19:30:36 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Jan 22 2021 09:49:36 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

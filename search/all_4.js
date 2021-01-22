@@ -20,6 +20,7 @@ var searchData=
   ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],
   ['enable_5fforced_5fview_5fupdates',['enable_forced_view_updates',['../classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b',1,'Interactor']]],
   ['end_5fof_5fchanges',['end_of_changes',['../classAScore.html#a9fcc07057e7d0c9bddd69d99463709fa',1,'AScore::end_of_changes()'],['../classADocument.html#a9fcc07057e7d0c9bddd69d99463709fa',1,'ADocument::end_of_changes()']]],
+  ['end_5fpath',['end_path',['../classDrawer.html#af9166e74c77d82ca1d72c6adc06a11e0',1,'Drawer']]],
   ['eobservedchild',['EObservedChild',['../classObservable.html#aeba2229fd6aa952b9d2e67b22444682e',1,'Observable']]],
   ['eoctave',['EOctave',['../group__enumerations.html#gabff4653ec15d209b178a474dd7da31fa',1,'lomse_pitch.h']]],
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],

@@ -5,6 +5,8 @@ var searchData=
   ['delete_5finstruments_5fgroup',['delete_instruments_group',['../classAScore.html#a5d6fc4611b71270c36fcc939b66ffc13',1,'AScore']]],
   ['delete_5finstruments_5fgroup_5fat',['delete_instruments_group_at',['../classAScore.html#a04ddbf023cc1bc024faef45b7253ea4e',1,'AScore']]],
   ['device_5fname',['device_name',['../classAMidiInfo.html#aa8540562f591416083d8dbe52df4ef4e',1,'AMidiInfo']]],
+  ['device_5fpoint_5fto_5fmodel',['device_point_to_model',['../classDrawer.html#a9434f7bb5dd43e27a99fe8e3d96cfa1d',1,'Drawer']]],
+  ['device_5funits_5fto_5fmodel',['device_units_to_model',['../classDrawer.html#a04960eb3cb3f70addd65ad9f96c00aa6',1,'Drawer']]],
   ['diatonicpitch',['DiatonicPitch',['../classDiatonicPitch.html#a9772777ca30014eb1071805a7288fd09',1,'DiatonicPitch::DiatonicPitch(int value)'],['../classDiatonicPitch.html#af8b966fcc878c1e99fac249039c9f9df',1,'DiatonicPitch::DiatonicPitch(int step, int octave)'],['../classDiatonicPitch.html#aed65086b03227b66a43321fd99fd15b0',1,'DiatonicPitch::DiatonicPitch()']]],
   ['doccmdcomposite',['DocCmdComposite',['../classDocCmdComposite.html#a1fdd3d58f52985e89499e6c9ec89afdc',1,'DocCmdComposite']]],
   ['doccommandexecuter',['DocCommandExecuter',['../classDocCommandExecuter.html#ace74bb66b123eb229fa1f2e66f598a2c',1,'DocCommandExecuter']]],
@@ -16,6 +18,10 @@ var searchData=
   ['downcast_5fto_5fparagraph',['downcast_to_paragraph',['../classAObject.html#adde938b5a7033ddac690704fed3257c2',1,'AObject']]],
   ['downcast_5fto_5fscore',['downcast_to_score',['../classAObject.html#aa903581f71bf6337dcd458628d94eda9',1,'AObject']]],
   ['downcast_5fto_5ftext_5fitem',['downcast_to_text_item',['../classAObject.html#a45db6b2a82edcda9afd5adf1a7aaee36',1,'AObject']]],
+  ['draw_5fbitmap',['draw_bitmap',['../classDrawer.html#afcbe3df0fa7bf0386a026650654a5672',1,'Drawer']]],
+  ['draw_5fglyph',['draw_glyph',['../classDrawer.html#a43dc14d80e0bde842fbf42887a0f6c4d',1,'Drawer']]],
+  ['draw_5ftext',['draw_text',['../classDrawer.html#a8707326a693f0db40d3befc123d35485',1,'Drawer::draw_text(double x, double y, const std::string &amp;str)=0'],['../classDrawer.html#ac1349be5c1911939648ce4c21c69815b',1,'Drawer::draw_text(double x, double y, const wstring &amp;str)=0']]],
+  ['drawer',['Drawer',['../classDrawer.html#ab2a64350c99445a02dbf5fd65118707a',1,'Drawer']]],
   ['dump_5fcursor',['dump_cursor',['../classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f',1,'Interactor']]],
   ['dump_5fselection',['dump_selection',['../classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659',1,'Interactor']]]
 ];

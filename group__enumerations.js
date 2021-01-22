@@ -123,6 +123,7 @@ var group__enumerations =
       [ "k_mensurstrich_barlines", "group__enumerations.html#gga391ee07675002e9ed01d8f5adfb18804aceadece5287a005301fd85e6a7e2278e", null ]
     ] ],
     [ "EOctave", "group__enumerations.html#gabff4653ec15d209b178a474dd7da31fa", [
+      [ "k_octave_undefined", "group__enumerations.html#ggabff4653ec15d209b178a474dd7da31faa41b3c42f24921175b67306633751496f", null ],
       [ "k_octave_0", "group__enumerations.html#ggabff4653ec15d209b178a474dd7da31faa2ba6c801aa3f26f4d038a9b0b65bb570", null ],
       [ "k_octave_1", "group__enumerations.html#ggabff4653ec15d209b178a474dd7da31faa76b7f2517206bae066d9d16bbdc2ccb3", null ],
       [ "k_octave_2", "group__enumerations.html#ggabff4653ec15d209b178a474dd7da31faae1cea09bf9e708a03133fc6cba96e49b", null ],
@@ -171,6 +172,7 @@ var group__enumerations =
     ] ],
     [ "ESteps", "group__enumerations.html#gaeae8853f80e4ededd64180f81d0083fb", [
       [ "k_no_pitch", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fba8b27f10e541b6fc6e5601335a6b98d58", null ],
+      [ "k_step_undefined", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fba8f84ffeb56cab01651407542db30fce1", null ],
       [ "k_step_C", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fbaed12d945d663c66a023ba8de4a1fa718", null ],
       [ "k_step_D", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fba33623c23a56ce288029d618d059a1606", null ],
       [ "k_step_E", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fba7b0398febb44ee6846ff2446ddca959a", null ],

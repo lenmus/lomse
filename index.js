@@ -9,26 +9,11 @@ var index =
       [ "Editing documents", "page-introduction.html#overview-edition", null ],
       [ "The sound engine", "page-introduction.html#overview-sound-engine", null ]
     ] ],
-    [ "Rendering documents overview", "page-render-overview.html", [
-      [ "How to render a document", "page-render-overview.html#mvc-rendering", null ],
-      [ "The Lomse Model-View-Controller", "page-render-overview.html#mvc-overview", null ],
-      [ "The rendering buffer for the View", "page-render-overview.html#rendering-buffer", null ],
-      [ "Lomse library initialization", "page-render-overview.html#page-render-overview-init-lomse", null ],
-      [ "Displaying the document", "page-render-overview.html#rendering-display", null ],
-      [ "View types", "page-render-overview.html#page-render-overview-viewtypes", null ],
-      [ "Controlling what is displayed", "page-render-overview.html#page-render-overview-control", null ],
-      [ "Tips for several OSs/frameworks", "page-render-overview.html#page-render-overview-tips", [
-        [ "Using Lomse in Qt", "page-render-overview.html#page-render-overview-qt", null ],
-        [ "Using Lomse in wxWidgets", "page-render-overview.html#page-render-overview-wxwidgets", null ],
-        [ "Using Lomse in JUCE", "page-render-overview.html#page-render-overview-juce", null ],
-        [ "Using Lomse in X11", "page-render-overview.html#page-render-overview-x11", null ],
-        [ "Using Lomse in MS Windows", "page-render-overview.html#page-render-overview-windows", null ]
-      ] ]
-    ] ],
-    [ "Printing documents overview", "page-printing.html", [
-      [ "The print API", "page-printing.html#page-printing-overview", null ],
-      [ "Determining print buffer size", "page-printing.html#page-printing-buffer-size", null ],
-      [ "Save memory by tiling", "page-printing.html#page-printing-tiles", null ]
+    [ "Rendering documents overview", "page-render-overview.html", "page-render-overview" ],
+    [ "Printing documents overview", "page-printing.html", "page-printing" ],
+    [ "Application specific Drawer objects", "page-user-drawers.html", [
+      [ "The Drawer object", "page-user-drawers.html#page-user-drawers-overview", null ],
+      [ "Using application specific drawers", "page-user-drawers.html#page-user-drawers-use", null ]
     ] ],
     [ "Editing documents overview", "page-edit-overview.html", [
       [ "How to modify a document", "page-edit-overview.html#edit-overview", null ],
@@ -67,7 +52,7 @@ var index =
       ] ],
       [ "The structure of a music score", "page-api-internal-model.html#api-internal-model-scores", null ]
     ] ],
-    [ "File formats supoported by Lomse", "page-file-formats.html", [
+    [ "File formats supported by Lomse", "page-file-formats.html", [
       [ "Supported file formats", "page-file-formats.html#page-file-formats-overview", [
         [ "LDP format", "page-file-formats.html#ldp-format", null ],
         [ "LMD format", "page-file-formats.html#lmd-format", null ],

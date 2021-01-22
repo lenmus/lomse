@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['file_20formats_20supoported_20by_20lomse',['File formats supoported by Lomse',['../page-file-formats.html',1,'index']]]
+  ['editing_20documents_20overview',['Editing documents overview',['../page-edit-overview.html',1,'index']]],
+  ['events_20and_20requests',['Events and Requests',['../page-events.html',1,'index']]]
 ];

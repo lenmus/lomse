@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.28.0</span>
+   &#160;<span id="projectnumber">0.28.1</span>
    </div>
   </td>
  </tr>
@@ -165,8 +165,8 @@ Public Member Functions</h2></td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Coordinates conversion</div></td></tr>
 <tr class="memitem:aaa5e88bd7eaa484ae2f0c11ab29e34ff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff">screen_point_to_page_point</a> (double *x, double *y)</td></tr>
 <tr class="separator:aaa5e88bd7eaa484ae2f0c11ab29e34ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae27a39c9cdbce876919dcd2a2205492e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e">model_point_to_screen</a> (double *x, double *y, int iPage)</td></tr>
-<tr class="separator:ae27a39c9cdbce876919dcd2a2205492e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01daf65c15286881cd66098de1ba9ce2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a01daf65c15286881cd66098de1ba9ce2">model_point_to_device</a> (double *x, double *y, int iPage)</td></tr>
+<tr class="separator:a01daf65c15286881cd66098de1ba9ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75600fd031826c9ae48ca4ada8b7ddce"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce">page_at_screen_point</a> (double x, double y)</td></tr>
 <tr class="separator:a75600fd031826c9ae48ca4ada8b7ddce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a986167b680f97ad5914c69343a7d15c5"><td class="memItemLeft" align="right" valign="top">virtual UPoint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">screen_point_to_model_point</a> (Pixels x, Pixels y)</td></tr>
@@ -247,10 +247,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Print related</div></td></tr>
 <tr class="memitem:a36d4801019bbf55a77b616d53680f7a2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a36d4801019bbf55a77b616d53680f7a2">set_print_buffer</a> (unsigned char *buf, unsigned width, unsigned height)</td></tr>
 <tr class="separator:a36d4801019bbf55a77b616d53680f7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">set_print_buffer</a> (RenderingBuffer *rbuf)</td></tr>
-<tr class="separator:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56006a47ef6164ad139c2d5bb1e17c3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">set_print_ppi</a> (double ppi)</td></tr>
-<tr class="separator:a56006a47ef6164ad139c2d5bb1e17c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3412f55d2c610efe19b86092b61afae1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a3412f55d2c610efe19b86092b61afae1">set_print_page_size</a> (Pixels width, Pixels height)</td></tr>
+<tr class="separator:a3412f55d2c610efe19b86092b61afae1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">print_page</a> (int page, VPoint viewport=VPoint(0, 0))</td></tr>
 <tr class="separator:a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4030a9cf2342d198a5890c30cecec4b7"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">get_num_pages</a> ()</td></tr>
@@ -1183,8 +1181,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 
 </div>
 </div>
-<a id="ae27a39c9cdbce876919dcd2a2205492e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae27a39c9cdbce876919dcd2a2205492e">&#9670;&nbsp;</a></span>model_point_to_screen()</h2>
+<a id="a01daf65c15286881cd66098de1ba9ce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01daf65c15286881cd66098de1ba9ce2">&#9670;&nbsp;</a></span>model_point_to_device()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1193,7 +1191,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void Interactor::model_point_to_screen </td>
+          <td class="memname">virtual void Interactor::model_point_to_device </td>
           <td>(</td>
           <td class="paramtype">double *&#160;</td>
           <td class="paramname"><em>x</em>, </td>
@@ -1223,7 +1221,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </table>
 </div><div class="memdoc">
 <p>Converts logical coordinates relative to the start of a page to absolute coordinates in device units (pixels, relative to view origin).</p>
-<p>Example: </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> iPage = 4;      <span class="comment">//in fact page 5. Remember iPage = 0..num_pages-1</span></div><div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//LUnits relative to page 5 origin</span></div><div class="line"><span class="keywordtype">double</span> y = 2700.0;</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;model_point_to_screen(&amp;x, &amp;y, iPage);</div><div class="line"></div><div class="line">    <span class="comment">//Here @a x and @a y contains pixels relative to</span></div><div class="line">    <span class="comment">//view origin</span></div><div class="line">}</div></div><!-- fragment --> 
+<p>Example: </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> iPage = 4;      <span class="comment">//in fact page 5. Remember iPage = 0..num_pages-1</span></div><div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//LUnits relative to page 5 origin</span></div><div class="line"><span class="keywordtype">double</span> y = 2700.0;</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;model_point_to_device(&amp;x, &amp;y, iPage);</div><div class="line"></div><div class="line">    <span class="comment">//Here @a x and @a y contains pixels relative to</span></div><div class="line">    <span class="comment">//view origin</span></div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a59a34de84e5ca08186be15ee25818868"></a>
@@ -2525,11 +2523,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </div><div class="memdoc">
 <p>Set current operation mode. An operation mode defines valid actions and commands on the Document. For instance, in 'read only' mode all actions that could alter Document content will be ignored. Valid operation modes are defined by enum <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a>. Look there for an explanation of the different operating modes.</p>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(SpEventInfo pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a36d4801019bbf55a77b616d53680f7a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36d4801019bbf55a77b616d53680f7a2">&#9670;&nbsp;</a></span>set_print_buffer() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d4801019bbf55a77b616d53680f7a2">&#9670;&nbsp;</a></span>set_print_buffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2568,13 +2566,20 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </table>
 </div><div class="memdoc">
 <p>Sets the memory area to be used as buffer for printing operations.</p>
-<p>In order to not interfere with screen display, a different rendering buffer is used for printing.</p>
+<p>In order to not interfere with screen display, a different rendering buffer is used for printing. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">buf</td><td>Pointer to the memory area to be used as rendering buffer </td></tr>
+    <tr><td class="paramname">width</td><td>Rendering buffer width, in pixels </td></tr>
+    <tr><td class="paramname">height</td><td>Rendering buffer height, in pixels</td></tr>
+  </table>
+  </dd>
+</dl>
 <p>See <a class="el" href="page-printing.html">Printing documents overview</a> </p>
 
 </div>
 </div>
-<a id="ab5402ba5556ee21c50bfab7a097cc5eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5402ba5556ee21c50bfab7a097cc5eb">&#9670;&nbsp;</a></span>set_print_buffer() <span class="overload">[2/2]</span></h2>
+<a id="a3412f55d2c610efe19b86092b61afae1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3412f55d2c610efe19b86092b61afae1">&#9670;&nbsp;</a></span>set_print_page_size()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2583,40 +2588,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void Interactor::set_print_buffer </td>
+          <td class="memname">virtual void Interactor::set_print_page_size </td>
           <td>(</td>
-          <td class="paramtype">RenderingBuffer *&#160;</td>
-          <td class="paramname"><em>rbuf</em></td><td>)</td>
-          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
         </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Sets the memory area to be used as buffer for printing operations.</p>
-<p>In order to not interfere with screen display, a different rendering buffer is used for printing.</p>
-<p>See <a class="el" href="page-printing.html">Printing documents overview</a> </p>
-
-</div>
-</div>
-<a id="a56006a47ef6164ad139c2d5bb1e17c3d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a56006a47ef6164ad139c2d5bb1e17c3d">&#9670;&nbsp;</a></span>set_print_ppi()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
         <tr>
-          <td class="memname">virtual void Interactor::set_print_ppi </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>ppi</em></td><td>)</td>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -2625,7 +2611,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Sets the resolution (in dots per inch, dpi) to use for printing.</p>
+<p>Sets the resolution to use for printing. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>Paper width, in pixels </td></tr>
+    <tr><td class="paramname">height</td><td>Paper height, in pixels</td></tr>
+  </table>
+  </dd>
+</dl>
 <p>See <a class="el" href="page-printing.html">Printing documents overview</a> </p>
 
 </div>
@@ -2862,7 +2854,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Changes the background color for the View. By default all Views have a gray background and the paper is white. Example, for suppressing the background: </p><div class="fragment"><div class="line">m_pPresenter = <a class="code" href="namespacelomse.html">lomse</a>.open_document(k_view_single_system, filename);</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line">    spInteractor-&gt;set_view_background( Color(255,255,255) );  <span class="comment">//white</span></div><div class="line">    ...</div></div><!-- fragment --> 
+<p>Changes the background color for the View. By default all Views have a gray background and the paper is white. Example, for suppressing the background: </p><div class="fragment"><div class="line">m_pPresenter = <a class="code" href="namespacelomse.html">lomse</a>.open_document(k_view_single_system, filename);</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;set_view_background( Color(255,255,255) );  <span class="comment">//white</span></div><div class="line">    ...</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a81455e8a584d8dff982c3f43e92e7f34"></a>
@@ -3239,7 +3231,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Mon Jan 11 2021 19:30:36 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Jan 22 2021 09:49:36 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

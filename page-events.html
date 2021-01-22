@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.28.0</span>
+   &#160;<span id="projectnumber">0.28.1</span>
    </div>
   </td>
  </tr>
@@ -170,7 +170,7 @@ How to register an event handler</h1>
 <li>A Control object.</li>
 </ul>
 <p>The parameters for the <code>add_event_handler()</code> method depends on the type of handler method. There are three possibilities:</p>
-<p>a) The handler is a C function: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span> (*pt2Func)(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event) );</div></div><!-- fragment --><p>b) The handler is a C++ method: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span>* pThis,</div><div class="line">                 <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>* pObj, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event) );</div></div><!-- fragment --><p>c) The handler is a C++ object derived form lomse::EventHandler: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <a class="code" href="classEventHandler.html">EventHandler</a>* pHandler);</div></div><!-- fragment --><p>The parameters for these methods are:</p><ul>
+<p>a) The handler is a C function: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span> (*pt2Func)(SpEventInfo event) );</div></div><!-- fragment --><p>b) The handler is a C++ method: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span>* pThis,</div><div class="line">                 <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>* pObj, SpEventInfo event) );</div></div><!-- fragment --><p>c) The handler is a C++ object derived form lomse::EventHandler: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <a class="code" href="classEventHandler.html">EventHandler</a>* pHandler);</div></div><!-- fragment --><p>The parameters for these methods are:</p><ul>
 <li><code>eventType</code> is the event type you wish to handle, such as a mouse click.</li>
 <li><code>SpEventInfo</code> is an shared pointer to the event object. All events derive from <code>lomse::EventInfo</code> class.</li>
 </ul>
@@ -200,7 +200,7 @@ Handling requests</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Jan 11 2021 19:30:36 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Jan 22 2021 09:49:36 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

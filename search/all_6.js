@@ -1,7 +1,7 @@
 var searchData=
 [
   ['get_5fbold',['get_bold',['../classRequestFont.html#a9c3719b6491ce9e2ebfe76292bebbd7d',1,'RequestFont']]],
-  ['get_5fbuild_5fdate',['get_build_date',['../classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a',1,'LomseDoorway']]],
+  ['get_5fbuild_5fdate',['get_build_date',['../classLomseDoorway.html#a3516a2e20c77ad974a0acc512e5446fe',1,'LomseDoorway']]],
   ['get_5fcaret_5ftimecode',['get_caret_timecode',['../classInteractor.html#ac30c10982952f57d03a3e992e90eaca0',1,'Interactor']]],
   ['get_5fcode',['get_code',['../classFIntval.html#ab5c70f31e77c4289d0db63dc7a541f73',1,'FIntval']]],
   ['get_5fcolor',['get_color',['../classFragmentMark.html#a1c835e2c03c144e446e1cc58e0ae1933',1,'FragmentMark::get_color()'],['../classTempoLine.html#a81beae9dbd0fc1f32fc1d451b565a6d4',1,'TempoLine::get_color()'],['../classPlaybackHighlight.html#afa41e379c5ac3a1799bab46b99c6feef',1,'PlaybackHighlight::get_color()']]],
@@ -65,17 +65,18 @@ var searchData=
   ['get_5ftype',['get_type',['../classFragmentMark.html#a1d23dba1c2b9dc0014fd68822998122f',1,'FragmentMark::get_type()'],['../classFIntval.html#ae52fc9217d9821a4e3d1af1e8379d680',1,'FIntval::get_type()']]],
   ['get_5fundo_5fpolicy',['get_undo_policy',['../classDocCommand.html#a1676ed87380eb546cbbd1f4fdc37af16',1,'DocCommand::get_undo_policy()'],['../classDocCmdComposite.html#a7660d47eebde37b3e4eff864958dc7f0',1,'DocCmdComposite::get_undo_policy()'],['../classCmdAddChordNote.html#adf998cfe8380dac6b3fb64c774ac9dd4',1,'CmdAddChordNote::get_undo_policy()'],['../classCmdAddNoteRest.html#a32790ea6ce2af4f2d922f45d09fa1d85',1,'CmdAddNoteRest::get_undo_policy()'],['../classCmdAddTie.html#abcf66db47baee8a9757ffa86430ca17b',1,'CmdAddTie::get_undo_policy()'],['../classCmdAddTuplet.html#aec57a577a101fa4088e2f783cce9b0cc',1,'CmdAddTuplet::get_undo_policy()'],['../classCmdBreakBeam.html#ac4c14b68a7cef47267ba1cfb7726779b',1,'CmdBreakBeam::get_undo_policy()'],['../classCmdChangeAccidentals.html#a1fe9d313e357ef72dd1f8a4d8ef74089',1,'CmdChangeAccidentals::get_undo_policy()'],['../classCmdChangeAttribute.html#a9aa796c22e78060a95c1921614e99b73',1,'CmdChangeAttribute::get_undo_policy()'],['../classCmdChangeDots.html#a21ae2ac6e2e56fc5ffd8abf595cd3657',1,'CmdChangeDots::get_undo_policy()'],['../classCmdCursor.html#a140c1d3b0437316b1c1071355bffcfad',1,'CmdCursor::get_undo_policy()'],['../classCmdDeleteBlockLevelObj.html#a6bdc126578c4457dd7d2f824c1b6c04e',1,'CmdDeleteBlockLevelObj::get_undo_policy()'],['../classCmdDeleteRelation.html#a4211889bf1ad7a87c13f23704f85aa44',1,'CmdDeleteRelation::get_undo_policy()'],['../classCmdDeleteSelection.html#a60127c51f19bf55bd691aa9c641a3ec1',1,'CmdDeleteSelection::get_undo_policy()'],['../classCmdDeleteStaffObj.html#a57938d115ae31e5fd8e9eec00514c251',1,'CmdDeleteStaffObj::get_undo_policy()'],['../classCmdInsertBlockLevelObj.html#a2d9f0723c416c9debbfde40fd6abe739',1,'CmdInsertBlockLevelObj::get_undo_policy()'],['../classCmdInsertManyStaffObjs.html#a59bc19c264d22764fbf787c6a39aebfe',1,'CmdInsertManyStaffObjs::get_undo_policy()'],['../classCmdInsertStaffObj.html#a1edb54e8789e5c2dbf595786cca1d7fa',1,'CmdInsertStaffObj::get_undo_policy()'],['../classCmdJoinBeam.html#a288ed569d2dbae86c6ded0699556e9df',1,'CmdJoinBeam::get_undo_policy()'],['../classCmdMoveObjectPoint.html#ad30e68cc16f86b8057d6ef8dde63378c',1,'CmdMoveObjectPoint::get_undo_policy()'],['../classCmdSelection.html#a99db2ad87e4f005b94705cde615e0812',1,'CmdSelection::get_undo_policy()'],['../classCmdTranspose.html#a108448a0199f7f212b8ba7d6a0b56153',1,'CmdTranspose::get_undo_policy()']]],
   ['get_5fuser_5fdata',['get_user_data',['../classPresenter.html#ae3bea16ee1a9c3194525d433ec56cc9f',1,'Presenter']]],
-  ['get_5fversion_5flong_5fstring',['get_version_long_string',['../classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0',1,'LomseDoorway']]],
+  ['get_5fversion_5flong_5fstring',['get_version_long_string',['../classLomseDoorway.html#aa1ea1c6035a8c54e690be7d1661ce109',1,'LomseDoorway']]],
   ['get_5fversion_5fmajor',['get_version_major',['../classLomseDoorway.html#af7b2996e6d55a4bf319b33d9e5cf3b3d',1,'LomseDoorway']]],
   ['get_5fversion_5fminor',['get_version_minor',['../classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09',1,'LomseDoorway']]],
   ['get_5fversion_5fpatch',['get_version_patch',['../classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152',1,'LomseDoorway']]],
-  ['get_5fversion_5fstring',['get_version_string',['../classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541',1,'LomseDoorway']]],
+  ['get_5fversion_5fstring',['get_version_string',['../classLomseDoorway.html#a3fa8a9cce30d315dd98214698537d626',1,'LomseDoorway']]],
   ['get_5fview',['get_view',['../classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a',1,'Interactor']]],
   ['get_5fview_5fsize',['get_view_size',['../classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65',1,'Interactor']]],
   ['get_5fviewport',['get_viewport',['../classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905',1,'Interactor']]],
   ['get_5fwidth',['get_width',['../classTempoLine.html#aed623b9e824d488b0eed12f3d7833883',1,'TempoLine']]],
   ['get_5fx',['get_x',['../classEventMouse.html#af79fd6811e3033cd08276eb3f68a7500',1,'EventMouse']]],
   ['get_5fy',['get_y',['../classEventMouse.html#a7df79bb4129b6a67936c0e8f26162b7b',1,'EventMouse']]],
+  ['gradient_5fcolor',['gradient_color',['../classDrawer.html#a1526a311e6e3d509247da2d0ffafa26f',1,'Drawer::gradient_color(Color c1, Color c2, double start, double stop)=0'],['../classDrawer.html#a6fe1d3da8a69908d4b9b5b13d42cd00f',1,'Drawer::gradient_color(Color c1, double start, double stop)=0']]],
   ['graphicview',['GraphicView',['../classGraphicView.html',1,'']]],
   ['group_5finstruments',['group_instruments',['../classAScore.html#ad871e475b38e78f142846776664a9aac',1,'AScore']]]
 ];

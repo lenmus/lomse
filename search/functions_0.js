@@ -10,6 +10,7 @@ var searchData=
   ['add_5fhandler',['add_handler',['../classObserver.html#ac5156b79493ca166ba54dffaf29302c1',1,'Observer::add_handler(int eventType, void(*pt2Func)(SpEventInfo event))'],['../classObserver.html#aa80ce202bd8f761b11c9a99f71f0dcda',1,'Observer::add_handler(int eventType, void *pThis, void(*pt2Func)(void *pObj, SpEventInfo event))'],['../classObserver.html#af5d86c2b8a575231bc9192fbe5aa9cb8',1,'Observer::add_handler(int eventType, EventHandler *pHandler)'],['../classObserver.html#afa9f0294988d2fd6abd0bb0c998bd712',1,'Observer::add_handler(int eventType, int childType, ImoId childId, EventHandler *pHandler)']]],
   ['add_5fobserver_5ffor',['add_observer_for',['../classEventNotifier.html#a8990a5faa47e3c605374ed4fd2b3e094',1,'EventNotifier']]],
   ['add_5fobserver_5ffor_5fchild',['add_observer_for_child',['../classEventNotifier.html#ad7366bed1d2b2895a28b7c524dbe5c53',1,'EventNotifier']]],
+  ['add_5fpath',['add_path',['../classDrawer.html#a5d9e490faf48d1436bbcc70da8510ca0',1,'Drawer']]],
   ['add_5fsemitone',['add_semitone',['../classFPitch.html#ae3409e308ab5422baf9ec32892990921',1,'FPitch::add_semitone(EKeySignature nKey)'],['../classFPitch.html#a4f53f348868666cad91bef6fd48c9fdf',1,'FPitch::add_semitone(bool fUseSharps)']]],
   ['all_5fsounds_5foff',['all_sounds_off',['../classMidiServerBase.html#a873f21029420df344a2dd9212ac27c5d',1,'MidiServerBase']]],
   ['aobject',['AObject',['../classAObject.html#a1773aea3dc61de960e1ba2811ce38e92',1,'AObject']]],

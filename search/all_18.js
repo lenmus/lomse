@@ -5,6 +5,7 @@ var searchData=
   ['_7edoccmdcomposite',['~DocCmdComposite',['../classDocCmdComposite.html#ac4bb34d9a2245adf26e6da74062857ee',1,'DocCmdComposite']]],
   ['_7edoccmdsimple',['~DocCmdSimple',['../classDocCmdSimple.html#a8bf9aa1e2a87310982879f8586918ac7',1,'DocCmdSimple']]],
   ['_7edoccommand',['~DocCommand',['../classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823',1,'DocCommand']]],
+  ['_7edrawer',['~Drawer',['../classDrawer.html#a828359121a6a1d800db1f2b05dd595e8',1,'Drawer']]],
   ['_7eeventaction',['~EventAction',['../classEventAction.html#ae6a6a992ce24a5244b5e7b9a7adab9fa',1,'EventAction']]],
   ['_7eeventdoc',['~EventDoc',['../classEventDoc.html#af9f98135e28a2b0c78c94bd65c41ba66',1,'EventDoc']]],
   ['_7eeventhandler',['~EventHandler',['../classEventHandler.html#a9578358998a3221402df5404ca2776d6',1,'EventHandler']]],

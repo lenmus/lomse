@@ -2,7 +2,7 @@ var searchData=
 [
   ['index_5fto_5ffirst_5finstrument',['index_to_first_instrument',['../classAInstrGroup.html#a8735a99d05a80c475d7f54a1ed92c3cb',1,'AInstrGroup']]],
   ['index_5fto_5flast_5finstrument',['index_to_last_instrument',['../classAInstrGroup.html#a326dddff4ebc11ae9b35f22d8f51a807',1,'AInstrGroup']]],
-  ['init_5flibrary',['init_library',['../classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f',1,'LomseDoorway']]],
+  ['init_5flibrary',['init_library',['../classLomseDoorway.html#af65c535236e088710cf055c9180f34fa',1,'LomseDoorway']]],
   ['instrument_5fat',['instrument_at',['../classAInstrGroup.html#a424072486701ac5384b55b081b4e53b1',1,'AInstrGroup::instrument_at()'],['../classAScore.html#a8d13afa60f66cbad8c1882722e73ce8f',1,'AScore::instrument_at()']]],
   ['instruments_5fgroup_5fat',['instruments_group_at',['../classAScore.html#a3aea66cc6c2c71a48fd34e795b10a51b',1,'AScore']]],
   ['internal_5fobject',['internal_object',['../classAObject.html#aefe8ae022e571d997e91b91846f89d44',1,'AObject::internal_object()'],['../classADynamic.html#a811b77eb6f1ae382559c606b87af82b7',1,'ADynamic::internal_object()'],['../classAInstrument.html#ae533f80c826212fdd5e00559601c0de6',1,'AInstrument::internal_object()'],['../classAInstrGroup.html#aa515c4425723e4c4302344855bf81bb0',1,'AInstrGroup::internal_object()'],['../classALink.html#aae412d6cf0d784c92ff9fd5f3dc27f8d',1,'ALink::internal_object()'],['../classAList.html#aa64ac68df7a7f36b9b4e752e2c6e4468',1,'AList::internal_object()'],['../classAMidiInfo.html#a4fa79ee508a4a84044fa18aa1ec73bea',1,'AMidiInfo::internal_object()'],['../classAScore.html#a13a7da8f0e89462ee6c632dcadb2a039',1,'AScore::internal_object()'],['../classASoundInfo.html#a49fbb04cba29fafd399f2efc60678f99',1,'ASoundInfo::internal_object()'],['../classATextItem.html#a1b562a6c7027354b8f3b95872409bae3',1,'ATextItem::internal_object()'],['../classADocument.html#af2cb84d1cb9010ce1dc6dd8355ac90e7',1,'ADocument::internal_object()']]],
@@ -29,6 +29,7 @@ var searchData=
   ['is_5fnatural_5fnote_5ffor',['is_natural_note_for',['../classMidiPitch.html#ab883bf5b7182b75b78980b7db0d79f5c',1,'MidiPitch::is_natural_note_for()'],['../classFPitch.html#a187fe6a750dabc9dd1e824b6a00790e6',1,'FPitch::is_natural_note_for()']]],
   ['is_5fparagraph',['is_paragraph',['../classAObject.html#aeb83071b2e5dd49bbcec89c2378b1f50',1,'AObject']]],
   ['is_5fplaying',['is_playing',['../classScorePlayer.html#ae0cce1824911d20d139117ea0f685a13',1,'ScorePlayer']]],
+  ['is_5fready',['is_ready',['../classDrawer.html#a12dbac4eff7ef28898ba9a9f643434ba',1,'Drawer']]],
   ['is_5frecordable',['is_recordable',['../classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf',1,'DocCommand']]],
   ['is_5fredo_5fpossible',['is_redo_possible',['../classDocCommandExecuter.html#a4b0e2a24ffe21e2b4ec5440543d10127',1,'DocCommandExecuter']]],
   ['is_5freversible',['is_reversible',['../classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d',1,'DocCommand']]],

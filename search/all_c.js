@@ -1,8 +1,10 @@
 var searchData=
 [
   ['name_5fstring',['name_string',['../classAInstrument.html#ac1be2fbabdd0563a8079e258204554a1',1,'AInstrument::name_string()'],['../classAInstrGroup.html#a838d016e094eadd3d16ff0ae9bf63341',1,'AInstrGroup::name_string()']]],
-  ['new_5fdocument',['new_document',['../classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948',1,'LomseDoorway::new_document(int viewType)'],['../classLomseDoorway.html#aeb01dedc72fc5e973e3dcf65a26a68ed',1,'LomseDoorway::new_document(int viewType, const string &amp;source, int format, ostream &amp;reporter=cout)']]],
+  ['new_5fdocument',['new_document',['../classLomseDoorway.html#af622c7d1c6af2e3394f6a7aaaab51878',1,'LomseDoorway::new_document(int viewType, Drawer *screenDrawer=nullptr, Drawer *printDrawer=nullptr)'],['../classLomseDoorway.html#adf61d133ff60fccf29582f457302f954',1,'LomseDoorway::new_document(int viewType, const std::string &amp;source, int format, std::ostream &amp;reporter=std::cout, Drawer *screenDrawer=nullptr, Drawer *printDrawer=nullptr)']]],
   ['new_5fviewport',['new_viewport',['../classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8',1,'Interactor']]],
+  ['new_5fviewport_5forigin',['new_viewport_origin',['../classDrawer.html#a82b53f6a2a4d75b3993b30318c40ca33',1,'Drawer']]],
+  ['new_5fviewport_5fsize',['new_viewport_size',['../classDrawer.html#aba6e374f64b50deec90c7b0e13ee024a',1,'Drawer']]],
   ['notated_5faccidentals_5ffor',['notated_accidentals_for',['../classFPitch.html#a917d10be06d698863d4b2332d8d3f3d5',1,'FPitch']]],
   ['note_5foff',['note_off',['../classMidiServerBase.html#a67b42d5394adde88fd7aac2f779bed04',1,'MidiServerBase']]],
   ['note_5fon',['note_on',['../classMidiServerBase.html#a0ccd958292bf0153bfc5ef80e9671d51',1,'MidiServerBase']]],

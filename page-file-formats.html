@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Lomse library. API documentation: File formats supoported by Lomse</title>
+<title>Lomse library. API documentation: File formats supported by Lomse</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.28.0</span>
+   &#160;<span id="projectnumber">0.28.1</span>
    </div>
   </td>
  </tr>
@@ -83,7 +83,7 @@ $(document).ready(function(){initNavTree('page-file-formats.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">File formats supoported by Lomse </div>  </div>
+<div class="title">File formats supported by Lomse </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
@@ -98,9 +98,9 @@ $(document).ready(function(){initNavTree('page-file-formats.html','');});
 Supported file formats</h1>
 <p>Lomse supports the following file formats:</p>
 <ul>
-<li><b>LMS: LenMus Score (.lms extension):</b> Plain txt file containing only a music score writen in LDP language. LDP is the acronym for Spanish <em>Lenguaje De Partituras</em> (<em>Language for music scores</em>). It was the initial language which started LenMus project.</li>
+<li><b>LMS: LenMus Score (.lms extension):</b> Plain txt file containing only a music score written in LDP language. LDP is the acronym for Spanish <em>Lenguaje De Partituras</em> (<em>Language for music scores</em>). It was the initial language which started LenMus project.</li>
 <li><b>LMD: LenMus Document (.lmd extension):</b> Plain XML file containing a full document with headers, paragraphs, images, tables lists, scores, etc. It is similar to an HTML or DocBook file with scores in LDP language (tag &lt;ldpmusic&gt;) or MusicXML (tag &lt;mxlmusic&gt;)</li>
-<li><b>MusicXML: (.xml extension):</b> An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.</li>
+<li><b>MusicXML: (usually .xml extension for uncompressed files or .musicxml for compressed files):</b> An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.</li>
 </ul>
 <h2><a class="anchor" id="ldp-format"></a>
 LDP format</h2>
@@ -115,7 +115,7 @@ Image: Rendering of the following LDP score.</div></div>
 <div class="fragment"><div class="line">(score</div><div class="line">    (vers 2.0)</div><div class="line">    (instrument</div><div class="line">        (musicData</div><div class="line">            (clef G)</div><div class="line">            (key C)</div><div class="line">            (time 4 4)</div><div class="line">            (n c4 w)</div><div class="line">            (barline)</div><div class="line">        )</div><div class="line">    )</div><div class="line">)</div></div><!-- fragment --><p>For more information see the LDP manual at <a href="https://lenmus.github.io/ldp/">https://lenmus.github.io/ldp/</a> .</p>
 <h2><a class="anchor" id="lmd-format"></a>
 LMD format</h2>
-<p>As LenMus project evolved, LDP was insuficient as it was necessary to describe not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tag for each format is created. For instance, tag &lt;ldpmusic&gt; is used to include LDP scores.</p>
+<p>As LenMus project evolved, LDP was insufficient as it was necessary to describe not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tag for each format is created. For instance, tag &lt;ldpmusic&gt; is used to include LDP scores.</p>
 <div class="image">
 <img src="lmd-sample-document.png" alt="lmd-sample-document.png"/>
 <div class="caption">
@@ -137,7 +137,7 @@ Image: Rendering of the following MusicXML score.</div></div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Jan 11 2021 19:30:36 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Jan 22 2021 09:49:36 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>
