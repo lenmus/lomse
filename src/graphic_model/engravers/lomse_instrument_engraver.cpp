@@ -360,6 +360,7 @@ void PartsEngraver::set_position_and_width_for_staves(LUnits indent, UPoint org,
     {
         (*it)->set_staves_horizontal_position(left, width, indent);
         (*it)->set_slice_instr_origin(org);
+        (*it)->reset_staff_position_shifts();
     }
 }
 
@@ -827,7 +828,7 @@ void InstrumentEngraver::reposition_staff(int iStaff, LUnits yShift)
 //---------------------------------------------------------------------------------------
 LUnits InstrumentEngraver::get_top_line_of_staff(int iStaff)
 {
-    return m_org.y + m_staffTop[iStaff] + m_lineThickness[iStaff] / 2.0f;
+    return m_org.y + m_staffTop[iStaff] + m_yShifts[iStaff] + m_lineThickness[iStaff] / 2.0f;
 }
 
 //---------------------------------------------------------------------------------------
@@ -838,9 +839,12 @@ LUnits InstrumentEngraver::get_bottom_line_of_staff(int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits InstrumentEngraver::get_unshifted_bottom_line_of_staff(int iStaff)
+void InstrumentEngraver::reset_staff_position_shifts()
 {
-    return m_org.y + m_staffBottom[iStaff] + m_lineThickness[iStaff] / 2.0f;
+    for (LUnits& yShift : m_yShifts)
+    {
+        yShift = 0;
+    }
 }
 
 //---------------------------------------------------------------------------------------

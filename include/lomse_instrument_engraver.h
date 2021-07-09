@@ -192,7 +192,7 @@ public:
     LUnits get_staff_bottom_position() { return m_staffBottom.back()  + m_yShifts.back(); }
     LUnits get_top_line_of_staff(int iStaff);
     LUnits get_bottom_line_of_staff(int iStaff);
-    LUnits get_unshifted_bottom_line_of_staff(int iStaff);
+    void reset_staff_position_shifts();
 
     //shapes
     void add_staff_lines(GmoBoxSystem* pBox);

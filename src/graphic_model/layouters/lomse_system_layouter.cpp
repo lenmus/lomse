@@ -239,8 +239,7 @@ void SystemLayouter::create_vertical_profile()
         for (int iStaff=0; iStaff < pInstrEngraver->get_num_staves(); iStaff++)
         {
             LUnits yTop = pInstrEngraver->get_top_line_of_staff(iStaff);
-            //LUnits yBottom = pInstrEngraver->get_bottom_line_of_staff(iStaff);
-            LUnits yBottom = pInstrEngraver->get_unshifted_bottom_line_of_staff(iStaff);
+            LUnits yBottom = pInstrEngraver->get_bottom_line_of_staff(iStaff);
             int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
             m_pVProfile->initialize(idxStaff, yTop, yBottom);
         }
