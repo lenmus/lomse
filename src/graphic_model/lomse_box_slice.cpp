@@ -65,8 +65,9 @@ GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr,
 
 //---------------------------------------------------------------------------------------
 void GmoBoxSlice::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
-                                               vector<LUnits>& heights,
-                                               vector<LUnits>& barlinesHeight,
+                                               const vector<LUnits>& heights,
+                                               const vector<LUnits>& barlinesHeight,
+                                               const vector<vector<LUnits>>& relStaffTopPositions,
                                                SystemLayouter* pSysLayouter)
 
 {
@@ -76,7 +77,8 @@ void GmoBoxSlice::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
     {
         GmoBoxSliceInstr* pSlice = static_cast<GmoBoxSliceInstr*>(*it);
         pSlice->reposition_slices_and_shapes(yOrgShifts, heights,
-                                             barlinesHeight[iInstr], pSysLayouter);
+                                             barlinesHeight[iInstr], relStaffTopPositions[iInstr],
+                                             pSysLayouter);
     }
 
     //shift origin and increase height

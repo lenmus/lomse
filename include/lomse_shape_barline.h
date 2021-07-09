@@ -33,6 +33,8 @@
 #include "lomse_basic.h"
 #include "lomse_shape_base.h"
 
+#include <vector>
+
 namespace lomse
 {
 
@@ -57,6 +59,7 @@ protected:
     LUnits  m_xRightLine;           //x right of last right line
     LUnits  m_xLeftLine;            //x left of first left line
 
+    std::vector<LUnits> m_relStaffTopPositions;
 
     friend class BarlineEngraver;
     GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineType,
@@ -76,6 +79,9 @@ public:
     inline LUnits get_x_right_line() { return m_xRightLine + m_uxLeft; }
     inline LUnits get_x_left_line() { return m_xLeftLine + m_uxLeft; }
 
+    void set_relative_staff_top_positions(const std::vector<LUnits>& positions) { m_relStaffTopPositions = positions; }
+    void set_relative_staff_top_positions(std::vector<LUnits>&& positions) { m_relStaffTopPositions = std::move(positions); }
+
 protected:
     void compute_width();
     void determine_lines_relative_positions();
@@ -84,6 +90,7 @@ protected:
     void draw_thick_line(Drawer* pDrawer, LUnits uxLeft, LUnits uyTop, LUnits uWidth,
                          LUnits uHeight, Color color);
     void draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, Color color);
+    void draw_repeat_dots_for_all_staves(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, Color color);
 
 };
 

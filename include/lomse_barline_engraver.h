@@ -39,6 +39,7 @@ namespace lomse
 
 //forward declarations
 class ImoBarline;
+class InstrumentEngraver;
 class GmoBoxSliceInstr;
 class GmoShape;
 class ScoreMeter;
@@ -47,7 +48,8 @@ class ScoreMeter;
 class BarlineEngraver : public Engraver
 {
 public:
-    BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr=0);
+    BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                    int iInstr=0, InstrumentEngraver* pInstrEngrv = nullptr);
     BarlineEngraver(LibraryScope& libraryScope);
     ~BarlineEngraver() {}
 
@@ -61,6 +63,7 @@ public:
 
 protected:
     GmoShape* m_pBarlineShape;
+    InstrumentEngraver* m_pInstrEngrv;
 
 };
 

@@ -61,8 +61,9 @@ public:
     //helpers for layout
     /**  Move boxes and shapes to theirs final 'y' positions. */
     void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
-                                      std::vector<LUnits>& heights,
+                                      const std::vector<LUnits>& heights,
                                       LUnits barlinesHeight,
+                                      const std::vector<LUnits>& relStaffTopPositions,
                                       SystemLayouter* pSysLayouter);
     GmoBoxSliceStaff* get_slice_staff_for(int iStaff);
 
@@ -88,6 +89,7 @@ public:
     //helpers for layout
     /**  Move shapes to theirs final 'y' positions and increment barlines height. */
     void reposition_shapes(const vector<LUnits>& yShifts, LUnits barlinesHeight,
+                           const std::vector<LUnits>& relStaffTopPositions,
                            SystemLayouter* pSysLayouter, int staff);
 
 protected:

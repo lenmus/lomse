@@ -68,8 +68,9 @@ public:
     //helpers for layout
     /**  Move boxes and shapes to theirs final 'y' positions. */
     void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
-                                      std::vector<LUnits>& heights,
-                                      vector<LUnits>& barlinesHeight,
+                                      const std::vector<LUnits>& heights,
+                                      const std::vector<LUnits>& barlinesHeight,
+                                      const std::vector<std::vector<LUnits>>& relStaffTopPositions,
                                       SystemLayouter* pSysLayouter);
 
     //slices

@@ -596,16 +596,27 @@ void SystemLayouter::reposition_slice_boxes_and_shapes(const vector<LUnits>& yOr
 {
     int numInstrs = m_pScore->get_num_instruments();
     vector<LUnits> barlinesHeight(numInstrs);
+    vector<vector<LUnits>> relStaffTopPositions(numInstrs);
 
     for (int iInstr = 0; iInstr < numInstrs; iInstr++)
     {
         InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-        barlinesHeight[iInstr] = pInstrEngrv->get_barline_bottom()
-                                - pInstrEngrv->get_barline_top();
+
+        const LUnits yTop = pInstrEngrv->get_barline_top();
+        barlinesHeight[iInstr] = pInstrEngrv->get_barline_bottom() - yTop;
+
+        const int numStaves = pInstrEngrv->get_num_staves();
+        relStaffTopPositions[iInstr].reserve(numStaves);
+
+        for (int iStaff = 0; iStaff < numStaves; ++iStaff)
+        {
+            const LUnits relStaffTop = pInstrEngrv->get_top_line_of_staff(iStaff) - yTop;
+            relStaffTopPositions[iInstr].push_back(relStaffTop);
+        }
     }
 
     GmoBoxSystem* pSystem = get_box_system();
-    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight, this);
+    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight, relStaffTopPositions, this);
 }
 
 //---------------------------------------------------------------------------------------

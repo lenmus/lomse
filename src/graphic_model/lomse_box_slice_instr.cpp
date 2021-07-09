@@ -77,8 +77,9 @@ void GmoBoxSliceInstr::add_shape(GmoShape* pShape, int layer, int iStaff)
 
 //---------------------------------------------------------------------------------------
 void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
-                                                    vector<LUnits>& heights,
+                                                    const vector<LUnits>& heights,
                                                     LUnits barlinesHeight,
+                                                    const std::vector<LUnits>& relStaffTopPositions,
                                                     SystemLayouter* pSysLayouter)
 
 {
@@ -88,7 +89,7 @@ void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgSh
     for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it, ++staff)
     {
         GmoBoxSliceStaff* pSlice = static_cast<GmoBoxSliceStaff*>(*it);
-        pSlice->reposition_shapes(yOrgShifts, barlinesHeight, pSysLayouter, staff);
+        pSlice->reposition_shapes(yOrgShifts, barlinesHeight, relStaffTopPositions, pSysLayouter, staff);
 
         m_size.height += heights[idxStaff];
     }
@@ -121,6 +122,7 @@ GmoBoxSliceStaff::~GmoBoxSliceStaff()
 //---------------------------------------------------------------------------------------
 void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                                          LUnits barlinesHeight,
+                                         const std::vector<LUnits>& relStaffTopPositions,
                                          SystemLayouter* pSysLayouter, int UNUSED(staff))
 
 {
@@ -133,7 +135,11 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
         for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
         {
             if ((*it)->is_shape_barline())
-                (*it)->set_height(barlinesHeight);
+            {
+                GmoShapeBarline* pBarlineShape = static_cast<GmoShapeBarline*>(*it);
+                pBarlineShape->set_height(barlinesHeight);
+                pBarlineShape->set_relative_staff_top_positions(relStaffTopPositions);
+            }
         }
     }
     else
@@ -189,8 +195,10 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
             }
             else if ((*it)->is_shape_barline())
             {
-                (*it)->reposition_shape(yShift);
-                (*it)->set_height(barlinesHeight);
+                GmoShapeBarline* pBarlineShape = static_cast<GmoShapeBarline*>(*it);
+                pBarlineShape->reposition_shape(yShift);
+                pBarlineShape->set_height(barlinesHeight);
+                pBarlineShape->set_relative_staff_top_positions(relStaffTopPositions);
             }
             else
             {

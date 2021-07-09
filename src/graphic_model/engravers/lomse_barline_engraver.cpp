@@ -30,6 +30,7 @@
 #include "lomse_barline_engraver.h"
 
 #include "lomse_internal_model.h"
+#include "lomse_instrument_engraver.h"
 #include "lomse_engraving_options.h"
 #include "lomse_shape_barline.h"
 #include "lomse_box_slice_instr.h"
@@ -44,9 +45,10 @@ namespace lomse
 // BarlineEngraver implementation
 //---------------------------------------------------------------------------------------
 BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                 int iInstr)
+                                 int iInstr, InstrumentEngraver* pInstrEngrv)
     : Engraver(libraryScope, pScoreMeter, iInstr)
     , m_pBarlineShape(nullptr)
+    , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
@@ -54,8 +56,33 @@ BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreM
 BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
     : Engraver(libraryScope, nullptr)
     , m_pBarlineShape(nullptr)
+    , m_pInstrEngrv(nullptr)
 {
     //constructor for dragged images
+}
+
+//---------------------------------------------------------------------------------------
+static bool is_repeat_barline_type(EBarline type)
+{
+    switch (type)
+    {
+        case k_barline_unknown:
+        case k_barline_none:
+        case k_barline_simple:
+        case k_barline_double:
+        case k_barline_start:
+        case k_barline_end:
+            return false;
+        case k_barline_start_repetition:
+        case k_barline_end_repetition:
+        case k_barline_double_repetition:
+        case k_barline_double_repetition_alt:
+            return true;
+        case k_max_barline:
+            break;
+    }
+
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -70,11 +97,31 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
     //force selection rectangle to have at least a width of half line (5 tenths)
     LUnits uMinWidth = 0;   //m_pMeter->tenths_to_logical(5.0f, m_iInstr, 0);
 
+    const EBarline barline_type = static_cast<EBarline>(pBarline->get_type());
+
     ShapeId idx = 0;
-    return LOMSE_NEW GmoShapeBarline(pBarline, idx, pBarline->get_type(),
-                                     xPos, yTop, yBottom,
-                                     thinLineWidth, thickLineWidth, spacing,
-                                     radius, color, uMinWidth);
+    GmoShapeBarline* pBarlineShape = LOMSE_NEW GmoShapeBarline(pBarline, idx, barline_type,
+                                                               xPos, yTop, yBottom,
+                                                               thinLineWidth, thickLineWidth, spacing,
+                                                               radius, color, uMinWidth);
+
+    if (m_pInstrEngrv && is_repeat_barline_type(barline_type))
+    {
+        const int numStaves = m_pInstrEngrv->get_num_staves();
+
+        std::vector<LUnits> relStaffTopPositions;
+        relStaffTopPositions.reserve(numStaves);
+
+        for (int i = 0; i < numStaves; ++i)
+        {
+            const LUnits yStaffTop = m_pInstrEngrv->get_top_line_of_staff(i);
+            relStaffTopPositions.push_back(yStaffTop - yTop);
+        }
+
+        pBarlineShape->set_relative_staff_top_positions(std::move(relStaffTopPositions));
+    }
+
+    return pBarlineShape;
 }
 
 //---------------------------------------------------------------------------------------
