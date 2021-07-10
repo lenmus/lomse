@@ -1109,7 +1109,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
                 m_pPartsEngraver->get_engraver_for(iInstr);
             LUnits yTop = pInstrEngrv->get_barline_top();
             LUnits yBottom = pInstrEngrv->get_barline_bottom();
-            BarlineEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr);
+            BarlineEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, pInstrEngrv);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos.x, yTop, yBottom, color);
         }
