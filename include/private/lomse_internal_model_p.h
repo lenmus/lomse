@@ -3228,20 +3228,6 @@ protected:
     {
     }
 
-    ImoLineStyle(ImoLineStyle& info)
-        : ImoSimpleObj(k_imo_line_style)
-        , m_lineStyle( info.get_line_style() )
-        , m_startEdge( info.get_start_edge() )
-        , m_endEdge( info.get_end_edge() )
-        , m_startStyle( info.get_start_cap() )
-        , m_endStyle( info.get_end_cap() )
-        , m_color( info.get_color() )
-        , m_width( info.get_width() )
-        , m_startPoint( info.get_start_point() )
-        , m_endPoint( info.get_end_point() )
-    {
-    }
-
 public:
     virtual ~ImoLineStyle() {}
 
@@ -3621,7 +3607,6 @@ protected:
     friend class ImoDocument;
     friend class ImoScore;
     ImoPageInfo();
-    ImoPageInfo(ImoPageInfo& dto);
 
 public:
     virtual ~ImoPageInfo() {}
@@ -5854,7 +5839,6 @@ protected:
     friend class ImFactory;
     friend class ImoScore;
     ImoSystemInfo();
-    ImoSystemInfo(ImoSystemInfo& dto);
 
 public:
     virtual ~ImoSystemInfo() {}

@@ -46,18 +46,6 @@ StaffObjsIterator::StaffObjsIterator(ColStaffObjs* pColStaffObjs)
 }
 
 //---------------------------------------------------------------------------------------
-StaffObjsIterator::StaffObjsIterator(const StaffObjsIterator& it)
-{
-    m_pColStaffObjs = it.m_pColStaffObjs;
-    m_it = it.m_it;;
-}
-
-//---------------------------------------------------------------------------------------
-StaffObjsIterator::~StaffObjsIterator()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void StaffObjsIterator::first()
 {
     m_it = m_pColStaffObjs->begin();
