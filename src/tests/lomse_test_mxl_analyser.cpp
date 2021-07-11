@@ -6496,6 +6496,7 @@ SUITE(MxlAnalyserTest)
                         CHECK( pWedge->is_crescendo() == false );
                         CHECK( pWedge->get_wedge_number() == 1 );
                         CHECK( !is_different(pWedge->get_color(), Color(0,0,0)) );
+                        CHECK( pWedge->get_end_object() == pDir ); //the first ImoDirection is the end of this edge
                     }
                 }
             }
