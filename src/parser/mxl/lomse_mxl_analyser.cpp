@@ -7399,7 +7399,7 @@ protected:
 
         if (m_pAnalyser->wedge_id_exists(num) && value != "continue")
         {
-            m_pInfo1->set_start(false);
+            m_pInfo1->set_start(value != "stop");
             int wedgeId =  m_pAnalyser->get_wedge_id_and_close(num);
             m_pInfo1->set_wedge_number(wedgeId);
             if (value == "crescendo")
@@ -7407,7 +7407,7 @@ protected:
         }
         else if (value == "crescendo" || value == "diminuendo" || value == "stop")
         {
-            m_pInfo1->set_start(true);
+            m_pInfo1->set_start(value != "stop");
             int wedgeId =  m_pAnalyser->new_wedge_id(num);
             m_pInfo1->set_wedge_number(wedgeId);
             m_pInfo1->set_crescendo(value == "crescendo");
@@ -7822,7 +7822,7 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
     else if (pDto->is_volta_bracket_dto())
         m_pVoltasBuilder->add_item_info(static_cast<ImoVoltaBracketDto*>(pDto));
     else if (pDto->is_wedge_dto())
-        m_pWedgesBuilder->add_item_info(static_cast<ImoWedgeDto*>(pDto));
+        m_pWedgesBuilder->add_item_info_reversed_valid(static_cast<ImoWedgeDto*>(pDto));
     else if (pDto->is_octave_shift_dto())
         m_pOctaveShiftBuilder->add_item_info(static_cast<ImoOctaveShiftDto*>(pDto));
 }
@@ -8478,6 +8478,11 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
 {
     ImoWedgeDto* pStartDto = m_matches.front();
     m_matches.push_back(pEndDto);
+
+    //start and end coud be reversed if end was defined before start
+    if (m_matches.back()->is_start_of_relation())
+        std::swap(m_matches.front(), m_matches.back());
+
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoWedge* pWedge = static_cast<ImoWedge*>(
