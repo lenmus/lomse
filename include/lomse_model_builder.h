@@ -133,8 +133,8 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-// GroupBarlinesFixer. Implements the algorithm to traverse the score instruments and assign
-// a unique partID to any instrument not having partID
+// GroupBarlinesFixer. Implements the algorithm for ensuring that barlines shared between
+// all instruments in a group are are identified and marked as such.
 class GroupBarlinesFixer
 {
 protected:
