@@ -181,15 +181,6 @@ public:
                 }
             }
 
-            virtual ~iterator() {}
-
-            iterator& operator =(const iterator& it) {
-                m_pCurrent = it.m_pCurrent;
-                m_pNext = it.m_pNext;
-                m_pPrev = it.m_pPrev;
-                return *this;
-            }
-
 	        ColStaffObjsEntry* operator *() const { return m_pCurrent; }
 
             iterator& operator ++() {

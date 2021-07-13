@@ -60,7 +60,6 @@ protected:
 
 public:
     XmlNode() {}
-    XmlNode(const XmlNode& node) : m_node(node.m_node) {}
     XmlNode(const XmlNode* node) : m_node(node->m_node) {}
 
     string name() { return string(m_node.name()); }

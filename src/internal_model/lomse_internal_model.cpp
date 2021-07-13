@@ -5146,19 +5146,6 @@ ImoPageInfo::ImoPageInfo()
     //defaults: DIN A4 (210.0 x 297.0 mm), portrait
 }
 
-//---------------------------------------------------------------------------------------
-ImoPageInfo::ImoPageInfo(ImoPageInfo& dto)
-    : ImoSimpleObj(k_imo_page_info)
-    , m_uLeftMargin( dto.get_left_margin() )
-    , m_uRightMargin( dto.get_right_margin() )
-    , m_uTopMargin( dto.get_top_margin() )
-    , m_uBottomMargin( dto.get_bottom_margin() )
-    , m_uBindingMargin( dto.get_binding_margin() )
-    , m_uPageSize( dto.get_page_size() )
-    , m_fPortrait( dto.is_portrait() )
-{
-}
-
 
 //=======================================================================================
 // ImoScoreText implementation
@@ -5292,17 +5279,6 @@ ImoSystemInfo::ImoSystemInfo()
     , m_rightMargin(0.0f)
     , m_systemDistance(0.0f)
     , m_topSystemDistance(0.0f)
-{
-}
-
-//---------------------------------------------------------------------------------------
-ImoSystemInfo::ImoSystemInfo(ImoSystemInfo& dto)
-    : ImoSimpleObj(k_imo_system_info)
-    , m_fFirst( dto.is_first() )
-    , m_leftMargin( dto.get_left_margin() )
-    , m_rightMargin( dto.get_right_margin() )
-    , m_systemDistance( dto.get_system_distance() )
-    , m_topSystemDistance( dto.get_top_system_distance() )
 {
 }
 

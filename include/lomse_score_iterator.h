@@ -54,8 +54,6 @@ protected:
 
 public:
     StaffObjsIterator(ColStaffObjs* pColStaffObjs);
-    StaffObjsIterator(const StaffObjsIterator& it);
-    ~StaffObjsIterator();
 
 
     inline bool is_first() { return m_it == m_pColStaffObjs->begin(); }
