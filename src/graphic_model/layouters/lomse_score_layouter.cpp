@@ -1405,9 +1405,14 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
 
     RelObjEngraver* pEngrv
         = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
-    pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
-                             xLeft, xRight, yTop, idxStaff, pVProfile);
-    pEngrv->set_prolog_width( prologWidth );
+
+    //pEngrv could not exist when malformed files, when start and end are reversed
+    if (pEngrv)
+    {
+        pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
+                                 xLeft, xRight, yTop, idxStaff, pVProfile);
+        pEngrv->set_prolog_width( prologWidth );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1415,7 +1420,12 @@ GmoShape* ShapesCreator::create_last_shape(ImoRelObj* pRO)
 {
     RelObjEngraver* pEngrv
         = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
-    return pEngrv->create_last_shape(pRO->get_color());
+
+    //pEngrv could not exist when malformed files, when start and end are reversed
+    if (pEngrv)
+        return pEngrv->create_last_shape(pRO->get_color());
+    else
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
