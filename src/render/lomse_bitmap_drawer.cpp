@@ -856,6 +856,16 @@ void BitmapDrawer::draw_glyph(double x, double y, unsigned int ch)
 }
 
 //---------------------------------------------------------------------------------------
+void BitmapDrawer::draw_glyph_rotated(double x, double y, unsigned int ch, double rotation)
+{
+    render_existing_paths();
+
+    TransAffine& mtx = m_pRenderer->get_transform();
+    mtx.transform(&x, &y);
+    m_pCalligrapher->draw_glyph_rotated(x, y, ch, m_textColor, m_pRenderer->get_scale(), rotation);
+}
+
+//---------------------------------------------------------------------------------------
 int BitmapDrawer::draw_text(double x, double y, const std::string& str)
 {
     //returns the number of chars drawn

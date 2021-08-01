@@ -171,6 +171,7 @@ public:
                 k_box_control, k_box_table, k_box_table_rows,
            k_shape,
                 k_shape_accidentals, k_shape_accidental_sign,
+                k_shape_arpeggio,
                 k_shape_articulation,
                 k_shape_barline, k_shape_beam, k_shape_brace,
                 k_shape_bracket, k_shape_button,
@@ -221,6 +222,7 @@ public:
     inline bool is_box_system() { return m_objtype == k_box_system; }
     inline bool is_box_table_rows() { return m_objtype == k_box_table_rows; }
 
+    bool is_shape_arpeggio() const { return m_objtype == k_shape_arpeggio; }
     inline bool is_shape_articulation() { return m_objtype == k_shape_articulation; }
     inline bool is_shape_accidentals() { return m_objtype == k_shape_accidentals; }
     inline bool is_shape_accidental_sign() { return m_objtype == k_shape_accidental_sign; }
@@ -276,10 +278,10 @@ public:
     inline void set_height(LUnits height) { m_size.height = height; }
 
     //position
-    inline LUnits get_left() { return m_origin.x; }
-    inline LUnits get_top() { return m_origin.y; }
-    inline LUnits get_right() { return m_origin.x + m_size.width; }
-    inline LUnits get_bottom() { return m_origin.y + m_size.height; }
+    LUnits get_left() const { return m_origin.x; }
+    LUnits get_top() const { return m_origin.y; }
+    LUnits get_right() const { return m_origin.x + m_size.width; }
+    LUnits get_bottom() const { return m_origin.y + m_size.height; }
     void set_origin(UPoint& pos);
     void set_origin(const UPoint& pos);
     void set_origin(LUnits xLeft, LUnits yTop);

@@ -153,6 +153,9 @@ public:
     inline void unlock() { m_fLocked = false; }
     void lock();
 
+    //may be needed in case child shapes changed their positions independently of the entire composite shape
+    void force_recompute_bounds() { recompute_bounds(); }
+
     //virtual methods from base class
     virtual void shift_origin(const USize& shift) override;
     virtual void reposition_shape(LUnits yShift) override;

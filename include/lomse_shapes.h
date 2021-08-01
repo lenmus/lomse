@@ -476,6 +476,40 @@ protected:
     }
 };
 
+//---------------------------------------------------------------------------------------
+class GmoShapeArpeggio : public GmoSimpleShape
+{
+protected:
+    LibraryScope& m_libraryScope;
+    double m_fontHeight;
+
+    LUnits m_unusedSpaceTop;
+    LUnits m_unusedSpaceBottom;
+
+    unsigned int m_segmentGlyph;
+    unsigned int m_segmentCount;
+    unsigned int m_arrowGlyph;
+    LUnits m_xInitialAdvance;
+    LUnits m_yInitialAdvance;
+    LUnits m_segmentAdvance;
+    bool m_fUp;
+
+    friend class ChordEngraver;
+    GmoShapeArpeggio(ImoObj* pCreatorImo, ShapeId idx,
+                     LUnits xRight, LUnits yTop, LUnits yBottom,
+                     bool fUp, bool fHasArrow,
+                     Color color, LibraryScope& libraryScope,
+                     double fontHeight);
+
+public:
+    //implementation of virtual methods in base class
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+
+    void increase_length_up(LUnits increment);
+
+protected:
+    void compute_shape_geometry(LUnits xPosRight, LUnits yTop, LUnits yBottom);
+};
 
 }   //namespace lomse
 

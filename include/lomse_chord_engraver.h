@@ -98,6 +98,8 @@ protected:
     ChordNoteData* m_pLinkNoteData;     //for cross-staff chords, the last note in the
                                         //same staff than the flag note
 
+    bool m_fSomeAccidentalsShifted;
+
 public:
     ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes,
                   double fontSize, int symbolSize);
@@ -136,6 +138,7 @@ protected:
     void find_reference_notes();
     void layout_noteheads();
     void layout_accidentals();
+    void layout_arpeggio();
     void determine_stem_x_left();
     void add_stem_and_flag();
     void add_stem_flag_segment(StemFlagEngraver* engrv);
@@ -156,6 +159,8 @@ protected:
 
     LUnits check_if_accidentals_overlap(GmoShapeAccidentals* pPrevAcc,
                                         GmoShapeAccidentals* pCurAcc);
+
+    void ensure_note_bounds_updated();
 
     //helpers
     inline bool has_stem() { return m_fHasStem; }

@@ -70,10 +70,12 @@ public:
     int draw_text(double x, double y, const wstring& str, Color color,
                   double scale=1.0);
     void draw_glyph(double x, double y, unsigned int ch, Color color, double scale);
+    void draw_glyph_rotated(double x, double y, unsigned int ch, Color color, double scale, double rotation);
 
 protected:
     void draw_glyph(double x, double y, unsigned int ch, Color color);
     void set_scale(double scale);
+    void set_scale_and_rotation(double scale, double rotation);
 
 };
 
@@ -93,6 +95,7 @@ public:
 
     LUnits measure_width(const std::string& str);
     LUnits measure_width(const wstring& str);
+    LUnits get_advance_x(unsigned int ch);
     LUnits get_ascender();
     LUnits get_descender();
     LUnits get_font_height();

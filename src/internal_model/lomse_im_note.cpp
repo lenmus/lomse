@@ -285,6 +285,12 @@ ImoGraceRelObj* ImoNote::get_grace_relobj()
 }
 
 //---------------------------------------------------------------------------------------
+ImoArpeggio* ImoNote::get_arpeggio()
+{
+    return static_cast<ImoArpeggio*>( find_relation(k_imo_arpeggio) );
+}
+
+//---------------------------------------------------------------------------------------
 FPitch ImoNote::get_fpitch()
 {
     //FPitch. Ignores fractional part of actual accidentals

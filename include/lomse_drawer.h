@@ -621,6 +621,7 @@ public:
         @param ch  The character to render.
     */
     virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
+    virtual void draw_glyph_rotated(double x, double y, unsigned int ch, double rotation) = 0;
     //@}    //Text redering methods
 
 

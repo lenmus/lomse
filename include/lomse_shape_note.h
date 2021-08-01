@@ -171,6 +171,8 @@ protected:
     GmoShapeNote* m_pLinkNote;  //note containing the link segment for the stem
     GmoShapeNote* m_pStartNote; //note containing the extensible segment for the stem
 
+    GmoShapeArpeggio* m_pArpeggio; //arpeggio, if a chord has any
+
 public:
     GmoShapeChordBaseNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                           LibraryScope& libraryScope)
@@ -178,6 +180,7 @@ public:
         , m_pFlagNote(nullptr)
         , m_pLinkNote(nullptr)
         , m_pStartNote(nullptr)
+        , m_pArpeggio(nullptr)
     {
         m_objtype = GmoObj::k_shape_chord_base_note;
     }
@@ -188,11 +191,14 @@ public:
     GmoShapeNote* get_top_note();
     GmoShapeNote* get_bottom_note();
 
+    GmoShapeArpeggio* get_arpeggio() { return m_pArpeggio; }
+
 protected:
     friend class ChordEngraver;
     void set_flag_note(GmoShapeNote* pNote);
     void set_link_note(GmoShapeNote* pNote);
     void set_start_note(GmoShapeNote* pNote);
+    void set_arpeggio(GmoShapeArpeggio* pArp) { m_pArpeggio = pArp; }
 
 };
 
