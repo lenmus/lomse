@@ -465,7 +465,134 @@ unsigned GmoShapeDebug::vertex(double* px, double* py)
 }
 
 
+//=======================================================================================
+// GmoShapeArpeggio
+//=======================================================================================
+GmoShapeArpeggio::GmoShapeArpeggio(ImoObj* pCreatorImo, ShapeId idx,
+                                   LUnits xRight, LUnits yTop, LUnits yBottom,
+                                   bool fUp, bool fHasArrow,
+                                   Color color, LibraryScope& libraryScope,
+                                   double fontHeight)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_arpeggio, idx, color)
+    , m_libraryScope(libraryScope)
+    , m_fontHeight(fontHeight)
+    , m_fUp(fUp)
+{
+    MusicGlyphs* pGlyphs = m_libraryScope.get_glyphs_table();
 
+    const int iSegmentGlyph = fUp ? k_glyph_arpeggiato_wiggle_segment_up : k_glyph_arpeggiato_wiggle_segment_down;
+    m_segmentGlyph = pGlyphs->glyph_code(iSegmentGlyph);
+
+    if (fHasArrow)
+    {
+        const int iArrowGlyph = fUp ? k_glyph_arpeggiato_arrow_up : k_glyph_arpeggiato_arrow_down;
+        m_arrowGlyph = pGlyphs->glyph_code(iArrowGlyph);
+    }
+    else
+    {
+        m_arrowGlyph = 0;
+    }
+
+    compute_shape_geometry(xRight, yTop, yBottom);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeArpeggio::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+
+    pDrawer->select_font("any",
+                         m_libraryScope.get_music_font_file(),
+                         m_libraryScope.get_music_font_name(),
+                         m_fontHeight);
+    pDrawer->set_text_color( determine_color_to_use(opt) );
+
+    const double rotation = (m_fUp ? -1.0 : 1.0) * agg::pi / 2.0; // angle is counted clockwise as the y axis is directed down
+
+    LUnits x = m_origin.x + m_xInitialAdvance;
+    LUnits y = m_origin.y + m_yInitialAdvance;
+    pDrawer->move_to(x, y);
+
+    for (unsigned int i = 0; i < m_segmentCount; ++i)
+    {
+        pDrawer->draw_glyph_rotated(x, y, m_segmentGlyph, rotation);
+        y += m_segmentAdvance;
+    }
+
+    if (m_arrowGlyph)
+    {
+        pDrawer->draw_glyph_rotated(x, y, m_arrowGlyph, rotation);
+    }
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeArpeggio::increase_length_up(LUnits increment)
+{
+    m_origin.y -= increment;
+    m_size.height += increment;
+
+    const LUnits xRight = m_origin.x + m_size.width;
+    const LUnits yTop = m_origin.y - m_unusedSpaceTop;
+    const LUnits yBottom = m_origin.y + m_size.height + m_unusedSpaceBottom;
+
+    compute_shape_geometry(xRight, yTop, yBottom);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeArpeggio::compute_shape_geometry(LUnits xRight, LUnits yTop, LUnits yBottom)
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font("any",
+                      m_libraryScope.get_music_font_file(),
+                      m_libraryScope.get_music_font_name(),
+                      m_fontHeight);
+
+    const URect segmentGlyphBox = meter.bounding_rectangle(m_segmentGlyph);
+    m_xInitialAdvance = 0;
+    m_yInitialAdvance = -segmentGlyphBox.x;
+    m_segmentAdvance = meter.get_advance_x(m_segmentGlyph);
+
+    LUnits maxGlyphHeight = segmentGlyphBox.height;
+
+    LUnits remainingHeight = yBottom - yTop - m_yInitialAdvance;
+
+    if (m_arrowGlyph)
+    {
+        const URect arrowGlyphBox = meter.bounding_rectangle(m_arrowGlyph);
+        remainingHeight -= arrowGlyphBox.right();
+
+        if (arrowGlyphBox.height > maxGlyphHeight)
+            maxGlyphHeight = arrowGlyphBox.height;
+
+        m_xInitialAdvance += arrowGlyphBox.bottom() - segmentGlyphBox.bottom();
+    }
+    else
+    {
+        remainingHeight -= segmentGlyphBox.right() - m_segmentAdvance;
+    }
+
+    m_segmentCount = (remainingHeight > 0) ? (remainingHeight / m_segmentAdvance) : 0;
+    remainingHeight -= m_segmentCount * m_segmentAdvance;
+
+    // Y shift to center arpeggio in its space box
+    const LUnits yShift = 0.5f * remainingHeight;
+
+    m_origin.x = xRight - maxGlyphHeight;
+    m_origin.y = yTop + yShift;
+    m_size.width = maxGlyphHeight;
+    m_size.height = yBottom - yTop - remainingHeight;
+
+    m_unusedSpaceTop = yShift;
+    m_unusedSpaceBottom = remainingHeight - yShift;
+
+    if (m_fUp)
+    {
+        m_xInitialAdvance = m_size.width - m_xInitialAdvance;
+        m_yInitialAdvance = m_size.height - m_yInitialAdvance;
+        m_segmentAdvance = -m_segmentAdvance;
+    }
+}
 
 
 

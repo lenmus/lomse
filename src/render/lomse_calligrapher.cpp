@@ -122,6 +122,14 @@ void Calligrapher::draw_glyph(double x, double y, unsigned int ch, Color color,
 }
 
 //---------------------------------------------------------------------------------------
+void Calligrapher::draw_glyph_rotated(double x, double y, unsigned int ch, Color color,
+                                      double scale, double rotation)
+{
+    set_scale_and_rotation(scale, rotation);
+    draw_glyph(x, y, ch, color);
+}
+
+//---------------------------------------------------------------------------------------
 void Calligrapher::draw_glyph(double x, double y, unsigned int ch, Color color)
 {
     //ch is the glyph (utf-32)
@@ -150,6 +158,18 @@ void Calligrapher::set_scale(double scale)
 
     agg::trans_affine mtx;
     mtx *= agg::trans_affine_scaling(scale);
+    m_pFonts->set_transform(mtx);
+}
+
+//---------------------------------------------------------------------------------------
+void Calligrapher::set_scale_and_rotation(double scale, double rotation)
+{
+   if (!m_pFonts->is_font_valid())
+        return;
+
+    agg::trans_affine mtx;
+    mtx *= agg::trans_affine_scaling(scale);
+    mtx *= agg::trans_affine_rotation(rotation);
     m_pFonts->set_transform(mtx);
 }
 
@@ -221,6 +241,22 @@ void TextMeter::measure_glyphs(wstring* glyphs, std::vector<LUnits>& glyphWidths
         else
             glyphWidths.push_back( 0.0f );
     }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TextMeter::get_advance_x(unsigned int ch)
+{
+    if (!m_pFonts->is_font_valid())
+        return 0.0f;
+
+    set_transform();
+
+    const lomse::glyph_cache* glyph = m_pFonts->get_glyph_cache(ch);
+
+    if (glyph)
+        return static_cast<LUnits>(glyph->advance_x);
+    else
+        return 0.0f;
 }
 
 //---------------------------------------------------------------------------------------

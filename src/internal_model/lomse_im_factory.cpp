@@ -55,6 +55,8 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
     switch(type)
     {
         case k_imo_anonymous_block:     pObj = LOMSE_NEW ImoAnonymousBlock();     break;
+        case k_imo_arpeggio:            pObj = LOMSE_NEW ImoArpeggio();           break;
+        case k_imo_arpeggio_dto:        pObj = LOMSE_NEW ImoArpeggioDto();        break;
         case k_imo_articulation_symbol: pObj = LOMSE_NEW ImoArticulationSymbol(); break;
         case k_imo_articulation_line:   pObj = LOMSE_NEW ImoArticulationLine();   break;
         case k_imo_attachments:         pObj = LOMSE_NEW ImoAttachments();        break;

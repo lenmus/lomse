@@ -525,6 +525,20 @@ enum EArticulations
 //-----------------------------------------------------------------------------
 /** @ingroup enumerations
 
+    This enum describes valid values for argpeggio types.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EArpeggio
+{
+    k_arpeggio_standard,    ///< Standard arpeggio
+    k_arpeggio_arrow_up,    ///< Arpeggio with an up arrow
+    k_arpeggio_arrow_down,  ///< Arpeggio with a down arrow
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
     This enum describes valid values for ornaments.
 
     @#include <lomse_internal_model.h>
@@ -643,6 +657,7 @@ enum EImoObjType
 
     //ImoDto (A)
     k_imo_dto,
+    k_imo_arpeggio_dto,
     k_imo_beam_dto,
     k_imo_border_dto,
     k_imo_color_dto,
@@ -767,6 +782,7 @@ enum EImoObjType
 
     // ImoRelObj (A)
     k_imo_relobj,           ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Relation objects. Any of the following:</b>
+    k_imo_arpeggio,         ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Arpeggio
     k_imo_beam,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beam
     k_imo_chord,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chord
     k_imo_grace_relobj,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Grace notes relationship
@@ -4225,6 +4241,55 @@ public:
 protected:
     void add_private_style(ImoStyle* pStyle);
 
+};
+
+//---------------------------------------------------------------------------------------
+class ImoArpeggio : public ImoRelObj
+{
+protected:
+    EArpeggio m_type;
+
+    friend class ImFactory;
+    ImoArpeggio()
+        : ImoRelObj(k_imo_arpeggio)
+        , m_type(k_arpeggio_standard)
+    {
+    }
+
+public:
+    //getters
+    EArpeggio get_type() const { return m_type; }
+
+    //setters
+    void set_type(EArpeggio value) { m_type = value; }
+
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
+};
+
+//---------------------------------------------------------------------------------------
+class ImoArpeggioDto : public ImoSimpleObj
+{
+protected:
+    EArpeggio m_type;
+    Color m_color;
+
+public:
+    ImoArpeggioDto() : ImoSimpleObj(k_imo_arpeggio_dto) {}
+
+    //getters
+    EArpeggio get_type() const { return m_type; }
+    const Color& get_color() const { return m_color; }
+
+    //setters
+    void set_type(EArpeggio type) { m_type = type; }
+    void set_color(const Color& color) { m_color = color; }
+
+    void apply_properties_to(ImoArpeggio* pArpeggio) const
+    {
+        pArpeggio->set_type(m_type);
+        pArpeggio->set_color(m_color);
+    }
 };
 
 //---------------------------------------------------------------------------------------

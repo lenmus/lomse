@@ -169,7 +169,7 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
             else if ((*it)->is_shape_note())
             {
                 GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(*it);
-                LUnits increment = (yShift + yShifts[m_idxStaff-1]);
+                LUnits increment = (yShift - yShifts[m_idxStaff-1]);
                 pShapeNote->reposition_shape(yShift);
 
                 if (pShapeNote->is_cross_staff_chord())
@@ -177,6 +177,11 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                     if (pShapeNote->is_chord_start_note())
                     {
                         pShapeNote->increment_stem_length(increment);
+
+                        GmoShapeArpeggio* pArpeggio = pShapeNote->get_base_note_shape()->get_arpeggio();
+
+                        if (pArpeggio)
+                            pArpeggio->increase_length_up(increment);
                     }
                     else if (pShapeNote->is_chord_flag_note() && !pShapeNote->is_up())
                     {

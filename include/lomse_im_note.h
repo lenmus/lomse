@@ -350,6 +350,9 @@ public:
     //grace notes related to this note
     ImoGraceRelObj* get_grace_relobj();
 
+    //arpeggio
+    ImoArpeggio* get_arpeggio();
+
 
     //pitch. Only valid when m_actual_acc is computed
     FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals

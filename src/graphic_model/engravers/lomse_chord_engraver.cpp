@@ -65,6 +65,7 @@ ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_numNotesMissing(numNotes)
     , m_fontSize(fontSize)
     , m_symbolSize(symbolSize)
+    , m_fSomeAccidentalsShifted(false)
 {
 }
 
@@ -134,6 +135,7 @@ int ChordEngraver::create_shapes(Color color)
     find_reference_notes();
     layout_noteheads();
     layout_accidentals();
+    layout_arpeggio();
     add_stem_and_flag();
     set_anchor_offset();
     return 0;
@@ -530,8 +532,83 @@ void ChordEngraver::shift_acc_if_confict_with_shape(GmoShapeAccidentals* pCurAcc
         {
             USize shift(xOverlap, 0.0f);
             pCurAcc->shift_origin(shift);
+            m_fSomeAccidentalsShifted = true;
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::layout_arpeggio()
+{
+    //assume for now that arpeggio is always attached to all notes of one chord
+    ImoArpeggio* pArpeggio = m_pBaseNoteData->pNote->get_arpeggio();
+
+    if (!pArpeggio)
+        return;
+
+    ensure_note_bounds_updated();
+
+    LUnits xLeft = m_notes.front()->pNoteShape->get_left();
+    LUnits yTop = m_notes.front()->pNoteShape->get_notehead_top();
+    LUnits yBottom = yTop;
+
+    for (const ChordNoteData* pNoteData : m_notes)
+    {
+        const GmoShapeNote* pNoteShape = pNoteData->pNoteShape;
+
+        //consider absolute left edge, including accidentals, but only noteheads' top and bottom
+        const LUnits noteLeft = pNoteShape->get_left();
+        const LUnits noteTop = pNoteShape->get_notehead_top();
+        const LUnits noteBottom = pNoteShape->get_notehead_bottom();
+
+        if (noteLeft < xLeft)
+            xLeft = noteLeft;
+
+        if (noteTop < yTop)
+            yTop = noteTop;
+
+        if (noteBottom > yBottom)
+            yBottom = noteBottom;
+    }
+
+    bool fArpeggioUp;
+    bool fArpeggioHasArrow;
+
+    switch (pArpeggio->get_type())
+    {
+        case k_arpeggio_standard:
+            fArpeggioUp = true;
+            fArpeggioHasArrow = false;
+            break;
+        case k_arpeggio_arrow_up:
+            fArpeggioUp = true;
+            fArpeggioHasArrow = true;
+            break;
+        case k_arpeggio_arrow_down:
+            fArpeggioUp = false;
+            fArpeggioHasArrow = true;
+            break;
+    }
+
+    //allow arpeggio take a bit more vertical space
+    const LUnits extraSpace = tenths_to_logical(LOMSE_ARPEGGIO_MAX_OUTGOING);
+    yTop -= extraSpace;
+    yBottom += extraSpace;
+
+    const LUnits xArpeggioRight = xLeft - tenths_to_logical(LOMSE_ARPEGGIO_SPACE_TO_CHORD);
+    const double fontSize = determine_font_size();
+    const ShapeId idx = 0;
+    ChordNoteData* pArpeggioNoteData = m_pStartNoteData ? m_pStartNoteData : m_pBaseNoteData;
+
+    GmoShapeArpeggio* pArpeggioShape = LOMSE_NEW GmoShapeArpeggio(pArpeggioNoteData->pNote, idx,
+                                                                  xArpeggioRight, yTop, yBottom,
+                                                                  fArpeggioUp, fArpeggioHasArrow,
+                                                                  pArpeggio->get_color(), m_libraryScope, fontSize);
+    pArpeggioNoteData->pNoteShape->add(pArpeggioShape);
+
+    GmoShapeChordBaseNote* pBaseNoteShape =
+                    static_cast<GmoShapeChordBaseNote*>(m_pBaseNoteData->pNoteShape);
+    pBaseNoteShape->set_arpeggio(pArpeggioShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -600,6 +677,20 @@ LUnits ChordEngraver::check_if_accidentals_overlap(GmoShapeAccidentals* pPrevAcc
     URect overlap = pPrevAcc->get_bounds();
     overlap.intersection( pCurAcc->get_bounds() );
     return overlap.get_width();
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::ensure_note_bounds_updated()
+{
+    if (m_fSomeAccidentalsShifted)
+    {
+        for (ChordNoteData* pNoteData : m_notes)
+        {
+            pNoteData->pNoteShape->force_recompute_bounds();
+        }
+
+        m_fSomeAccidentalsShifted = false;
+    }
 }
 
 //---------------------------------------------------------------------------------------

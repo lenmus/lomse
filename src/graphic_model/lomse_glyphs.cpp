@@ -295,6 +295,10 @@ const GlyphData m_glyphs_smufl[] =
 
 //Multi-segment lines (U+EAA0 - U+EB0F)
     GlyphData(0xEAA4),  // Trill wiggle segment
+    GlyphData(0xEAA9),  // Arpeggiato wiggle segment, upwards
+    GlyphData(0xEAAA),  // Arpeggiato wiggle segment, downwards
+    GlyphData(0xEAAD),  // Arpeggiato arrowhead up
+    GlyphData(0xEAAE),  // Arpeggiato arrowhead down
 
 //Tremolos (U+E220 - U+E23F)
     GlyphData(0xE220),  // Combining tremolo 1

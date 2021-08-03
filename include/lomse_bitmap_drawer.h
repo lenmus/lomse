@@ -197,6 +197,7 @@ public:
     int draw_text(double x, double y, const std::string& str) override;
     int draw_text(double x, double y, const wstring& str) override;
     void draw_glyph(double x, double y, unsigned int ch) override;
+    void draw_glyph_rotated(double x, double y, unsigned int ch, double rotation) override;
 
 
     //copy/blend a bitmap

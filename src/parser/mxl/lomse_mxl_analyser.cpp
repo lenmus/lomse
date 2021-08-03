@@ -236,6 +236,7 @@ enum EMxlTag
     k_mxl_tag_undefined = -1,
 
     k_mxl_tag_accordion_registration,
+    k_mxl_tag_arpeggiate,
     k_mxl_tag_articulations,
     k_mxl_tag_attributes,
     k_mxl_tag_backup,
@@ -805,7 +806,11 @@ protected:
             return;
 
         ImoScoreObj* pObj = static_cast<ImoScoreObj*>(pImo);
+        pObj->set_color(get_attribute_color());
+    }
 
+    Color get_attribute_color()
+    {
         if (has_attribute(&m_analysedNode, "color"))
         {
             string value = m_analysedNode.attribute_value("color");
@@ -819,10 +824,15 @@ protected:
                 fError = true;
 
             if (fError || !color.is_ok())
+            {
                 error_msg("Invalid color value. Default color assigned.");
-            else
-                pObj->set_color( color.get_color() );
+                return Color(0, 0, 0);
+            }
+
+            return color.get_color();
         }
+
+        return Color(0, 0, 0);
     }
 
 //    //-----------------------------------------------------------------------------------
@@ -1669,6 +1679,47 @@ public:
     {
 		//TODO
         return nullptr;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <arpeggiate>
+class ArpeggiateMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ArpeggiateMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoArpeggioDto* pDto = static_cast<ImoArpeggioDto*>(ImFactory::inject(k_imo_arpeggio_dto, pDoc));
+        pDto->set_type(get_arpeggiation_type());
+        pDto->set_color(get_attribute_color());
+        m_pAnalyser->save_arpeggio_data(pDto);
+        return nullptr;
+    }
+
+private:
+    EArpeggio get_arpeggiation_type()
+    {
+        const std::string attributeName("direction");
+
+        if (!has_attribute(attributeName))
+            return k_arpeggio_standard;
+
+        const std::string value = get_attribute(attributeName);
+
+        if (value == "up")
+            return k_arpeggio_arrow_up;
+        if (value == "down")
+            return k_arpeggio_arrow_down;
+
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            "Unknown direction attrib. '" + value + "'. Ignored.");
+
+        return k_arpeggio_standard;
     }
 };
 
@@ -4364,6 +4415,26 @@ public:
 //      //      nNoteType = m_pLastNote->GetNoteType();
 //      //      nDots = m_pLastNote->GetNumDots();
 //      //  }
+        }
+
+        ImoArpeggioDto* pArpeggioDto = m_pAnalyser->get_arpeggio_data();
+        if (pArpeggioDto)
+        {
+            if (!fIsRest)
+            {
+                ImoArpeggio* pArpeggio = nullptr;
+
+                if (fInChord && pPrevNote)
+                    pArpeggio = static_cast<ImoArpeggio*>(pNote->find_relation(k_imo_arpeggio));
+
+                if (!pArpeggio)
+                    pArpeggio = static_cast<ImoArpeggio*>(ImFactory::inject(k_imo_arpeggio, pDoc));
+
+                pArpeggioDto->apply_properties_to(pArpeggio);
+                pNote->include_in_relation(pDoc, pArpeggio);
+            }
+
+            m_pAnalyser->reset_arpeggio_data();
         }
 
         //save this note as last note
@@ -7585,6 +7656,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pCurScore(nullptr)
     , m_pCurInstrument(nullptr)
     , m_pLastNote(nullptr)
+    , m_pArpeggioDto(nullptr)
     , m_pLastBarline(nullptr)
     , m_pImoDoc(nullptr)
     , m_time(0.0)
@@ -7596,6 +7668,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 {
     //populate the name to enum conversion map
     m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
+    m_NameToEnum["arpeggiate"] = k_mxl_tag_arpeggiate;
     m_NameToEnum["articulations"] = k_mxl_tag_articulations;
     m_NameToEnum["attributes"] = k_mxl_tag_attributes;
     m_NameToEnum["backup"] = k_mxl_tag_backup;
@@ -7663,6 +7736,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //---------------------------------------------------------------------------------------
 MxlAnalyser::~MxlAnalyser()
 {
+    delete m_pArpeggioDto;
     delete_relation_builders();
     m_NameToEnum.clear();
     m_lyrics.clear();
@@ -7755,6 +7829,20 @@ void MxlAnalyser::save_last_note(ImoNote* pNote)
 ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
 {
     return m_notes[iStaff];
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::save_arpeggio_data(ImoArpeggioDto* pArpeggioDto)
+{
+    delete m_pArpeggioDto;
+    m_pArpeggioDto = pArpeggioDto;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::reset_arpeggio_data()
+{
+    delete m_pArpeggioDto;
+    m_pArpeggioDto = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -8150,6 +8238,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
     switch ( name_to_enum(name) )
     {
 //        case k_mxl_tag_accordion_registration: return LOMSE_NEW AccordionRegistrationMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_arpeggiate:           return LOMSE_NEW ArpeggiateMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_articulations:        return LOMSE_NEW ArticulationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_attributes:           return LOMSE_NEW AtribbutesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_backup:               return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

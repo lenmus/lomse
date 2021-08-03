@@ -319,6 +319,10 @@ enum EGlyphIndex
 
     //Multi-segment lines (U+EAA0 - U+EB0F)
     k_glyph_trill_wiggle_segment,           // Trill wiggle segment
+    k_glyph_arpeggiato_wiggle_segment_up,   // Arpeggiato wiggle segment, upwards
+    k_glyph_arpeggiato_wiggle_segment_down, // Arpeggiato wiggle segment, downwards
+    k_glyph_arpeggiato_arrow_up,            // Arpeggiato arrowhead up
+    k_glyph_arpeggiato_arrow_down,          // Arpeggiato arrowhead down
 
     //Tremolos (U+E220 - U+E23F)
     k_glyph_tremolo_1,     // Combining tremolo 1

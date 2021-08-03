@@ -278,6 +278,7 @@ protected:
     ImoScore*       m_pCurScore;        //the score under construction
     ImoInstrument*  m_pCurInstrument;   //the instrument being analysed
     ImoNote*        m_pLastNote;        //last note added to the score
+    ImoArpeggioDto* m_pArpeggioDto;     //data for the last arpeggio encountered
     ImoBarline*     m_pLastBarline;     //last barline added to current instrument
     ImoDocument*    m_pImoDoc;          //the document containing the score
     PartList        m_partList;         //the list of instruments
@@ -370,6 +371,10 @@ public:
     void save_last_note(ImoNote* pNote);
     inline ImoNote* get_last_note() { return m_pLastNote; }
     ImoNote* get_last_note_for(int iStaff);
+
+    void save_arpeggio_data(ImoArpeggioDto* pArpeggioDto);
+    ImoArpeggioDto* get_arpeggio_data() { return m_pArpeggioDto; }
+    void reset_arpeggio_data();
 
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }

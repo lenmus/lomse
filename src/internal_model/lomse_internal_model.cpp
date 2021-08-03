@@ -480,6 +480,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_inline_wrapper] = "wrapper";
 
         // ImoDto, ImoSimpleObj (A)
+        m_TypeToName[k_imo_arpeggio_dto] = "arpeggio";
         m_TypeToName[k_imo_beam_dto] = "beam";
         m_TypeToName[k_imo_bezier_info] = "bezier";
         m_TypeToName[k_imo_border_dto] = "border";
@@ -556,6 +557,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_lyric] = "lyric";
 
         // ImoRelObj (A)
+        m_TypeToName[k_imo_arpeggio] = "arpeggio";
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
         m_TypeToName[k_imo_grace_relobj] = "grace-relobj";
@@ -2535,6 +2537,15 @@ void ImoDocument::delete_block_level_obj(ImoBlockLevelObj* pAt)
     delete pAt;
 
     set_dirty(true);
+}
+
+
+//=======================================================================================
+// ImoArpeggio implementation
+//=======================================================================================
+void ImoArpeggio::reorganize_after_object_deletion()
+{
+    //Nothing to do
 }
 
 

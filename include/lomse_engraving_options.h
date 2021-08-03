@@ -77,6 +77,8 @@ namespace lomse
 #define LOMSE_LEGER_LINE_OUTGOING        5.0f
 #define LOMSE_GRACE_NOTES_SCALE          0.60f  //Scaling factor for grace notes size
 #define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size
+#define LOMSE_ARPEGGIO_SPACE_TO_CHORD    6.0f   //Spacing between an arpeggio and a chord
+#define LOMSE_ARPEGGIO_MAX_OUTGOING      3.0f   //Amount of space arpeggio is allowed to go beyond a chord's top or bottom note
 
 //System layouter
     //spacing function parameters
