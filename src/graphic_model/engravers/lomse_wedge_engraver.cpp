@@ -182,6 +182,10 @@ GmoShape* WedgeEngraver::create_first_shape()
         niente = (m_pWedge->is_crescendo() ? GmoShapeWedge::k_niente_at_start
                                            : GmoShapeWedge::k_niente_at_end);
         radius = tenths_to_logical(LOMSE_WEDGE_NIENTE_RADIUS);
+
+        //do not render the niente mark if wedge continues in next system
+        if (niente == GmoShapeWedge::k_niente_at_end && m_pEndDirectionShape == nullptr)
+            niente = GmoShapeWedge::k_no_niente;
     }
 
     return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
