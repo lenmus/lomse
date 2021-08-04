@@ -471,7 +471,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //determine last metronome pulse before first note to play.
     //First note could be syncopated or an off-beat note. Round time to nearest
     //lower pulse time
-    long nMissingTime = long( m_pTable->get_anacruxis_missing_time() );
+    long nMissingTime = long( m_pTable->get_anacrusis_missing_time() );
     while (nMissingTime >= m_nMtrPulseDuration)
        nMissingTime -= m_nMtrPulseDuration;
     if (nMissingTime > 0)
@@ -479,11 +479,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     nMtrEvDeltaTime -= nMissingTime;
     curTime = time_units_to_milliseconds( nMtrEvDeltaTime );
-    long nExtraTime = long( m_pTable->get_anacruxis_extra_time() );
+    long nExtraTime = long( m_pTable->get_anacrusis_extra_time() );
     LOMSE_LOG_DEBUG(Logger::k_score_player,
-                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacruxis missing time=%f, "
+                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacrusis missing time=%f, "
                     "curTime=%ld, nMissingTime=%ld, nExtraTime=%ld",
-                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacruxis_missing_time(),
+                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacrusis_missing_time(),
                     curTime, nMissingTime, nExtraTime);
 
     //prepare weak_ptr to interactor
@@ -504,19 +504,19 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     bool fCountOffPulseActive = false;
 
     //generate count off metronome clicks. Number of pulses will be the necessary
-    //pulses before first anacruxis note, or full measure if no anacruxis.
+    //pulses before first anacrusis note, or full measure if no anacrusis.
     //At least two pulses.
     bool fSendMtrOff = false;                //if true, next metronome event is start
     if (fCountOff)
     {
         //determine num pulses
         int numPulses = 0;
-        TimeUnits prevTime = m_pTable->get_anacruxis_missing_time();
+        TimeUnits prevTime = m_pTable->get_anacrusis_missing_time();
         if (is_greater_time(prevTime, 0.0))
         {
             numPulses = int(prevTime + 0.5) / m_nMtrPulseDuration;
 
-            //if anacruxis and first event is a rest (real or implicit), add
+            //if anacrusis and first event is a rest (real or implicit), add
             //one additional pulse
             bool fAddExtraPulse = false;
 

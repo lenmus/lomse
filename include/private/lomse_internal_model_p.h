@@ -1224,7 +1224,7 @@ public:
     int index;      ///< An optional integer index for the measure, as defined in NMX.
                     ///< The first measure has an index of 1.
     int count;      ///< sequential integer index for the measure. The first measure
-                    ///< is counted as 1, even if anacruxis start.
+                    ///< is counted as 1, even if anacrusis start.
     std::string number;  ///< An optional textual number to be displayed for the measure.
     bool fHideNumber;   ///< Override measures number policy for preventing to
                         ///< display the number in this measure.

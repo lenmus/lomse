@@ -94,7 +94,7 @@ ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
     , m_numEntries(0)
     , m_rMissingTime(0.0)
-    , m_rAnacruxisExtraTime(0.0)
+    , m_rAnacrusisExtraTime(0.0)
     , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
     , m_pFirst(nullptr)
     , m_pLast(nullptr)
@@ -126,8 +126,8 @@ string ColStaffObjs::dump(bool fWithIds)
     stringstream s;
     ColStaffObjs::iterator it;
     s << "Num.entries = " << num_entries()
-      << ", anacruxis: missing time = " << m_rMissingTime
-      << ", extra time = " << m_rAnacruxisExtraTime << endl;
+      << ", anacrusis: missing time = " << m_rMissingTime
+      << ", extra time = " << m_rAnacrusisExtraTime << endl;
     //    +.......+.......+.......+.......+.......+.......+.......+.......+
     s << "instr   staff   meas.   time    play    pdur    line    object" << endl;
     s << "----------------------------------------------------------------" << endl;
@@ -392,11 +392,11 @@ void ColStaffObjsBuilderEngine::create_table()
         prepare_for_next_instrument();
     }
     compute_playback_time();
-    collect_anacruxis_info();
+    collect_anacrusis_info();
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine::collect_anacruxis_info()
+void ColStaffObjsBuilderEngine::collect_anacrusis_info()
 {
     ColStaffObjsIterator it = m_pColStaffObjs->begin();
     ImoTimeSignature* pTS = nullptr;
@@ -417,11 +417,11 @@ void ColStaffObjsBuilderEngine::collect_anacruxis_info()
     }
     if (pTS == nullptr)
     {
-        if (m_gracesAnacruxisTime > 0.0)
+        if (m_gracesAnacrusisTime > 0.0)
         {
             fix_negative_playback_times();
-            m_pColStaffObjs->set_anacruxis_missing_time(64.0 - m_gracesAnacruxisTime);
-            m_pColStaffObjs->set_anacruxis_extra_time(m_gracesAnacruxisTime);
+            m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacrusisTime);
+            m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
         }
         return;
     }
@@ -441,27 +441,27 @@ void ColStaffObjsBuilderEngine::collect_anacruxis_info()
     if (rTime <= 0.0)
     {
     //TODO: test case can not be generated with MusicXML
-//        if (m_gracesAnacruxisTime > 0.0)
+//        if (m_gracesAnacrusisTime > 0.0)
 //        {
 //            fix_negative_playback_times();
-//            m_pColStaffObjs->set_anacruxis_missing_time(64.0 - m_gracesAnacruxisTime);
-//            m_pColStaffObjs->set_anacruxis_extra_time(m_gracesAnacruxisTime);
+//            m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacrusisTime);
+//            m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
 //        }
         return;
     }
 
-    //set anacruxis missing time
+    //set anacrusis missing time
     TimeUnits measureTime = pTS->get_measure_duration();
-    TimeUnits anacruxis = (is_lower_time(rTime, measureTime) ? rTime : 0.0);
+    TimeUnits anacrusis = (is_lower_time(rTime, measureTime) ? rTime : 0.0);
 
-    if (m_gracesAnacruxisTime > 0.0)
+    if (m_gracesAnacrusisTime > 0.0)
     {
         fix_negative_playback_times();
-        m_pColStaffObjs->set_anacruxis_extra_time(m_gracesAnacruxisTime);
-        anacruxis += m_gracesAnacruxisTime;
+        m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
+        anacrusis += m_gracesAnacrusisTime;
     }
-    if (anacruxis > 0.0)
-        m_pColStaffObjs->set_anacruxis_missing_time(max(0.0, measureTime - anacruxis));
+    if (anacrusis > 0.0)
+        m_pColStaffObjs->set_anacrusis_missing_time(max(0.0, measureTime - anacrusis));
 }
 
 //---------------------------------------------------------------------------------------
@@ -620,7 +620,7 @@ void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
     {
         gracePlayTime -= dur;
         if (gracePlayTime < 0.0)
-            m_gracesAnacruxisTime = max(m_gracesAnacruxisTime, -gracePlayTime);
+            m_gracesAnacrusisTime = max(m_gracesAnacrusisTime, -gracePlayTime);
     }
 
 
@@ -712,7 +712,7 @@ void ColStaffObjsBuilderEngine::fix_negative_playback_times()
         {
             ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pSO );
             TimeUnits playtime = pNR->get_playback_time();
-            pNR->set_playback_time(playtime + m_gracesAnacruxisTime);
+            pNR->set_playback_time(playtime + m_gracesAnacrusisTime);
         }
         ++it;
     }

@@ -83,11 +83,11 @@ public:
 
     //access to info
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
-    inline TimeUnits anacruxis_missing_time() {
-        return m_pColStaffObjs->anacruxis_missing_time();
+    inline TimeUnits anacrusis_missing_time() {
+        return m_pColStaffObjs->anacrusis_missing_time();
     }
-    inline TimeUnits anacruxis_extra_time() {
-        return m_pColStaffObjs->anacruxis_extra_time();
+    inline TimeUnits anacrusis_extra_time() {
+        return m_pColStaffObjs->anacrusis_extra_time();
     }
     int num_measures();
     TimeUnits score_total_duration();

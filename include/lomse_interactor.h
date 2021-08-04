@@ -738,7 +738,7 @@ public:
         viewport so that requested score location is visible in the viewport.
         @param scoreId ID of the score to which all other parameters refer to.
         @param iMeasure The index to the desired measure. First measure in the
-            instrument, including a possible anacruxis start measure, is always measure 0.
+            instrument, including a possible anacrusis start measure, is always measure 0.
         @param iBeat The index to the desired beat in the measure. First beat is 0.
         @param iInstr The index to the instrument to which the measure refers. If not
             specified, iInstr 0 is assumed. Normally,
@@ -758,7 +758,7 @@ public:
         viewport so that requested score location is visible in the viewport.
         @param scoreId ID of the score to which all other parameters refer to.
         @param iMeasure The index to the desired measure. First measure in the
-            instrument, including a possible anacruxis start measure, is always measure 0.
+            instrument, including a possible anacrusis start measure, is always measure 0.
         @param location Time units from the start of the measure.
         @param iInstr The index to the instrument to which the measure refers. If not
             specified, iInstr 0 is assumed. Normally,
@@ -778,7 +778,7 @@ public:
         location is visible in the viewport.
         @param scoreId ID of the score to which all other parameters refer to.
         @param iMeasure The index to the desired measure. First measure in the
-            instrument, including a possible anacruxis start measure, is always measure 0.
+            instrument, including a possible anacrusis start measure, is always measure 0.
         @param iBeat The index to the desired beat in the measure. First beat is 0.
         @param iInstr The index to the instrument to which the measure refers. If not
             specified, iInstr 0 is assumed. Normally,
@@ -797,7 +797,7 @@ public:
         location is visible in the viewport.
         @param scoreId ID of the score to which all other parameters refer to.
         @param iMeasure The index to the desired measure. First measure in the
-            instrument, including a possible anacruxis start measure, is always measure 0.
+            instrument, including a possible anacrusis start measure, is always measure 0.
         @param location Time units from the start of the measure.
         @param iInstr The index to the instrument to which the measure refers. If not
             specified, iInstr 0 is assumed. Normally,
