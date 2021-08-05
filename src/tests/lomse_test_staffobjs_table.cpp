@@ -1043,8 +1043,8 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 4 );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_missing_time(), 51.2) );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 51.2) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                    // (clef G p1)
@@ -1191,10 +1191,10 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_215)
     {
-        //@215. graces at start that steal from previous create anacruxis start. No TS
+        //@215. graces at start that steal from previous create anacrusis start. No TS
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/grace-notes/215-graces-anacruxis-start.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/215-graces-anacrusis-start.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -1204,9 +1204,9 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 11 );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_missing_time(), 32.0) );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_extra_time(), 32.0) );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 32.0) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 32.0) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                     //(clef#36 G p1)
@@ -1231,10 +1231,10 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_216)
     {
-        //@216. graces anacruxis time when time signature
+        //@216. graces anacrusis time when time signature
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/grace-notes/216-grace-anacruxis-time-signature.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/216-grace-anacrusis-time-signature.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -1244,9 +1244,9 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 5 );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_missing_time(), 115.2) );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_extra_time(), 12.8) );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 115.2) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 12.8) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                     //(clef G p1)
@@ -1259,10 +1259,10 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_217)
     {
-        //@217. graces anacruxis greater than notated anacruxis. Anacruxis extra time
+        //@217. graces anacrusis greater than notated anacrusis. Anacruxis extra time
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/grace-notes/217-graces-anacruxis-greater-than-notated.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/217-graces-anacrusis-greater-than-notated.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -1272,9 +1272,9 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 8 );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_missing_time(), 102.4) );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_extra_time(), 9.6) );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 102.4) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 9.6) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                     //(clef G p1)
@@ -1292,10 +1292,10 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_218)
     {
-        //@218. graces anacruxis lower than notated anacruxis. No anacruxis extra time
+        //@218. graces anacrusis lower than notated anacrusis. No anacrusis extra time
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/grace-notes/219-graces-anacruxis-lower-than-notated.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/219-graces-anacrusis-lower-than-notated.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -1305,9 +1305,9 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 8 );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_missing_time(), 112.0) );
-        CHECK( is_equal_time(pColStaffObjs->anacruxis_extra_time(), 0.0) );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 112.0) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 0.0) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                     //(clef G p1)
@@ -1338,7 +1338,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 0 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_02)
@@ -1354,7 +1354,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 5 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1381,7 +1381,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1410,7 +1410,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 10 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1442,7 +1442,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1471,7 +1471,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 11 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1505,7 +1505,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 5 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1522,7 +1522,7 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_08)
     {
-        //@08. anacruxis detected and its duration computed
+        //@08. anacrusis detected and its duration computed
         create_score(
             "(score (vers 2.0) (instrument (musicData "
             "(clef G)(time 3 4)(n c4 q)(barline)(n d4 e.)(n d4 s)"
@@ -1533,8 +1533,8 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == true );
-        CHECK( is_equal_time( pTable->anacruxis_missing_time(), 128.0f) == true );
+        CHECK( pTable->is_anacrusis_start() == true );
+        CHECK( is_equal_time( pTable->anacrusis_missing_time(), 128.0f) == true );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1562,7 +1562,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
         //cout << pTable->dump();
@@ -1589,7 +1589,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1618,7 +1618,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 7 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1657,7 +1657,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 4 );
         CHECK( pTable->num_entries() == 26 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1715,7 +1715,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 12 );
-        CHECK( pTable->is_anacruxis_start() == true );
+        CHECK( pTable->is_anacrusis_start() == true );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -1755,7 +1755,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 12 );
-        CHECK( pTable->is_anacruxis_start() == true );
+        CHECK( pTable->is_anacrusis_start() == true );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -2136,8 +2136,8 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 6 );
-        CHECK( pColStaffObjs->is_anacruxis_start() == true );
-        CHECK( is_equal_time( pColStaffObjs->anacruxis_missing_time(), 128.0f) == true );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+        CHECK( is_equal_time( pColStaffObjs->anacrusis_missing_time(), 128.0f) == true );
 
                    // (clef G)
         ++it;       //(time 2 4)
@@ -2224,7 +2224,7 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 11 );
-        CHECK( pColStaffObjs->is_anacruxis_start() == false );
+        CHECK( pColStaffObjs->is_anacrusis_start() == false );
 //        cout << test_name() << endl;
 //        cout << pColStaffObjs->dump();
         ColStaffObjsIterator it = pColStaffObjs->begin();
@@ -2288,7 +2288,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 4 );
         CHECK( pTable->num_entries() == 26 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();

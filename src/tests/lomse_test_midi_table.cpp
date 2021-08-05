@@ -865,7 +865,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 12 );
-        CHECK( pTable && pTable->get_anacruxis_missing_time() == 0.0 );
+        CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[1]->EventType == SoundEvent::k_note_on );
         CHECK( events[1]->DeltaTime == 0L );
@@ -900,7 +900,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 11 );
-        CHECK( pTable && pTable->get_anacruxis_missing_time() == 0.0 );
+        CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
         CHECK( events[2]->DeltaTime == 0L );
@@ -932,7 +932,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 13 );
-        CHECK( is_equal_time(pTable->get_anacruxis_missing_time(), 128.0 ) );
+        CHECK( is_equal_time(pTable->get_anacrusis_missing_time(), 128.0 ) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
         CHECK( events[2]->DeltaTime == 0L );
@@ -984,7 +984,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 5 );
-        CHECK( pTable && pTable->get_anacruxis_missing_time() == 0.0 );
+        CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[0]->EventType == SoundEvent::k_prog_instr );
         CHECK( events[0]->DeltaTime == 0L );
@@ -1008,7 +1008,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 13 );
-        CHECK( pTable && is_equal_time(pTable->get_anacruxis_missing_time(), 192.0) );
+        CHECK( pTable && is_equal_time(pTable->get_anacrusis_missing_time(), 192.0) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[6]->EventType == SoundEvent::k_note_on );
         CHECK( events[6]->DeltaTime == 0L );
@@ -1034,7 +1034,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable && pTable->num_events() == 17 );
-        CHECK( pTable && is_equal_time(pTable->get_anacruxis_missing_time(), 0.0) );
+        CHECK( pTable && is_equal_time(pTable->get_anacrusis_missing_time(), 0.0) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[8]->EventType == SoundEvent::k_note_on );
         CHECK( events[8]->DeltaTime == 0L );

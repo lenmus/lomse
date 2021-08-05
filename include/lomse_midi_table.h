@@ -229,8 +229,8 @@ public:
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
-    inline TimeUnits get_anacruxis_missing_time() { return m_rAnacrusisMissingTime; }
-    inline TimeUnits get_anacruxis_extra_time() { return m_rAnacrusisExtraTime; }
+    inline TimeUnits get_anacrusis_missing_time() { return m_rAnacrusisMissingTime; }
+    inline TimeUnits get_anacrusis_extra_time() { return m_rAnacrusisExtraTime; }
 
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }

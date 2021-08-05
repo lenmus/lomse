@@ -257,7 +257,7 @@
     <measure number="7">
       <direction placement="below">
         <direction-type>
-          <wedge spread="0" type="stop" niente="yes"/>
+          <wedge spread="0" type="crescendo" niente="yes"/>
         </direction-type>
       </direction>
       <note>
@@ -280,7 +280,7 @@
       </note>
       <direction>
         <direction-type>
-          <wedge spread="15" type="crescendo"/>
+          <wedge spread="15" type="stop"/>
         </direction-type>
       </direction>
       <note>

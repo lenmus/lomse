@@ -129,7 +129,7 @@ protected:
     int m_numLines;
     int m_numEntries;
     TimeUnits m_rMissingTime;
-    TimeUnits m_rAnacruxisExtraTime;    //extra anacruxis time introduced by grace notes
+    TimeUnits m_rAnacrusisExtraTime;    //extra anacrusis time introduced by grace notes
     TimeUnits m_minNoteDuration;
 
     ColStaffObjsEntry* m_pFirst;
@@ -142,9 +142,9 @@ public:
     //table info
     inline int num_entries() { return m_numEntries; }
     inline int num_lines() { return m_numLines; }
-    inline bool is_anacruxis_start() { return is_greater_time(m_rMissingTime, 0.0); }
-    inline TimeUnits anacruxis_missing_time() { return m_rMissingTime; }
-    inline TimeUnits anacruxis_extra_time() { return m_rAnacruxisExtraTime; }
+    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
+    inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
+    inline TimeUnits anacrusis_extra_time() { return m_rAnacrusisExtraTime; }
     inline TimeUnits min_note_duration() { return m_minNoteDuration; }
 
     //table management
@@ -232,8 +232,8 @@ protected:
     friend class ColStaffObjsBuilderEngine2x;
 
     inline void set_total_lines(int number) { m_numLines = number; }
-    inline void set_anacruxis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
-    inline void set_anacruxis_extra_time(TimeUnits rTime) { m_rAnacruxisExtraTime = rTime; }
+    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    inline void set_anacrusis_extra_time(TimeUnits rTime) { m_rAnacrusisExtraTime = rTime; }
     void sort_table();
     static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
     inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
@@ -301,7 +301,7 @@ protected:
     TimeUnits   m_rMaxSegmentTime;
     TimeUnits   m_rStartSegmentTime;
     TimeUnits   m_minNoteDuration;
-    TimeUnits   m_gracesAnacruxisTime;
+    TimeUnits   m_gracesAnacrusisTime;
     StaffVoiceLineTable  m_lines;
     std::vector<ColStaffObjsEntry*> m_graces;       //entries for grace notes
 
@@ -312,7 +312,7 @@ protected:
         , m_rMaxSegmentTime(0.0)
         , m_rStartSegmentTime(0.0)
         , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
-        , m_gracesAnacruxisTime(0.0)
+        , m_gracesAnacrusisTime(0.0)
     {}
 
 public:
@@ -327,7 +327,7 @@ protected:
     virtual void prepare_for_next_instrument()=0;
 
     void create_table();
-    void collect_anacruxis_info();
+    void collect_anacrusis_info();
     int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);

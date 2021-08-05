@@ -706,7 +706,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -757,7 +757,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -813,7 +813,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        CHECK( pTable->num_lines() == 2 );
 //        CHECK( pTable->num_entries() == 7 );
-//        CHECK( pTable->is_anacruxis_start() == false );
+//        CHECK( pTable->is_anacrusis_start() == false );
 //
 //        ColStaffObjsIterator it = pTable->begin();
 //        //              instr, staff, meas. time, line, scr
@@ -865,7 +865,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        CHECK( pTable->num_lines() == 2 );
 //        CHECK( pTable->num_entries() == 7 );
-//        CHECK( pTable->is_anacruxis_start() == false );
+//        CHECK( pTable->is_anacrusis_start() == false );
 //
 //        ColStaffObjsIterator it = pTable->begin();
 //        //              instr, staff, meas. time, line, scr
@@ -1017,7 +1017,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 10 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -1063,7 +1063,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 7 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -1105,7 +1105,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 9 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -1152,7 +1152,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 10 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2316,7 +2316,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
         //cout << pTable->dump() << endl;
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2356,7 +2356,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
         //cout << pTable->dump() << endl;
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2394,7 +2394,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 //        cout << doc.to_string(true) << endl;
 //        cout << pTable->dump() << endl;
 
@@ -2438,7 +2438,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 //        cout << doc.to_string(true) << endl;
 //        cout << pTable->dump() << endl;
 
@@ -2541,7 +2541,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2584,7 +2584,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2627,7 +2627,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2671,7 +2671,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2715,7 +2715,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2760,7 +2760,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2805,7 +2805,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2851,7 +2851,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2899,7 +2899,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -2929,7 +2929,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
         //cout << pTable->dump() << endl;
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2960,7 +2960,7 @@ SUITE(DocCommandTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_entries() == 0 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         //cursor pointing to right place
         //cout << "id=" << cursor.get_pointee_id() << endl;
@@ -3467,7 +3467,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -3509,7 +3509,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -3552,7 +3552,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
@@ -3584,7 +3584,7 @@ SUITE(DocCommandTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 3 );
-        CHECK( pTable->is_anacruxis_start() == false );
+        CHECK( pTable->is_anacrusis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
