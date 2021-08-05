@@ -38,7 +38,7 @@
         </attributes>
       <direction placement="above">
         <direction-type>
-          <words font-weight="bold" font-size="10.5">Andantino</words>
+          <words default-y="15" font-weight="bold" font-size="10.5">Andantino</words>
           </direction-type>
         <sound tempo="60"/>
         </direction>
@@ -51,7 +51,7 @@
     <measure number="2" width="303.33">
       <direction placement="above">
         <direction-type>
-          <words font-style="italic" font-size="9">dolce</words>
+          <words default-x="-10" default-y="15" font-style="italic" font-size="9">dolce</words>
           </direction-type>
         </direction>
       <note default-x="27.51" default-y="-30.00">
