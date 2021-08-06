@@ -2114,7 +2114,19 @@ public:
 
     ImoObj* do_analysis() override
     {
-        //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+        //How the importer works: If location==left, the barline must be combined with
+        //previous right one. Otherwise (middle or roght barlines) the barline is
+        //created. This is done as follows:
+        //
+        //1. for right and middle barlines the ImoBarline is created, but left barlines
+        //   the previous ImoBarline is retrieved:      create_barline(location);
+        //
+        //2. for barlines having <repeat> element, fix the barline type to add the repeat dots:
+        //            EBarline type = find_barline_type(barStyle, repeat);
+        //
+        //3. if left barline exists, update its info by combining it with current one:
+        //            combine_barlines(m_pBarline, type);
+
 
             //attributes:
 
@@ -2186,22 +2198,20 @@ protected:
 
     void create_barline(const string& location)
     {
-        m_pBarline = nullptr;
         if (location == "left")
         {
-            //must be combined with previous barline
+            //this barline must be combined with previous barline
             m_pBarline = m_pAnalyser->get_last_barline();
+            m_fNewBarline = false;
+            return;
         }
 
-        m_fNewBarline = false;
-        if (m_pBarline == nullptr)
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            m_pBarline = static_cast<ImoBarline*>(
-                                ImFactory::inject(k_imo_barline, pDoc) );
-            m_pBarline->set_type(k_barline_simple);
-            m_fNewBarline = true;
-        }
+        //middle or right barline: create it
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pBarline = static_cast<ImoBarline*>(
+                            ImFactory::inject(k_imo_barline, pDoc) );
+        m_pBarline->set_type(k_barline_simple);
+        m_fNewBarline = true;
     }
 
     EBarline find_barline_type(const string& barType, const string& repeat)
@@ -2242,7 +2252,7 @@ protected:
         else if (barType == "heavy-heavy")
         {
             if (repeat == "backward")
-                type = k_barline_double_repetition_alt;
+                type = k_barline_double_repetition_alt;     //heavy-heavy. See E.Gould, p.234
             else if (repeat.empty())
                 type = k_barline_double;
             else
@@ -2344,7 +2354,11 @@ protected:
 
         pBarline->set_type(type);
         if (pBarline->get_num_repeats() == 0
-            && (type == k_barline_double_repetition || type == k_barline_end_repetition))
+            && (type == k_barline_double_repetition
+                || type == k_barline_double_repetition_alt
+                || type == k_barline_end_repetition
+               )
+           )
         {
             pBarline->set_num_repeats(1);           //TODO: extract from <repeat>
         }
