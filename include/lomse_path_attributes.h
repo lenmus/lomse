@@ -164,14 +164,18 @@ struct PathAttributes
     //destructor
     ~PathAttributes()
     {
-        //AWARE: This destructor IS NEVER INVOKED
-        //AttrStorage objects are pod_bvector<PathAttributes>
-        //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore,
-        //memory allocated for GradientAttributes is released in
-        //BitmapDrawer::delete_paths().
-        //fill_gradient is deleted there, so DON'T DO IT HERE
+        //AWARE: This destructor IS NEVER INVOKED because
+        // AttrStorage objects are pod_bvector<PathAttributes>
+        // and pod_bvector doesn't invoke destructors, just dealloc memory. Thus,
+        // it is useless to try to delete GradientAttributes in this destructor.
+        // Currently, memory allocated for GradientAttributes will be  released in
+        // BitmapDrawer::delete_paths(), but **only** if this PathAttributes
+        // object is used to render something.
 
-        //delete fill_gradient;
+        //TODO: Fix this to avoid memory leaks if PathAttributes is not used
+
+        //delete fill_gradient();   //useless. Never invoked
+
     }
 };
 
