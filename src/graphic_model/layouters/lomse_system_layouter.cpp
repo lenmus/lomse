@@ -1016,7 +1016,9 @@ void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObj* 
                                                  int UNUSED(iSystem))
 {
     int iInstr = pPAO->m_iInstr;
-    int iCol = pPAO->m_iCol;
+    //pRO may span for several systems, ensure that the new
+    //shape is bound to a column from this system
+    int iCol = max(pPAO->m_iCol, m_iFirstCol);
     int iStaff = pPAO->m_iStaff;
     int idxStaff = pPAO->m_idxStaff;
 
