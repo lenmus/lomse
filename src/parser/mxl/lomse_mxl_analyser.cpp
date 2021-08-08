@@ -1994,10 +1994,11 @@ public:
         // staves?
         if (get_optional("staves"))
         {
-            int staves = get_child_value_integer(1);
+            const int targetStaves = get_child_value_integer(1);
             ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
+            int instrStaves = pInstr->get_num_staves();
             // coverity[tainted_data]
-            for(; staves > 1; --staves)
+            for (; instrStaves < targetStaves; ++instrStaves)
                 pInstr->add_staff();
         }
 
