@@ -1353,6 +1353,81 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_04)
+    {
+        //@04 setting number of staves
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>3</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_num_staves() == 3 );
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_05)
+    {
+        //@05 repeatedly setting <staves> value in the mid-score <attributes> should not lead to adding extra staves
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "<measure number='2'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_num_staves() == 2 );
+
+        delete pRoot;
+    }
+
 
     //@ barline --------------------------------------------------------------------------
 
