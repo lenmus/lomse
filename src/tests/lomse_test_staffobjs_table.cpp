@@ -1323,6 +1323,72 @@ SUITE(ColStaffObjsBuilderTest)
         check_note(__LINE__, *it, k_imo_note_regular, 1, 16.0, 128.0);   //ppal. dur 100%
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_301)
+    {
+        //@301. single arpeggiated chord. bottom-up
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/arpeggios/301-arpeggiated-chord-up.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 192.0) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 0.0) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                    //(clef G p1)
+        ++it;       //(key C)
+        ++it;       //(time 4 4)
+        ++it;       //(chord (n#39 c4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);
+        ++it;       //(n#42 e4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 5.33, 58.67);
+        ++it;       //(n#46 g4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 10.67, 53.33);
+        ++it;       //(n#49 b4 q v1 p1 (stem up)))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 16.00, 48.00);
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_302)
+    {
+        //@301. single arpeggiated chord. bottom-up
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/arpeggios/302-arpeggiated-chord-down.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 192.0) );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_extra_time(), 0.0) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                    //(clef G p1)
+        ++it;       //(key C)
+        ++it;       //(time 4 4)
+        ++it;       //(chord (n#39 c4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 16.00, 48.00);
+        ++it;       //(n#42 e4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 10.67, 53.33);
+        ++it;       //(n#46 g4 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 5.33, 58.67);
+        ++it;       //(n#49 b4 q v1 p1 (stem up)))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.00, 64.00);
+    }
+
 
     // ColStaffObjsBuilderEngine2x ------------------------------------------------------
 
