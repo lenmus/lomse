@@ -391,8 +391,9 @@ void ColStaffObjsBuilderEngine::create_table()
         create_entries_for_instrument(instr);
         prepare_for_next_instrument();
     }
-    compute_playback_time();
+    compute_grace_notes_playback_time();
     collect_anacrusis_info();
+    compute_arpeggiated_chords_playback_time();
 }
 
 //---------------------------------------------------------------------------------------
@@ -498,7 +499,7 @@ void ColStaffObjsBuilderEngine::set_min_note_duration()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine::compute_playback_time()
+void ColStaffObjsBuilderEngine::compute_grace_notes_playback_time()
 {
     for (auto pEntry : m_graces)
     {
@@ -506,6 +507,71 @@ void ColStaffObjsBuilderEngine::compute_playback_time()
         ImoGraceRelObj* pGraceRO = pGrace->get_grace_relobj();
         if (static_cast<ImoGraceNote*>(pGraceRO->get_start_object()) == pGrace)
             process_grace_relobj(pGrace, pGraceRO, pEntry);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::compute_arpeggiated_chords_playback_time()
+{
+    for (auto pBaseNote : m_arpeggios)
+    {
+        //determine arpeggio direction: top-down or bottom-up
+        bool fBottomUp = pBaseNote->get_arpeggio()->get_type() != k_arpeggio_arrow_down;
+
+        //collect arpeggio notes and sort them by pitch, as required by arpeggio type
+        std::list<ImoNote*> arpeggioNotes;
+        ImoChord* pChord = pBaseNote->get_chord();
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >& chordNotes = pChord->get_related_objects();
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
+        for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
+        {
+            ImoNote* pNote = static_cast<ImoNote*>((*itC).first);
+            save_arpeggiated_note(pNote, fBottomUp, arpeggioNotes);
+        }
+
+        //assign duration to the arpeggio
+        TimeUnits arpeggioDuration =
+            min(pBaseNote->get_playback_duration() * 0.7, TimeUnits(k_duration_16th));
+
+        //determine time shift per note
+        TimeUnits shift = arpeggioDuration / double(chordNotes.size() - 1);
+
+        //Compute notes start time and duration
+        TimeUnits totalShift = 0.0;
+        for (auto pNote : arpeggioNotes)
+        {
+            pNote->set_playback_time( pNote->get_playback_time() + totalShift);
+            pNote->set_playback_duration( pNote->get_playback_duration() - totalShift);
+            totalShift += shift;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::save_arpeggiated_note(ImoNote* pNote, bool fBottomUp,
+                                                      list<ImoNote*>& chordNotes)
+{
+    //notes are inserted to keep them sorted by pitch
+
+    if (chordNotes.size() == 0)
+    {
+	    chordNotes.push_back(pNote);
+    }
+    else
+    {
+        MidiPitch newPitch( pNote->get_midi_pitch() );
+        std::list<ImoNote*>::iterator it;
+        for (it = chordNotes.begin(); it != chordNotes.end(); ++it)
+        {
+            if ( (fBottomUp && newPitch < (*it)->get_midi_pitch())
+                 || (!fBottomUp && newPitch > (*it)->get_midi_pitch())
+               )
+            {
+	            chordNotes.insert(it, 1, pNote);
+                return;
+            }
+        }
+	    chordNotes.push_back(pNote);
     }
 }
 
@@ -777,6 +843,13 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         nVoice = pNR->get_voice();
         if (!pNR->is_grace_note())
             m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
+
+        if (pNR->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>(pNR);
+            if (pNote->is_start_of_chord() && pNote->get_arpeggio())
+                m_arpeggios.push_back(pNote);
+        }
     }
     int nLine = get_line_for(nVoice, nStaff);
     ColStaffObjsEntry* pEntry = m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr,
@@ -925,6 +998,13 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
         m_curVoice = nVoice;
+
+        if (pNR->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>(pNR);
+            if (pNote->is_start_of_chord() && pNote->get_arpeggio())
+                m_arpeggios.push_back(pNote);
+        }
     }
     else if (pSO->is_barline())
         nVoice = 0;

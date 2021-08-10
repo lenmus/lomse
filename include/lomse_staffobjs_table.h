@@ -303,7 +303,9 @@ protected:
     TimeUnits   m_minNoteDuration;
     TimeUnits   m_gracesAnacrusisTime;
     StaffVoiceLineTable  m_lines;
-    std::vector<ColStaffObjsEntry*> m_graces;       //entries for grace notes
+    std::vector<ColStaffObjsEntry*> m_graces;   //entries for grace notes
+    std::vector<ImoNote*> m_arpeggios;          //chord base notes for arpeggiated chords
+
 
     ColStaffObjsBuilderEngine(ImoScore* pScore)
         : m_pColStaffObjs(nullptr)
@@ -332,12 +334,17 @@ protected:
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     void set_min_note_duration();
-    void compute_playback_time();
+    void compute_grace_notes_playback_time();
     void process_grace_relobj(ImoGraceNote* pGrace, ImoGraceRelObj* pGRO,
                               ColStaffObjsEntry* pEntry);
     ImoNote* locate_grace_principal_note(ColStaffObjsEntry* pEntry);
     ImoNote* locate_grace_previous_note(ColStaffObjsEntry* pEntry);
     void fix_negative_playback_times();
+    void compute_arpeggiated_chords_playback_time();
+
+    static void save_arpeggiated_note(ImoNote* pNote, bool fBottomUp,
+                                      list<ImoNote*>& chordNotes);
+
 
 };
 
