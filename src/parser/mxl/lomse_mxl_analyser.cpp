@@ -2199,7 +2199,7 @@ protected:
 
     void create_barline(const string& location)
     {
-        if (location == "left")
+        if (location == "left" && m_pAnalyser->get_last_barline())
         {
             //this barline must be combined with previous barline
             m_pBarline = m_pAnalyser->get_last_barline();

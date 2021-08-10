@@ -2650,6 +2650,88 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, measure_04)
+    {
+        //@04. Left and right barlines handling
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<barline location='left'>"
+                    "<bar-style>heavy-light</bar-style>"
+                    "<repeat direction='forward'/>"
+                "</barline>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>4</duration><type>whole</type></note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<repeat direction='backward'/>"
+                "</barline>"
+            "</measure>"
+            "<measure number='2'>"
+                "<barline location='left'>"
+                    "<bar-style>heavy-light</bar-style>"
+                    "<repeat direction='forward'/>"
+                "</barline>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>4</duration><type>whole</type></note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<repeat direction='backward'/>"
+                "</barline>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc != nullptr );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 5 );
+
+        ImoObj::children_iterator it = pMD->begin(); //measure 1: the first start repeat barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_start_repetition );
+
+        ++it; //measure 1: note
+        CHECK( (*it)->is_note() );
+
+        ++it; //measure 1-2: a combined repeat barline
+        CHECK( (*it)->is_barline() );
+        pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_double_repetition );
+
+        ++it; //measure 2: note
+        CHECK( (*it)->is_note() );
+
+        ++it; //measure 2: end repeat barline
+        CHECK( (*it)->is_barline() );
+        pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_end_repetition );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
 
     //@ metronome -----------------------------------------------------------------------
 
