@@ -111,7 +111,8 @@ public:
     inline void set_dots(int dots) { m_nDots = dots; }
     inline void set_voice(int voice) { m_nVoice = voice; }
     void set_note_type_and_dots(int noteType, int dots);
-    void set_time_modification(int numerator, int denominator);
+    void set_time_modifiers_and_duration(int numerator, int denominator);
+    void set_time_modifiers(int numerator, int denominator);
     void set_type_dots_duration(int noteType, int dots, TimeUnits duration);
     inline void set_playback_duration(TimeUnits value) { m_playDuration = value; }
     inline void set_event_duration(TimeUnits value) { m_eventDuration = value; }

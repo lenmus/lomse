@@ -339,7 +339,7 @@ public:
     ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
     float current_divisions() { return m_divisions; }
     void set_current_divisions(float value) { m_divisions = value; }
-    TimeUnits duration_to_timepos(int duration);
+    TimeUnits duration_to_time_units(int duration);
 
     //timepos
     TimeUnits get_current_time() { return m_time; }

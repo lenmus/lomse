@@ -91,7 +91,7 @@ ImoTuplet* ImoNoteRest::get_first_tuplet()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoNoteRest::set_time_modification(int numerator, int denominator)
+void ImoNoteRest::set_time_modifiers_and_duration(int numerator, int denominator)
 {
     m_timeModifierTop = numerator;
     m_timeModifierBottom = denominator;
@@ -100,6 +100,13 @@ void ImoNoteRest::set_time_modification(int numerator, int denominator)
     m_duration = to_duration(m_nNoteType, m_nDots) * modifier;
     m_playDuration = m_duration;
     m_eventDuration = m_duration;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNoteRest::set_time_modifiers(int numerator, int denominator)
+{
+    m_timeModifierTop = numerator;
+    m_timeModifierBottom = denominator;
 }
 
 //---------------------------------------------------------------------------------------

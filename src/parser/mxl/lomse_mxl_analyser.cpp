@@ -3241,7 +3241,7 @@ public:
         if (!get_mandatory("duration"))
             return nullptr;
         int duration = get_child_value_integer(0);
-        TimeUnits shift = m_pAnalyser->duration_to_timepos(duration);
+        TimeUnits shift = m_pAnalyser->duration_to_time_units(duration);
 
         //<voice>
         if (fFwd && get_optional("voice"))
@@ -4467,7 +4467,7 @@ protected:
                            int duration)
     {
         int noteType = k_unknown_notetype;
-        TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
+        TimeUnits units = m_pAnalyser->duration_to_time_units(duration);
         if (!type.empty())
             noteType = to_note_type(type);
         else if (pNR->is_rest())
@@ -6986,7 +6986,7 @@ public:
         fError |= error_if_more_elements();
 
         if (!fError)
-            m_pNR->set_time_modification(m_normal, m_actual);
+            m_pNR->set_time_modifiers(m_normal, m_actual);
 
         return nullptr;
     }
@@ -8179,7 +8179,7 @@ int MxlAnalyser::get_octave_shift_id_and_close(int num)
 }
 
 //---------------------------------------------------------------------------------------
-TimeUnits MxlAnalyser::duration_to_timepos(int duration)
+TimeUnits MxlAnalyser::duration_to_time_units(int duration)
 {
     //AWARE: 'divisions' indicates how many divisions per quarter note
     //       and 'duration' is expressed in 'divisions'

@@ -3822,7 +3822,7 @@ public:
         //time modification
         if (m_pTimeModifDto != nullptr)
         {
-            pNR->set_time_modification( m_pTimeModifDto->get_top_number(),
+            pNR->set_time_modifiers_and_duration( m_pTimeModifDto->get_top_number(),
                                         m_pTimeModifDto->get_bottom_number() );
             delete m_pTimeModifDto;
         }
@@ -7387,7 +7387,7 @@ void TupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
 
         //if not only graphical (LDP < 2.0) add time modification the note/rest
         if (!pStartDto->is_only_graphical())
-            pNR->set_time_modification( m_pTuplet->get_normal_number(),
+            pNR->set_time_modifiers_and_duration( m_pTuplet->get_normal_number(),
                                         m_pTuplet->get_actual_number() );
     }
 }
