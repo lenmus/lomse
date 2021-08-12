@@ -6816,13 +6816,16 @@ public:
 
         set_tie_type_and_id(type, num, pNote);
 
-        m_pInfo1->set_note(pNote);
-        m_pAnalyser->add_relation_info(m_pInfo1);
-
-        if (m_pInfo2)
+        if (m_pInfo1)
         {
-            m_pInfo2->set_note(pNote);
-            m_pAnalyser->add_relation_info(m_pInfo2);
+            m_pInfo1->set_note(pNote);
+            m_pAnalyser->add_relation_info(m_pInfo1);
+
+            if (m_pInfo2)
+            {
+                m_pInfo2->set_note(pNote);
+                m_pAnalyser->add_relation_info(m_pInfo2);
+            }
         }
 
         return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
