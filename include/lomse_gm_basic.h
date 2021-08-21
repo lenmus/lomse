@@ -491,10 +491,33 @@ protected:
     void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
     void add_shapes_to_tables_in(GmoBoxDocPage* pPage);
 
+    friend class StaffObjShapeCursor;
     friend class GraphicModel;
     void add_boxes_to_map_imo_to_box(GraphicModel* pGM);
     void add_boxes_to_controls_map(GraphicModel* pGM);
 
+};
+
+//---------------------------------------------------------------------------------------
+class StaffObjShapeCursor {
+public:
+    explicit StaffObjShapeCursor(GmoBox* pBox);
+    explicit StaffObjShapeCursor(GmoShape* pShape);
+
+    GmoShape* get_shape() const { return (*m_it); }
+    TimeUnits get_time() const;
+
+    bool next();
+    bool next(TimeUnits maxTime);
+    bool nextAfter(TimeUnits time);
+
+    bool prev();
+    bool prev(TimeUnits minTime);
+    bool prevBefore(TimeUnits time);
+
+protected:
+    GmoBox* m_pCurrentBox;
+    std::list<GmoShape*>::const_iterator m_it;
 };
 
 //---------------------------------------------------------------------------------------

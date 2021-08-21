@@ -32,6 +32,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_engraving_options.h"
+#include "lomse_shape_note.h"
 #include "lomse_shape_wedge.h"
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
@@ -148,7 +149,7 @@ GmoShape* WedgeEngraver::create_intermediate_shape()
     int niente = GmoShapeWedge::k_no_niente;
     LUnits radius = 0.0f;
 
-    compute_intermediate_shape_position();
+    compute_intermediate_or_last_shape_position();
     //add_user_displacements(1, &m_points[0]);
     return LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points[0], thickness,
                                    m_pWedge->get_color(), niente, radius);
@@ -196,22 +197,8 @@ GmoShape* WedgeEngraver::create_first_shape()
 void WedgeEngraver::compute_first_shape_position()
 {
     //compute xLeft and xRight positions
-    if (m_pEndDirectionShape == nullptr)
-    {
-        m_points[0].x = m_pStartDirectionShape->get_left();    //xLeft at Direction tag
-        m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
-    }
-    else if (m_fFirstShapeAtSystemStart)
-    {
-        m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
-                        - tenths_to_logical(10.0f);           //xLeft at start of system
-        m_points[1].x = m_pEndDirectionShape->get_left();
-    }
-    else
-    {
-        m_points[0].x = m_pStartDirectionShape->get_left();
-        m_points[1].x = m_pEndDirectionShape->get_left();
-    }
+    m_points[0].x = determine_shape_position_left(/* first */ true);
+    m_points[1].x = determine_shape_position_right();
     m_points[2].x = m_points[0].x;
     m_points[3].x = m_points[1].x;
 
@@ -254,19 +241,18 @@ GmoShape* WedgeEngraver::create_final_shape()
             niente = GmoShapeWedge::k_niente_at_end;
     }
 
-    compute_last_shape_position();
+    compute_intermediate_or_last_shape_position();
     //add_user_displacements(1, &m_points[0]);
     return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
                                    m_pWedge->get_color(), niente, radius);
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::compute_last_shape_position()
+void WedgeEngraver::compute_intermediate_or_last_shape_position()
 {
-    m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
-                     - tenths_to_logical(10.0f);
+    m_points[0].x = determine_shape_position_left(/* first */ false);
     m_points[2].x = m_points[0].x;
-    m_points[1].x = m_pEndDirectionShape->get_left();
+    m_points[1].x = determine_shape_position_right();
     m_points[3].x = m_points[1].x;
 
     //determine wedge spread
@@ -289,31 +275,66 @@ void WedgeEngraver::compute_last_shape_position()
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::compute_intermediate_shape_position()
+LUnits WedgeEngraver::determine_shape_position_left(bool first) const
 {
-    m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
-                     - tenths_to_logical(10.0f);
-    m_points[2].x = m_points[0].x;
-    m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
-    m_points[3].x = m_points[1].x;
+    if (m_fFirstShapeAtSystemStart || !first)
+        return m_pInstrEngrv->get_staves_left() + m_uPrologWidth - tenths_to_logical(10.0f);
 
-    //determine wedge spread
-    LUnits endSpread = tenths_to_logical(m_pWedge->get_end_spread()) / 2.0f;
-    LUnits startSpread = tenths_to_logical(m_pWedge->get_start_spread()) / 2.0f;
-    if (m_pWedge->is_crescendo())
-        startSpread = endSpread / 2.0f;
-    else
-        startSpread /= 2.0f;
+    StaffObjShapeCursor cursor(m_pStartDirectionShape);
+    const TimeUnits maxTime = m_pStartDirection->get_time();
 
-    //determine center line of shape box
-    LUnits yRef = determine_center_line_of_shape(startSpread, endSpread);
+    constexpr LUnits xMaxValue = std::numeric_limits<LUnits>::max();
+    LUnits xNext = xMaxValue;
 
-    //compute points
-    m_points[0].y = yRef - startSpread;
-    m_points[2].y = yRef + startSpread;
+    while (cursor.next(maxTime))
+    {
+        GmoShape* pShape = cursor.get_shape();
+        LUnits x;
 
-    m_points[1].y = yRef - endSpread;
-    m_points[3].y = yRef + endSpread;
+        if (pShape->is_shape_note())
+            x = static_cast<GmoShapeNote*>(pShape)->get_notehead_left();
+        else if (pShape->is_shape_rest())
+            x = pShape->get_left();
+        else
+            continue;
+
+        if (x < xNext)
+            xNext = x;
+    }
+
+    if (xNext < xMaxValue)
+        return xNext;
+
+    return m_pStartDirectionShape->get_left() + tenths_to_logical(10.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits WedgeEngraver::determine_shape_position_right() const
+{
+    if (!m_pEndDirectionShape)
+        return m_pInstrEngrv->get_staves_right();
+
+    StaffObjShapeCursor cursor(m_pEndDirectionShape);
+    const TimeUnits maxTime = m_pEndDirection->get_time();
+
+    LUnits xRight = m_pEndDirectionShape->get_left();
+    bool hasNoteRestAfterEnd = false;
+
+    while (cursor.next(maxTime))
+    {
+        GmoShape* pShape = cursor.get_shape();
+
+        if (pShape->get_creator_imo()->is_note_rest())
+        {
+            hasNoteRestAfterEnd = true;
+            break;
+        }
+    }
+
+    if (!hasNoteRestAfterEnd)
+        xRight -= tenths_to_logical(10.0f);
+
+    return xRight;
 }
 
 //---------------------------------------------------------------------------------------

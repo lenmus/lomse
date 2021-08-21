@@ -39,7 +39,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // Engraver implementation
 //---------------------------------------------------------------------------------------
-LUnits Engraver::tenths_to_logical(Tenths value)
+LUnits Engraver::tenths_to_logical(Tenths value) const
 {
     return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
 }
