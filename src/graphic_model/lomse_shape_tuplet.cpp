@@ -218,21 +218,21 @@ void GmoShapeTuplet::compute_horizontal_position()
     //when the tuplet is engraved the system is not justified and, therefore,
     //the notes will be moved.
 
-    if (m_pStartNR->is_shape_rest())
-        m_uxStart = m_pStartNR->get_left();
-    else
+    if (m_pStartNR->is_shape_note())
     {
         GmoShapeNote* pStartNote = static_cast<GmoShapeNote*>(m_pStartNR);
         m_uxStart = pStartNote->get_notehead_left();
     }
-
-    if (m_pEndNR->is_shape_rest())
-        m_uxEnd = m_pEndNR->get_right();
     else
+        m_uxStart = m_pStartNR->get_left();
+
+    if (m_pEndNR->is_shape_note())
     {
         GmoShapeNote* pEndNote = static_cast<GmoShapeNote*>(m_pEndNR);
         m_uxEnd = pEndNote->get_notehead_right();
     }
+    else
+        m_uxEnd = m_pEndNR->get_right();
 }
 
 //---------------------------------------------------------------------------------------

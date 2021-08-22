@@ -349,8 +349,8 @@ GmoShapeNote* TupletEngraver::get_first_note()
     std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
     for (it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
     {
-        if ((*it).first->is_note())
-            return dynamic_cast<GmoShapeNote*>((*it).second);
+        if ((*it).second->is_shape_note())
+            return static_cast<GmoShapeNote*>((*it).second);
     }
     return nullptr;    //imposible case unless all group are rests!
 }
@@ -361,8 +361,8 @@ GmoShapeNote* TupletEngraver::get_last_note()
     std::list< pair<ImoNoteRest*, GmoShape*> >::reverse_iterator it;
     for (it = m_noteRests.rbegin(); it != m_noteRests.rend(); ++it)
     {
-        if ((*it).first->is_note())
-            return dynamic_cast<GmoShapeNote*>((*it).second);
+        if ((*it).second->is_shape_note())
+            return static_cast<GmoShapeNote*>((*it).second);
     }
     return nullptr;    //imposible case unless all group are rests!
 }
