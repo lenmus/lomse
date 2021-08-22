@@ -891,7 +891,6 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObj* pPAO,
                                                       iLine, prologWidth, pInstr,
                                                       idxStaff, m_pVProfile);
             GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
-            if (pAuxShape)
             add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
                                         iCol, iInstr, iStaff, idxStaff);
 
@@ -1121,6 +1120,12 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
                                                  int layer, int iCol, int iInstr,
                                                  int iStaff, int idxStaff)
 {
+    if (!pShape)
+    {
+        delete_rel_obj_engraver(pRO);
+        return;
+    }
+
     //in case of cross-staff beams (beams with flag stem segments in two or more staves),
     //the beam must be placed on bottom staff when below or double-stemmed or in top
     //staff when above.
@@ -1142,17 +1147,21 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
     add_aux_shape_to_model(pShape, layer, iCol, iInstr, iStaff, idxStaff);
 
     if (fDeleteEngraver)
+        delete_rel_obj_engraver(pRO);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::delete_rel_obj_engraver(ImoRelObj* pRO)
+{
+    RelObjEngraver* pEngrv
+        = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
+    if (pEngrv == nullptr)
     {
-        RelObjEngraver* pEngrv
-            = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
-        if (pEngrv == nullptr)
-        {
-            LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
-            return;
-        }
-        m_engravers.remove_engraver(pRO);
-        delete pEngrv;
+        LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
+        return;
     }
+    m_engravers.remove_engraver(pRO);
+    delete pEngrv;
 }
 
 //---------------------------------------------------------------------------------------

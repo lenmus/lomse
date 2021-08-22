@@ -116,6 +116,12 @@ void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 //---------------------------------------------------------------------------------------
 void BeamEngraver::add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 {
+    if (pStaffObjShape->is_shape_invisible())
+        return;
+
+    if (pSO->is_note())
+        ++m_numNotes;
+
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
 
     if (pNR->is_note())
@@ -147,6 +153,12 @@ GmoShape* BeamEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffL
 //---------------------------------------------------------------------------------------
 GmoShape* BeamEngraver::create_last_shape(Color color)
 {
+    if (!m_numNotes)
+    {
+        LOMSE_LOG_WARN("No notes in beam");
+        return nullptr;
+    }
+
     m_color = color;
     decide_stems_direction();
     determine_number_of_beam_levels();
