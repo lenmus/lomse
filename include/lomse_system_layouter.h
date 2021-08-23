@@ -174,6 +174,7 @@ protected:
 
     void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
                                      int iCol, int iInstr, int iStaff, int idxStaff);
+    void delete_rel_obj_engraver(ImoRelObj* pRO);
     void add_lyrics_shapes_to_model(const std::string& tag, int layer, bool fLast,
                                     int iStaff, int idxStaff);
     void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
