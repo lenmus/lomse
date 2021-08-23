@@ -735,6 +735,96 @@ void GmoBox::add_boxes_to_map_imo_to_box(GraphicModel* pGM)
 
 
 //=======================================================================================
+// StaffObjShapeCursor
+//=======================================================================================
+StaffObjShapeCursor::StaffObjShapeCursor(GmoBox* pBox)
+    : m_pCurrentBox(pBox), m_it(pBox->m_shapes.begin())
+{
+}
+
+//---------------------------------------------------------------------------------------
+StaffObjShapeCursor::StaffObjShapeCursor(GmoShape* pShape)
+    : m_pCurrentBox(pShape->get_owner_box())
+{
+    std::list<GmoShape*>& shapes = m_pCurrentBox->m_shapes;
+    m_it = std::find(shapes.begin(), shapes.end(), pShape);
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits StaffObjShapeCursor::get_time() const
+{
+    return static_cast<ImoStaffObj*>(get_shape()->get_creator_imo())->get_time();
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::next()
+{
+    ++m_it;
+    return m_it != m_pCurrentBox->m_shapes.end() && (*m_it)->get_creator_imo()->is_staffobj();
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::next(TimeUnits maxTime)
+{
+    if (!next())
+        return false;
+
+    //next() ensures that we have a staffobj shape
+    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(get_shape()->get_creator_imo());
+    return pSO->get_time() <= maxTime;
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::nextAfter(TimeUnits time)
+{
+    while (next())
+    {
+        //next() ensures that we have a staffobj shape
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(get_shape()->get_creator_imo());
+        if (pSO->get_time() > time)
+            return true;
+    }
+
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::prev()
+{
+    if (m_it == m_pCurrentBox->m_shapes.begin())
+        return false;
+
+    --m_it;
+    return (*m_it)->get_creator_imo()->is_staffobj();
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::prev(TimeUnits minTime)
+{
+    if (!prev())
+        return false;
+
+    //prev() ensures that we have a staffobj shape
+    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(get_shape()->get_creator_imo());
+    return pSO->get_time() >= minTime;
+}
+
+//---------------------------------------------------------------------------------------
+bool StaffObjShapeCursor::prevBefore(TimeUnits time)
+{
+    while (prev())
+    {
+        //prev() ensures that we have a staffobj shape
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(get_shape()->get_creator_imo());
+        if (pSO->get_time() < time)
+            return true;
+    }
+
+    return false;
+}
+
+
+//=======================================================================================
 // GmoLayer: helper class. A collection of GmoShape objects
 //=======================================================================================
 

@@ -98,9 +98,10 @@ protected:
     GmoShape* create_final_shape();
 
     void compute_first_shape_position();
-    void compute_last_shape_position();
-    void compute_intermediate_shape_position();
+    void compute_intermediate_or_last_shape_position();
 
+    LUnits determine_shape_position_left(bool first) const;
+    LUnits determine_shape_position_right() const;
     LUnits determine_center_line_of_shape(LUnits startSpread, LUnits endSpread);
     //void add_user_displacements(int iWedge, UPoint* points);
 

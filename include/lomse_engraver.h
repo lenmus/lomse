@@ -67,7 +67,7 @@ public:
     virtual ~Engraver() {}
 
 protected:
-    LUnits tenths_to_logical(Tenths value);
+    LUnits tenths_to_logical(Tenths value) const;
     virtual double determine_font_size();
     virtual void add_user_shift(ImoContentObj* pImo, UPoint* pos);
 };
