@@ -131,6 +131,12 @@ GmoShape* TupletEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaf
 //---------------------------------------------------------------------------------------
 GmoShape* TupletEngraver::create_last_shape(Color color)
 {
+    GmoShapeNote* pStart = get_first_note();
+    GmoShapeNote* pEnd = get_last_note();
+
+    if (!pStart || !pEnd)
+        return nullptr;     //all group are rests or notes longer than quarter note!
+
     m_color = color;
     decide_tuplet_placement();
     decide_if_show_bracket();
@@ -138,7 +144,7 @@ GmoShape* TupletEngraver::create_last_shape(Color color)
 
     if (m_fDrawNumber || m_fDrawBracket)
     {
-        compute_y_coordinates();
+        compute_y_coordinates(pStart, pEnd);
         create_shape();
         set_shape_details();
         m_numShapes = 1;
@@ -221,14 +227,8 @@ void TupletEngraver::add_text_shape()
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::compute_y_coordinates()
+void TupletEngraver::compute_y_coordinates(GmoShapeNote* pStart, GmoShapeNote* pEnd)
 {
-    GmoShapeNote* pStart = get_first_note();
-    GmoShapeNote* pEnd = get_last_note();
-
-    if (!pStart || !pEnd)
-    	return;     //all group are rests or notes longer than quarter note!
-
     GmoShapeBeam* pBeamShapeStart = static_cast<GmoShapeBeam*>(
                                     pStart->find_related_shape(GmoObj::k_shape_beam) );
     GmoShapeBeam* pBeamShapeEnd = static_cast<GmoShapeBeam*>(
