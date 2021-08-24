@@ -102,7 +102,7 @@ protected:
     ImoNoteRest* get_start_noterest() { return m_noteRests.front().first; }
     ImoNoteRest* get_end_noterest() { return m_noteRests.back().first; }
 
-    void compute_y_coordinates();
+    void compute_y_coordinates(GmoShapeNote* pStart, GmoShapeNote* pEnd);
     GmoShapeNote* get_first_note();
     GmoShapeNote* get_last_note();
 
