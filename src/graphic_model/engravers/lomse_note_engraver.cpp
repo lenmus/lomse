@@ -201,9 +201,6 @@ void NoteEngraver::determine_stem_direction()
     ImoBeam* pBeam = m_pNote->get_beam();
     if (pBeam && pBeam->contains_chords())
     {
-        //As the stem will be engraved by the beam, it doesn't matter with stem
-        //direction is set in this method
-        m_fStemDown = false;
         if (m_pNote == pBeam->get_start_object())
         {
             //When the note is in a beam and the beam contains chords, stem direction
@@ -211,6 +208,14 @@ void NoteEngraver::determine_stem_direction()
             vector<int> clefs = m_pCursor->get_applicable_clefs_for_instrument(m_iInstr);
             BeamedChordHelper helper(pBeam, &clefs);
             m_fStemDown = helper.compute_stems_directions();
+        }
+        else if (m_pNote->get_computed_stem() != k_computed_stem_undecided)
+        {
+            m_fStemDown = m_pNote->is_computed_stem_down();
+        }
+        else
+        {
+            m_fStemDown = false;
         }
     }
     else if (m_pNote->is_grace_note())
