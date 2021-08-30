@@ -91,16 +91,16 @@ void initialize_engraving_order()
     m_order[i++] = k_imo_symbol_repetition_mark;
     m_order[i++] = k_imo_technical;
     m_order[i++] = k_imo_articulation_line;
-    m_order[i++] = k_imo_lyric;
     m_order[i++] = k_imo_text_repetition_mark;
+    m_order[i++] = k_imo_octave_shift;
+    m_order[i++] = k_imo_volta_bracket;
+    m_order[i++] = k_imo_wedge;
     m_order[i++] = k_imo_score_text;
+    m_order[i++] = k_imo_lyric;
     m_order[i++] = k_imo_score_title;
     m_order[i++] = k_imo_line;
     m_order[i++] = k_imo_score_line;
     m_order[i++] = k_imo_text_box;
-    m_order[i++] = k_imo_octave_shift;
-    m_order[i++] = k_imo_volta_bracket;
-    m_order[i++] = k_imo_wedge;
 
     while (i < k_num_auxobjs)
         m_order[i++] = k_imo_last-1;
