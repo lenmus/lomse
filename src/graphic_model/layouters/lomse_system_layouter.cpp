@@ -796,22 +796,26 @@ void SystemLayouter::engrave_system_details(int iSystem)
                     ++it;
             }
         }
-    }
 
-    //engrave RelObjs that continue in next system
-    list<PendingRelObj>::iterator itR;
-    for (itR = m_pScoreLyt->m_notFinishedRelObj.begin();
-         itR != m_pScoreLyt->m_notFinishedRelObj.end(); ++itR)
-    {
-        engrave_not_finished_relobj((*itR).first, (*itR).second, iSystem);
-    }
-
-    //engrave Lyrics that continue in next system
-    list<PendingLyricsObj>::iterator itAR;
-    for (itAR = m_pScoreLyt->m_notFinishedLyrics.begin();
-         itAR != m_pScoreLyt->m_notFinishedLyrics.end(); ++itAR)
-    {
-        engrave_not_finished_lyrics((*itAR).first, (*itAR).second, iSystem);
+        if (k_imo_relobj < type && type < k_imo_relobj_last)
+        {
+            //engrave RelObjs that continue in next system
+            for (PendingRelObj& obj : m_pScoreLyt->m_notFinishedRelObj)
+            {
+                if (obj.first->get_obj_type() == type)
+                {
+                    engrave_not_finished_relobj(obj.first, obj.second, iSystem);
+                }
+            }
+        }
+        else if (type == k_imo_lyric)
+        {
+            //engrave Lyrics that continue in next system
+            for (PendingLyricsObj& obj : m_pScoreLyt->m_notFinishedLyrics)
+            {
+                engrave_not_finished_lyrics(obj.first, obj.second, iSystem);
+            }
+        }
     }
 
     //delete engraved staffobjs
