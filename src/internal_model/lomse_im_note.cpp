@@ -220,6 +220,7 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_stemDirection(stem)
     , m_pTieNext(nullptr)
     , m_pTiePrev(nullptr)
+    , m_computedStem(k_computed_stem_undecided)
 {
     m_step = step;
     m_octave = octave;

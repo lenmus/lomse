@@ -911,8 +911,6 @@ bool BeamedChordHelper::compute_stem_direction_for_chord(ImoNote* pBaseNote,
         fStemDown ? ++m_nDownForced : ++m_nUpForced;
         computedStem = (fStemDown ? k_computed_stem_forced_down
                                   : k_computed_stem_forced_up);
-        pChord->set_stem_direction(computedStem);
-        m_pStemsDir->push_back(computedStem);
     }
     else
     {
