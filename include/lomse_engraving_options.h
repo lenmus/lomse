@@ -82,7 +82,7 @@ namespace lomse
 
 //System layouter
     //spacing function parameters
-#define LOMSE_MIN_SPACE                 10.0f   //Smin: space for Dmin (tenths)
+#define LOMSE_MIN_SPACE                 18.0f   //Smin: space for Dmin (tenths) (including the notehead)
     //space
 #define LOMSE_EXCEPTIONAL_MIN_SPACE      2.5f
 #define LOMSE_SPACE_AFTER_BARLINE       14.0f

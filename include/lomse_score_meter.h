@@ -124,6 +124,7 @@ public:
     //info about the score
     inline int num_instruments() { return m_numInstruments; }
     inline int num_staves() { return m_numStaves; }
+    int num_lines();
     inline int staff_index(int iInstr, int iStaff) {
         return m_staffIndex[iInstr] + iStaff;
     }

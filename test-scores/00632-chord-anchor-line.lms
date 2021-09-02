@@ -1,0 +1,19 @@
+(score
+   (vers 2.0)
+   (instrument
+      (musicData 
+        (clef G)
+        (key c)
+        (time 4 4)
+        (chord (n +f4 q v1 (stem down))(n d4 q)(n c4 q))
+        (chord (n g4 q (stem up))(n d4 q)(n =b3 q))
+        
+        //second voice
+        (n =b4 e. v2 (stem up)(beam 1 +))
+        (n =a4 s (stem up)(beam 1 -b))
+        
+        (barline end)
+      )
+   )
+)
+

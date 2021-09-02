@@ -96,6 +96,10 @@ ColStaffObjs::ColStaffObjs()
     , m_rMissingTime(0.0)
     , m_rAnacrusisExtraTime(0.0)
     , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
+    , m_numHalf(0)
+    , m_numQuarter(0)
+    , m_numEighth(0)
+    , m_num16th(0)
     , m_pFirst(nullptr)
     , m_pLast(nullptr)
 {
@@ -118,6 +122,19 @@ ColStaffObjsEntry* ColStaffObjs::add_entry(int measure, int instr, int voice, in
     add_entry_to_list(pEntry);
     ++m_numEntries;
     return pEntry;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjs::count_noterest(int type)
+{
+    if (type <= k_half)
+        ++m_numHalf;
+    else if (type == k_quarter)
+        ++m_numQuarter;
+    else if (type == k_eighth)
+        ++m_numEighth;
+    else
+        ++m_num16th;
 }
 
 //---------------------------------------------------------------------------------------
@@ -842,7 +859,10 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
         if (!pNR->is_grace_note())
+        {
+            m_pColStaffObjs->count_noterest(pNR->get_note_type());
             m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
+        }
 
         if (pNR->is_note())
         {
@@ -998,6 +1018,9 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
         m_curVoice = nVoice;
+
+        if (!pNR->is_grace_note())
+            m_pColStaffObjs->count_noterest(pNR->get_note_type());
 
         if (pNR->is_note())
         {

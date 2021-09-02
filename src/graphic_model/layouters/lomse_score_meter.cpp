@@ -97,6 +97,12 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
 }
 
 //---------------------------------------------------------------------------------------
+int ScoreMeter::num_lines()
+{
+    return m_pScore->get_staffobjs_table()->num_lines();
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreMeter::get_options(ImoScore* pScore)
 {
     ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
@@ -124,12 +130,6 @@ void ScoreMeter::get_options(ImoScore* pScore)
 
     pOpt = pScore->get_option("Render.SpacingDmin");
     m_spacingDmin = pOpt->get_float_value();
-    if (m_spacingDmin == 0.0f)
-    {
-        //use the minimun note duration in this score
-        m_spacingDmin = float(m_pScore->get_staffobjs_table()->min_note_duration());
-        m_spacingDmin = min(m_spacingDmin, 16.0f);    //option Render.SpacingMaxDmin ?
-    }
 
 	pOpt = pScore->get_option("Score.FillPageWithEmptyStaves");
     m_fFillPageWithEmptyStaves = pOpt->get_bool_value();
@@ -143,12 +143,12 @@ void ScoreMeter::get_options(ImoScore* pScore)
 	pOpt = pScore->get_option("StaffLines.Truncate");
     m_nTruncateStaffLines = pOpt->get_long_value();
 
-//    LOMSE_LOG_DEBUG(Logger::k_all, "SpacingFactor=%f, SpacingFopt=%f, SpacingMethod=%d, "
-//        "SpacingOptions=%d, SpacingValue=%f, DrawLeftBarline=%s, "
-//        "UpperLegerLines.Displacement=%f, spacingDmin=%f, spacingSmin =%f",
-//        m_spacingAlpha, m_spacingOptForce, m_nSpacingMethod, m_renderSpacingOpts,
-//        m_rSpacingValue, (m_fDrawLeftBarline ? "yes" : "no"),
-//        m_rUpperLegerLinesDisplacement, m_spacingDmin, m_spacingSmin);
+    LOMSE_LOG_DEBUG(Logger::k_all, "SpacingFactor=%f, SpacingFopt=%f, SpacingMethod=%d, "
+        "SpacingOptions=%d, SpacingValue=%f, DrawLeftBarline=%s, "
+        "UpperLegerLines.Displacement=%f, spacingDmin=%f, spacingSmin =%f",
+        m_spacingAlpha, m_spacingOptForce, m_nSpacingMethod, m_renderSpacingOpts,
+        m_rSpacingValue, (m_fDrawLeftBarline ? "yes" : "no"),
+        m_rUpperLegerLinesDisplacement, m_spacingDmin, m_spacingSmin);
 }
 
 //---------------------------------------------------------------------------------------
