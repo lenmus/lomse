@@ -523,7 +523,7 @@ void SpAlgGourlay::do_spacing(int iColumnToTrace)
         (*it)->apply_force(m_Fopt);     //to get an initial estimation for columns width
         (*it)->determine_approx_sff_for(m_Fopt);
 
-//        if ((iCol == iColumnToTrace) || m_libraryScope.dump_column_tables())
+        if ((iCol == iColumnToTrace) || m_libraryScope.dump_column_tables())
         {
             dbgLogger << " ****************************** After applying Fopt = "
                 << m_Fopt << endl;
@@ -537,6 +537,7 @@ void SpAlgGourlay::do_spacing(int iColumnToTrace)
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::determine_spacing_parameters()
 {
+    stringstream ss;
     if (m_libraryScope.use_debug_values())
     {
         m_Fopt = m_libraryScope.get_optimum_force();
@@ -544,7 +545,7 @@ void SpAlgGourlay::determine_spacing_parameters()
         m_dmin = m_libraryScope.get_spacing_dmin();
         m_uSmin = m_pScoreMeter->tenths_to_logical_max(
                             m_libraryScope.get_spacing_smin() );
-        dbgLogger << "Using debug";
+        ss << "Using debug";
     }
     else
     {
@@ -552,10 +553,10 @@ void SpAlgGourlay::determine_spacing_parameters()
         m_alpha = m_pScoreMeter->get_spacing_alpha();
         m_dmin = m_pScoreMeter->get_spacing_dmin();
         m_uSmin = m_pScoreMeter->get_spacing_smin();
-        dbgLogger << "Using default";
+        ss << "Using default";
     }
-    dbgLogger << " values for spacing parameters: alpha=" << m_alpha << ", Fopt="
-        << m_Fopt << ", Smin =" << m_uSmin << endl;
+    ss << " values for spacing parameters: alpha=" << m_alpha << ", Fopt="
+        << m_Fopt << ", Smin =" << m_uSmin;
 
     //m_dmin==0.0 implies that value must be determined by the spacing algorithm
     if (m_dmin == 0.0f)
@@ -590,8 +591,9 @@ void SpAlgGourlay::determine_spacing_parameters()
 //        }
 
 
-        dbgLogger << "    h=" << h << ", q=" << q << ", e=" << e << ", s=" << s
-            << ", total=" << total << ", dmin=" << dmin << ", Dmin=" << m_dmin << endl;
+        ss << ", h=" << h << ", q=" << q << ", e=" << e << ", s=" << s
+            << ", total=" << total << ", dmin=" << dmin << ", Dmin=" << m_dmin;
+        LOMSE_LOG_INFO(ss.str());
     }
 }
 
@@ -2508,8 +2510,6 @@ int TimeSliceNoterest::compute_neighborhood(int prevNeighborhood, int numOpenSeq
     //A neighborhood starts when a sequence starts and no neighborhood is open.
     //A neighborhood finishes when no already open sequence continues from that point.
 
-    dbgLogger << "TimeSliceNoterest::compute_neighborhood(). prevNeighborhood="
-        << prevNeighborhood << ", numOpenSeqs=" << numOpenSeqs;
     int numEndStart = 0;
     for (size_t i=0; i < m_lines.size(); ++i)
     {
@@ -2523,8 +2523,6 @@ int TimeSliceNoterest::compute_neighborhood(int prevNeighborhood, int numOpenSeq
                 --numOpenSeqs;
         }
     }
-    dbgLogger << ", after numOpenSeqs=" << numOpenSeqs << ", numEndStart="
-        << numEndStart;
 
     bool fError = false;
     if (numEndStart > 0 && numOpenSeqs - numEndStart == 0)  //end_start
@@ -2557,7 +2555,6 @@ int TimeSliceNoterest::compute_neighborhood(int prevNeighborhood, int numOpenSeq
                 fError = true;
                 break;
         }
-        dbgLogger << ", case 1. m_neighborhood=" << m_neighborhood << endl;
     }
     else if (numOpenSeqs - numEndStart > 0)  //start or continue
     {
@@ -2578,7 +2575,6 @@ int TimeSliceNoterest::compute_neighborhood(int prevNeighborhood, int numOpenSeq
                 m_neighborhood = SeqData::k_seq_continue;
                 break;
         }
-        dbgLogger << ", case 2. m_neighborhood=" << m_neighborhood << endl;
     }
     else if (numOpenSeqs == 0)  //numEndStart==0 ==> end or isolated
     {
@@ -2604,14 +2600,12 @@ int TimeSliceNoterest::compute_neighborhood(int prevNeighborhood, int numOpenSeq
                 fError = true;
                 break;
         }
-        dbgLogger << ", case 3. m_neighborhood=" << m_neighborhood << endl;
     }
     else
     {
         //imposible! implies either numEndStart < 0, numOpenSeqs < 0 or
         //numOpenSeqs - numEndStart < 0
         fError = true;
-        dbgLogger << ", case 4. m_neighborhood=" << m_neighborhood << endl;
     }
 
     if (fError)
@@ -2823,7 +2817,7 @@ void ColumnDataGourlay::fix_neighborhood_spacing_problems(bool fTrace)
                 {
                     //Fix spacing problem
                     di_average /= neighborhoodLength;
-                //    if (fTrace)
+                    if (fTrace)
                     {
                         dbgLogger << "Fixing neighborhood spacing problem. di_average="
                            << fixed << setprecision(8) << setfill(' ')
