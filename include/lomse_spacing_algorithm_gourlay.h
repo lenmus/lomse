@@ -54,12 +54,13 @@ class GmoBoxSliceInstr;
 class ImoLyric;
 class ColumnDataGourlay;
 class TimeSlice;
-class StaffObjData;
+class ShapeData;
 class FullMeasureRestData;
 class TextMeter;
 class ImoStyle;
 class GmMeasuresTable;
 class GraphicModel;
+class TimeSliceNoterest;
 
 
 //---------------------------------------------------------------------------------------
@@ -69,9 +70,9 @@ class GraphicModel;
 class SpAlgGourlay : public SpAlgColumn
 {
 protected:
-    list<TimeSlice*> m_slices;              //list of TimeSlices
-    vector<ColumnDataGourlay*> m_columns;   //columns
-    vector<StaffObjData*> m_data;           //data associated to each staff object
+    std::list<TimeSlice*> m_slices;              //list of TimeSlices
+    std::vector<ColumnDataGourlay*> m_columns;   //columns
+    std::vector<ShapeData*> m_shapes;            //data associated to each staff object
 
     //auxiliary temporal variables used while collecting columns' data
     TimeSlice*          m_pCurSlice;
@@ -84,11 +85,15 @@ protected:
     int                 m_numSlices;
     int                 m_iPrevColumn;
 
+    //auxiliary temporal data to determine note sequences and minimum rods
+    std::vector<int> m_lastSequence;                //last sequence value for each line
+    std::vector<TimeSliceNoterest*> m_lastSlice;    //last slice for each line
+
     //auxiliary, for controlling objects to include in a prolog slice
     TimeUnits    m_lastPrologTime;
-    vector<bool> m_prologClefs;
-    vector<bool> m_prologKeys;
-    vector<bool> m_prologTimes;
+    std::vector<bool> m_prologClefs;
+    std::vector<bool> m_prologKeys;
+    std::vector<bool> m_prologTimes;
 
     //data collected for each slice
     TimeUnits   m_maxNoteDur;
@@ -98,7 +103,6 @@ protected:
 	LUnits m_uSmin;     //minimun space between notes
     float  m_alpha;     //alpha parameter for Gourlay's formula
     float  m_dmin;      //min note duration for which fixed spacing will be used
-    float  m_log2dmin;  //precomputed value for log2(dmin)
     float  m_Fopt;      //Optimum force (user defined and dependent on personal taste)
 
 public:
@@ -110,7 +114,7 @@ public:
 
 
     //spacing algorithm main actions
-    void do_spacing(int iCol, bool fTrace=false) override;
+    void do_spacing(int iColumnToTrace) override;
     void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) override;
 
     //for lines break algorithm
@@ -127,7 +131,8 @@ public:
     TimeGridTable* create_time_grid_table_for_column(int iCol) override;
 
     //debug
-    void dump_column_data(int iCol, ostream& outStream) override;
+    void dump_column_data(int iCol, std::ostream& outStream) override;
+    std::string dump_spacing_parameters();
 
     //column creation: collecting content
     void start_column_measurements(int iCol) override;
@@ -146,13 +151,18 @@ public:
 
 protected:
     void new_column(TimeSlice* pSlice);
-    void new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColumn, int iData);
+    void new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColumn, int iShape);
     void finish_slice(ColStaffObjsEntry* pLastEntry, int numEntries);
+    void finish_sequences();
+    void compute_rods_ds_and_di();
+    void fix_neighborhood_spacing_problems(int iColumnToTrace);
     void compute_springs();
-    void order_slices_in_columns();
-    void apply_force(float F);
     void determine_spacing_parameters();
     bool accept_for_prolog_slice(ColStaffObjsEntry* pEntry);
+    int determine_required_slice_type(ImoStaffObj* pSO, bool fInProlog);
+    ShapeData* save_info_for_shape(GmoShape* pShape, int iInstr, int iStaff);
+    bool determine_if_new_slice_needed(ColStaffObjsEntry* pCurEntry, TimeUnits curTime,
+                                       int curType, ImoStaffObj* pSO);
 
 };
 
@@ -165,8 +175,8 @@ class ColumnDataGourlay
 {
 public:
     TimeSlice* m_pFirstSlice;            //first slice in natural order
-    vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
-    list<FullMeasureRestData*> m_rests;  //data for full-measure rests in this column
+    std::vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
+    std::list<FullMeasureRestData*> m_rests;  //data for full-measure rests in this column
 
     float   m_slope;            //slope of approximated sff() for this column
     float   m_minFi;            //minimum force at which this column reacts
@@ -195,6 +205,7 @@ public:
     float determine_force_for(LUnits width);
     void determine_approx_sff_for(float force);
     void apply_force(float F);
+    void fix_neighborhood_spacing_problems(bool fTrace);
 
     //for TimeGridTable
     TimeGridTable* create_time_grid_table();
@@ -221,39 +232,99 @@ public:
 
     //managing shapes
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
-                           vector<StaffObjData*>& data);
-    void delete_shapes(vector<StaffObjData*>& data);
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                           std::vector<ShapeData*>& shapes);
+    void delete_shapes(std::vector<ShapeData*>& shapes);
+    void move_shapes_to_final_positions(std::vector<ShapeData*>& shapes, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile);
     void reposition_full_measure_rests(GmoBoxSystem* pBox, GmMeasuresTable* pMeasures);
 
     //debug
-    void dump(ostream& outStream, bool fOrdered=false);
+    void dump(std::ostream& outStream, bool fOrdered=false);
 
 protected:
 
 };
 
 
+
 //---------------------------------------------------------------------------------------
-// StaffObjData
-// Spacing data associated to an staff object.
-class StaffObjData
+// ShapeData
+// Shape and related data associated to an staff object.
+class ShapeData
 {
 public:
     GmoShape*   m_pShape;       //shape for this staff object
     int         m_idxStaff;     //staff index 0..n-1, relative to system
     int         m_iStaff;       //staff index 0..n-1, relative to instrument
-    LUnits      m_xUserShift;
-    LUnits      m_yUserShift;
 
 public:
-    StaffObjData();
-    virtual ~StaffObjData();
+    ShapeData() : m_pShape(nullptr) {}
 
     inline GmoShape* get_shape() { return m_pShape; }
+};
+
+
+
+//---------------------------------------------------------------------------------------
+// SeqData
+// information for each noterest included in an slice, to compute sequences
+class SeqData
+{
+public:
+    ColStaffObjsEntry* m_pEntry;    //the note/rest entry in ColStaffObjs
+    int m_sequence;         //type of sequence. Value from enum ESeqType
+
+public:
+    SeqData(ColStaffObjsEntry* pEntry, int sequence);
+
+    enum ESeqType {
+        k_seq_isolated = 0,     //0-isolated note
+        k_seq_start,            //1-start of sequence
+        k_seq_end,              //2-end of sequence
+        k_seq_end_start,        //3-end of a sequence and and start of a new one
+        k_seq_continue,         //4-in sequence
+    };
+
+    inline bool is_in_sequence() { return m_sequence == k_seq_continue; }
+    void update_info(ColStaffObjsEntry* pEntry, GmoShape* pShape);
+    inline void update_sequence(int seq) { m_sequence = seq; }
+    inline void finish_sequence_if_in_sequence() {
+        if (is_in_sequence())
+            m_sequence = k_seq_end;
+    }
+    TimeUnits get_duration();
+    int get_sequence() { return m_sequence; }
+
+    //debug
+    void dump(int iLine, std::ostream& ss);
+
+};
+
+//---------------------------------------------------------------------------------------
+// RodsData
+// Rods information for each noterest included in an slice
+class RodsData
+{
+public:
+    LUnits  m_dxB;          //width of left rod (before)
+    LUnits  m_dxNH;         //width of notehead
+    LUnits  m_dxA;          //width of right rod (after)
+
+public:
+    RodsData(LUnits dxB, LUnits dxNH, LUnits dxA)
+        : m_dxB(dxB)
+        , m_dxNH(dxNH)
+        , m_dxA(dxA)
+    {
+    }
+
+    void update_rods(LUnits dxB, LUnits dxNH, LUnits dxA);
+
+    //debug
+    void dump(int iStaff, std::ostream& ss);
+
 };
 
 
@@ -300,7 +371,7 @@ protected:
     friend class TimeSliceGraces;
     ColStaffObjsEntry*  m_firstEntry;
     ColStaffObjsEntry*  m_lastEntry;
-    int         m_iFirstData;   //index to first StaffObjData element for this slice
+    int         m_iFirstShape;  //index to first ShapeData element for this slice
     int         m_numEntries;   //num staffobjs in this slice
     int         m_type;         //type of slice. Value from enum ESliceType
     int         m_iColumn;      //Column in which this slice is included
@@ -310,12 +381,12 @@ protected:
     TimeSlice* m_prev;
 
     //data for spacing
-    LUnits  m_xLi;          //width of left rod
-    LUnits  m_xRi;          //width of right rod
+    LUnits  m_dxLeft;       //fixed space at start (a rod in the springs join)
+    LUnits  m_dxL;          //width of left rod
+    LUnits  m_dxR;          //width of right rod
     float   m_fi;           //pre-stretching force
-    float   m_ci;           //spring constant
+    float   m_c;            //spring constant c
     LUnits  m_width;        //final extent after applying force
-    LUnits  m_xLeft;        //fixed space at start (a rod in the springs join)
 
     //auxiliary
     TimeUnits   m_ds;       //spring duration (= timepos(next_slice) - timepos(this_slice))
@@ -323,7 +394,7 @@ protected:
     TimeUnits   m_minNote;      //min note/rest duration in this segment
     TimeUnits   m_minNoteNext;  //min note/rest duration still sounding in next segment
 
-    TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
+    TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iShape);
 
 public:
     virtual ~TimeSlice();
@@ -346,28 +417,29 @@ public:
     inline void set_next(TimeSlice* pSlice) { m_next = pSlice; }
 
     //spacing
-    void compute_spring_data(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin,
+    void compute_ds_and_di();
+    void compute_spring_data(LUnits uSmin, float alpha, TimeUnits dmin,
                              bool fProportional, LUnits dsFixed);
-    virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    virtual void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                        TextMeter& textMeter) = 0;
     void apply_force(float F);
-    inline void increment_fixed_extent(LUnits value) { m_xLeft += value; }
-    virtual void increment_xRi(LUnits value) { m_xRi += value; }
-    virtual void merge_with_xRi(LUnits value) { m_xRi = max(m_xRi, value); }
-    virtual void set_minimum_xi(LUnits value) {
-        if (get_xi() < value)
-            m_xRi = value - m_xLi;
+    inline void increment_fixed_extent(LUnits value) { m_dxLeft += value; }
+    virtual void increment_dxR(LUnits value) { m_dxR += value; }
+    virtual void merge_with_dxR(LUnits value) { m_dxR = max(m_dxR, value); }
+    virtual void set_minimum_space(LUnits value) {
+        if (get_total_rods() < value)
+            m_dxR = value - m_dxL;
     }
 
     //basic information
     inline int get_type() { return m_type; }
 
     //access to information
-    inline LUnits get_xi() { return m_xLi + m_xRi; }
-    inline LUnits get_minimum_extent() { return m_xLi + m_xRi + m_xLeft; }
-    inline LUnits get_left_rod() { return m_xLi; }
-    inline LUnits get_right_rod() { return m_xRi; }
-    inline LUnits get_fixed_extent() { return m_xLeft; }
+    inline LUnits get_left_space() { return m_dxLeft; }
+    inline LUnits get_left_rod() { return m_dxL; }
+    inline LUnits get_right_rod() { return m_dxR; }
+    virtual LUnits get_total_rods() { return m_dxL + m_dxR; }
+    LUnits get_minimum_extent() { return get_total_rods() + m_dxLeft; }
     inline float get_pre_stretching_force() { return m_fi; }
     inline TimeUnits get_spring_duration() { return m_ds; }
     inline TimeUnits get_shortest_duration() { return m_di; }
@@ -375,39 +447,44 @@ public:
     inline int get_num_entries() { return m_numEntries; }
     inline ColStaffObjsEntry* get_first_entry() { return m_firstEntry; }
     inline ColStaffObjsEntry* get_last_entry() { return m_lastEntry; }
+    inline LUnits get_width() { return m_width; }
 
     //operations
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
-                           vector<StaffObjData*>& data);
-    void delete_shapes(vector<StaffObjData*>& data);
-    virtual void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                           std::vector<ShapeData*>& shapes);
+    void delete_shapes(std::vector<ShapeData*>& shapes);
+    virtual void move_shapes_to_final_positions(std::vector<ShapeData*>& shapes, LUnits xPos,
                                                 LUnits yPos, LUnits* yMin, LUnits* yMax,
                                                 ScoreMeter* pMeter,
                                                 VerticalProfile* pVProfile);
 
-    //access to information
-    inline LUnits get_width() { return m_width; }
+    //settings
+    inline void set_shortest_duration(TimeUnits di) { m_di = di; }
 
     //other information (barline slice)
     int collect_barlines_information(int numInstruments);
 
     //debug
-    void dump(ostream& ss);
-    static void dump_header(ostream& ss);
-    inline int dbg_get_first_data() { return m_iFirstData; }
+    void dump(std::ostream& ss);
+    virtual void dump_lines(std::ostream& UNUSED(ss)) {}
+    virtual void dump_rods(std::ostream& UNUSED(ss)) {}
+    virtual void dump_neighborhood(std::ostream& ss) { ss << "    "; }
+    static void dump_header(std::ostream& ss);
+    inline int dbg_get_first_data() { return m_iFirstShape; }
+    static std::string slice_type_to_string(int sliceType);
 
 
 protected:
     void compute_smallest_duration_di(TimeUnits minNotePrev);
     void find_smallest_note_soundig_at(TimeUnits nextTime);
-    void compute_spring_constant(LUnits uSmin, float alpha, float log2dmin,
-                                 TimeUnits dmin, bool fProportional, LUnits dsFixed);
+    void compute_spring_constant(LUnits uSmin, float alpha, TimeUnits dmin,
+                                 bool fProportional, LUnits dsFixed);
     void compute_pre_stretching_force();
-    LUnits spacing_function(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin);
+    static LUnits spacing_function(TimeUnits d, LUnits uSmin, float alpha, TimeUnits dmin);
     inline TimeUnits get_min_note_still_sounding() { return m_minNoteNext; }
 
-    LUnits measure_text(const string& text, ImoStyle* pStyle,
-                        const string& language, TextMeter& meter);
+    LUnits measure_text(const std::string& text, ImoStyle* pStyle,
+                        const std::string& language, TextMeter& meter);
 
 };
 
@@ -425,13 +502,13 @@ protected:
     LUnits m_spaceBefore;
 
 public:
-    TimeSliceProlog(ColStaffObjsEntry* pEntry, int column, int iData);
+    TimeSliceProlog(ColStaffObjsEntry* pEntry, int column, int iShape);
     virtual ~TimeSliceProlog();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+    void move_shapes_to_final_positions(std::vector<ShapeData*>& shapes, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile) override;
@@ -450,22 +527,23 @@ class TimeSliceNonTimed : public TimeSlice
 protected:
     int m_numStaves;
     LUnits m_interSpace;
-    vector<LUnits> m_widths;        //total width for objects, by staff
-    vector<bool> m_fHasObjects;     //there are objects, by staff
+    std::vector<LUnits> m_widths;        //total width for objects, by staff
+    std::vector<bool> m_fHasObjects;     //there are objects, by staff
     bool m_fHasWidth;               //true if at least one shape has width
     bool m_fSomeVisible;            //true if at least one shape is visible
 
 public:
-    TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int column, int iData);
+    TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int column, int iShape);
     virtual ~TimeSliceNonTimed();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+    void move_shapes_to_final_positions(std::vector<ShapeData*>& shapes, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile) override;
+    void join_with_previous(ScoreMeter* pMeter);
 
     inline bool has_width() { return m_fHasWidth; }
     inline bool some_objects_visible() { return m_fSomeVisible; }
@@ -482,16 +560,17 @@ class TimeSliceBarline : public TimeSlice
 protected:
 
 public:
-    TimeSliceBarline(ColStaffObjsEntry* pEntry, int column, int iData);
+    TimeSliceBarline(ColStaffObjsEntry* pEntry, int column, int iShape);
     virtual ~TimeSliceBarline();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+    void move_shapes_to_final_positions(std::vector<ShapeData*>& shapes, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile) override;
+    void join_with_previous();
 
 };
 
@@ -504,12 +583,13 @@ class TimeSliceGraces : public TimeSlice
 protected:
 
 public:
-    TimeSliceGraces(ColStaffObjsEntry* pEntry, int column, int iData);
+    TimeSliceGraces(ColStaffObjsEntry* pEntry, int column, int iShape);
     virtual ~TimeSliceGraces();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
+    void join_with_previous(ScoreMeter* pMeter, std::vector<LUnits>& xAcc, LUnits xPrev);
 
 };
 
@@ -521,26 +601,50 @@ class TimeSliceNoterest : public TimeSlice
 {
 protected:
     //lyrics (ptr to lyrics, index to staff)
-    vector< pair<ImoLyric*, int> > m_lyrics;
-    LUnits m_xRiLyrics;     //part of xRi due to lyrics
-    LUnits m_xRiMerged;     //part of xRi due to merged from non-timed
-    vector<LUnits> m_xLy;   //rods for lyrics
+    std::vector< std::pair<ImoLyric*, int> > m_lyrics;
+    LUnits m_dxRLyrics;     //part of dxR due to lyrics
+    LUnits m_dxRMerged;     //part of dxR due to merged from non-timed
+//    std::vector<LUnits> m_xLy;          //rods for lyrics
+    std::vector<SeqData*> m_lines;     //info for each noterest, for sequences
+    std::vector<RodsData*> m_rods;     //rods info for each noterest, by staff
+    int m_neighborhood;     //type of neighborhood: none, start, continue, end, end-start
 
 public:
-    TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int iData);
+    TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int iShape, int numLines,
+                      int numStaves);
     virtual ~TimeSliceNoterest();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+    void assign_spacing_values(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
-    void increment_xRi(LUnits value) override;
-    void merge_with_xRi(LUnits value) override;
-    void set_minimum_xi(LUnits value) override;
+    void join_with_previous(ScoreMeter* pMeter, LUnits xLyrics, LUnits xPrev);
+    void increment_dxR(LUnits value) override;
+    void merge_with_dxR(LUnits value) override;
+    void set_minimum_space(LUnits value) override;
+    LUnits get_total_rods() override { return m_dxL + m_dxR + max(m_dxRLyrics - m_dxL, m_dxRMerged); };
+    void dump_lines(std::ostream& ss) override;
+    void dump_rods(std::ostream& ss) override;
+    void dump_neighborhood(std::ostream& ss) override;
+
+    //specific, for computing note sequences and measuring rods by line
+    void save_seq_data(ColStaffObjsEntry* pEntry, int sequence);
+    void update_sequence(int iLine, int sequence);
+    void finish_sequences(int iLine);
+    TimeUnits get_duration(int iLine);
+    int get_sequence(int iLine);
+    inline int get_neighborhood() { return m_neighborhood; }
+    int compute_neighborhood(int prevNeighborhood, int numOpenSeqs);
 
     //specific to deal with lyrics
     void add_lyrics(ScoreMeter* pMeter);
     LUnits measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter, TextMeter& textMeter);
-    inline LUnits get_lyrics_rod() { return m_xRiLyrics; }
+    inline LUnits get_lyrics_rod() { return m_dxRLyrics; }
+
+protected:
+    SeqData* find_prev_rodsdata_for_line(int iLine);
+    SeqData* get_rodsdata(int iLine) { return m_lines[iLine]; }
+    LUnits compute_rods(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter);
+    void merge_rods_with(std::vector<RodsData*>& nextRods, LUnits minSpace);
 
 };
 

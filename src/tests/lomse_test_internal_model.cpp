@@ -263,7 +263,7 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_options()->get_num_items() == 12 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
         CHECK( pScore->get_option("Render.SpacingFopt")->get_float_value() == 1.4f );
-        CHECK( pScore->get_option("Render.SpacingDmin")->get_float_value() == 16.0f );
+        CHECK( pScore->get_option("Render.SpacingDmin")->get_float_value() == 0.0f );
         CHECK( pScore->get_option("Render.SpacingOptions")->get_long_value() == k_render_opt_breaker_simple );
         CHECK( pScore->get_option("Score.FillPageWithEmptyStaves")->get_bool_value() == false );
         CHECK( pScore->get_option("StaffLines.Truncate")->get_long_value() == k_truncate_barline_final );

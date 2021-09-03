@@ -131,6 +131,10 @@ protected:
     TimeUnits m_rMissingTime;
     TimeUnits m_rAnacrusisExtraTime;    //extra anacrusis time introduced by grace notes
     TimeUnits m_minNoteDuration;
+    int m_numHalf;
+    int m_numQuarter;
+    int m_numEighth;
+    int m_num16th;
 
     ColStaffObjsEntry* m_pFirst;
     ColStaffObjsEntry* m_pLast;
@@ -146,6 +150,10 @@ public:
     inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
     inline TimeUnits anacrusis_extra_time() { return m_rAnacrusisExtraTime; }
     inline TimeUnits min_note_duration() { return m_minNoteDuration; }
+    inline int num_half_noterests() { return m_numHalf; }
+    inline int num_quarter_noterests() { return m_numQuarter; }
+    inline int num_eighth_noterests() { return m_numEighth; }
+    inline int num_16th_noterests() { return m_num16th; }
 
     //table management
     ColStaffObjsEntry* add_entry(int measure, int instr, int voice, int staff,
@@ -237,6 +245,7 @@ protected:
     void sort_table();
     static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
     inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
+    void count_noterest(int type);
 
     void add_entry_to_list(ColStaffObjsEntry* pEntry);
     ColStaffObjsEntry* find_entry_for(ImoStaffObj* pSO);

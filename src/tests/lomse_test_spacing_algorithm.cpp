@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,7 +82,7 @@ public:
 
     ColumnDataGourlay* my_get_column(int i) { return m_columns[i]; }
     list<TimeSlice*>& my_get_slices() { return m_slices; }
-    vector<StaffObjData*>& my_get_data_vector() { return m_data; }
+    vector<ShapeData*>& my_get_shapes_vector() { return m_shapes; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
     }
     virtual ~MyTimeSlice() {}
 
-    inline int my_get_iData() { return m_iFirstData; }
+    inline int my_get_iShape() { return m_iFirstShape; }
     inline int my_get_num_entries() { return m_numEntries; }
 
 };
@@ -198,20 +198,20 @@ SUITE(SpAlgGourlayTest)
         //staffobj data
         list<TimeSlice*>& slices = pAlg->my_get_slices();
         CHECK( slices.size() == 4 );
-        vector<StaffObjData*>& data = pAlg->my_get_data_vector();
+        vector<ShapeData*>& data = pAlg->my_get_shapes_vector();
         CHECK( data.size() == 4 );
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( pSlice->my_get_iData() == 0 );
+        CHECK( pSlice->my_get_iShape() == 0 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( pSlice->my_get_iData() == 1 );
+        CHECK( pSlice->my_get_iShape() == 1 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( pSlice->my_get_iData() == 2 );
+        CHECK( pSlice->my_get_iShape() == 2 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( pSlice->my_get_iData() == 3 );
+        CHECK( pSlice->my_get_iShape() == 3 );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
@@ -247,33 +247,33 @@ SUITE(SpAlgGourlayTest)
         pCol = pAlg->my_get_column(1);
         CHECK( pCol->m_orderedSlices.size() == 1 );
 
-        //check xi computation & iData
+        //check rods computation & iShape
         list<TimeSlice*>& slices = pAlg->my_get_slices();
         CHECK( slices.size() == 4 );
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( is_equal_pos(pSlice->get_left_rod(), 0.0f) );
         CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 1096.0f) );
-        CHECK( pSlice->my_get_iData() == 0 );
+        CHECK( is_equal_pos(pSlice->get_left_space(), 1096.0f) );
+        CHECK( pSlice->my_get_iShape() == 0 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
-        CHECK( is_equal_pos(pSlice->get_right_rod(), 212.0f) );
-        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
-        CHECK( pSlice->my_get_iData() == 2 );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 257.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_space(), 0.0f) );
+        CHECK( pSlice->my_get_iShape() == 2 );
+        ++it;
+        pSlice = static_cast<MyTimeSlice*>(*it);
+        CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 45.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_space(), 0.0f) );
+        CHECK( pSlice->my_get_iShape() == 4 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
         CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
-        CHECK( pSlice->my_get_iData() == 4 );
-        ++it;
-        pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
-        CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
-        CHECK( pSlice->my_get_iData() == 5 );
+        CHECK( is_equal_pos(pSlice->get_left_space(), 0.0f) );
+        CHECK( pSlice->my_get_iShape() == 5 );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
@@ -285,7 +285,7 @@ SUITE(SpAlgGourlayTest)
 
     TEST_FIXTURE(SpAlgGourlayTestFixture, SpAlgGourlay_03)
     {
-        //@ 03. compute di, ds, ci & fi for each slice
+        //@ 03. compute di, ds, ci & fi for each slice. Neighborhood problem fixed
         //@     This checks TimeSlice::compute_spring_data()
 
         Document doc(m_libraryScope);
@@ -317,16 +317,16 @@ SUITE(SpAlgGourlayTest)
         CHECK( is_equal_time(pSlice->get_shortest_duration(), 0.0) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->get_shortest_duration(), 16.0) );
+        CHECK( is_equal_time(pSlice->get_shortest_duration(), 20.0) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->get_shortest_duration(), 21.333) );
+        CHECK( is_equal_time(pSlice->get_shortest_duration(), 20.0) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->get_shortest_duration(), 21.333) );
+        CHECK( is_equal_time(pSlice->get_shortest_duration(), 20.0) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->get_shortest_duration(), 21.333) );
+        CHECK( is_equal_time(pSlice->get_shortest_duration(), 20.0) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( is_equal_time(pSlice->get_shortest_duration(), 64.0) );

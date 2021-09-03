@@ -335,8 +335,8 @@ public:
     virtual void finish_column_measurements(int iCol) = 0;
 
     //spacing algorithm main actions
-    ///apply spacing algorithm to column iCol
-    virtual void do_spacing(int iCol, bool fTrace=false) = 0;
+    ///apply spacing algorithm to all columns
+    virtual void do_spacing(int iColumnToTrace) = 0;
 
     //auxiliary: shapes and boxes
     ///add shapes for staff objects to graphical model
@@ -443,7 +443,6 @@ protected:
 
     void prepare_for_new_column();
     void collect_content_for_this_column();
-    void layout_column();
 
     GmoBoxSlice* create_slice_box();
     void find_and_save_context_info_for_this_column();

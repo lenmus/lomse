@@ -3357,13 +3357,16 @@ static const BoolOption m_BoolOptions[] =
 //---------------------------------------------------------------------------------------
 static const FloatOption m_FloatOptions[] =
 {
+    // Spacing is proportional to note/rest duration.
+    // As the duration of a quarter note is 64 (time units), this will be mapped
+    // to 35 tenths. This gives a conversion factor of 35/64 = 0.547
     {"Render.SpacingFactor", 0.547f },
-        // Note spacing is proportional to duration.
-        // As the duration of quarter note is 64 (time units), I am
-        // going to map it to 35 tenths. This gives a conversion factor
-        // of 35/64 = 0.547
+
     {"Render.SpacingFopt", 1.4f },
-    {"Render.SpacingDmin", 16.0f },
+
+    //All notes with a duration lower than Dmin will be spaced by a fixed small amount.
+    //Value 0.0 implies that Dmin will be determined by the spacing algorithm
+    {"Render.SpacingDmin", 0.0f }, //16.0f },
 };
 
 //---------------------------------------------------------------------------------------

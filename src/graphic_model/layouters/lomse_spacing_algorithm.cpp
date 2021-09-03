@@ -309,8 +309,7 @@ void ColumnsBuilder::create_columns()
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::do_spacing_algorithm()
 {
-    for (m_iColumn=0; m_iColumn <= m_maxColumn; ++m_iColumn)
-        layout_column();
+    m_pSpAlgorithm->do_spacing(m_iColumnToTrace);
 }
 
 //---------------------------------------------------------------------------------------
@@ -498,13 +497,6 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
     PendingAuxObj* data = LOMSE_NEW PendingAuxObj(pSO, pMainShape, iInstr, iStaff,
                            iCol, iLine, pInstr, idxStaff);
     m_pScoreLyt->m_pendingAuxObjs.push_back(data);
-}
-
-//---------------------------------------------------------------------------------------
-void ColumnsBuilder::layout_column()
-{
-    bool fTrace = (m_iColumnToTrace == m_iColumn);
-    m_pSpAlgorithm->do_spacing(m_iColumn, fTrace);
 }
 
 //---------------------------------------------------------------------------------------
