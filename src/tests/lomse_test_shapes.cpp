@@ -94,29 +94,7 @@ SUITE(GmoShapeTest)
         CHECK( shape.get_origin() == newOrigin );
     }
 
-    TEST_FIXTURE(GmoShapeTestFixture, Composite_IsLocked)
-    {
-        Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
-        pNote->set_step(0);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_no_accidentals);
-        pNote->set_note_type(k_whole);
-
-        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
-        EngraversMap storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
-        GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
-
-        CHECK( pShape != nullptr );
-        CHECK( pShape && pShape->is_locked() == true );
-
-        delete pNote;
-        delete pShape;
-    }
-
-    TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds)
+    TEST_FIXTURE(GmoShapeTestFixture, Composite_RecomputeBounds)
     {
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
@@ -132,17 +110,13 @@ SUITE(GmoShapeTest)
         CHECK( pShape != nullptr);
         if (pShape)
         {
-            pShape->unlock();
-            CHECK( pShape->is_locked() == false );
-
             USize size = pShape->get_size();
             UPoint org = pShape->get_origin();
             GmoShapeNotehead* pNH = pShape->get_notehead_shape();
             USize shift(200.0f, 300.0f);
             pNH->shift_origin(shift);
-            pShape->lock();
+            pShape->force_recompute_bounds();
 
-            CHECK( pShape->is_locked() == true );
             CHECK( pShape->get_size() == size );
             CHECK( pShape->get_origin().x == org.x + shift.width );
             CHECK( pShape->get_origin().y == org.y + shift.height );
@@ -152,7 +126,7 @@ SUITE(GmoShapeTest)
         delete pShape;
     }
 
-    TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds2)
+    TEST_FIXTURE(GmoShapeTestFixture, Composite_RecomputeBounds2)
     {
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
@@ -168,17 +142,13 @@ SUITE(GmoShapeTest)
         CHECK( pShape != nullptr);
         if (pShape)
         {
-            pShape->unlock();
-            CHECK( pShape->is_locked() == false );
-
             USize size = pShape->get_size();
             GmoShapeNotehead* pNH = pShape->get_notehead_shape();
             GmoShapeAccidentals* pAcc = pShape->get_accidentals_shape();
             USize shift(200.0f, 300.0f);
             pNH->shift_origin(shift);
-            pShape->lock();
+            pShape->force_recompute_bounds();
 
-            CHECK( pShape->is_locked() == true );
             CHECK( pShape->get_size().width == size.width + shift.width );
             CHECK( pShape->get_origin().x == min(pAcc->get_origin().x, pNH->get_origin().x) );
             CHECK( pShape->get_origin().y == min(pAcc->get_origin().y, pNH->get_origin().y) );

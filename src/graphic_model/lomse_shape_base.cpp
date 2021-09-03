@@ -200,7 +200,6 @@ GmoSimpleShape::~GmoSimpleShape()
 GmoCompositeShape::GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx,
                                      Color color)
     : GmoShape(pCreatorImo, objtype, idx, color)
-    , m_fLocked(true)
 {
 }
 
@@ -277,13 +276,6 @@ void GmoCompositeShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
         (*it)->on_draw(pDrawer, opt);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoCompositeShape::lock()
-{
-    m_fLocked = true;
-    recompute_bounds();
 }
 
 //---------------------------------------------------------------------------------------

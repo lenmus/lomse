@@ -143,15 +143,11 @@ class GmoCompositeShape : public GmoShape
 {
 protected:
 	std::list<GmoShape*> m_components;	//constituent shapes
-    bool m_fLocked;                     //constituent shapes cannot be moved
 
 public:
     ~GmoCompositeShape() override;
 
     virtual int add(GmoShape* pShape);
-    inline bool is_locked() { return m_fLocked; }
-    inline void unlock() { m_fLocked = false; }
-    void lock();
 
     //may be needed in case child shapes changed their positions independently of the entire composite shape
     void force_recompute_bounds() { recompute_bounds(); }
