@@ -49,7 +49,7 @@ namespace lomse
 
 
 //=======================================================================================
-// ClefEngraver implementation
+// ChordEngraver implementation
 //=======================================================================================
 ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                              int numNotes, double fontSize, int symbolSize)
@@ -463,7 +463,6 @@ void ChordEngraver::layout_accidentals()
     {
         GmoShapeNote* pNoteShape = (*it)->pNoteShape;
         GmoShapeAccidentals* pCurAcc = pNoteShape->get_accidentals_shape();
-        pNoteShape->unlock();
 
         if (pCurAcc)
         {
@@ -614,45 +613,39 @@ void ChordEngraver::layout_arpeggio()
 //---------------------------------------------------------------------------------------
 void ChordEngraver::set_anchor_offset()
 {
+    //The anchor line for a chord is the anchor line of any of its notes, and any of
+    //them will provide the right alinment position.
+
 	std::list<ChordNoteData*>::iterator it;
 	for(it = m_notes.begin(); it != m_notes.end(); ++it)
 	{
 		GmoShapeNote* pNoteShape = (*it)->pNoteShape;
-		pNoteShape->lock();
+
+		//as no more changes in shapes, let's ensure bounds are properly set
+		pNoteShape->force_recompute_bounds();
 
         //compute anchor pos
         LUnits offset;
-        if (!m_fSomeNoteReversed)
-            //a) if no reversed noteads, anchor is notehead x left. Stem direction
-            //   doesn't matter.
+        if (!(*it)->fNoteheadReversed)
+        {
+            //if no reversed notehead, anchor is notehead x left. Stem direction
+            //doesn't matter.
             offset = pNoteShape->get_notehead_left();
-
+        }
         else
         {
-            //b) At least a note with reversed notehead:
+            //when notehead is reversed, anchor line depends on stem direction
             if (is_stem_down())
             {
-                //b.1) if stem goes down:
-                if ((*it)->fNoteheadReversed)
-                    //b.1.1) if note is reversed, anchor is x left of notehead.
-                    offset = pNoteShape->get_notehead_left();
-                else
-                    //b.1.2) if note is not reversed, anchor is x left of notehead plus
-                    //       stem width minus notehead width.
-                    offset = pNoteShape->get_notehead_left() + m_stemWidth
-                             - pNoteShape->get_notehead_width();
+                //reversed notehead and stem down: anchor is x right of notehead.
+                offset = pNoteShape->get_notehead_right();
             }
             else
             {
-                //b.2) if stem goes up:
-                if (!(*it)->fNoteheadReversed)
-                    //b.2.1) if note is not reversed, anchor is x left of notehead.
-                    offset = pNoteShape->get_notehead_left();
-                else
-                    //b.2.2) if note is reversed, anchor is x left of notehead plus
-                    //       stem width minus notehead width.
-                    offset = pNoteShape->get_notehead_left() + m_stemWidth
-                             - pNoteShape->get_notehead_width();
+                //reversed notehead and stem up: anchor is x left of notehead plus
+                //       stem width minus notehead width.
+                offset = pNoteShape->get_notehead_left() + m_stemWidth
+                         - pNoteShape->get_notehead_width();
             }
         }
         offset = pNoteShape->get_origin().x - offset;
