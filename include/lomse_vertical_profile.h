@@ -41,6 +41,8 @@ namespace lomse
 //forward declarations
 class GmoShape;
 class GmoBox;
+class AuxShapesAligner;
+class AuxShapesAlignersSystem;
 
 #define LOMSE_PAPER_LOWER_LIMIT   -100000000000000.0f  //any impossible low value
 #define LOMSE_PAPER_UPPER_LIMIT    100000000000000.0f  //any impossible high value
@@ -94,6 +96,8 @@ protected:
 	std::vector<PointsRow*> m_xMax;         //ptrs. to max x pos vector for each staff
 	std::vector<PointsRow*> m_xMin;         //ptrs. to min x pos vector for each staff
 
+    AuxShapesAlignersSystem* m_pCurrentAuxShapesAligner = nullptr;
+
 public:
     VerticalProfile(LUnits xStart, LUnits xEnd, int numStaves);
     virtual ~VerticalProfile();
@@ -119,6 +123,11 @@ public:
     */
     std::vector<UPoint> get_min_profile_points(LUnits xStart, LUnits xEnd, int idxStaff);
     std::vector<UPoint> get_max_profile_points(LUnits xStart, LUnits xEnd, int idxStaff);
+
+    //auxiliary shapes aligner
+    void set_current_aux_shapes_aligner(AuxShapesAlignersSystem* p) { m_pCurrentAuxShapesAligner = p; }
+    AuxShapesAlignersSystem* get_current_aux_shapes_aligner() { return m_pCurrentAuxShapesAligner; }
+    AuxShapesAligner* get_current_aux_shapes_aligner(int staff, bool fAbove);
 
     //debug
     void dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem);

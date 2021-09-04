@@ -63,16 +63,18 @@ protected:
     LUnits m_yBottomStart;
     LUnits m_xBottomEnd;
     LUnits m_yBottomEnd;
+    LUnits m_yBaseline;
 
     int     m_niente;
     LUnits  m_radiusNiente;
 
 public:
     GmoShapeWedge(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
-                  Color color, int niente, LUnits radius);
+                  Color color, int niente, LUnits radius, LUnits yBaseline);
     virtual ~GmoShapeWedge();
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+    LUnits get_baseline_y() const override;
 
     //construction
     enum {

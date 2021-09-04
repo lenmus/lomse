@@ -360,6 +360,7 @@ public:
     void set_origin_and_notify_observers(LUnits xLeft, LUnits yTop);
     virtual bool hit_test(LUnits x, LUnits y);
     virtual void reposition_shape(LUnits yShift);
+    virtual LUnits get_baseline_y() const { return get_bottom(); }
 
     //related shapes
     inline std::list<GmoShape*>* get_related_shapes() { return m_pRelatedShapes; }

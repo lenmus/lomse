@@ -107,6 +107,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_volta_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_wedge_engraver.cpp
 
+    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_aux_shapes_aligner.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_blocks_container_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_inlines_container_layouter.cpp

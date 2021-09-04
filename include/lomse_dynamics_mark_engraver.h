@@ -42,6 +42,7 @@ class ImoDynamicsMark;
 class GmoShape;
 class ScoreMeter;
 class GmoShapeDynamicsMark;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 class DynamicsMarkEngraver : public Engraver
@@ -52,10 +53,12 @@ protected:
     bool m_fAbove;
     GmoShape* m_pParentShape;
     GmoShapeDynamicsMark* m_pDynamicsMarkShape;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
 
 public:
     DynamicsMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                    int iInstr, int iStaff);
+                    int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
     ~DynamicsMarkEngraver() {}
 
     GmoShapeDynamicsMark* create_shape(ImoDynamicsMark* pDynamicsMark, UPoint pos,
@@ -68,6 +71,7 @@ protected:
     void center_on_parent();
     void add_voice();
     int find_glyph();
+    void shift_shape_if_collision();
 
 };
 

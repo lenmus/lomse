@@ -36,6 +36,7 @@
 #include "lomse_shape_wedge.h"
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
+#include "lomse_aux_shapes_aligner.h"
 #include "lomse_vertical_profile.h"
 
 
@@ -151,8 +152,11 @@ GmoShape* WedgeEngraver::create_intermediate_shape()
 
     compute_intermediate_or_last_shape_position();
     //add_user_displacements(1, &m_points[0]);
-    return LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points[0], thickness,
-                                   m_pWedge->get_color(), niente, radius);
+    GmoShapeWedge* pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points[0], thickness,
+                                                    m_pWedge->get_color(), niente, radius,
+                                                    m_yAlignBaseline);
+    add_to_aux_shapes_aligner(pShape, m_fWedgeAbove);
+    return pShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -189,8 +193,11 @@ GmoShape* WedgeEngraver::create_first_shape()
             niente = GmoShapeWedge::k_no_niente;
     }
 
-    return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
-                                   m_pWedge->get_color(), niente, radius);
+    GmoShapeWedge* pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
+                                                    m_pWedge->get_color(), niente, radius,
+                                                    m_yAlignBaseline);
+    add_to_aux_shapes_aligner(pShape, m_fWedgeAbove);
+    return pShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -243,8 +250,11 @@ GmoShape* WedgeEngraver::create_final_shape()
 
     compute_intermediate_or_last_shape_position();
     //add_user_displacements(1, &m_points[0]);
-    return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
-                                   m_pWedge->get_color(), niente, radius);
+    GmoShapeWedge* pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
+                                                    m_pWedge->get_color(), niente, radius,
+                                                    m_yAlignBaseline);
+    add_to_aux_shapes_aligner(pShape, m_fWedgeAbove);
+    return pShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -275,7 +285,7 @@ void WedgeEngraver::compute_intermediate_or_last_shape_position()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits WedgeEngraver::determine_shape_position_left(bool first) const
+LUnits WedgeEngraver::determine_default_shape_position_left(bool first) const
 {
     if (m_fFirstShapeAtSystemStart || !first)
         return m_pInstrEngrv->get_staves_left() + m_uPrologWidth - tenths_to_logical(10.0f);
@@ -309,7 +319,33 @@ LUnits WedgeEngraver::determine_shape_position_left(bool first) const
 }
 
 //---------------------------------------------------------------------------------------
-LUnits WedgeEngraver::determine_shape_position_right() const
+LUnits WedgeEngraver::determine_shape_position_left(bool first) const
+{
+    LUnits xLeft = determine_default_shape_position_left(first);
+
+    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+
+    if (!pAligner)
+        return xLeft;
+
+    const LUnits alignDistance = tenths_to_logical(LOMSE_WEDGE_HORIZONTAL_ALIGN_DISTANCE);
+    const LUnits xFree = pAligner->find_nearest_free_point_right(xLeft - alignDistance);
+
+    if (xLeft <= xFree)
+    {
+        const LUnits xLeftModified = xFree + alignDistance;
+
+        if (xLeftModified - xLeft < tenths_to_logical(LOMSE_WEDGE_ALIGN_MAX_EDGE_SHIFT))
+        {
+            xLeft = xLeftModified;
+        }
+    }
+
+    return xLeft;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits WedgeEngraver::determine_default_shape_position_right() const
 {
     if (!m_pEndDirectionShape)
         return m_pInstrEngrv->get_staves_right();
@@ -338,6 +374,32 @@ LUnits WedgeEngraver::determine_shape_position_right() const
 }
 
 //---------------------------------------------------------------------------------------
+LUnits WedgeEngraver::determine_shape_position_right() const
+{
+    LUnits xRight = determine_default_shape_position_right();
+
+    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+
+    if (!pAligner)
+        return xRight;
+
+    const LUnits alignDistance = tenths_to_logical(LOMSE_WEDGE_HORIZONTAL_ALIGN_DISTANCE);
+    const LUnits xFree = pAligner->find_nearest_free_point_left(xRight + alignDistance);
+
+    if (xFree <= xRight)
+    {
+        const LUnits xRightModified = xFree - alignDistance;
+
+        if (xRight - xRightModified < tenths_to_logical(LOMSE_WEDGE_ALIGN_MAX_EDGE_SHIFT))
+        {
+            xRight = xRightModified;
+        }
+    }
+
+    return xRight;
+}
+
+//---------------------------------------------------------------------------------------
 LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits endSpread)
 {
     LUnits yRef = m_uStaffTop;
@@ -360,6 +422,7 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
         yRef = max(yRef, yMax);
     }
 
+    m_yAlignBaseline = yRef + tenths_to_logical(LOMSE_WEDGE_BASELINE_SHIFT_Y);
     return yRef;
 }
 

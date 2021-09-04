@@ -142,6 +142,9 @@ public:
                                             VerticalProfile* UNUSED(pVProfile),
                                             Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
     virtual GmoShape* create_last_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
+
+protected:
+    void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff);
 };
 
 //---------------------------------------------------------------------------------------

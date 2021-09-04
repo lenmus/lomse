@@ -30,6 +30,7 @@
 #include "lomse_vertical_profile.h"
 
 #include "lomse_gm_basic.h"
+#include "lomse_aux_shapes_aligner.h"
 
 //for generating a debug shape
 #include "lomse_shapes.h"
@@ -480,5 +481,10 @@ vector<UPoint> VerticalProfile::get_max_profile_points(LUnits xStart, LUnits xEn
     return dataPoints;
 }
 
+//---------------------------------------------------------------------------------------
+AuxShapesAligner* VerticalProfile::get_current_aux_shapes_aligner(int staff, bool fAbove)
+{
+    return m_pCurrentAuxShapesAligner ? &m_pCurrentAuxShapesAligner->get_aligner(staff, fAbove) : nullptr;
+}
 
 }  //namespace lomse
