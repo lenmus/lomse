@@ -143,6 +143,7 @@ GmoShape* VoltaBracketEngraver::create_intermediate_shape()
     set_shape_details(pShape, k_intermediate_shape);
     pShape->set_two_brackets();
 
+    add_to_aux_shapes_aligner(pShape, true);
     ++m_numShapes;
     return pShape;
 }
@@ -165,6 +166,7 @@ GmoShape* VoltaBracketEngraver::create_single_shape()
 
     set_shape_details(pShape, k_single_shape);
 
+    add_to_aux_shapes_aligner(pShape, true);
     m_numShapes++;
     return pShape;
 }
@@ -198,6 +200,7 @@ GmoShape* VoltaBracketEngraver::create_first_shape()
     set_shape_details(pShape, k_first_shape);
     pShape->set_two_brackets();
 
+    add_to_aux_shapes_aligner(pShape, true);
     m_numShapes++;
     return pShape;
 }
@@ -213,6 +216,7 @@ GmoShape* VoltaBracketEngraver::create_final_shape()
     set_shape_details(pShape, k_final_shape);
     pShape->set_two_brackets();
 
+    add_to_aux_shapes_aligner(pShape, true);
     m_numShapes++;
     return pShape;
 }

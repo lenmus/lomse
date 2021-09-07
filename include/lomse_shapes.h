@@ -62,6 +62,9 @@ public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
+    LUnits get_relative_baseline_y() const { return m_shiftToDraw.height; }
+    LUnits get_baseline_y() const override { return m_origin.y + get_relative_baseline_y(); }
+
 protected:
     GmoShapeGlyph(ImoObj* pCreatorImo, int type, ShapeId idx, unsigned int nGlyph,
                   UPoint pos, Color color, LibraryScope& libraryScope,

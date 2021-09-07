@@ -1212,7 +1212,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         case k_imo_dynamics_mark:
         {
             ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(pAO);
-            DynamicsMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            DynamicsMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
+                                       idxStaff, pVProfile);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }

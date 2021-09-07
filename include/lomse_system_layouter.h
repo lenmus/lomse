@@ -38,6 +38,7 @@
 #include "lomse_spacing_algorithm.h"
 
 #include <list>
+#include <memory>
 #include <tuple>
 
 namespace lomse
@@ -51,6 +52,7 @@ class GmoShape;
 class GmoBoxSystem;
 class GmoShapeBeam;
 class GmoShapeNote;
+class AuxShapesAlignersSystem;
 class ImoAuxObj;
 class ImoRelObj;
 class ImoAuxRelObj;
@@ -69,6 +71,7 @@ class SystemLayouter;
 class TypeMeasureInfo;
 class VerticalProfile;
 struct PendingAuxObj;
+enum EAuxShapesAlignmentScope : int;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -103,6 +106,8 @@ protected:
 
     SpacingAlgorithm* m_pSpAlgorithm;
     int m_constrains;
+
+    std::unique_ptr<AuxShapesAlignersSystem> m_curAuxShapesAligner;
 
 public:
     SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& libraryScope,
@@ -153,6 +158,7 @@ protected:
     void redistribute_free_space();
     void engrave_measure_numbers();
     void engrave_system_details(int iSystem);
+    void setup_aux_shapes_aligner(EAuxShapesAlignmentScope scope, Tenths maxAlignDistance = 0.0f);
     void add_instruments_info();
     void move_staves_to_avoid_collisions();
     void reposition_staves_in_engravers(const std::vector<LUnits>& yOrgShifts);

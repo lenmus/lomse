@@ -44,13 +44,15 @@ namespace lomse
 // GmoShapeWedge implementation
 //=======================================================================================
 GmoShapeWedge::GmoShapeWedge(ImoObj* pCreatorImo, ShapeId idx, UPoint points[],
-                             LUnits thickness, Color color, int niente, LUnits radius)
+                             LUnits thickness, Color color, int niente, LUnits radius,
+                             LUnits yBaseline)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_wedge, idx, color)
     , m_thickness(thickness)
     , m_niente(niente)
     , m_radiusNiente(radius)
 {
     save_points_and_compute_bounds(points);
+    m_yBaseline = yBaseline - m_origin.y;
 }
 
 //---------------------------------------------------------------------------------------
@@ -103,6 +105,12 @@ void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeWedge::get_baseline_y() const
+{
+    return m_origin.y + m_yBaseline;
 }
 
 //---------------------------------------------------------------------------------------

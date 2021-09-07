@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,45 +27,61 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_engraver.h"
+#ifndef __LOMSE_AUX_SHAPES_ALIGNER_H__
+#define __LOMSE_AUX_SHAPES_ALIGNER_H__
 
-#include "lomse_internal_model.h"
-#include "lomse_aux_shapes_aligner.h"
-#include "lomse_score_meter.h"
-#include "lomse_vertical_profile.h"
+#include "lomse_basic.h"
 
+#include <map>
+#include <vector>
 
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
-// Engraver implementation
-//---------------------------------------------------------------------------------------
-LUnits Engraver::tenths_to_logical(Tenths value) const
+class GmoShape;
+class VerticalProfile;
+
+class AuxShapesAligner
 {
-    return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
-}
+protected:
+    std::map<LUnits, GmoShape*> m_shapes;
+    LUnits m_xAbsLeft;
+    LUnits m_xAbsRight;
 
-double Engraver::determine_font_size()
+    using ShapeIterator = std::map<LUnits, GmoShape*>::const_iterator;
+
+public:
+    AuxShapesAligner(LUnits xAbsLeft, LUnits xAbsRight);
+
+    void add_shape(GmoShape* pShape);
+    void align_shape_base_lines(LUnits maxAlignDistance, VerticalProfile* pVProfile, int idxStaff, bool fDown);
+
+    GmoShape* find_shape(LUnits x) const;
+    LUnits find_nearest_free_point_left(LUnits x) const;
+    LUnits find_nearest_free_point_right(LUnits x) const;
+    LUnits find_nearest_occupied_point_left(LUnits x) const;
+    LUnits find_nearest_occupied_point_right(LUnits x) const;
+
+protected:
+    void set_base_line_for_range(ShapeIterator rangeBegin, ShapeIterator rangeEnd,
+                                 LUnits yBaseline, VerticalProfile* pVProfile, int idxStaff);
+};
+
+class AuxShapesAlignersSystem
 {
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
-}
+protected:
+    std::vector<AuxShapesAligner> m_alignersAbove;
+    std::vector<AuxShapesAligner> m_alignersBelow;
+    LUnits m_maxAlignDistance;
 
-void Engraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
-{
-    (*pos).x += tenths_to_logical(pImo->get_user_location_x());
-    (*pos).y += tenths_to_logical(pImo->get_user_location_y());
-}
+public:
+    AuxShapesAlignersSystem(size_t numStaves, LUnits xAbsLeft, LUnits xAbsRight,
+                          LUnits maxAlignDistance);
 
-//---------------------------------------------------------------------------------------
-// RelObjEngraver implementation
-//---------------------------------------------------------------------------------------
-void RelObjEngraver::add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff)
-{
-    AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAboveStaff);
-    if (pAligner)
-        pAligner->add_shape(pShape);
-}
+    AuxShapesAligner& get_aligner(int staff, bool fAbove) { return fAbove ? m_alignersAbove[staff] : m_alignersBelow[staff]; }
+    void align_shape_base_lines(VerticalProfile* pVProfile);
+};
 
+}   //namespace lomse
 
-}  //namespace lomse
+#endif      //__LOMSE_AUX_SHAPES_ALIGNER_H__

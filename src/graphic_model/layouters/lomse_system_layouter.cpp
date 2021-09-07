@@ -51,6 +51,7 @@
 #include "lomse_shape_beam.h"
 #include "lomse_beam_engraver.h"
 #include "lomse_chord_engraver.h"
+#include "lomse_aux_shapes_aligner.h"
 
 #include <sstream>
 #include <algorithm>
@@ -71,39 +72,55 @@ namespace lomse
 
 typedef std::pair<ImoObj*, PendingAuxObj*> PendingPair;
 
-#define k_num_auxobjs (k_imo_auxobj_last - k_imo_auxobj - 1) + (k_imo_relobj_last - k_imo_relobj -1)
-static int m_order[k_num_auxobjs];
-
-void initialize_engraving_order()
+enum EAuxShapesAlignmentScope : int
 {
-    int i = 0;
-    m_order[i++] = k_imo_beam;
-    m_order[i++] = k_imo_articulation_symbol;
+    k_alignment_scope_none,
+    k_alignment_scope_begin,
+    k_alignment_scope_continue,
+};
 
-    m_order[i++] = k_imo_tuplet;
-    m_order[i++] = k_imo_slur;
-    m_order[i++] = k_imo_tie;
+struct EngravingOrderInfo
+{
+    int type;
+    EAuxShapesAlignmentScope alignmentScope;
+    Tenths maxAlignDistance;
 
-    m_order[i++] = k_imo_dynamics_mark;
-    m_order[i++] = k_imo_fermata;
-    m_order[i++] = k_imo_metronome_mark;
-    m_order[i++] = k_imo_ornament;
-    m_order[i++] = k_imo_symbol_repetition_mark;
-    m_order[i++] = k_imo_technical;
-    m_order[i++] = k_imo_articulation_line;
-    m_order[i++] = k_imo_text_repetition_mark;
-    m_order[i++] = k_imo_octave_shift;
-    m_order[i++] = k_imo_volta_bracket;
-    m_order[i++] = k_imo_wedge;
-    m_order[i++] = k_imo_score_text;
-    m_order[i++] = k_imo_lyric;
-    m_order[i++] = k_imo_score_title;
-    m_order[i++] = k_imo_line;
-    m_order[i++] = k_imo_score_line;
-    m_order[i++] = k_imo_text_box;
+    EngravingOrderInfo(int type,
+                       EAuxShapesAlignmentScope alignmentScope = k_alignment_scope_none,
+                       Tenths maxAlignDistance = 0.0f)
+        : type(type)
+        , alignmentScope(alignmentScope)
+        , maxAlignDistance(maxAlignDistance)
+    {
+    }
+};
 
-    while (i < k_num_auxobjs)
-        m_order[i++] = k_imo_last-1;
+static const std::initializer_list<EngravingOrderInfo> m_order
+{
+    { k_imo_beam },
+    { k_imo_articulation_symbol },
+
+    { k_imo_tuplet },
+    { k_imo_slur },
+    { k_imo_tie },
+
+    { k_imo_fermata },
+    { k_imo_metronome_mark },
+    { k_imo_ornament },
+    { k_imo_symbol_repetition_mark },
+    { k_imo_technical },
+    { k_imo_articulation_line },
+    { k_imo_text_repetition_mark },
+    { k_imo_octave_shift },
+    { k_imo_volta_bracket,          k_alignment_scope_begin,    LOMSE_INFINITE_LENGTH   },
+    { k_imo_dynamics_mark,          k_alignment_scope_begin,    50.0f                   },
+    { k_imo_wedge,                  k_alignment_scope_continue                          },
+    { k_imo_score_text },
+    { k_imo_lyric },
+    { k_imo_score_title },
+    { k_imo_line },
+    { k_imo_score_line },
+    { k_imo_text_box },
 };
 
 
@@ -137,7 +154,6 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_pSpAlgorithm(pSpAlgorithm)
     , m_constrains(0)
 {
-    initialize_engraving_order();
 }
 
 //---------------------------------------------------------------------------------------
@@ -779,9 +795,11 @@ void SystemLayouter::engrave_system_details(int iSystem)
 
     //engrave the AuxObjs/RelObjs in this system
     //systemAuxObjs is traversed several times to engrave objects by priority order
-    for (size_t i = 0; i < k_num_auxobjs; ++i)
+    for (const EngravingOrderInfo& order : m_order)
     {
-        int type = m_order[i];
+        setup_aux_shapes_aligner(order.alignmentScope, order.maxAlignDistance);
+
+        const int type = order.type;
         if (used.test(type))
         {
             std::list<PendingPair>::iterator it = systemAuxObjs.begin();
@@ -818,6 +836,9 @@ void SystemLayouter::engrave_system_details(int iSystem)
         }
     }
 
+    //finish the last alignment scope
+    setup_aux_shapes_aligner(k_alignment_scope_none);
+
     //delete engraved staffobjs
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end();)
     {
@@ -834,6 +855,29 @@ void SystemLayouter::engrave_system_details(int iSystem)
         else
             ++it;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::setup_aux_shapes_aligner(EAuxShapesAlignmentScope scope, Tenths maxAlignDistanceTenths)
+{
+    if (scope == k_alignment_scope_continue)
+        return;
+
+    if (m_curAuxShapesAligner)
+    {
+        m_curAuxShapesAligner->align_shape_base_lines(m_pVProfile);
+        m_curAuxShapesAligner.reset();
+    }
+
+    if (scope == k_alignment_scope_begin)
+    {
+        const LUnits maxAlignDistance = m_pScoreMeter->tenths_to_logical_max(maxAlignDistanceTenths);
+        m_curAuxShapesAligner.reset(LOMSE_NEW AuxShapesAlignersSystem(m_pScoreMeter->num_staves(),
+                                                                   m_pBoxSystem->get_left(), m_pBoxSystem->get_right(),
+                                                                   maxAlignDistance));
+    }
+
+    m_pVProfile->set_current_aux_shapes_aligner(m_curAuxShapesAligner.get());
 }
 
 //---------------------------------------------------------------------------------------

@@ -118,6 +118,9 @@ namespace lomse
 //wedges
 #define LOMSE_WEDGE_LINE_THICKNESS      1.5f    //line thickness for wedges/hairpins
 #define LOMSE_WEDGE_NIENTE_RADIUS       4.0f    //radius for niente circles in wedges
+#define LOMSE_WEDGE_HORIZONTAL_ALIGN_DISTANCE 6.0f //space between a wedge and the nearest wedge or dynamic mark
+#define LOMSE_WEDGE_ALIGN_MAX_EDGE_SHIFT 50.0f  //maximum amount of space a wedge's end can be horizontally shifted if collision with another wedge or dynamic mark is detected
+#define LOMSE_WEDGE_BASELINE_SHIFT_Y    5.0f    //wedge baseline shift relative to its center to properly align with dynamic marks
 
 //octave-shift lines
 #define LOMSE_OCTAVE_SHIFT_LINE_THICKNESS  1.0f //thickness for octave-shift lines

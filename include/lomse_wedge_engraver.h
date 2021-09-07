@@ -66,6 +66,7 @@ protected:
     GmoShapeInvisible* m_pEndDirectionShape;
 
     UPoint m_points[4];    //points for wedge
+    LUnits m_yAlignBaseline; //baseline coordinate for aligning with dynamic marks
 
 public:
     WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -97,10 +98,13 @@ protected:
     GmoShape* create_intermediate_shape();
     GmoShape* create_final_shape();
 
+    void compute_shape_x_position(bool first);
     void compute_first_shape_position();
     void compute_intermediate_or_last_shape_position();
 
+    LUnits determine_default_shape_position_left(bool first) const;
     LUnits determine_shape_position_left(bool first) const;
+    LUnits determine_default_shape_position_right() const;
     LUnits determine_shape_position_right() const;
     LUnits determine_center_line_of_shape(LUnits startSpread, LUnits endSpread);
     //void add_user_displacements(int iWedge, UPoint* points);

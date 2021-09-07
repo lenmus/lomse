@@ -35,6 +35,8 @@
 #include "lomse_shapes.h"
 #include "lomse_glyphs.h"
 #include "lomse_shape_note.h"
+#include "lomse_aux_shapes_aligner.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -45,13 +47,16 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 DynamicsMarkEngraver::DynamicsMarkEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff))
+                                           int UNUSED(iInstr), int UNUSED(iStaff),
+                                           int idxStaff, VerticalProfile* pVProfile)
     : Engraver(libraryScope, pScoreMeter)
     , m_pDynamicsMark(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)
     , m_pParentShape(nullptr)
     , m_pDynamicsMarkShape(nullptr)
+    , m_idxStaff(idxStaff)
+    , m_pVProfile(pVProfile)
 {
 }
 
@@ -78,6 +83,11 @@ GmoShapeDynamicsMark* DynamicsMarkEngraver::create_shape(ImoDynamicsMark* pDynam
     {
         center_on_parent();
     }
+
+    shift_shape_if_collision();
+
+    if (AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fAbove))
+        pAligner->add_shape(m_pDynamicsMarkShape);
 
     return m_pDynamicsMarkShape;
 }
@@ -241,5 +251,34 @@ int DynamicsMarkEngraver::find_glyph()
     return k_glyph_dynamic_p;       //TODO: composite shape?
 }
 
+//---------------------------------------------------------------------------------------
+void DynamicsMarkEngraver::shift_shape_if_collision()
+{
+    LUnits yPos = m_pDynamicsMarkShape->get_top();
+    const LUnits space = tenths_to_logical(5.0f);
+
+    if (m_placement == k_placement_above)
+    {
+        std::pair<LUnits, GmoShape*> minValue =
+                        m_pVProfile->get_min_for(m_pDynamicsMarkShape->get_left(),
+                                                 m_pDynamicsMarkShape->get_right(),
+                                                 m_idxStaff);
+        const LUnits yMin = minValue.first - m_pDynamicsMarkShape->get_height() - space;
+        if (yPos > yMin)
+            yPos = yMin;
+    }
+    else
+    {
+        std::pair<LUnits, GmoShape*> maxValue =
+                        m_pVProfile->get_max_for(m_pDynamicsMarkShape->get_left(),
+                                                 m_pDynamicsMarkShape->get_right(),
+                                                 m_idxStaff);
+        const LUnits yMax = maxValue.first + space;
+        if (yPos < yMax)
+            yPos = yMax;
+    }
+
+    m_pDynamicsMarkShape->set_top(yPos);
+}
 
 }  //namespace lomse
