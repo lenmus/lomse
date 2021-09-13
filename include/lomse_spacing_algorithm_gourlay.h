@@ -61,6 +61,8 @@ class ImoStyle;
 class GmMeasuresTable;
 class GraphicModel;
 class TimeSliceNoterest;
+class ImoNoteRest;
+class GmoShapeNote;
 
 
 //---------------------------------------------------------------------------------------
@@ -326,7 +328,6 @@ public:
     void dump(int iStaff, std::ostream& ss);
 
 };
-
 
 
 //---------------------------------------------------------------------------------------
@@ -643,6 +644,7 @@ public:
 protected:
     SeqData* find_prev_rodsdata_for_line(int iLine);
     SeqData* get_rodsdata(int iLine) { return m_lines[iLine]; }
+    void fix_spacing_issues(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter);
     LUnits compute_rods(std::vector<ShapeData*>& shapes, ScoreMeter* pMeter);
     void merge_rods_with(std::vector<RodsData*>& nextRods, LUnits minSpace);
 

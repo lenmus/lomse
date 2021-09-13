@@ -43,6 +43,8 @@
 #include "lomse_graphical_model.h"
 #include "lomse_vertical_profile.h"
 #include "lomse_shape_note.h"
+#include "lomse_noterests_collisions_fixer.h"
+
 
 #include <vector>
 #include <cmath>   //abs
@@ -2027,7 +2029,6 @@ void TimeSliceNoterest::assign_spacing_values(vector<ShapeData*>& shapes,
 	//assign fixed space at start of this slice and compute pre-stretching
 	//extend (left and right rods)
 
-	//new:
     //dxLeft = not transferred accidentals
     //dxL = notehead width
     //dxR = additional requiered space included in the noteshape (flag, dots)
@@ -2035,6 +2036,8 @@ void TimeSliceNoterest::assign_spacing_values(vector<ShapeData*>& shapes,
     //dxRMerged = transferred space from next slices, to be merged with (dxRLyrics + dxR)
     //xPrev = acc. to be transferred to previous or left in dxLeft
 
+    //check and fix possible conflicts between noterests in this slice
+    fix_spacing_issues(shapes, pMeter);
 
     //xPrev is the max. space required by accidentals (positive)
     LUnits xPrev = compute_rods(shapes, pMeter);
@@ -2309,6 +2312,40 @@ LUnits TimeSliceNoterest::compute_rods(vector<ShapeData*>& shapes, ScoreMeter* p
         }
     }
     return xPrev;
+}
+
+//---------------------------------------------------------------------------------------
+void TimeSliceNoterest::fix_spacing_issues(vector<ShapeData*>& shapes, ScoreMeter* pMeter)
+{
+    vector<NoterestsCollisionsFixer*> fixers;
+    fixers.assign(pMeter->num_staves(), nullptr);
+
+    //loop for creating fixers and collecting shapes
+    ColStaffObjsEntry* pEntry = m_firstEntry;
+    int iMax = m_iFirstShape + m_numEntries;
+    for (int i=m_iFirstShape; i < iMax; ++i, pEntry = pEntry->get_next())
+    {
+        GmoShape* pShape = shapes[i]->get_shape();
+        if (pShape)
+        {
+            int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
+
+            if (fixers[iStaff])
+                fixers[iStaff]->add_noterest(pShape, pEntry);
+            else
+                fixers[iStaff] = LOMSE_NEW NoterestsCollisionsFixer(pShape, pEntry, pMeter);
+        }
+    }
+
+    //fix issues and delete fixers
+    for (auto fixer : fixers)
+    {
+        if (fixer)
+        {
+            fixer->fix_spacing_issues();
+            delete fixer;
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

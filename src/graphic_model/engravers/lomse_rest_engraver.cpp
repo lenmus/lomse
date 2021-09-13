@@ -131,6 +131,7 @@ void RestEngraver::create_main_shape()
                                              m_color, m_libraryScope, m_fontSize);
     add_voice(m_pRestGlyphShape);
     m_pRestShape->add(m_pRestGlyphShape);
+    m_pRestShape->set_pos_on_staff( determine_pos_on_staff(m_iGlyph) );
     m_uxLeft += m_pRestGlyphShape->get_width();
 }
 
@@ -164,6 +165,39 @@ int RestEngraver::find_glyph()
 }
 
 //---------------------------------------------------------------------------------------
+int RestEngraver::determine_pos_on_staff(int iGlyph)
+{
+    // Returns the position on the staff (line/space) referred to the first ledger line of
+    // the staff:
+    //        0 - on first ledger line (C note in G clef)
+    //        1 - on next space (D in G clef)
+    //        2 - on first line (E not in G clef)
+    //        3 - on first space
+    //        4 - on second line
+    //        5 - on second space
+    //        etc.
+    //
+    //Default placement is on the center line of a five-line staff,
+    //with the exception of the whole note rest, which should hang from the
+    //font baseline.
+    //
+    //if rest placement is defined, it is controlled by step and octave values
+
+    int posOnStaff = 6;     //third line (center)
+    if (iGlyph == k_glyph_whole_rest)
+        posOnStaff = 8;     //fourth line
+
+    //if rest placement is defined, it is controlled by step and octave values
+    if (m_pRest->get_step() != k_step_undefined)
+    {
+        int pos = NoteEngraver::pitch_to_pos_on_staff(m_pRest, m_clefType, m_octaveShift);
+        posOnStaff = (6 - pos);
+    }
+
+    return posOnStaff;
+}
+
+//---------------------------------------------------------------------------------------
 LUnits RestEngraver::get_glyph_offset(int iGlyph)
 {
     //default placement: rests are placed on the center line of a five-line staff,
@@ -181,7 +215,6 @@ LUnits RestEngraver::get_glyph_offset(int iGlyph)
         int pos = NoteEngraver::pitch_to_pos_on_staff(m_pRest, m_clefType, m_octaveShift);
         offset += (6 - pos)*5.0f;
     }
-
     return tenths_to_logical(offset);
 }
 

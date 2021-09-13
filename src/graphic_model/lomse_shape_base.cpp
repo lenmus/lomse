@@ -227,11 +227,6 @@ int GmoCompositeShape::add(GmoShape* pShape)
 	}
 	else
 	{
-	    //TODO: Note from LenMus:
-//        lmCompositeShape: the selection rectangle should not be the boundling rectangle
-//        but each rectangle of each component shape. This will save the need to define
-//        specific shapes just to override selection rectangle. i.i. metronome marks
-
 		//compute new selection rectangle by union of individual selection rectangles
 		URect bbox = get_bounds();
 		bbox.Union(pShape->get_bounds());
@@ -257,6 +252,18 @@ void GmoCompositeShape::shift_origin(const USize& shift)
 }
 
 //---------------------------------------------------------------------------------------
+void GmoCompositeShape::shift_origin(LUnits x, LUnits y)
+{
+    m_origin.x += x;
+    m_origin.y += y;
+
+    //shift components
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->shift_origin(x, y);
+}
+
+//---------------------------------------------------------------------------------------
 void GmoCompositeShape::reposition_shape(LUnits yShift)
 {
     m_origin.y += yShift;
@@ -265,6 +272,14 @@ void GmoCompositeShape::reposition_shape(LUnits yShift)
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
         (*it)->reposition_shape(yShift);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoCompositeShape::set_color(Color color)
+{
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->set_color(color);
 }
 
 //---------------------------------------------------------------------------------------

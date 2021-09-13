@@ -347,7 +347,7 @@ bool GmoShapeNote::is_cross_staff_chord()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeNote::set_color(Color color)
+void GmoShapeNote::set_notehead_color(Color color)
 {
     m_pNoteheadShape->set_color(color);
 }
@@ -450,6 +450,22 @@ void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     GmoCompositeShape::on_draw(pDrawer, opt);
 }
+
+//---------------------------------------------------------------------------------------
+void GmoShapeRest::shift_rest_glyph(LUnits xShift, LUnits yShift)
+{
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+    {
+        if ((*it)->is_shape_rest_glyph())
+        {
+            (*it)->reposition_shape(yShift);
+            break;
+        }
+    }
+    recompute_bounds();
+}
+
 
 
 }  //namespace lomse

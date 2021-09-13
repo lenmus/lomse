@@ -104,6 +104,7 @@ public:
     void add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine, LUnits lineLength,
                               LUnits lineThickness, LUnits lineSpacing);
     inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
+    inline void increment_anchor_offset(LUnits incr) { m_uAnchorOffset += incr; }
 
 	//access to constituent shapes
     inline GmoShapeNotehead* get_notehead_shape() const { return m_pNoteheadShape; }
@@ -149,7 +150,7 @@ public:
     inline GmoShapeChordBaseNote* get_base_note_shape() { return m_pBaseNoteShape; }
 
     //used for debug
-    void set_color(Color color);
+    void set_notehead_color(Color color);
     void dump(ostream& outStream, int level) override;
 
 
@@ -260,7 +261,11 @@ protected:
 class GmoShapeRest : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
-	GmoShapeBeam* m_pBeamShape;
+	GmoShapeBeam* m_pBeamShape = nullptr;
+
+	//required for fixing overlaps
+    int m_nPosOnStaff = 0;
+    LUnits m_uAnchorOffset = 0.0f;
 
 public:     //TO_FIX: Constructor used in tests
 //    friend class RestEngraver;
@@ -269,6 +274,14 @@ public:     //TO_FIX: Constructor used in tests
 
 public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+
+    //required for fixing overlaps
+    inline void set_pos_on_staff(int pos) { m_nPosOnStaff = pos; }
+    inline int get_pos_on_staff() { return m_nPosOnStaff; }
+    void shift_rest_glyph(LUnits xShift, LUnits yShift);
+    LUnits get_anchor_offset() override { return m_uAnchorOffset; }
+    inline void increment_anchor_offset(LUnits incr) { m_uAnchorOffset += incr; }
+    inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
 };
 
 //---------------------------------------------------------------------------------------

@@ -90,8 +90,6 @@ void GmoObj::set_origin(const UPoint& pos)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_origin(LUnits xLeft, LUnits yTop)
 {
-    if (xLeft == 0.0f && yTop == 0.0f) return;
-
     USize shift(xLeft - m_origin.x, yTop - m_origin.y);
     shift_origin(shift);
 }
@@ -99,8 +97,6 @@ void GmoObj::set_origin(LUnits xLeft, LUnits yTop)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_left(LUnits xLeft)
 {
-    if (xLeft == 0.0f) return;
-
     USize shift(xLeft - m_origin.x, 0.0f);
     shift_origin(shift);
 }
@@ -108,8 +104,6 @@ void GmoObj::set_left(LUnits xLeft)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_top(LUnits yTop)
 {
-    if (yTop == 0.0f) return;
-
     USize shift(0.0f, yTop - m_origin.y);
     shift_origin(shift);
 }
