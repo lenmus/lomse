@@ -79,6 +79,10 @@ void NoterestsCollisionsFixer::add_noterest(GmoShape* pShape, ColStaffObjsEntry*
 //    LOMSE_ASSERT(pEntry->imo_object()->is_note_rest());
 //    LOMSE_ASSERT(pShape->is_shape_note() || pShape->is_shape_rest());
 
+    //exclude invisible notes/rests
+    if (pShape->is_shape_invisible())
+        return;
+
     ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pEntry->imo_object());
     int posOnStaff = (pNR->is_note() ? static_cast<GmoShapeNote*>(pShape)->get_pos_on_staff()
                                      : static_cast<GmoShapeRest*>(pShape)->get_pos_on_staff());

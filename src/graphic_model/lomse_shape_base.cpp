@@ -242,13 +242,7 @@ int GmoCompositeShape::add(GmoShape* pShape)
 //---------------------------------------------------------------------------------------
 void GmoCompositeShape::shift_origin(const USize& shift)
 {
-    m_origin.x += shift.width;
-    m_origin.y += shift.height;
-
-    //shift components
-    std::list<GmoShape*>::iterator it;
-    for (it = m_components.begin(); it != m_components.end(); ++it)
-        (*it)->shift_origin(shift);
+    shift_origin(shift.width, shift.height);
 }
 
 //---------------------------------------------------------------------------------------

@@ -451,21 +451,6 @@ void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
     GmoCompositeShape::on_draw(pDrawer, opt);
 }
 
-//---------------------------------------------------------------------------------------
-void GmoShapeRest::shift_rest_glyph(LUnits xShift, LUnits yShift)
-{
-    std::list<GmoShape*>::iterator it;
-    for (it = m_components.begin(); it != m_components.end(); ++it)
-    {
-        if ((*it)->is_shape_rest_glyph())
-        {
-            (*it)->reposition_shape(yShift);
-            break;
-        }
-    }
-    recompute_bounds();
-}
-
 
 
 }  //namespace lomse

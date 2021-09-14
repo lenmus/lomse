@@ -278,7 +278,6 @@ public:
     //required for fixing overlaps
     inline void set_pos_on_staff(int pos) { m_nPosOnStaff = pos; }
     inline int get_pos_on_staff() { return m_nPosOnStaff; }
-    void shift_rest_glyph(LUnits xShift, LUnits yShift);
     LUnits get_anchor_offset() override { return m_uAnchorOffset; }
     inline void increment_anchor_offset(LUnits incr) { m_uAnchorOffset += incr; }
     inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
