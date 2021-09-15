@@ -625,7 +625,7 @@ void NoterestsCollisionsFixer::move_rest(size_t i, LUnits yShift)
 
     GmoShapeRest* pRestShape = static_cast<GmoShapeRest*>(m_notes[i]->pShape);
 
-    pRestShape->shift_origin(0.0f, yShift);
+    pRestShape->shift_origin(USize(0.0f, yShift));
     pRestShape->force_recompute_bounds();
     #if (LOMSE_NOTERESTS_COLLISIONS_COLOURED == 1)
         pRestShape->set_color(m_colorMoved);     //debug, to visualy identify moved shape
@@ -797,7 +797,7 @@ void NoterestsCollisionsFixer::move_note_and_chord_accidentals(size_t iNote, siz
             bbox.intersection( pAccShapeNote->get_bounds() );
             if (bbox.width > 0.0f)
             {
-                pAccShapeNote->shift_origin(-bbox.width, 0.0f);
+                pAccShapeNote->shift_origin(USize(-bbox.width, 0.0f));
                 pShapeNote->force_recompute_bounds();
             }
             pShapeNote->increment_anchor_offset(xShift - bbox.width);
@@ -998,8 +998,8 @@ void NoterestsCollisionsFixer::move_notehead(GmoShapeNote* pShapeNote, LUnits xS
         //   original position.
         // - no need to change anchor offset as current offset sets the anchor line
         //   at accidental right border.
-        pShapeNote->shift_origin(xShift, 0.0f); //shift all to right
-        pShapeAcc->shift_origin(-xShift, 0.0f); //shift acc to left
+        pShapeNote->shift_origin(USize(xShift, 0.0f)); //shift all to right
+        pShapeAcc->shift_origin(USize(-xShift, 0.0f)); //shift acc to left
         pShapeNote->force_recompute_bounds();
     }
     else
@@ -1018,7 +1018,7 @@ void NoterestsCollisionsFixer::move_accidental_to_left(GmoShapeNote* pShapeNote,
     //position (notehead left if stem up or at notehead right if stem down).
 
     GmoShape* pShapeAcc = pShapeNote->get_accidentals_shape();
-    pShapeAcc->shift_origin(-xShift, 0.0f);
+    pShapeAcc->shift_origin(USize(-xShift, 0.0f));
     pShapeNote->force_recompute_bounds();   //this recomputes the origin, at acc top/left
     pShapeNote->increment_anchor_offset(-xShift);
 }

@@ -119,14 +119,8 @@ bool GmoObj::bounds_contains_point(UPoint& p)
 //---------------------------------------------------------------------------------------
 void GmoObj::shift_origin(const USize& shift)
 {
-    shift_origin(shift.width, shift.height);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoObj::shift_origin(LUnits x, LUnits y)
-{
-    m_origin.x += x;
-    m_origin.y += y;
+    m_origin.x += shift.width;
+    m_origin.y += shift.height;
 }
 
 //---------------------------------------------------------------------------------------

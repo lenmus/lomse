@@ -288,7 +288,6 @@ public:
     void set_left(LUnits xLeft);
     void set_top(LUnits yTop);
     virtual void shift_origin(const USize& shift);
-    virtual void shift_origin(LUnits x, LUnits y);
 
     //bounds
     bool bounds_contains_point(UPoint& p);

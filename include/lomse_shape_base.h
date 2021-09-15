@@ -154,7 +154,6 @@ public:
 
     //virtual methods from base class
     virtual void shift_origin(const USize& shift) override;
-    virtual void shift_origin(LUnits x, LUnits y) override;
     virtual void reposition_shape(LUnits yShift) override;
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
