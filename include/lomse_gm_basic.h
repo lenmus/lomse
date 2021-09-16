@@ -288,7 +288,6 @@ public:
     void set_left(LUnits xLeft);
     void set_top(LUnits yTop);
     virtual void shift_origin(const USize& shift);
-    void shift_origin(LUnits x, LUnits y);
 
     //bounds
     bool bounds_contains_point(UPoint& p);
@@ -390,7 +389,7 @@ public:
 
     //test and debug
     void dump(ostream& outStream, int level) override;
-    void set_color(Color color) { m_color = color; }
+    virtual void set_color(Color color) { m_color = color; }
     virtual Color get_normal_color() { return m_color; }
 
 protected:

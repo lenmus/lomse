@@ -104,7 +104,7 @@ enum EAccidentals
     k_no_accidentals = 0,           ///< No accidental sign
     k_natural,                      ///< Natural accidental sign
     k_flat,                         ///< Flat accidental sign (b)
-    k_sharp,                        ///< Natural accidental sign (#)
+    k_sharp,                        ///< Sharp accidental sign (#)
     k_flat_flat,                    ///< Two consecutive flat signs (bb)
     k_double_sharp,                 ///< The double sharp symbol (x)
     k_sharp_sharp,                  ///< Two consecutive sharp signs (##)

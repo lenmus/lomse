@@ -347,7 +347,7 @@ bool GmoShapeNote::is_cross_staff_chord()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeNote::set_color(Color color)
+void GmoShapeNote::set_notehead_color(Color color)
 {
     m_pNoteheadShape->set_color(color);
 }
@@ -450,6 +450,7 @@ void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     GmoCompositeShape::on_draw(pDrawer, opt);
 }
+
 
 
 }  //namespace lomse

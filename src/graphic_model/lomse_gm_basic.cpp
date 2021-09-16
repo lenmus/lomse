@@ -76,42 +76,32 @@ GmoObj::~GmoObj()
 //---------------------------------------------------------------------------------------
 void GmoObj::set_origin(UPoint& pos)
 {
-    USize shift(pos.x - m_origin.x, pos.y - m_origin.y);
-    shift_origin(shift);
+    set_origin(pos.x, pos.y);
 }
 
 //---------------------------------------------------------------------------------------
 void GmoObj::set_origin(const UPoint& pos)
 {
-    USize shift(pos.x - m_origin.x, pos.y - m_origin.y);
-    shift_origin(shift);
+    set_origin(pos.x, pos.y);
 }
 
 //---------------------------------------------------------------------------------------
 void GmoObj::set_origin(LUnits xLeft, LUnits yTop)
 {
-    if (xLeft == 0.0f && yTop == 0.0f) return;
-
-    USize shift(xLeft - m_origin.x, yTop - m_origin.y);
-    shift_origin(shift);
+    m_origin.x = xLeft;
+    m_origin.y = yTop;
 }
 
 //---------------------------------------------------------------------------------------
 void GmoObj::set_left(LUnits xLeft)
 {
-    if (xLeft == 0.0f) return;
-
-    USize shift(xLeft - m_origin.x, 0.0f);
-    shift_origin(shift);
+    set_origin(xLeft, m_origin.y);
 }
 
 //---------------------------------------------------------------------------------------
 void GmoObj::set_top(LUnits yTop)
 {
-    if (yTop == 0.0f) return;
-
-    USize shift(0.0f, yTop - m_origin.y);
-    shift_origin(shift);
+    set_origin(m_origin.x, yTop);
 }
 
 //---------------------------------------------------------------------------------------
@@ -131,13 +121,6 @@ void GmoObj::shift_origin(const USize& shift)
 {
     m_origin.x += shift.width;
     m_origin.y += shift.height;
-}
-
-//---------------------------------------------------------------------------------------
-void GmoObj::shift_origin(LUnits x, LUnits y)
-{
-    m_origin.x += x;
-    m_origin.y += y;
 }
 
 //---------------------------------------------------------------------------------------

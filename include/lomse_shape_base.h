@@ -157,9 +157,9 @@ public:
     virtual void reposition_shape(LUnits yShift) override;
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
-    //for unit tests
+    //for tests and debug
     inline std::list<GmoShape*>& get_components() { return m_components; }
-
+    void set_color(Color color) override;
 
 protected:
     GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);

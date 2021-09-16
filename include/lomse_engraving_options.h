@@ -79,6 +79,7 @@ namespace lomse
 #define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size
 #define LOMSE_ARPEGGIO_SPACE_TO_CHORD    6.0f   //Spacing between an arpeggio and a chord
 #define LOMSE_ARPEGGIO_MAX_OUTGOING      3.0f   //Amount of space arpeggio is allowed to go beyond a chord's top or bottom note
+#define LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP  3.0f   //Offset for notehead when collision with other voice notehead
 
 //System layouter
     //spacing function parameters
