@@ -68,6 +68,7 @@ void GmoBoxSlice::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
                                                const vector<LUnits>& heights,
                                                const vector<LUnits>& barlinesHeight,
                                                const vector<vector<LUnits>>& relStaffTopPositions,
+                                               LUnits bottomMarginIncr,
                                                SystemLayouter* pSysLayouter)
 
 {
@@ -81,9 +82,19 @@ void GmoBoxSlice::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
                                              pSysLayouter);
     }
 
-    //shift origin and increase height
-    m_origin.y += yOrgShifts[0];
-    m_size.height += yOrgShifts.back() + heights[0];
+    //increase height
+    m_size.height += (yOrgShifts.back() + bottomMarginIncr);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSlice::reduce_last_instrument_height(LUnits space)
+{
+    //reduce height of this slice
+    m_size.height -= space;
+
+    //reduce height of last instrument slice
+    GmoBoxSliceInstr* pSlice = static_cast<GmoBoxSliceInstr*>(m_childBoxes.back());
+    pSlice->set_height( pSlice->get_height() - space );
 }
 
 //---------------------------------------------------------------------------------------

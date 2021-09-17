@@ -91,11 +91,12 @@ void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgSh
         GmoBoxSliceStaff* pSlice = static_cast<GmoBoxSliceStaff*>(*it);
         pSlice->reposition_shapes(yOrgShifts, barlinesHeight, relStaffTopPositions, pSysLayouter, staff);
 
-        m_size.height += heights[idxStaff];
+        m_size.height += heights[idxStaff+staff];
     }
 
     //shift origin
-    m_origin.y += yOrgShifts[m_idxStaff];
+    if (m_idxStaff > 0)
+        m_origin.y += yOrgShifts[m_idxStaff-1];
 }
 
 //---------------------------------------------------------------------------------------
@@ -127,6 +128,7 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
 
 {
     LUnits yShift = yShifts[m_idxStaff];
+    LUnits yPrevShift = (m_idxStaff > 0 ? yShifts[m_idxStaff-1] : 0.0f);
 
     if (yShift == 0.0f)
     {
@@ -155,8 +157,8 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                 {
 //                    if (!pShapeBeam->has_chords())
 //                    {
-                        LUnits down = (yShift + yShifts[m_idxStaff-1]) / 2.0f;
-                        LUnits increment = (yShift - yShifts[m_idxStaff-1]) / 2.0f;
+                        LUnits down = (yShift + yPrevShift) / 2.0f;
+                        LUnits increment = (yShift - yPrevShift) / 2.0f;
                         pSysLayouter->increment_cross_staff_stems(pShapeBeam, increment);
                         (*it)->reposition_shape(down);
 //                    }
@@ -169,7 +171,7 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
             else if ((*it)->is_shape_note())
             {
                 GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(*it);
-                LUnits increment = (yShift - yShifts[m_idxStaff-1]);
+                LUnits increment = (yShift - yPrevShift);
                 pShapeNote->reposition_shape(yShift);
 
                 if (pShapeNote->is_cross_staff_chord())

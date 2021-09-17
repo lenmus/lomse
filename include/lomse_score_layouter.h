@@ -175,6 +175,7 @@ protected:
     ScoreStub*          m_pStub;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
+    GmoBoxSystem*       m_pPrevBoxSystem = nullptr;
 
     //support for debug and unit test
     int                 m_iColumnToTrace;

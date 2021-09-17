@@ -487,7 +487,7 @@ protected:
     void draw_border(Drawer* pDrawer, RenderOptions& opt);
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
-    void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
+    virtual void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
     void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
     void add_shapes_to_tables_in(GmoBoxDocPage* pPage);
 

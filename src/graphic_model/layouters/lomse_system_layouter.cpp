@@ -182,7 +182,7 @@ GmoBoxSystem* SystemLayouter::create_system_box(LUnits left, LUnits top, LUnits 
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
-                                    UPoint pos)
+                                    UPoint pos, GmoBoxSystem* pPrevBoxSystem)
 {
     m_iSystem = m_pScoreLyt->m_iCurSystem;
     m_iFirstCol = iFirstCol;
@@ -205,7 +205,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     engrave_measure_numbers();
 
     if (!m_libraryScope.draw_vertical_profile())
-        move_staves_to_avoid_collisions();
+        move_staves_to_avoid_collisions(pPrevBoxSystem);
 
     engrave_instrument_details();
     add_instruments_info();
@@ -608,7 +608,8 @@ void SystemLayouter::reposition_staves_in_engravers(const vector<LUnits>& yOrgSh
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::reposition_slice_boxes_and_shapes(const vector<LUnits>& yOrgShifts,
-                                                       vector<LUnits>& heights)
+                                                       vector<LUnits>& heights,
+                                                       LUnits bottomMarginIncr)
 {
     int numInstrs = m_pScore->get_num_instruments();
     vector<LUnits> barlinesHeight(numInstrs);
@@ -632,7 +633,8 @@ void SystemLayouter::reposition_slice_boxes_and_shapes(const vector<LUnits>& yOr
     }
 
     GmoBoxSystem* pSystem = get_box_system();
-    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight, relStaffTopPositions, this);
+    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight,
+                                          relStaffTopPositions, bottomMarginIncr, this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -694,20 +696,63 @@ void SystemLayouter::engrave_instrument_details()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::move_staves_to_avoid_collisions()
+void SystemLayouter::move_staves_to_avoid_collisions(GmoBoxSystem* pPrevBoxSystem)
 {
     int numStaves = m_pScoreMeter->num_staves();
-    vector<LUnits> yOrgShifts(numStaves);
-    vector<LUnits> heights(numStaves);
+    vector<LUnits> yOrgShifts(numStaves, 0.0f); //accumulated vertical pos. increment for each staff
+    vector<LUnits> heights(numStaves, 0.0f);    //height increment for each staff. To set InstrSlice boxes height
 
-    //determine shifts to apply
+    //determine shapes limits to know free space at system top an bottom
+    LUnits maxLimit = m_pVProfile->get_max_limit(numStaves-1);
+    LUnits  minLimit = m_pVProfile->get_min_limit(0);
+    m_pBoxSystem->set_top_limit(minLimit);      //AWARE: can be negative if shapes above
+    m_pBoxSystem->set_bottom_limit(maxLimit);   //AWARE: can be negative if shapes below
+
+    //existing separation from previous system
+    LUnits minSysDistance = m_pScoreMeter->tenths_to_logical(LOMSE_MIN_SPACING_SYSTEMS);
+    LUnits freeSpace = max(m_pBoxSystem->get_free_space_at_top(), 0.0f);
+    freeSpace += (pPrevBoxSystem ? pPrevBoxSystem->get_free_space_at_bottom()
+                                 : minSysDistance);
+
+    //top margin increment if there are shapes above system top
+    LUnits topMarginIncr = max(m_pBoxSystem->get_top() - minLimit, 0.0f);
+    if (topMarginIncr > 0.0f)
+        m_pBoxSystem->set_free_space_at_top(0.0f);
+
+    //bottom margin increment if there are shapes below system bottom
+    LUnits bottomMarginIncr = max(maxLimit - m_pBoxSystem->get_bottom(), 0.0f);
+    if (bottomMarginIncr > 0.0f)
+    {
+        heights[numStaves-1] += bottomMarginIncr;
+        m_pBoxSystem->set_free_space_at_bottom(0.0f);
+    }
+
+    //add space for required top margin incr or/and for minimum space between systems
+    LUnits spaceIncr = max(minSysDistance - freeSpace, 0.0f);
+    if (spaceIncr > 0.0f)
+    {
+        m_pBoxSystem->set_free_space_at_top(spaceIncr);
+        topMarginIncr += spaceIncr;
+    }
+
+    //if it is necessary to increment top margin, do it
+    if (topMarginIncr > 0.0f)
+    {
+        heights[0] += topMarginIncr;
+        for (int j=0; j < numStaves; ++j)
+            yOrgShifts[j] += topMarginIncr;
+    }
+
+    //determine shifts to apply to the staves to avoid overlaps between their notations
+    //and height increments
+    LUnits minDistance = m_pScoreMeter->tenths_to_logical(LOMSE_MIN_SPACING_STAVES);
     for (int i=1; i < numStaves; ++i)
     {
         LUnits distance = m_pVProfile->get_staves_distance(i);
-        if (distance < 0.0f)
+        if (distance < minDistance)
         {
-            distance -= m_pScoreMeter->tenths_to_logical(LOMSE_MIN_SPACING_STAVES);
-            heights[i-1] = -distance;
+            distance -= minDistance;
+            heights[i] += -distance;
             for (int j=i; j < numStaves; ++j)
                 yOrgShifts[j] -= distance;
         }
@@ -719,9 +764,8 @@ void SystemLayouter::move_staves_to_avoid_collisions()
     //- shift all shapes inside staffSlice boxes
     reposition_staves_in_engravers(yOrgShifts);
 
-    if (yOrgShifts[numStaves - 1] > 0.0f)
-        reposition_slice_boxes_and_shapes(yOrgShifts, heights);
-
+    if (yOrgShifts[numStaves - 1] > 0.0f || bottomMarginIncr > 0.0f)
+        reposition_slice_boxes_and_shapes(yOrgShifts, heights, bottomMarginIncr);
 }
 
 //---------------------------------------------------------------------------------------
