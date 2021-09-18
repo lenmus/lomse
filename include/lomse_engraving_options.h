@@ -38,11 +38,15 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 
 //Staff
+//---------------------------------------------------------------------------------------
 //Default values for instantiating scores when defaults are used.
 //**DO NOT** use these constants for other purposes. For engravers, take values from ImoScore.
 #define LOMSE_STAFF_LINE_THICKNESS      15.0f   // line thickness. LUnits: 0.15 millimeters
 #define LOMSE_STAFF_LINE_SPACING       180.0f   // LUnits: 1.8 mm (staff height = 7.2 mm)
 #define LOMSE_STAFF_TOP_MARGIN        1000.0f   // LUnits: 10 millimeters
+//** END of restricted values, only for instantiating scores
+//---------------------------------------------------------------------------------------
+
 
 //Barlines
 #define LOMSE_THIN_LINE_WIDTH            1.5f   // thin line width
@@ -77,8 +81,6 @@ namespace lomse
 #define LOMSE_LEGER_LINE_OUTGOING        5.0f
 #define LOMSE_GRACE_NOTES_SCALE          0.60f  //Scaling factor for grace notes size
 #define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size
-#define LOMSE_ARPEGGIO_SPACE_TO_CHORD    6.0f   //Spacing between an arpeggio and a chord
-#define LOMSE_ARPEGGIO_MAX_OUTGOING      3.0f   //Amount of space arpeggio is allowed to go beyond a chord's top or bottom note
 #define LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP  3.0f   //Offset for notehead when collision with other voice notehead
 
 //System layouter
@@ -94,9 +96,9 @@ namespace lomse
 #define LOMSE_PROLOG_GAP_BEORE_KEY      10.0f
 #define LOMSE_PROLOG_GAP_BEFORE_TIME    10.0f
 #define LOMSE_SPACE_AFTER_PROLOG        15.0f
-    //staves distance
-#define LOMSE_MIN_SPACING_STAVES        15.0f   //Min. vertical space bitween staves
-
+    //staves/systems distances
+#define LOMSE_MIN_SPACING_STAVES        15.0f   //Min. vertical space between staves
+#define LOMSE_MIN_SPACING_SYSTEMS       30.0f   //Min. vertical space between systems
 
 //tuplets
 #define LOMSE_TUPLET_BORDER_LENGHT      10.0f
@@ -135,6 +137,10 @@ namespace lomse
 //lyrics
 #define LOMSE_LYRICS_SPACE_TO_MUSIC     12.0f //space between first lyric line and other music notation
 #define LOMSE_LYRICS_LINES_EXTRA_SPACE   3.0f //additional space between two lyric lines
+
+//arpeggios
+#define LOMSE_ARPEGGIO_SPACE_TO_CHORD    6.0f   //Spacing between an arpeggio and a chord
+#define LOMSE_ARPEGGIO_MAX_OUTGOING      3.0f   //Amount of space arpeggio is allowed to go beyond a chord's top or bottom note
 
 //playback
 #define LOMSE_STEAL_TIME_SHORT          20.0f //"Playback/Percentage of time to steal for acciaccatura grace notes"

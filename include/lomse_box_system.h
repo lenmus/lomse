@@ -61,16 +61,28 @@ protected:
     vector<int> m_nMeasures;        //number of measures in this system, per instrument
     LUnits m_dxFirstMeasure;        //shift from box left (virtual end barline of previous measure)
 
+    //free vertical space at top and bottom
+    LUnits m_uFreeAtTop = 0.0f;
+    LUnits m_uFreeAtBottom = 0.0f;
+
 public:
     GmoBoxSystem(ImoScore* pScore);
     ~GmoBoxSystem();
 
     //helpers for layout
+    inline void set_top_limit(LUnits minLimit) { m_uFreeAtTop = minLimit - get_top(); }
+    inline void set_bottom_limit(LUnits maxLimit) { m_uFreeAtBottom = get_bottom() - maxLimit; }
+    inline LUnits get_free_space_at_top() { return m_uFreeAtTop; }
+    inline LUnits get_free_space_at_bottom() { return m_uFreeAtBottom; }
+    inline void set_free_space_at_top(LUnits space) { m_uFreeAtTop = space; }
+    inline void set_free_space_at_bottom(LUnits space) { m_uFreeAtBottom = space; }
+
     /**  Move boxes and shapes to theirs final 'y' positions. */
     void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
                                       const std::vector<LUnits>& heights,
                                       const std::vector<LUnits>& barlinesHeight,
                                       const std::vector<std::vector<LUnits>>& relStaffTopPositions,
+                                      LUnits bottomMarginIncr,
                                       SystemLayouter* pSysLayouter);
 
     //slices
@@ -78,6 +90,8 @@ public:
     inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
     GmoBoxSliceInstr* get_first_instr_slice(int iInstr);
     GmoBoxSliceStaff* get_first_slice_staff_for(int iInstr, int iStaff);
+    void reposition_slices(USize shift);
+    void remove_free_space_at_bottom_and_adjust_slices();
 
     //grid table: xPositions/timepos
     inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
@@ -139,6 +153,8 @@ protected:
     friend class GmoBoxScorePage;
     inline void set_system_number(int iSystem) { m_iSystem = iSystem; }
 
+    //overrides
+    void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color) override;
 
 };
 

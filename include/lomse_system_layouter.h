@@ -119,7 +119,8 @@ public:
     ~SystemLayouter();
 
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
-    void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos);
+    void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos,
+                        GmoBoxSystem* pPrevBoxSystem);
     void on_origin_shift(LUnits yShift);
     inline void set_constrains(int constrains) { m_constrains = constrains; }
 
@@ -160,10 +161,11 @@ protected:
     void engrave_system_details(int iSystem);
     void setup_aux_shapes_aligner(EAuxShapesAlignmentScope scope, Tenths maxAlignDistance = 0.0f);
     void add_instruments_info();
-    void move_staves_to_avoid_collisions();
+    void move_staves_to_avoid_collisions(GmoBoxSystem* pPrevBoxSystem);
     void reposition_staves_in_engravers(const std::vector<LUnits>& yOrgShifts);
     void reposition_slice_boxes_and_shapes(const vector<LUnits>& yOrgShifts,
-                                           vector<LUnits>& heights);
+                                           vector<LUnits>& heights,
+                                           LUnits bottomMarginIncr);
 
     void add_prolog_shapes_to_boxes();
     void add_system_prolog_if_necessary();

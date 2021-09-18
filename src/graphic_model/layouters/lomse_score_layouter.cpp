@@ -317,7 +317,17 @@ bool ScoreLayouter::system_created()
 bool ScoreLayouter::enough_space_in_page_for_system()
 {
     LUnits height = m_pCurBoxSystem->get_height();
-    return remaining_height() >= height;
+    if (remaining_height() >= height)
+        return true;
+
+    //check if enough space if free space at system bottom is removed
+    height -= m_pCurBoxSystem->get_free_space_at_bottom();
+    if (remaining_height() >= height)
+    {
+        m_pCurBoxSystem->remove_free_space_at_bottom_and_adjust_slices();
+        return true;
+    }
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -344,14 +354,14 @@ void ScoreLayouter::engrave_system()
     if (get_num_columns() == 0)
     {
         //force to layout an empty system
-        m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor);
+        m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor, m_pPrevBoxSystem);
     }
     else
     {
         int iFirstCol = m_breaks[m_iCurSystem];
         int iLastCol = (m_iCurSystem == get_num_systems() - 1 ?
                                         get_num_columns() : m_breaks[m_iCurSystem + 1] );
-        m_pCurSysLyt->engrave_system(indent, iFirstCol, iLastCol, m_cursor);
+        m_pCurSysLyt->engrave_system(indent, iFirstCol, iLastCol, m_cursor, m_pPrevBoxSystem);
     }
 }
 
@@ -359,6 +369,7 @@ void ScoreLayouter::engrave_system()
 void ScoreLayouter::create_system_box()
 {
     m_iCurSystem++;
+    m_pPrevBoxSystem = (m_fFirstSystemInPage ? nullptr : m_pPrevBoxSystem);
 
     LUnits width = m_pCurBoxPage->get_width();
     LUnits top = m_cursor.y
@@ -388,6 +399,7 @@ void ScoreLayouter::add_system_to_page()
 
     move_paper_cursor_to_bottom_of_added_system();
     is_first_system_in_page(false);
+    m_pPrevBoxSystem = m_pCurBoxSystem;
     m_pCurBoxSystem = nullptr;
 }
 
@@ -815,7 +827,7 @@ void ScoreLayouter::create_empty_system()
 void ScoreLayouter::engrave_empty_system()
 {
     LUnits indent = get_system_indent();
-    m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor);
+    m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor, m_pPrevBoxSystem);
 }
 
 //---------------------------------------------------------------------------------------

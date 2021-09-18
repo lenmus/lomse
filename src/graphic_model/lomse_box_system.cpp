@@ -103,6 +103,7 @@ void GmoBoxSystem::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts
                                                 const vector<LUnits>& heights,
                                                 const vector<LUnits>& barlinesHeight,
                                                 const vector<vector<LUnits>>& relStaffTopPositions,
+                                                LUnits bottomMarginIncr,
                                                 SystemLayouter* pSysLayouter)
 
 {
@@ -111,13 +112,43 @@ void GmoBoxSystem::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts
     {
         GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
         pSlice->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight,
-                                             relStaffTopPositions,
+                                             relStaffTopPositions, bottomMarginIncr,
                                              pSysLayouter);
     }
 
-    //shift origin and increase height
-    m_origin.y += yOrgShifts[0];
-    m_size.height += yOrgShifts.back() + heights[0];
+    //increase height
+    m_size.height += (yOrgShifts.back() + bottomMarginIncr);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::reposition_slices(USize shift)
+{
+    vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
+        pSlice->shift_origin(shift);
+    }
+
+    //shift origin
+    m_origin.y += shift.height;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::remove_free_space_at_bottom_and_adjust_slices()
+{
+    //remove free space at bottom
+    LUnits space = m_uFreeAtBottom;
+    set_height( get_height() - m_uFreeAtBottom );
+    m_uFreeAtBottom = 0.0f;
+
+    //reduce height of slices
+    vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
+        pSlice->reduce_last_instrument_height(space);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -264,6 +295,32 @@ string GmoBoxSystem::dump_measures_info()
     }
     s << endl;
     return s.str();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color)
+{
+    GmoBox::draw_box_bounds(pDrawer, xorg, yorg, color);
+
+    //draw free space limits
+    if (m_uFreeAtTop != 0.0f || m_uFreeAtBottom != 0.0f)
+    {
+        pDrawer->begin_path();
+        pDrawer->fill( Color(255, 255, 255, 0) );     //background white transparent
+        pDrawer->stroke( color );
+        pDrawer->stroke_width(20.0);    //0.2 mm
+        if (m_uFreeAtTop != 0.0f)
+        {
+            pDrawer->move_to(xorg, yorg + m_uFreeAtTop);
+            pDrawer->hline_to(xorg + get_width());
+        }
+        if (m_uFreeAtBottom != 0.0f)
+        {
+            pDrawer->move_to(xorg, yorg + get_height() - m_uFreeAtBottom);
+            pDrawer->hline_to(xorg + get_width());
+        }
+        pDrawer->end_path();
+    }
 }
 
 

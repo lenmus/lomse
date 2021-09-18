@@ -65,8 +65,10 @@ public:
                                       const std::vector<LUnits>& heights,
                                       const std::vector<LUnits>& barlinesHeight,
                                       const std::vector<std::vector<LUnits>>& relStaffTopPositions,
+                                      LUnits bottomMarginIncr,
                                       SystemLayouter* pSysLayouter);
     GmoBoxSliceStaff* get_slice_staff_for(int iInstr, int iStaff);
+    void reduce_last_instrument_height(LUnits space);
 
 };
 
