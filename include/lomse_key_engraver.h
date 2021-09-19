@@ -42,6 +42,7 @@ class ImoKeySignature;
 class GmoShape;
 class GmoShapeKeySignature;
 class ScoreMeter;
+class StaffObjsCursor;
 
 //---------------------------------------------------------------------------------------
 class KeyEngraver : public Engraver
@@ -60,6 +61,7 @@ public:
     ~KeyEngraver() {}
 
     GmoShape* create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos,
+                           StaffObjsCursor* pCursor,
                            Color color=Color(0,0,0));
 
 protected:

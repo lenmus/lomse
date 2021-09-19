@@ -78,6 +78,7 @@ namespace lomse
 #define LOMSE_SPACE_BEFORE_DOT           5.0f
 #define LOMSE_SPACE_AFTER_ACCIDENTALS    1.5f
 #define LOMSE_SPACE_BETWEEN_ACCIDENTALS  1.5f
+#define LOMSE_SPACE_BETWEEN_KEY_NATURALS 2.0f
 #define LOMSE_LEGER_LINE_OUTGOING        5.0f
 #define LOMSE_GRACE_NOTES_SCALE          0.60f  //Scaling factor for grace notes size
 #define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size

@@ -34,6 +34,7 @@
 #include "lomse_glyphs.h"
 #include "lomse_shapes.h"
 #include "lomse_score_meter.h"
+#include "lomse_staffobjs_cursor.h"
 
 
 namespace lomse
@@ -54,6 +55,7 @@ KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 
 //---------------------------------------------------------------------------------------
 GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos,
+                                    StaffObjsCursor* pCursor,
                                     Color color)
 {
     m_pCreatorImo = pKey;
@@ -68,8 +70,26 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint 
 
     int numAccidentals = get_num_fifths(m_nKeyType);
     if (numAccidentals == 0)
-        return m_pKeyShape;
+    {
+        ImoKeySignature* pPrevKey = pCursor ? pCursor->get_key_for_instr_staff(m_iInstr, m_iStaff) : nullptr;
 
+        if (pPrevKey)
+        {
+            const int prevNumAccidentals = get_num_fifths(pPrevKey->get_key_type());
+
+            //display naturals to let a performer know about the key change
+            if (prevNumAccidentals > 0)
+            {
+                compute_positions_for_sharps(clefType);
+                add_accidentals(prevNumAccidentals, k_glyph_natural_accidental, uPos);
+            }
+            else if (prevNumAccidentals < 0)
+            {
+                compute_positions_for_flats(clefType);
+                add_accidentals(-prevNumAccidentals, k_glyph_natural_accidental, uPos);
+            }
+        }
+    }
     else if (numAccidentals > 0)
     {
         compute_positions_for_sharps(clefType);
@@ -89,6 +109,7 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint 
 void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
 {
     LUnits x = uPos.x;
+    const LUnits space = (iGlyph == k_glyph_natural_accidental) ? tenths_to_logical(LOMSE_SPACE_BETWEEN_KEY_NATURALS) : 0.0f;
     for (int i=1; i <= numAccidentals; i++)
     {
         Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph)
@@ -97,7 +118,7 @@ void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
         GmoShape* pSA = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
                                                m_color, m_libraryScope, m_fontSize);
         m_pKeyShape->add(pSA);
-        x += pSA->get_width();
+        x += pSA->get_width() + space;
     }
 }
 
