@@ -1141,7 +1141,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             ImoKeySignature* pImo = static_cast<ImoKeySignature*>(pSO);
             KeyEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
-            return engrv.create_shape(pImo, clefType, pos, color);
+            return engrv.create_shape(pImo, clefType, pos, pCursor, color);
         }
         case k_imo_note_regular:
         case k_imo_note_grace:

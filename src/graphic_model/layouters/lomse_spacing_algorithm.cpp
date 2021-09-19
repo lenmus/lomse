@@ -378,7 +378,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         pagePos, clefType, 0, flags);
+                         pagePos, clefType, 0, flags, m_pSysCursor);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iInstr, iStaff, pSO, pShape, fInProlog);
