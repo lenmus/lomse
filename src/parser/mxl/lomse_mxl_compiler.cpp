@@ -118,6 +118,14 @@ ImoDocument* MxlCompiler::compile_string(const std::string& source)
 }
 
 //---------------------------------------------------------------------------------------
+ImoDocument* MxlCompiler::compile_buffer(const void* buffer, size_t size)
+{
+    m_fileLocator = "string:";
+    m_pXmlParser->parse_buffer(buffer, size);
+    return compile_parsed_tree( m_pXmlParser->get_tree_root() );
+}
+
+//---------------------------------------------------------------------------------------
 ImoDocument* MxlCompiler::compile_parsed_tree(XmlNode* root)
 {
     ImoDocument* pDoc = dynamic_cast<ImoDocument*>(

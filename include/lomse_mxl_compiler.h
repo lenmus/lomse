@@ -64,6 +64,7 @@ public:
     //compilation
     ImoDocument* compile_file(const std::string& filename) override;
     ImoDocument* compile_string(const std::string& source) override;
+    ImoDocument* compile_buffer(const void* buffer, size_t size);
 
 protected:
     ImoDocument* compile_parsed_tree(XmlNode* root);

@@ -62,15 +62,15 @@ ImoDocument* CompressedMxlCompiler::compile_file(const std::string& filename)
 #if (LOMSE_ENABLE_COMPRESSION == 1)
     ZipInputStream zip(filename);
 
-    const std::string mxmlString = read_rootfile(zip);
+    const std::vector<unsigned char> mxmlBuffer = read_rootfile(zip);
 
-    if (mxmlString.empty())
+    if (mxmlBuffer.empty())
     {
         LOMSE_LOG_ERROR("[CompressedMxlCompiler::compile_file] Couldn't read rootfile");
         return nullptr;
     }
 
-    return m_pMxlCompiler->compile_string(mxmlString);
+    return m_pMxlCompiler->compile_buffer(static_cast<const void*>(mxmlBuffer.data()), mxmlBuffer.size());
 #else
     throw runtime_error("Could not open compressed file: Lomse was compiled without compression support");
 #endif
@@ -95,7 +95,7 @@ std::string CompressedMxlCompiler::get_rootfile_path(ZipInputStream& zip)
     std::vector<unsigned char> metaInfBuffer = zip.get_as_vector();
 
     XmlParser xml;
-    xml.parse_cstring(reinterpret_cast<char*>(metaInfBuffer.data()));
+    xml.parse_buffer(static_cast<const void*>(metaInfBuffer.data()), metaInfBuffer.size());
 
     XmlNode* root = xml.get_tree_root();
 
@@ -113,24 +113,22 @@ std::string CompressedMxlCompiler::get_rootfile_path(ZipInputStream& zip)
 }
 
 //---------------------------------------------------------------------------------------
-std::string CompressedMxlCompiler::read_rootfile(ZipInputStream& zip)
+std::vector<unsigned char> CompressedMxlCompiler::read_rootfile(ZipInputStream& zip)
 {
 #if (LOMSE_ENABLE_COMPRESSION == 1)
     const std::string rootFilePath = get_rootfile_path(zip);
 
     if (rootFilePath.empty())
-        return std::string();
+        return {};
 
     zip.move_to_entry(rootFilePath);
 
     if (!zip.open_current_entry())
-        return std::string();
+        return {};
 
-    std::vector<unsigned char> mxmlBuffer = zip.get_as_vector();
-
-    return std::string(reinterpret_cast<char*>(mxmlBuffer.data()));
+    return zip.get_as_vector();
 #else
-    return std::string();
+    return {};
 #endif
 }
 
