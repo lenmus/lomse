@@ -129,6 +129,7 @@ public:
     void parse_file(const std::string& filename, bool fErrorMsg = true) override;
     void parse_text(const std::string& sourceText) override;
     void parse_cstring(char* sourceText);
+    void parse_buffer(const void* buffer, size_t size);
 
     inline const string& get_error() { return m_errorMsg; }
     inline const string& get_encoding() { return m_encoding; }

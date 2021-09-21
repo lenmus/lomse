@@ -193,6 +193,27 @@ void XmlParser::parse_char_string(char* str)
 }
 
 //---------------------------------------------------------------------------------------
+void XmlParser::parse_buffer(const void* buffer, size_t size)
+{
+    m_fOffsetDataReady = false;
+    m_filename.clear();
+    pugi::xml_parse_result result = m_doc.load_buffer(buffer, size,
+                                                      (pugi::parse_default |
+                                                       //pugi::parse_trim_pcdata |
+                                                       //pugi::parse_wnorm_attribute |
+                                                       pugi::parse_declaration)
+                                                     );
+
+    if (!result)
+    {
+        m_errorMsg = string(result.description());
+        m_errorOffset = int(result.offset);
+        m_reporter << "Pos: " << m_errorOffset << ". Error: " << m_errorMsg << endl;
+    }
+    find_root();
+}
+
+//---------------------------------------------------------------------------------------
 void XmlParser::find_root()
 {
     pugi::xml_node root = m_doc.first_child();

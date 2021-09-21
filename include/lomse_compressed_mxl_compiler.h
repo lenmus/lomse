@@ -59,7 +59,7 @@ public:
 
 protected:
     std::string get_rootfile_path(ZipInputStream&);
-    std::string read_rootfile(ZipInputStream&);
+    std::vector<unsigned char> read_rootfile(ZipInputStream&);
 };
 
 
