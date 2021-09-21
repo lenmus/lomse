@@ -932,50 +932,98 @@ bool ADocument::append_child(const AObject& detachedObj)
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Sets the left margin of the page. The new margin value is specified in logical
+    Sets the left margin in odd pages. The new margin value is specified in logical
     units (cents of a millimeter).
 */
-void ADocument::set_page_left_margin(LUnits value)
+void ADocument::set_page_left_margin_odd(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    pageInfo->set_left_margin(value);
+    pageInfo->set_left_margin_odd(value);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Sets the right margin of the page. The new margin value is specified in logical
+    Sets the right margin in odd pages. The new margin value is specified in logical
     units (cents of a millimeter).
 */
-void ADocument::set_page_right_margin(LUnits value)
+void ADocument::set_page_right_margin_odd(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    pageInfo->set_right_margin(value);
+    pageInfo->set_right_margin_odd(value);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Sets the top margin of the page. The new margin value is specified in logical
+    Sets the top margin in odd pages. The new margin value is specified in logical
     units (cents of a millimeter).
 */
-void ADocument::set_page_top_margin(LUnits value)
+void ADocument::set_page_top_margin_odd(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    pageInfo->set_top_margin(value);
+    pageInfo->set_top_margin_odd(value);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Sets the bottom margin of the page. The new margin value is specified in logical
+    Sets the bottom margin in odd pages. The new margin value is specified in logical
     units (cents of a millimeter).
 */
-void ADocument::set_page_bottom_margin(LUnits value)
+void ADocument::set_page_bottom_margin_odd(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    pageInfo->set_bottom_margin(value);
+    pageInfo->set_bottom_margin_odd(value);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Sets the left margin in even pages. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
+void ADocument::set_page_left_margin_even(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_left_margin_even(value);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Sets the right margin in even pages. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
+void ADocument::set_page_right_margin_even(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_right_margin_even(value);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Sets the top margin in even pages. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
+void ADocument::set_page_top_margin_even(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_top_margin_even(value);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Sets the bottom margin in even pages. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
+void ADocument::set_page_bottom_margin_even(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_bottom_margin_even(value);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1016,50 +1064,98 @@ void ADocument::set_page_height(LUnits value)
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Returns the left margin of the page. The returned value is in logical
+    Returns the left margin for odd pages. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits ADocument::page_left_margin() const
+LUnits ADocument::page_left_margin_odd() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    return pageInfo->get_left_margin();
+    return pageInfo->get_left_margin_odd();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Returns the right margin of the page. The returned value is in logical
+    Returns the right margin for odd pages. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits ADocument::page_right_margin() const
+LUnits ADocument::page_right_margin_odd() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    return pageInfo->get_right_margin();
+    return pageInfo->get_right_margin_odd();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Returns the top margin of the page. The returned value is in logical
+    Returns the top margin for odd pages. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits ADocument::page_top_margin() const
+LUnits ADocument::page_top_margin_odd() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    return pageInfo->get_top_margin();
+    return pageInfo->get_top_margin_odd();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADocument
-    Returns the bottom margin of the page. The returned value is in logical
+    Returns the bottom margin for odd pages. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits ADocument::page_bottom_margin() const
+LUnits ADocument::page_bottom_margin_odd() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    return pageInfo->get_bottom_margin();
+    return pageInfo->get_bottom_margin_odd();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Returns the left margin for even pages. The returned value is in logical
+    units (cents of a millimeter).
+*/
+LUnits ADocument::page_left_margin_even() const
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_left_margin_even();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Returns the right margin for even pages. The returned value is in logical
+    units (cents of a millimeter).
+*/
+LUnits ADocument::page_right_margin_even() const
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_right_margin_even();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Returns the top margin for even pages. The returned value is in logical
+    units (cents of a millimeter).
+*/
+LUnits ADocument::page_top_margin_even() const
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_top_margin_even();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ADocument
+    Returns the bottom margin for even pages. The returned value is in logical
+    units (cents of a millimeter).
+*/
+LUnits ADocument::page_bottom_margin_even() const
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_bottom_margin_even();
 }
 
 //---------------------------------------------------------------------------------------

@@ -371,22 +371,32 @@ void ScoreLayouter::create_system_box()
     m_iCurSystem++;
     m_pPrevBoxSystem = (m_fFirstSystemInPage ? nullptr : m_pPrevBoxSystem);
 
-    LUnits width = m_pCurBoxPage->get_width();
+    //get margins
+    ImoSystemInfo* pInfo = (m_iCurSystem == 0 ? m_pScore->get_first_system_info()
+                                              : m_pScore->get_other_system_info());
+    LUnits leftMargin = pInfo->get_left_margin();
+    LUnits rightMargin = pInfo->get_right_margin();
+
+    //determine top and left positions
     LUnits top = m_cursor.y
                  + distance_to_top_of_system(m_iCurSystem, m_fFirstSystemInPage);
-    LUnits left = m_cursor.x;
+    LUnits left = m_cursor.x + leftMargin;
 
-    //save info for repositioning system if necessary
-    m_iSysPage = m_iCurPage;
-    m_sysCursor = m_cursor;
-
-    ImoSystemInfo* pInfo = m_pScore->get_other_system_info();
-
+    //determine height
     LUnits height = determine_system_top_margin();      //top margin
     height += m_pSpAlgorithm->get_staves_height();      //staves height
     height += pInfo->get_system_distance() / 2.0f;      //bottom margin
 
+    //determine width
+    LUnits width = m_pCurBoxPage->get_width();
+    width -= (leftMargin + rightMargin);
+
+    //create the box
     m_pCurBoxSystem = m_pCurSysLyt->create_system_box(left, top, width, height);
+
+    //save info for repositioning system if necessary
+    m_iSysPage = m_iCurPage;
+    m_sysCursor = m_cursor;
 }
 
 //---------------------------------------------------------------------------------------

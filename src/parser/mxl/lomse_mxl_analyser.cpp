@@ -247,6 +247,7 @@ enum EMxlTag
     k_mxl_tag_damp,
     k_mxl_tag_damp_all,
     k_mxl_tag_dashes,
+    k_mxl_tag_defaults,
     k_mxl_tag_direction,
     k_mxl_tag_direction_type,
     k_mxl_tag_dynamics,
@@ -266,6 +267,8 @@ enum EMxlTag
     k_mxl_tag_note,
     k_mxl_tag_octave_shift,
     k_mxl_tag_ornaments,
+    k_mxl_tag_page_layout,
+    k_mxl_tag_page_margins,
     k_mxl_tag_part,
     k_mxl_tag_part_group,
     k_mxl_tag_part_list,
@@ -277,6 +280,7 @@ enum EMxlTag
     k_mxl_tag_print,
     k_mxl_tag_rehearsal,
     k_mxl_tag_rest,
+    k_mxl_tag_scaling,
     k_mxl_tag_scordatura,
     k_mxl_tag_score_instrument,
     k_mxl_tag_score_part,
@@ -285,6 +289,9 @@ enum EMxlTag
     k_mxl_tag_slur,
     k_mxl_tag_sound,
     k_mxl_tag_string_mute,
+    k_mxl_tag_staff_layout,
+    k_mxl_tag_system_layout,
+    k_mxl_tag_system_margins,
     k_mxl_tag_technical,
     k_mxl_tag_text,
     k_mxl_tag_tied,
@@ -393,11 +400,18 @@ protected:
     float get_child_attribute_as_float(const string& name, float rDefault) {
         return get_node_attribute_as_float(&m_childToAnalyse, name, rDefault);
     }
+    string get_child_attribute_as_string(const string& name, const string& sDefault) {
+        return get_node_attribute(&m_childToAnalyse, name, sDefault);
+    }
+    int get_child_attribute_as_integer(const string& name, int nDefault) {
+        return get_node_attribute_as_integer(&m_childToAnalyse, name, nDefault);
+    }
 
     //auxiliary, for getting attributes from a node
     bool get_optional_yes_no_attribute(XmlNode* node, const string& name, bool fDefault);
     float get_node_attribute_as_float(XmlNode* node, const string& name, float rDefault);
-
+    string get_node_attribute(XmlNode* node, const string& name, const string& sDefault);
+    int get_node_attribute_as_integer(XmlNode* node, const string& name, int nDefault);
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -565,6 +579,28 @@ protected:
     string get_child_value_string()
     {
         return m_childToAnalyse.value();
+    }
+
+
+    //-----------------------------------------------------------------------------------
+    // Analysers for common elements
+    //-----------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------
+    //@ <staff>
+    //@ Staff assignment is only needed for music notated on
+    //@ multiple staves. Used by both notes and directions. Staff
+    //@ values are numbers, with 1 referring to the top-most staff
+    //@ in a part.
+    //@
+    //@ <!ELEMENT staff (#PCDATA)>
+    //
+    int analyse_optional_staff(int nDefault)
+    {
+        if (get_optional("staff"))
+            return get_child_value_integer(nDefault);
+        else
+            return nDefault;
     }
 
 
@@ -757,37 +793,73 @@ protected:
     //@     font-style   CDATA  #IMPLIED     can be normal or italic
     //@     font-size    CDATA  #IMPLIED
     //@     font-weight  CDATA  #IMPLIED">
-//    ImoStyle* get_attribute_font()
-//    {
-//        ImoStyle* pStyle = nullptr;pScore->new_unnamed_style();   //derived from default
-//        if (has_attribute(&m_childToAnalyse, "font-style"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-style");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-size"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-size");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-weight"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-weight");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-family"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-family");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (!pStyle)
-//            pStyle = pScore->default();
-//          return pStyle;
-//    }
+    void get_attributes_for_font(ImoFontStyleDto* pFont)
+    {
+        //font-family: a comma-separated list of font names
+        if (has_attribute(&m_childToAnalyse, "font-family"))
+        {
+            pFont->name = get_attribute(&m_childToAnalyse, "font-family");
+        }
+
+        //font-style: normal or italic
+        if (has_attribute(&m_childToAnalyse, "font-style"))
+        {
+            string value = get_attribute(&m_childToAnalyse, "font-style");
+            if (value == "normal")
+                pFont->style = ImoStyle::k_font_style_normal;
+            else if (value == "italic")
+                pFont->style = ImoStyle::k_font_style_italic;
+            else
+            {
+                report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                    "Unknown font-style '" + value + "'. Replaced by 'normal'.");
+                pFont->style = ImoStyle::k_font_style_normal;
+            }
+        }
+
+        //font-size: string xx-small, x-small, small, medium, large, x-large, xx-large
+        // or a numeric point size.
+        if (has_attribute(&m_childToAnalyse, "font-size"))
+        {
+            string value = get_node_attribute(&m_childToAnalyse, "font-size", "");
+            if (value == "xx-small")
+                pFont->size = 6.0f;
+            else if (value == "x-small")
+                pFont->size = 8.0f;
+            else if (value == "small")
+                pFont->size = 10.0f;
+            else if (value == "medium")
+                pFont->size = 12.0f;
+            else if (value == "large")
+                pFont->size = 14.0f;
+            else if (value == "x-large")
+                pFont->size = 18.0f;
+            else if (value == "xx-large")
+                pFont->size = 24.0f;
+            else
+            {
+                float points = get_node_attribute_as_float(&m_childToAnalyse, "font-size", 0.0f);
+                if (points> 0.0f)
+                    pFont->size = points;
+            }
+        }
+
+        //font-weight: normal or bold
+        if (has_attribute(&m_childToAnalyse, "font-weight"))
+        {
+            string value = get_attribute(&m_childToAnalyse, "font-weight");
+            if (value == "normal")
+                pFont->weight = ImoStyle::k_font_weight_normal;
+            else if (value == "bold")
+                pFont->weight = ImoStyle::k_font_weight_bold;
+            else
+            {
+                report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                    "Unknown font-weight '" + value + "'. Replaced by 'normal'.");
+                pFont->weight = ImoStyle::k_font_weight_normal;
+            }
+        }
+    }
 
     //-----------------------------------------------------------------------------------
     //@ % color
@@ -880,28 +952,6 @@ protected:
 //<!ENTITY % valign
 //    "valign (top | middle | bottom | baseline) #IMPLIED">
 //
-
-
-    //-----------------------------------------------------------------------------------
-    // Analysers for common elements
-    //-----------------------------------------------------------------------------------
-
-    //-----------------------------------------------------------------------------------
-    //@ <staff>
-    //@ Staff assignment is only needed for music notated on
-    //@ multiple staves. Used by both notes and directions. Staff
-    //@ values are numbers, with 1 referring to the top-most staff
-    //@ in a part.
-    //@
-    //@ <!ELEMENT staff (#PCDATA)>
-    //
-    int analyse_optional_staff(int nDefault)
-    {
-        if (get_optional("staff"))
-            return get_child_value_integer(nDefault);
-        else
-            return nDefault;
-    }
 
 //<!--
 //    The text-decoration entity is based on the similar
@@ -1166,6 +1216,19 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
+    // Helper, to check and cast anchor object
+    //-----------------------------------------------------------------------------------
+
+    ImoScore* get_anchor_as_score()
+    {
+        if (m_pAnchor && m_pAnchor->is_score())
+            return static_cast<ImoScore*>(m_pAnchor);
+
+        LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoScore");
+        return nullptr;
+    }
+
 };
 
 
@@ -1252,19 +1315,21 @@ string MxlElementAnalyser::get_optional_string_attribute(const string& name,
 //---------------------------------------------------------------------------------------
 int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefault)
 {
-    string number = m_analysedNode.attribute_value(name);
-    long nNumber;
-    std::istringstream iss(number);
-    if ((iss >> std::dec >> nNumber).fail())
-        return nDefault;
-    else
-        return int(nNumber);
+    return get_node_attribute_as_integer(&m_analysedNode, name, nDefault);
 }
 
 //---------------------------------------------------------------------------------------
 float MxlElementAnalyser::get_attribute_as_float(const string& name, float rDefault)
 {
     return get_node_attribute_as_float(&m_analysedNode, name, rDefault);
+}
+
+//---------------------------------------------------------------------------------------
+string MxlElementAnalyser::get_node_attribute(XmlNode* node, const string& name,
+                                              const string& sDefault)
+{
+    string value = node->attribute_value(name);
+    return (value.empty() ? sDefault : value);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1296,6 +1361,19 @@ float MxlElementAnalyser::get_node_attribute_as_float(XmlNode* node, const strin
     }
     else
         return rNumber;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlElementAnalyser::get_node_attribute_as_integer(XmlNode* node, const string& name,
+                                                      int nDefault)
+{
+    string number = node->attribute_value(name);
+    long nNumber;
+    std::istringstream iss(number);
+    if ((iss >> std::dec >> nNumber).fail())
+        return nDefault;
+    else
+        return int(nNumber);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1996,10 +2074,13 @@ public:
         {
             const int targetStaves = get_child_value_integer(1);
             ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
-            int instrStaves = pInstr->get_num_staves();
+            int iStaff = pInstr->get_num_staves();
             // coverity[tainted_data]
-            for (; instrStaves < targetStaves; ++instrStaves)
+            for (; iStaff < targetStaves; ++iStaff)
+            {
                 pInstr->add_staff();
+                pInstr->set_staff_margin(iStaff, m_pAnalyser->get_default_staff_distance(iStaff));
+            }
         }
 
         // part-symbol?
@@ -2695,6 +2776,207 @@ public:
 		//TODO
         return nullptr;
     }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ defaults
+//@ <!ELEMENT defaults
+//@ 	(scaling?, concert-score?, %common-layout;, appearance?,
+//@ 	 music-font?, word-font?, lyric-font*, lyric-language*)>
+//@
+class DefaultsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DefaultsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        // [<scaling>]
+        analyse_optional("scaling", pScore);
+
+        // [<concert-score>]
+        if (get_optional("level"))
+        {
+            //TODO
+        }
+
+        // [<page-layout>]
+        analyse_optional("page-layout", pScore);
+
+        // [<system-layout>]
+        analyse_optional("system-layout", pScore);
+
+        // [<staff-layout>]*
+        while(analyse_optional("staff-layout", pScore));
+
+        // [<appearance>]
+        if (get_optional("appearance"))
+        {
+            //TODO
+        }
+
+        // [<music-font>]
+        if (get_optional("music-font"))
+            set_music_font(pScore);
+
+        // [<word-font>]
+        if (get_optional("word-font"))
+            set_word_font(pScore);
+
+        // [<lyric-font>]*
+        while (get_optional("lyric-font"))
+            set_lyric_font(pScore);
+
+        // [<lyric-language>]*
+        while (get_optional("lyric-language"))
+            set_lyric_language(pScore);
+
+        error_if_more_elements();
+
+        return nullptr;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_music_font(ImoScore* pScore)
+    {
+        //@ <!ELEMENT music-font EMPTY>
+        //@ <!ATTLIST music-font
+        //@     %font;
+        //@ >
+
+        //TODO. although font is now imported, Lomse will continue using Bravura font
+        //      and the created musicFont is, for now, useless
+        ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
+
+        //transfer defaults
+        ImoStyle* pStyle = pScore->get_default_style();
+        pFont->name = pStyle->font_name();
+        pFont->size = pStyle->font_size();
+        pFont->style = pStyle->font_style();
+        pFont->weight = pStyle->font_weight();
+
+        //parse source file
+        get_attributes_for_font(pFont);
+        m_pAnalyser->set_music_font(pFont);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_word_font(ImoScore* pScore)
+    {
+        //@ <!ELEMENT word-font EMPTY>
+        //@ <!ATTLIST word-font
+        //@     %font;
+        //@ >
+
+        ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
+
+        //transfer defaults
+        ImoStyle* pStyle = pScore->get_default_style();
+        pFont->name = pStyle->font_name();
+        pFont->size = pStyle->font_size();
+        pFont->style = pStyle->font_style();
+        pFont->weight = pStyle->font_weight();
+
+        //parse source file
+        get_attributes_for_font(pFont);
+        m_pAnalyser->set_word_font(pFont);
+
+        if (!(pFont->name).empty())
+        {
+            //modify already created defaults in the score
+            pStyle->font_name(pFont->name);
+            pStyle->font_size(pFont->size);
+            pStyle->font_style(pFont->style);
+            pStyle->font_weight(pFont->weight);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_lyric_font(ImoScore* pScore)
+    {
+        //@ <!ELEMENT lyric-font EMPTY>
+        //@ <!ATTLIST lyric-font
+        //@     number NMTOKEN #IMPLIED
+        //@     name CDATA #IMPLIED
+        //@     %font;
+        //@ >
+        //@ The number and name attributes in lyric-font and
+        //@ lyric-language elements are typically used when lyrics are
+        //@ provided in multiple languages. If the number and name
+        //@ attributes are omitted, the lyric-font and lyric-language
+        //@ values apply to all numbers and names.
+
+        ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
+
+        //transfer defaults
+        ImoStyle* pLyricsStyle = pScore->find_style("Lyrics");
+        pFont->name = pLyricsStyle->font_name();
+        pFont->size = pLyricsStyle->font_size();
+        pFont->style = pLyricsStyle->font_style();
+        pFont->weight = pLyricsStyle->font_weight();
+
+        //determine if specific style needed
+        ImoStyle* pStyle = nullptr;
+        int number = get_child_attribute_as_integer("number", 0);
+        if (number == 0)
+            pStyle = pLyricsStyle;
+        else
+        {
+            //create the style if not already created
+            stringstream ss;
+            ss << "Lyric-" << number;
+            pStyle = pScore->find_style(ss.str());
+            if (pStyle == nullptr)
+            {
+                Document* pDoc = m_pAnalyser->get_document_being_analysed();
+                pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
+                pStyle->set_name(ss.str());
+                pStyle->set_parent_style(pLyricsStyle);
+                pScore->add_style(pStyle);
+            }
+        }
+
+        //parse source file
+        get_attributes_for_font(pFont);
+        m_pAnalyser->set_lyric_style(number, pStyle);
+
+        if (!(pFont->name).empty())
+        {
+            //modify already created defaults in the score
+            pStyle->font_name(pFont->name);
+            pStyle->font_size(pFont->size);
+            pStyle->font_style(pFont->style);
+            pStyle->font_weight(pFont->weight);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_lyric_language(ImoScore* UNUSED(pScore))
+    {
+        //@ <!ELEMENT lyric-language EMPTY>
+        //@ <!ATTLIST lyric-language
+        //@     number NMTOKEN #IMPLIED
+        //@     name CDATA #IMPLIED
+        //@     xml:lang CDATA #REQUIRED
+        //@ >
+
+        int number = get_child_attribute_as_integer("number", 0);
+        string lang = get_child_attribute_as_string("xml:lang", "");
+        if (lang.empty())
+            return;
+
+        m_pAnalyser->set_lyric_language(number, lang);
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3504,15 +3786,12 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ lyric = ([syllabic] text [ ([elision] [syllabic] text)* [extend] |
-//@                            extend | laughing | humming ] )
-//@         [end-line] [end-paragraph] [%editorial]
-
-//<!ELEMENT lyric
-//    ((((syllabic?, text),
-//       (elision?, syllabic?, text)*, extend?) |
-//       extend | laughing | humming),
-//      end-line?, end-paragraph?, %editorial;)>
+//@ lyric
+//@ <!ELEMENT lyric
+//@     ((((syllabic?, text),
+//@        (elision?, syllabic?, text)*, extend?) |
+//@        extend | laughing | humming),
+//@       end-line?, end-paragraph?, %editorial;)>
 
 class LyricMxlAnalyser : public MxlElementAnalyser
 {
@@ -3550,6 +3829,16 @@ public:
         ImoLyricsTextInfo* pText = static_cast<ImoLyricsTextInfo*>(
                 ImFactory::inject(k_imo_lyrics_text_info, pDoc) );
         pData->add_text_item(pText);
+
+        //set text language if defined in <defaults> element
+        string lang = m_pAnalyser->get_lyric_language(num-1);
+        if (!lang.empty())
+            pText->set_syllable_language(lang);
+
+        //set text style if defined in <defaults> element
+        ImoStyle* pStyle = m_pAnalyser->get_lyric_style(num-1);
+        if (pStyle)
+            pText->set_syllable_style(pStyle);
 
         // [syllabic]
         if (get_optional("syllabic"))
@@ -5179,6 +5468,178 @@ protected:
 
 
 //@--------------------------------------------------------------------------------------
+//@ <!ELEMENT page-layout ((page-height, page-width)?,
+//@ 	(page-margins, page-margins?)?)>
+//@ <!ELEMENT page-height %layout-tenths;>
+//@ <!ELEMENT page-width %layout-tenths;>
+//@
+class PageLayoutMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PageLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        // (page-height, page-width)?
+        if (get_optional("page-height"))
+        {
+            set_page_height(pScore);
+
+            // <page-width>
+            if (get_mandatory("page-width"))
+                set_page_width(pScore);
+        }
+
+        // <page-margins>   0 times (default margins), 1-both or to 2 times (odd, even)
+        while (analyse_optional("page-margins", pScore));
+
+        return nullptr;
+    }
+
+protected:
+
+    void set_page_height(ImoScore* pScore)
+    {
+        float value = get_child_value_float(29700.0f);
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        pInfo->set_page_height( pScore->tenths_to_logical(value) );
+    }
+
+    void set_page_width(ImoScore* pScore)
+    {
+        float value = get_child_value_float(29700.0f);
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        pInfo->set_page_width( pScore->tenths_to_logical(value) );
+    }
+
+};
+
+
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT page-margins (left-margin, right-margin,
+//@ 	top-margin, bottom-margin)>
+//@ <!ATTLIST page-margins
+//@     type (odd | even | both) #IMPLIED
+//@ >
+//@
+class PageMarginsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PageMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                           LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        //attrb: type
+        string type = get_optional_string_attribute("type", "both");
+        if (type != "odd" && type != "even" && type != "both")
+        {
+            error_msg2("Invalid value for 'type' attribute: '" + type +
+                       "'. Replaced by 'both'.");
+            type = "both";
+        }
+
+        //left-margin
+        if (get_mandatory("left-margin"))
+            set_left_margin(pScore, type);
+
+        //right-margin
+        if (get_mandatory("right-margin"))
+            set_right_margin(pScore, type);
+
+        //top-margin
+        if (get_mandatory("top-margin"))
+            set_top_margin(pScore, type);
+
+        //bottom-margin
+        if (get_mandatory("bottom-margin"))
+            set_bottom_margin(pScore, type);
+
+        return nullptr;
+    }
+
+protected:
+
+    void set_left_margin(ImoScore* pScore, const string& type)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(83.33333333f) );
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        if (type == "odd")
+            pInfo->set_left_margin_odd(value);
+        else if (type == "even")
+            pInfo->set_left_margin_even(value);
+        else
+        {
+            pInfo->set_left_margin_odd(value);
+            pInfo->set_left_margin_even(value);
+        }
+    }
+
+    void set_right_margin(ImoScore* pScore, const string& type)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(83.33333333f) );
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        if (type == "odd")
+            pInfo->set_right_margin_odd(value);
+        else if (type == "even")
+            pInfo->set_right_margin_even(value);
+        else
+        {
+            pInfo->set_right_margin_odd(value);
+            pInfo->set_right_margin_even(value);
+        }
+    }
+
+    void set_top_margin(ImoScore* pScore, const string& type)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(111.11111111f) );
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        if (type == "odd")
+            pInfo->set_top_margin_odd(value);
+        else if (type == "even")
+            pInfo->set_top_margin_even(value);
+        else
+        {
+            pInfo->set_top_margin_odd(value);
+            pInfo->set_top_margin_even(value);
+        }
+    }
+
+    void set_bottom_margin(ImoScore* pScore, const string& type)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(111.11111111f) );
+        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        if (type == "odd")
+            pInfo->set_bottom_margin_odd(value);
+        else if (type == "even")
+            pInfo->set_bottom_margin_even(value);
+        else
+        {
+            pInfo->set_bottom_margin_odd(value);
+            pInfo->set_bottom_margin_even(value);
+        }
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
 //@ <!ELEMENT part-group (group-name?, group-name-display?,
 //@           group-abbreviation?, group-abbreviation-display?,
 //@           group-symbol?, group-barline?, group-time?, %editorial;)>
@@ -5853,6 +6314,7 @@ protected:
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, pDoc) );
         pInstrument->set_instr_id(id);
+        pInstrument->set_staff_margin(0, m_pAnalyser->get_default_staff_distance(0));
 
         Linker linker(pDoc);
         linker.add_child_to_model(pInstrument, pMD, pMD->get_obj_type());
@@ -5929,9 +6391,10 @@ public:
         // [<identification>]
         // coverity[check_return]
         get_optional("identification");
+
         // [<defaults>]
-        // coverity[check_return]
-        get_optional("defaults");
+        analyse_optional("defaults", pScore);
+
         // [<credit>*]
         while (get_optional("credit"));
 
@@ -6093,6 +6556,48 @@ protected:
 
 
 //@--------------------------------------------------------------------------------------
+//@ <scaling>
+//@ <!ELEMENT scaling (millimeters, tenths)>
+//@ <!ELEMENT millimeters (#PCDATA)>
+//@ <!ELEMENT tenths %layout-tenths;>
+//@
+class ScalingMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ScalingMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                       LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        // millimeters
+        float millimeters = 0.0f;
+        if (get_mandatory("millimeters"))
+            millimeters = get_child_value_float(0.0f);
+
+        // tenths %layout-tenths;>
+        float tenths = 0.0f;
+        if (get_mandatory("tenths"))
+            tenths = get_child_value_float(0.0f);
+
+        if (millimeters > 0.0f && tenths > 0.0f)
+            pScore->set_global_scaling(millimeters, tenths);
+        else
+        {
+            error_msg2("Errors in <scaling> content. Ignored.");
+        }
+
+        return nullptr;
+    }
+
+};
+
+
+//@--------------------------------------------------------------------------------------
 //@ <scordatura>
 class ScordaturaMxlAnalyser : public MxlElementAnalyser
 {
@@ -6154,10 +6659,10 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <string-mute>
-class StringMmuteMxlAnalyser : public MxlElementAnalyser
+class StringMuteMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    StringMmuteMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+    StringMuteMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                            LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
@@ -6167,6 +6672,147 @@ public:
         return nullptr;
     }
 };
+
+
+//@--------------------------------------------------------------------------------------
+//@ <staff-layout>
+//@ <!ELEMENT staff-layout (staff-distance?)>
+//@ <!ELEMENT staff-distance %layout-tenths;>
+//@ <!ATTLIST staff-layout
+//@     number CDATA #IMPLIED
+//@ >
+//@ attrb: number (default = 1)
+class StaffLayoutMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    StaffLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                           LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        //attrb: number
+        int iStaff = get_attribute_as_integer("number", 1) - 1;
+
+        // staff-distance
+        if (get_optional("staff-distance"))
+        {
+            float value = pScore->tenths_to_logical( get_child_value_float(55.555555555f) );     //1000.0f LUnits
+            m_pAnalyser->save_default_staff_distance(iStaff, value);
+        }
+
+        return nullptr;
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
+//@ <system-layout>
+//@ <!ELEMENT system-layout
+//@ 	(system-margins?, system-distance?,
+//@ 	 top-system-distance?, system-dividers?)>
+//@ <!ELEMENT system-margins (left-margin, right-margin)>
+//@ <!ELEMENT system-distance %layout-tenths;>
+//@ <!ELEMENT top-system-distance %layout-tenths;>
+//@
+class SystemLayoutMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    SystemLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        // system-margins?
+        analyse_optional("system-margins", pScore);
+
+        // system-distance?
+        if (get_optional("system-distance"))
+            set_system_distance(pScore);
+
+        // top-system-distance?
+        if (get_optional("top-system-distance"))
+            set_system_top_distance(pScore);
+
+        // system-dividers?
+        //TODO: What are system dividers? what to do with them?
+
+        return nullptr;
+    }
+
+protected:
+
+    void set_system_distance(ImoScore* pScore)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(111.111111111f) );     //2000.0f LUnits
+        pScore->get_first_system_info()->set_system_distance(value);
+        pScore->get_other_system_info()->set_system_distance(value);
+    }
+
+    void set_system_top_distance(ImoScore* pScore)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(55.555555555f) );     //1000.0f LUnits
+        pScore->get_first_system_info()->set_top_system_distance(value);
+        pScore->get_other_system_info()->set_top_system_distance(value);
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <system-margins>
+//@ <!ELEMENT system-margins (left-margin, right-margin)>
+//@
+class SystemMarginsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    SystemMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                             LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoScore* pScore = get_anchor_as_score();
+        if (pScore == nullptr)
+            return nullptr;
+
+        // left-margin
+        if (get_mandatory("left-margin"))
+            set_left_margin(pScore);
+
+        // right-margin
+        if (get_mandatory("right-margin"))
+            set_right_margin(pScore);
+
+        return nullptr;
+    }
+
+protected:
+
+    void set_left_margin(ImoScore* pScore)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(0.0f) );
+        pScore->get_first_system_info()->set_left_margin(value);
+        pScore->get_other_system_info()->set_left_margin(value);
+    }
+
+    void set_right_margin(ImoScore* pScore)
+    {
+        float value = pScore->tenths_to_logical( get_child_value_float(0.0f) );
+        pScore->get_first_system_info()->set_right_margin(value);
+        pScore->get_other_system_info()->set_right_margin(value);
+    }
+
+};
+
 
 //@--------------------------------------------------------------------------------------
 //@ <technical> = (technical <tech-mark>+)
@@ -7697,6 +8343,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["damp"] = k_mxl_tag_damp;
     m_NameToEnum["damp-all"] = k_mxl_tag_damp_all;
     m_NameToEnum["dashes"] = k_mxl_tag_dashes;
+    m_NameToEnum["defaults"] = k_mxl_tag_defaults;
     m_NameToEnum["direction"] = k_mxl_tag_direction;
     m_NameToEnum["direction-type"] = k_mxl_tag_direction_type;
     m_NameToEnum["dynamics"] = k_mxl_tag_dynamics;
@@ -7716,6 +8363,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["note"] = k_mxl_tag_note;
     m_NameToEnum["octave-shift"] = k_mxl_tag_octave_shift;
     m_NameToEnum["ornaments"] = k_mxl_tag_ornaments;
+    m_NameToEnum["page-layout"] = k_mxl_tag_page_layout;
+    m_NameToEnum["page-margins"] = k_mxl_tag_page_margins;
     m_NameToEnum["part"] = k_mxl_tag_part;
     m_NameToEnum["part-group"] = k_mxl_tag_part_group;
     m_NameToEnum["part-list"] = k_mxl_tag_part_list;
@@ -7727,6 +8376,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["print"] = k_mxl_tag_print;
     m_NameToEnum["rehearsal"] = k_mxl_tag_rehearsal;
     m_NameToEnum["rest"] = k_mxl_tag_rest;
+    m_NameToEnum["scaling"] = k_mxl_tag_scaling;
     m_NameToEnum["scordatura"] = k_mxl_tag_scordatura;
     m_NameToEnum["score-instrument"] = k_mxl_tag_score_instrument;
     m_NameToEnum["score-part"] = k_mxl_tag_score_part;
@@ -7735,6 +8385,9 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["slur"] = k_mxl_tag_slur;
     m_NameToEnum["sound"] = k_mxl_tag_sound;
     m_NameToEnum["string-mute"] = k_mxl_tag_string_mute;
+    m_NameToEnum["staff-layout"] = k_mxl_tag_staff_layout;
+    m_NameToEnum["system-layout"] = k_mxl_tag_system_layout;
+    m_NameToEnum["system-margins"] = k_mxl_tag_system_margins;
     m_NameToEnum["technical"] = k_mxl_tag_technical;
     m_NameToEnum["text"] = k_mxl_tag_text;
     m_NameToEnum["tied"] = k_mxl_tag_tied;
@@ -7759,6 +8412,12 @@ MxlAnalyser::~MxlAnalyser()
     m_NameToEnum.clear();
     m_lyrics.clear();
     m_lyricIndex.clear();
+    m_staffDistance.clear();
+    m_lyricLang.clear();
+    m_lyricStyle.clear();
+
+    delete m_pMusicFont;
+    delete m_pWordFont;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7850,6 +8509,38 @@ ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+ImoStyle* MxlAnalyser::get_lyric_style(int number)
+{
+    map<int, ImoStyle*>::iterator it = m_lyricStyle.find(number);
+    if (it != m_lyricStyle.end())
+        return it->second;
+
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::set_lyric_style(int number, ImoStyle* pStyle)
+{
+    m_lyricStyle[number] = pStyle;
+}
+
+//---------------------------------------------------------------------------------------
+string MxlAnalyser::get_lyric_language(int number)
+{
+    map<int, string>::iterator it = m_lyricLang.find(number);
+    if (it != m_lyricLang.end())
+        return it->second;
+
+    return "";
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::set_lyric_language(int number, const string& lang)
+{
+    m_lyricLang[number] = lang;
+}
+
+//---------------------------------------------------------------------------------------
 void MxlAnalyser::save_arpeggio_data(ImoArpeggioDto* pArpeggioDto)
 {
     delete m_pArpeggioDto;
@@ -7870,6 +8561,23 @@ void MxlAnalyser::save_current_instrument(ImoInstrument* pInstr)
 
     int numStaves = pInstr->get_num_staves();
     m_notes.assign( max(numStaves, 10), nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::save_default_staff_distance(int iStaff, LUnits distance)
+{
+    m_staffDistance[iStaff] = distance;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits MxlAnalyser::get_default_staff_distance(int iStaff)
+{
+    map<int, LUnits>::iterator it = m_staffDistance.find(iStaff);
+    if (it != m_staffDistance.end())
+        return it->second;
+
+    //return default value
+    return LOMSE_STAFF_TOP_MARGIN;
 }
 
 //---------------------------------------------------------------------------------------
@@ -8267,6 +8975,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_mxl_tag_damp:                 return LOMSE_NEW DampMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_damp_all:             return LOMSE_NEW DampAllMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_dashes:               return LOMSE_NEW DashesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_defaults:             return LOMSE_NEW DefaultsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_direction:            return LOMSE_NEW DirectionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_direction_type:       return LOMSE_NEW DirectionTypeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_dynamics:             return LOMSE_NEW DynamicsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -8286,6 +8995,8 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_octave_shift:         return LOMSE_NEW OctaveShiftMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_page_layout:          return LOMSE_NEW PageLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_page_margins:         return LOMSE_NEW PageMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_group:           return LOMSE_NEW PartGroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
@@ -8297,6 +9008,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_print:                return LOMSE_NEW PrintMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_rehearsal:            return LOMSE_NEW RehearsalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_rest:                 return LOMSE_NEW RestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_scaling:              return LOMSE_NEW ScalingMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_scordatura:           return LOMSE_NEW ScordaturaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_instrument:     return LOMSE_NEW ScoreInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
@@ -8304,7 +9016,10 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_segno:                return LOMSE_NEW SegnoMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_sound:                return LOMSE_NEW SoundMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMmuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_staff_layout:         return LOMSE_NEW StaffLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_system_layout:        return LOMSE_NEW SystemLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_system_margins:       return LOMSE_NEW SystemMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_technical:            return LOMSE_NEW TecnicalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_text:                 return LOMSE_NEW TextMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tied:                 return LOMSE_NEW TiedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

@@ -190,14 +190,7 @@ ImoObj* Linker::add_option(ImoOptionInfo* pOpt)
 //---------------------------------------------------------------------------------------
 ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
 {
-    if (m_pParent && m_pParent->is_score())
-    {
-        ImoScore* pScore = static_cast<ImoScore*>(m_pParent);
-        pScore->add_page_info(pPI);
-        delete pPI;
-        return nullptr;
-    }
-    else if (m_pParent && m_pParent->is_document())
+    if (m_pParent && m_pParent->is_document())
     {
         ImoDocument* pDoc = static_cast<ImoDocument*>(m_pParent);
         pDoc->add_page_info(pPI);

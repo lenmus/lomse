@@ -2666,6 +2666,19 @@ void ImoInstrument::replace_staff_info(ImoStaffInfo* pInfo)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::set_staff_margin(int iStaff, LUnits distance)
+{
+    std::list<ImoStaffInfo*>::iterator it = m_staves.begin();
+    for (; it != m_staves.end() && iStaff > 0; ++it, --iStaff);
+
+    if (it != m_staves.end())
+    {
+        ImoStaffInfo* pInfo = *it;
+        pInfo->set_staff_margin(distance);
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::set_name(ImoScoreText* pText)
 {
     m_name = *pText;
@@ -3386,9 +3399,9 @@ ImoScore::ImoScore(Document* pDoc)
     , m_version(0)
     , m_pColStaffObjs(nullptr)
     , m_pMidiTable(nullptr)
+    , m_scaling(LOMSE_STAFF_LINE_SPACING / 10.0f)     //default staff: 7.2mm = 40 tenths
     , m_systemInfoFirst()
     , m_systemInfoOther()
-    , m_pageInfo()
 {
     set_edit_terminal(true);
     m_pDoc = pDoc;
@@ -3534,6 +3547,13 @@ void ImoScore::set_staffobjs_table(ColStaffObjs* pColStaffObjs)
 {
     delete m_pColStaffObjs;
     m_pColStaffObjs = pColStaffObjs;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::set_global_scaling(float millimeters, float tenths)
+{
+    if (millimeters > 0.0f && tenths > 0.0f)
+        m_scaling = (millimeters * 100.0f) / tenths;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3730,12 +3750,6 @@ void ImoScore::add_sytem_info(ImoSystemInfo* pSL)
         m_systemInfoFirst = *pSL;
     else
         m_systemInfoOther = *pSL;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoScore::add_page_info(ImoPageInfo* pPI)
-{
-    m_pageInfo = *pPI;
 }
 
 //---------------------------------------------------------------------------------------
@@ -5149,11 +5163,17 @@ void ImoStyles::create_default_styles()
 //=======================================================================================
 ImoPageInfo::ImoPageInfo()
     : ImoSimpleObj(k_imo_page_info)
-    , m_uLeftMargin(1500.0f)
-    , m_uRightMargin(1500.0f)
-    , m_uTopMargin(2000.0f)
-    , m_uBottomMargin(2000.0f)
-    , m_uBindingMargin(0.0f)
+    //odd pages
+    , m_uLeftMarginOdd(1500.0f)
+    , m_uRightMarginOdd(1500.0f)
+    , m_uTopMarginOdd(2000.0f)
+    , m_uBottomMarginOdd(2000.0f)
+    //even pages
+    , m_uLeftMarginEven(1500.0f)
+    , m_uRightMarginEven(1500.0f)
+    , m_uTopMarginEven(2000.0f)
+    , m_uBottomMarginEven(2000.0f)
+    //size and orientation
     , m_uPageSize(21000.0f, 29700.0f)
     , m_fPortrait(true)
 {

@@ -624,11 +624,14 @@ SUITE(InternalModelTest)
         ImoPageInfo* pInfo = static_cast<ImoPageInfo*>(
                                     ImFactory::inject(k_imo_page_info, &doc));
         CHECK( pInfo->is_page_info() == true );
-        CHECK( pInfo->get_top_margin() == 2000.0f );
-        CHECK( pInfo->get_bottom_margin() == 2000.0f );
-        CHECK( pInfo->get_left_margin() == 1500.0f );
-        CHECK( pInfo->get_right_margin() == 1500.0f );
-        CHECK( pInfo->get_binding_margin() == 0.0f );
+        CHECK( pInfo->get_top_margin_odd() == 2000.0f );
+        CHECK( pInfo->get_bottom_margin_odd() == 2000.0f );
+        CHECK( pInfo->get_left_margin_odd() == 1500.0f );
+        CHECK( pInfo->get_right_margin_odd() == 1500.0f );
+        CHECK( pInfo->get_top_margin_even() == 2000.0f );
+        CHECK( pInfo->get_bottom_margin_even() == 2000.0f );
+        CHECK( pInfo->get_left_margin_even() == 1500.0f );
+        CHECK( pInfo->get_right_margin_even() == 1500.0f );
         CHECK( pInfo->is_portrait() == true );
         delete pInfo;
     }

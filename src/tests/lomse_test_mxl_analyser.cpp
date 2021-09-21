@@ -1751,6 +1751,473 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ defaults --------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_01)
+    {
+        //@01. defaults: scaling parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<scaling>"
+                  "<millimeters>6.35</millimeters>"
+                  "<tenths>40</tenths>"
+                "</scaling>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore );
+        CHECK( is_equal_float( pScore->tenths_to_logical(40.0f), 635.0f) );
+//        cout << test_name() << ". LUnits=" << pScore->tenths_to_logical(40.0f) << endl;
+
+        //page has default values (in LUnits)
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        CHECK( is_equal_float(pInfo->get_left_margin_odd(), 1500.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin_odd(), 1500.0f) );
+        CHECK( is_equal_float(pInfo->get_top_margin_odd(), 2000.0f) );
+        CHECK( is_equal_float(pInfo->get_bottom_margin_odd(), 2000.0f) );
+        CHECK( is_equal_float(pInfo->get_left_margin_even(), 1500.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin_even(), 1500.0f) );
+        CHECK( is_equal_float(pInfo->get_top_margin_even(), 2000.0f) );
+        CHECK( is_equal_float(pInfo->get_bottom_margin_even(), 2000.0f) );
+        CHECK( is_equal_float(pInfo->get_page_width(), 21000.0f) ); //DIN A4 (210.0 x 297.0 mm)
+        CHECK( is_equal_float(pInfo->get_page_height(), 29700.0f) );
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_02)
+    {
+        //@02. defaults: page-layout parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<page-layout>"
+                  "<page-height>1760</page-height>"
+                  "<page-width>1360</page-width>"
+                  "<page-margins type='both'>"
+                    "<left-margin>80</left-margin>"
+                    "<right-margin>100</right-margin>"
+                    "<top-margin>60</top-margin>"
+                    "<bottom-margin>120</bottom-margin>"
+                  "</page-margins>"
+                "</page-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore );
+        CHECK( is_equal_float( pScore->tenths_to_logical(40.0f), 720.0f) );
+//        cout << test_name() << ". LUnits=" << pScore->tenths_to_logical(40.0f) << endl;
+
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+        CHECK( is_equal_float(pInfo->get_left_margin_odd(), 1440.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin_odd(), 1800.0f) );
+        CHECK( is_equal_float(pInfo->get_top_margin_odd(), 1080.0f) );
+        CHECK( is_equal_float(pInfo->get_bottom_margin_odd(), 2160.0f) );
+        CHECK( is_equal_float(pInfo->get_left_margin_even(), 1440.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin_even(), 1800.0f) );
+        CHECK( is_equal_float(pInfo->get_top_margin_even(), 1080.0f) );
+        CHECK( is_equal_float(pInfo->get_bottom_margin_even(), 2160.0f) );
+        CHECK( is_equal_float(pInfo->get_page_width(), 24480.0f) );
+        CHECK( is_equal_float(pInfo->get_page_height(), 31680.0f) );
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_03)
+    {
+        //@03. defaults: system-layout parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<system-layout>"
+                  "<system-margins>"
+                    "<left-margin>80</left-margin>"
+                    "<right-margin>40</right-margin>"
+                  "</system-margins>"
+                  "<system-distance>120</system-distance>"
+                  "<top-system-distance>160</top-system-distance>"
+                "</system-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore );
+        CHECK( is_equal_float( pScore->tenths_to_logical(40.0f), 720.0f) );
+//        cout << test_name() << ". LUnits=" << pScore->tenths_to_logical(40.0f) << endl;
+
+        ImoSystemInfo* pInfo = pScore->get_first_system_info();
+        CHECK( pInfo->is_first() == true );
+        CHECK( is_equal_float(pInfo->get_left_margin(), 1440.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin(), 720.0f) );
+        CHECK( is_equal_float(pInfo->get_system_distance(), 2160.0f) );
+        CHECK( is_equal_float(pInfo->get_top_system_distance(), 2880.0f) );
+        pInfo = pScore->get_other_system_info();
+        CHECK( pInfo->is_first() == false );
+        CHECK( is_equal_float(pInfo->get_left_margin(), 1440.0f) );
+        CHECK( is_equal_float(pInfo->get_right_margin(), 720.0f) );
+        CHECK( is_equal_float(pInfo->get_system_distance(), 2160.0f) );
+        CHECK( is_equal_float(pInfo->get_top_system_distance(), 2880.0f) );
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_04)
+    {
+        //@04. defaults: staff-layout parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<staff-layout>"
+                  "<staff-distance>80</staff-distance>"
+                "</staff-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            CHECK( pScore->get_num_instruments() == 1 );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            CHECK( pInstr != nullptr );
+            if (pInstr)
+            {
+                ImoStaffInfo* pInfo = pInstr->get_staff(0);
+                CHECK( is_equal_float( pInfo->get_staff_margin(), 1440.0f) );
+                pInfo = pInstr->get_staff(1);
+                CHECK( is_equal_float( pInfo->get_staff_margin(), 1000.0f) );
+            }
+        }
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_05)
+    {
+        //@05. defaults: staff-layout transferred when more staves added
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<staff-layout number='1'>"
+                  "<staff-distance>80</staff-distance>"
+                "</staff-layout>"
+                "<staff-layout number='2'>"
+                  "<staff-distance>120</staff-distance>"
+                "</staff-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            CHECK( pScore->get_num_instruments() == 1 );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            CHECK( pInstr != nullptr );
+            if (pInstr)
+            {
+                ImoStaffInfo* pInfo = pInstr->get_staff(0);
+                CHECK( is_equal_float( pInfo->get_staff_margin(), 1440.0f) );
+                pInfo = pInstr->get_staff(1);
+                CHECK( is_equal_float( pInfo->get_staff_margin(), 2160.0f) );
+            }
+        }
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_06)
+    {
+        //@06. defaults: word-font and music-font parsed and transferred
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<music-font font-family='Maestro,engraved' font-size='20.5'/>"
+                "<word-font font-family='Times New Roman' font-size='9'/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ImoStyle* pStyle = pScore->get_default_style();
+            CHECK( pStyle->font_name() == "Times New Roman" );
+            CHECK( is_equal_float(pStyle->font_size(), 9.0f) );
+//            cout << test_name() << ", name='" << pStyle->font_name()
+//                << "', size=" << pStyle->font_size() << endl;
+
+            ImoFontStyleDto* pFont = a.get_music_font();
+            CHECK( pFont );
+            if (pFont)
+            {
+                CHECK( pFont->name == "Maestro,engraved" );
+                CHECK( is_equal_float(pFont->size, 20.5f) );
+//                cout << test_name() << ", name='" << pFont->name
+//                    << "', size=" << pFont->size << endl;
+            }
+        }
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_07)
+    {
+        //@07. defaults: lyric-font parsed and transferred. No: number, language
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<lyric-font font-family='ＭＳ ゴシック' font-size='10.25'/>"
+                "<lyric-language xml:lang='ja'/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ImoStyle* pStyle = pScore->find_style("Lyrics");
+            CHECK( pStyle->font_name() == "ＭＳ ゴシック" );
+            CHECK( is_equal_float(pStyle->font_size(), 10.25f) );
+//            cout << test_name() << ", name='" << pStyle->font_name()
+//                << "', size=" << pStyle->font_size() << endl;
+        }
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_08)
+    {
+        //@08. defaults: lyric-font for two lines
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<lyric-font number='1' font-family='Book Antiqua' font-size='10'/>"
+                "<lyric-font number='2' font-family='ＭＳ ゴシック' font-size='10.25'/>"
+                "<lyric-language number='1' xml:lang='en'/>"
+                "<lyric-language number='2' xml:lang='ja'/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ImoStyle* pStyle = pScore->find_style("Lyric-1");
+            CHECK( pStyle );
+            if (pStyle)
+            {
+                CHECK( pStyle->font_name() == "Book Antiqua" );
+                CHECK( is_equal_float(pStyle->font_size(), 10.0f) );
+//                cout << test_name() << ", name='" << pStyle->font_name()
+//                    << "', size=" << pStyle->font_size() << endl;
+            }
+            CHECK( pStyle );
+            pStyle = pScore->find_style("Lyric-2");
+            if (pStyle)
+            {
+                CHECK( pStyle->font_name() == "ＭＳ ゴシック" );
+                CHECK( is_equal_float(pStyle->font_size(), 10.25f) );
+//                cout << test_name() << ", name='" << pStyle->font_name()
+//                    << "', size=" << pStyle->font_size() << endl;
+            }
+
+            //languages
+            CHECK( a.get_lyric_language(1) == "en" );
+            CHECK( a.get_lyric_language(2) == "ja" );
+        }
+
+        delete pRoot;
+    }
+
+
     //@ direction -------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_01)

@@ -149,7 +149,7 @@ SUITE(DocLayouterTest)
         CHECK( pBox && pBox->is_box_doc_page_content() == true );
         CHECK( pBox && pBox->get_width() == 16000.0f );
         CHECK( pBox && pBox->get_height() == 2735.0f );
-        CHECK( pBox && pBox->get_left() == 1000.0f );
+        CHECK( pBox && pBox->get_left() == 5000.0f );
         CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
@@ -173,7 +173,7 @@ SUITE(DocLayouterTest)
         CHECK( pBox && pBox->get_width() == 16000.0f );
         //cout << pBox->get_height() << endl;
         CHECK( pBox && pBox->get_height() == 2735.0f );     //system height
-        CHECK( pBox && pBox->get_left() == 1000.0f );
+        CHECK( pBox && pBox->get_left() == 5000.0f );
         CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }

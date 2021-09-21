@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,8 +37,6 @@
 #include "lomse_relation_builder.h"
 #include "lomse_internal_model.h"       //required to define MxlBeamsBuilder, MxlSlursBuilder
 #include "lomse_im_note.h"              //required for enum EAccidentals
-
-using namespace std;
 
 namespace lomse
 {
@@ -172,9 +170,9 @@ public:
 class PartList
 {
 protected:
-    vector<ImoInstrument*> m_instruments;
-    vector<bool> m_partAdded;
-    map<string, int> m_locators;
+    std::vector<ImoInstrument*> m_instruments;
+    std::vector<bool> m_partAdded;
+    std::map<std::string, int> m_locators;
     int m_numInstrs;
     bool m_fInstrumentsAdded;
 
@@ -183,9 +181,9 @@ public:
     ~PartList();
 
     int get_num_items() { return static_cast<int>(m_locators.size()); }
-    int add_score_part(const string& id, ImoInstrument* pInstrument);
-    ImoInstrument* get_instrument(const string& id);
-    bool mark_part_as_added(const string& id);
+    int add_score_part(const std::string& id, ImoInstrument* pInstrument);
+    ImoInstrument* get_instrument(const std::string& id);
+    bool mark_part_as_added(const std::string& id);
     void add_all_instruments(ImoScore* pScore);
     void check_if_missing_parts(ostream& reporter);
 
@@ -193,7 +191,7 @@ public:
     void do_not_delete_instruments_in_destructor() { m_fInstrumentsAdded = true; }
 
 protected:
-    int find_index_for(const string& id);
+    int find_index_for(const std::string& id);
 
 };
 
@@ -202,7 +200,7 @@ protected:
 class PartGroups
 {
 protected:
-    map<int, ImoInstrGroup*> m_groups;
+    std::map<int, ImoInstrGroup*> m_groups;
 
 //    int m_number;
 //    int m_symbol;
@@ -212,10 +210,10 @@ public:
     PartGroups();
     ~PartGroups();
 
-//    void set_name(const string& name);
-//    void set_name_display(const string& name);
-//    void set_abbreviation(const string& abbrev);
-//    void set_abbreviation_display(const string& abbrev);
+//    void set_name(const std::string& name);
+//    void set_name_display(const std::string& name);
+//    void set_abbreviation(const std::string& abbrev);
+//    void set_abbreviation_display(const std::string& abbrev);
 //    void set_number(int num);
 //    void set_symbol(int symbol);
 //    void set_barline(bool value);
@@ -229,7 +227,19 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------------
+// helper struct to store information for a font
+struct FontData
+{
+    std::string family;     //a comma-separated list of font names
+    std::string style;      //can be normal or italic
+    std::string size;       //one of the CSS sizes (xx-small, x-small, small, medium,
+                            //   large, x-large, xx-large) or a numeric point size
+    std::string weight;     //can be normal or bold
+    std::string language;   //language tags, as defined in RFC 3066 (e.g. "en-GB")
 
+    FontData() {}
+};
 
 //---------------------------------------------------------------------------------------
 //MxlAnalyser: responsible for parsing a tree of MusicXML nodes
@@ -249,30 +259,31 @@ protected:
     MxlSlursBuilder*    m_pSlursBuilder;
     MxlVoltasBuilder*   m_pVoltasBuilder;
     MxlWedgesBuilder*   m_pWedgesBuilder;
-    MxlOctaveShiftBuilder*  m_pOctaveShiftBuilder;
-    vector<ImoDynamicsMark*> m_pendingDynamicsMarks;
-    map<string, int>    m_lyricIndex;
-    vector<ImoLyric*>   m_lyrics;
-    map<string, int>    m_soundIdToIdx;     //conversion sound-instrument id to index
-	vector<ImoMidiInfo*> m_latestMidiInfo;  //latest MidiInfo for each soundIdx
+    MxlOctaveShiftBuilder*          m_pOctaveShiftBuilder;
+    std::vector<ImoDynamicsMark*>   m_pendingDynamicsMarks;
+    std::map<std::string, int>      m_lyricIndex;
+    std::vector<ImoLyric*>          m_lyrics;
+    std::map<std::string, int>      m_soundIdToIdx;     //conversion sound-instrument id to index
+	std::vector<ImoMidiInfo*>       m_latestMidiInfo;  //latest MidiInfo for each soundIdx
+	std::map<int, LUnits>           m_staffDistance;    //<defaults> for staff-distance
 
 
-    int             m_musicxmlVersion;
-    ImoObj*         m_pNodeImo;
-    map<int, ImoId> m_tieIds;
-    int             m_tieNum;
-    map<int, ImoId> m_slurIds;
-    int             m_slurNum;
-    int             m_voltaNum;
-    map<int, ImoId> m_wedgeIds;
-    int             m_wedgeNum;
-    map<int, ImoId> m_octaveShiftIds;
-    int             m_octaveShiftNum;
+    int                  m_musicxmlVersion;
+    ImoObj*              m_pNodeImo;
+    std::map<int, ImoId> m_tieIds;
+    int                  m_tieNum;
+    std::map<int, ImoId> m_slurIds;
+    int                  m_slurNum;
+    int                  m_voltaNum;
+    std::map<int, ImoId> m_wedgeIds;
+    int                  m_wedgeNum;
+    std::map<int, ImoId> m_octaveShiftIds;
+    int                  m_octaveShiftNum;
 
 
     //analysis input
     XmlNode* m_pTree;
-    string m_fileLocator;
+    std::string m_fileLocator;
 
     // information maintained in MxlAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
@@ -286,11 +297,17 @@ protected:
     TimeUnits       m_time;             //time-position counter
     TimeUnits       m_maxTime;          //max time-position reached
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
-    string          m_curPartId;        //Part Id being analysed
-    string          m_curMeasureNum;    //Num of measure being analysed
+    std::string     m_curPartId;        //Part Id being analysed
+    std::string     m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
 
-    vector<ImoNote*> m_notes;           //last note for each staff
+    std::vector<ImoNote*> m_notes;           //last note for each staff
+
+    //default fonts
+    ImoFontStyleDto* m_pMusicFont = nullptr;
+    ImoFontStyleDto* m_pWordFont = nullptr;
+    std::map<int, ImoStyle*> m_lyricStyle;
+    std::map<int, std::string> m_lyricLang;
 
     //inherited values
 //    int m_curStaff;
@@ -299,7 +316,7 @@ protected:
 //    int m_nShowTupletNumber;
 
     //conversion from xml element name to int
-    std::map<std::string, int>	m_NameToEnum;
+    std::map<std::string, int> m_NameToEnum;
 
 public:
     MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc,
@@ -307,7 +324,7 @@ public:
     virtual ~MxlAnalyser();
 
     //access to results
-    ImoObj* analyse_tree(XmlNode* tree, const string& locator);
+    ImoObj* analyse_tree(XmlNode* tree, const std::string& locator);
     ImoObj* analyse_tree_and_get_object(XmlNode* tree);
 
     //analysis
@@ -317,12 +334,12 @@ public:
 
     //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
-    void add_score_part(const string& id, ImoInstrument* pInstrument) {
+    void add_score_part(const std::string& id, ImoInstrument* pInstrument) {
         int iInstr = m_partList.add_score_part(id, pInstrument);
         m_partGroups.add_instrument_to_groups(iInstr);
     }
     void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
-    bool mark_part_as_added(const string& id) {
+    bool mark_part_as_added(const std::string& id) {
         return m_partList.mark_part_as_added(id);
     }
     void check_if_missing_parts() { m_partList.check_if_missing_parts(m_reporter); }
@@ -334,9 +351,9 @@ public:
     void check_if_all_groups_are_closed();
 
     //global info: setters, getters and checkers
-    int set_musicxml_version(const string& version);
+    int set_musicxml_version(const std::string& version);
     inline int get_musicxml_version() { return m_musicxmlVersion; }
-    ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
+    ImoInstrument* get_instrument(const std::string& id) { return m_partList.get_instrument(id); }
     float current_divisions() { return m_divisions; }
     void set_current_divisions(float value) { m_divisions = value; }
     TimeUnits duration_to_time_units(int duration);
@@ -372,9 +389,29 @@ public:
     inline ImoNote* get_last_note() { return m_pLastNote; }
     ImoNote* get_last_note_for(int iStaff);
 
+    //
     void save_arpeggio_data(ImoArpeggioDto* pArpeggioDto);
     ImoArpeggioDto* get_arpeggio_data() { return m_pArpeggioDto; }
     void reset_arpeggio_data();
+
+    //default fonts
+        //music
+    inline ImoFontStyleDto* get_music_font() { return m_pMusicFont; }
+    inline void set_music_font(ImoFontStyleDto* pFont) {
+        delete m_pMusicFont;
+        m_pMusicFont = pFont;
+    }
+        //words
+    inline ImoFontStyleDto* get_word_font() { return m_pWordFont; }
+    inline void set_word_font(ImoFontStyleDto* pFont) {
+        delete m_pWordFont;
+        m_pWordFont = pFont;
+    }
+        //lyric lines
+    ImoStyle* get_lyric_style(int number);
+    void set_lyric_style(int number, ImoStyle* pStyle);
+    std::string get_lyric_language(int number);
+    void set_lyric_language(int number, const std::string& lang);
 
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
@@ -388,23 +425,28 @@ public:
     void save_current_instrument(ImoInstrument* pInstr);
     inline ImoInstrument* get_current_instrument() { return m_pCurInstrument; }
 
+    //access to default staves spacing, for current instrument being analysed
+    void save_default_staff_distance(int iStaff, LUnits distance);
+    LUnits get_default_staff_distance(int iStaff);
+
+
     //access to document being analysed
     inline Document* get_document_being_analysed() { return m_pDoc; }
-    inline const string& get_document_locator() { return m_fileLocator; }
+    inline const std::string& get_document_locator() { return m_fileLocator; }
 
     //access to root ImoDocument
     inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
     inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
     //sound-instruments and midi info management
-    int get_index_for_sound(const string& id);
-    int create_index_for_sound(const string& id);
-    ImoMidiInfo* get_latest_midi_info_for(const string& id);
-    void set_latest_midi_info_for(const string& id, ImoMidiInfo* pMidi);
+    int get_index_for_sound(const std::string& id);
+    int create_index_for_sound(const std::string& id);
+    ImoMidiInfo* get_latest_midi_info_for(const std::string& id);
+    void set_latest_midi_info_for(const std::string& id, ImoMidiInfo* pMidi);
 
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
-    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+    inline void save_current_measure_num(const std::string& num) { m_curMeasureNum = num; }
     inline int get_measures_counter() { return m_measuresCounter; }
 
     //interface for building relations
@@ -463,27 +505,27 @@ public:
     }
 
     //information for reporting errors
-    string get_element_info();
-    inline void save_current_part_id(const string& id) { m_curPartId = id; }
+    std::string get_element_info();
+    inline void save_current_part_id(const std::string& id) { m_curPartId = id; }
     int get_line_number(XmlNode* node);
 
 
-    int name_to_enum(const string& name) const;
-    bool to_integer(const string& text, int* pResult);
+    int name_to_enum(const std::string& name) const;
+    bool to_integer(const std::string& text, int* pResult);
 
 
 protected:
-    MxlElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
+    MxlElementAnalyser* new_analyser(const std::string& name, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };
 
 //defined in WordsMxlAnalyser to simplify unit testing of the regex
-extern int mxl_type_of_repetion_mark(const string& value);
+extern int mxl_type_of_repetion_mark(const std::string& value);
 //defined in EndingMxlAnalyser to simplify unit testing of the regex
-extern bool mxl_is_valid_ending_number(const string& num);
+extern bool mxl_is_valid_ending_number(const std::string& num);
 //defined in EndingMxlAnalyser to simplify unit testing of the regex
-extern void mxl_extract_numbers_from_ending(const string& num, vector<int>* repetitions);
+extern void mxl_extract_numbers_from_ending(const std::string& num, std::vector<int>* repetitions);
 
 
 }   //namespace lomse
