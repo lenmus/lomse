@@ -228,20 +228,6 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// helper struct to store information for a font
-struct FontData
-{
-    std::string family;     //a comma-separated list of font names
-    std::string style;      //can be normal or italic
-    std::string size;       //one of the CSS sizes (xx-small, x-small, small, medium,
-                            //   large, x-large, xx-large) or a numeric point size
-    std::string weight;     //can be normal or bold
-    std::string language;   //language tags, as defined in RFC 3066 (e.g. "en-GB")
-
-    FontData() {}
-};
-
-//---------------------------------------------------------------------------------------
 //MxlAnalyser: responsible for parsing a tree of MusicXML nodes
 //             and building an internal model for it.
 class MxlAnalyser : public Analyser
