@@ -162,14 +162,24 @@ void DocLayouter::assign_paper_size_to(GmoBox* pBox)
 void DocLayouter::add_margins_to_page(GmoBoxDocPage* pPage)
 {
     ImoPageInfo* pInfo = m_pDoc->get_page_info();
-    LUnits top = pInfo->get_top_margin() / m_pDoc->get_page_content_scale();
-    LUnits bottom = pInfo->get_bottom_margin() / m_pDoc->get_page_content_scale();
-    LUnits left = pInfo->get_left_margin() / m_pDoc->get_page_content_scale();
-    LUnits right = pInfo->get_right_margin() / m_pDoc->get_page_content_scale();
+    LUnits top = 0.0f;
+    LUnits bottom = 0.0f;
+    LUnits left = 0.0f;
+    LUnits right = 0.0f;
     if (pPage->get_number() % 2 == 0)
-        left += pInfo->get_binding_margin() / m_pDoc->get_page_content_scale();
+    {
+        top = pInfo->get_top_margin_even() / m_pDoc->get_page_content_scale();
+        bottom = pInfo->get_bottom_margin_even() / m_pDoc->get_page_content_scale();
+        left = pInfo->get_left_margin_even() / m_pDoc->get_page_content_scale();
+        right = pInfo->get_right_margin_even() / m_pDoc->get_page_content_scale();
+    }
     else
-        right += pInfo->get_binding_margin() / m_pDoc->get_page_content_scale();
+    {
+        top = pInfo->get_top_margin_odd() / m_pDoc->get_page_content_scale();
+        bottom = pInfo->get_bottom_margin_odd() / m_pDoc->get_page_content_scale();
+        left = pInfo->get_left_margin_odd() / m_pDoc->get_page_content_scale();
+        right = pInfo->get_right_margin_odd() / m_pDoc->get_page_content_scale();
+    }
 
     m_pageCursor.x = left;
     m_pageCursor.y = top;
@@ -215,7 +225,10 @@ void DocLayouter::fix_document_size()
 
             LUnits height = pBSys->get_size().height + pBSys->get_origin().y;
             ImoPageInfo* pInfo = m_pDoc->get_page_info();
-            height += pInfo->get_bottom_margin() / m_pDoc->get_page_content_scale();
+            if (pPage->get_number() % 2 == 0)
+                height += pInfo->get_bottom_margin_even() / m_pDoc->get_page_content_scale();
+            else
+                height += pInfo->get_bottom_margin_odd() / m_pDoc->get_page_content_scale();
             pPage->set_height(height);
         }
         else

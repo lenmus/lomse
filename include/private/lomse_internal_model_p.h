@@ -3611,11 +3611,17 @@ public:
 class ImoPageInfo : public ImoSimpleObj
 {
 protected:
-    LUnits  m_uLeftMargin;
-    LUnits  m_uRightMargin;
-    LUnits  m_uTopMargin;
-    LUnits  m_uBottomMargin;
-    LUnits  m_uBindingMargin;
+    //odd pages
+    LUnits  m_uLeftMarginOdd;
+    LUnits  m_uRightMarginOdd;
+    LUnits  m_uTopMarginOdd;
+    LUnits  m_uBottomMarginOdd;
+    //even pages
+    LUnits  m_uLeftMarginEven;
+    LUnits  m_uRightMarginEven;
+    LUnits  m_uTopMarginEven;
+    LUnits  m_uBottomMarginEven;
+    //common
     USize   m_uPageSize;
     bool    m_fPortrait;
 
@@ -3627,27 +3633,37 @@ protected:
 public:
     virtual ~ImoPageInfo() {}
 
-    //getters
-    inline LUnits get_left_margin() { return m_uLeftMargin; }
-    inline LUnits get_right_margin() { return m_uRightMargin; }
-    inline LUnits get_top_margin() { return m_uTopMargin; }
-    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
-    inline LUnits get_binding_margin() { return m_uBindingMargin; }
-    inline bool is_portrait() { return m_fPortrait; }
+    //margins, odd pages
+    inline LUnits get_left_margin_odd() { return m_uLeftMarginOdd; }
+    inline LUnits get_right_margin_odd() { return m_uRightMarginOdd; }
+    inline LUnits get_top_margin_odd() { return m_uTopMarginOdd; }
+    inline LUnits get_bottom_margin_odd() { return m_uBottomMarginOdd; }
+    inline void set_left_margin_odd(LUnits value) { m_uLeftMarginOdd = value; }
+    inline void set_right_margin_odd(LUnits value) { m_uRightMarginOdd = value; }
+    inline void set_top_margin_odd(LUnits value) { m_uTopMarginOdd = value; }
+    inline void set_bottom_margin_odd(LUnits value) { m_uBottomMarginOdd = value; }
+
+    //margins, even pages
+    inline LUnits get_left_margin_even() { return m_uLeftMarginEven; }
+    inline LUnits get_right_margin_even() { return m_uRightMarginEven; }
+    inline LUnits get_top_margin_even() { return m_uTopMarginEven; }
+    inline LUnits get_bottom_margin_even() { return m_uBottomMarginEven; }
+    inline void set_left_margin_even(LUnits value) { m_uLeftMarginEven = value; }
+    inline void set_right_margin_even(LUnits value) { m_uRightMarginEven = value; }
+    inline void set_top_margin_even(LUnits value) { m_uTopMarginEven = value; }
+    inline void set_bottom_margin_even(LUnits value) { m_uBottomMarginEven = value; }
+
+    //page size
     inline USize get_page_size() { return m_uPageSize; }
     inline LUnits get_page_width() { return m_uPageSize.width; }
     inline LUnits get_page_height() { return m_uPageSize.height; }
-
-    //setters
-    inline void set_left_margin(LUnits value) { m_uLeftMargin = value; }
-    inline void set_right_margin(LUnits value) { m_uRightMargin = value; }
-    inline void set_top_margin(LUnits value) { m_uTopMargin = value; }
-    inline void set_bottom_margin(LUnits value) { m_uBottomMargin = value; }
-    inline void set_binding_margin(LUnits value) { m_uBindingMargin = value; }
-    inline void set_portrait(bool value) { m_fPortrait = value; }
     inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
     inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
     inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
+
+    //page orientation
+    inline bool is_portrait() { return m_fPortrait; }
+    inline void set_portrait(bool value) { m_fPortrait = value; }
 };
 
 
@@ -5102,6 +5118,9 @@ public:
     inline void set_instr_id(const std::string& id) { m_partId = id; }
     inline void set_last_measure_info(TypeMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
 
+    //to change default settings at creation time (MusicXML importer)
+    void set_staff_margin(int iStaff, LUnits distance);
+
         //layout options
 
     /// Valid values for defining the policy to layout barlines.
@@ -5909,48 +5928,18 @@ public:
     virtual ~ImoSystemInfo() {}
 
     //getters
-    inline bool is_first()
-    {
-        return m_fFirst;
-    }
-    inline LUnits get_left_margin()
-    {
-        return m_leftMargin;
-    }
-    inline LUnits get_right_margin()
-    {
-        return m_rightMargin;
-    }
-    inline LUnits get_system_distance()
-    {
-        return m_systemDistance;
-    }
-    inline LUnits get_top_system_distance()
-    {
-        return m_topSystemDistance;
-    }
+    inline bool is_first() { return m_fFirst; }
+    inline LUnits get_left_margin() { return m_leftMargin; }
+    inline LUnits get_right_margin() { return m_rightMargin; }
+    inline LUnits get_system_distance() { return m_systemDistance; }
+    inline LUnits get_top_system_distance() { return m_topSystemDistance; }
 
     //setters
-    inline void set_first(bool fValue)
-    {
-        m_fFirst = fValue;
-    }
-    inline void set_left_margin(LUnits rValue)
-    {
-        m_leftMargin = rValue;
-    }
-    inline void set_right_margin(LUnits rValue)
-    {
-        m_rightMargin = rValue;
-    }
-    inline void set_system_distance(LUnits rValue)
-    {
-        m_systemDistance = rValue;
-    }
-    inline void set_top_system_distance(LUnits rValue)
-    {
-        m_topSystemDistance = rValue;
-    }
+    inline void set_first(bool fValue) { m_fFirst = fValue; }
+    inline void set_left_margin(LUnits rValue) { m_leftMargin = rValue; }
+    inline void set_right_margin(LUnits rValue) { m_rightMargin = rValue; }
+    inline void set_system_distance(LUnits rValue) { m_systemDistance = rValue; }
+    inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -5960,9 +5949,9 @@ protected:
     int             m_version;
     ColStaffObjs*   m_pColStaffObjs;
     SoundEventsTable* m_pMidiTable;
+    float           m_scaling;              //global scaling tenths -> LUnits
     ImoSystemInfo   m_systemInfoFirst;
     ImoSystemInfo   m_systemInfoOther;
-    ImoPageInfo     m_pageInfo;
     std::list<ImoScoreTitle*> m_titles;     //titles are added as children nodes. This list is
                                             //kept for quick access. Do not delete in destructor.
     std::map<string, ImoStyle*> m_nameToStyle;
@@ -5984,6 +5973,8 @@ public:
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
+    void set_global_scaling(float millimeters, float tenths);
+    inline LUnits tenths_to_logical(Tenths value) { return m_scaling * value; }
 
     //required by Visitable parent class
     void accept_visitor(BaseVisitor& v) override;
@@ -6013,22 +6004,14 @@ public:
 
     //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
-    inline ImoSystemInfo* get_first_system_info() { return &m_systemInfoFirst;
-    }
-    inline ImoSystemInfo* get_other_system_info() { return &m_systemInfoOther;
-    }
-    void add_page_info(ImoPageInfo* pPI);
-    inline ImoPageInfo* get_page_info() { return &m_pageInfo;
-    }
+    inline ImoSystemInfo* get_first_system_info() { return &m_systemInfoFirst; }
+    inline ImoSystemInfo* get_other_system_info() { return &m_systemInfoOther; }
     bool has_default_values(ImoSystemInfo* pInfo);
 
 
     //titles
     void add_title(ImoScoreTitle* pTitle);
-    inline std::list<ImoScoreTitle*>& get_titles()
-    {
-        return m_titles;
-    }
+    inline std::list<ImoScoreTitle*>& get_titles() { return m_titles; }
 
     //styles
     void add_style(ImoStyle* pStyle);
@@ -6294,44 +6277,20 @@ public:
          };
 
     //staff number
-    inline int get_staff_number()
-    {
-        return m_numStaff;
-    }
-    inline void set_staff_number(int num)
-    {
-        m_numStaff = num;
-    }
+    inline int get_staff_number() { return m_numStaff; }
+    inline void set_staff_number(int num) { m_numStaff = num; }
 
     //staff type
-    inline int get_staff_type()
-    {
-        return m_staffType;
-    }
-    inline void set_staff_type(int type)
-    {
-        m_staffType = type;
-    }
+    inline int get_staff_type() { return m_staffType; }
+    inline void set_staff_type(int type) { m_staffType = type; }
 
     //margins
-    inline LUnits get_staff_margin()
-    {
-        return m_uMarging;
-    }
-    inline void set_staff_margin(LUnits uSpace)
-    {
-        m_uMarging = uSpace;
-    }
+    inline LUnits get_staff_margin() { return m_uMarging; }
+    inline void set_staff_margin(LUnits uSpace) { m_uMarging = uSpace; }
 
     //spacing and size
-    inline LUnits get_line_spacing()
-    {
-        return m_uSpacing;
-    }
-    inline void set_line_spacing(LUnits uSpacing)
-    {
-        m_uSpacing = uSpacing;
-    }
+    inline LUnits get_line_spacing() { return m_uSpacing; }
+    inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
     LUnits get_height()
     {
         if (m_nNumLines > 1)
@@ -6341,31 +6300,16 @@ public:
     }
 
     //lines
-    inline LUnits get_line_thickness()
-    {
-        return m_uLineThickness;
-    }
-    inline void set_line_thickness(LUnits uTickness)
-    {
-        m_uLineThickness = uTickness;
-    }
-    inline int get_num_lines()
-    {
-        return m_nNumLines;
-    }
-    inline void set_num_lines(int nLines)
-    {
-        m_nNumLines = nLines;
-    }
+    inline LUnits get_line_thickness() { return m_uLineThickness; }
+    inline void set_line_thickness(LUnits uTickness) { m_uLineThickness = uTickness; }
+    inline int get_num_lines() { return m_nNumLines; }
+    inline void set_num_lines(int nLines) { m_nNumLines = nLines; }
 
 protected:
     friend class MxlAnalyser;
     friend class LdpAnalyser;
     friend class MnxAnalyser;
-    inline void add_space_for_lyrics(LUnits space)
-    {
-        m_uMarging += space;
-    }
+    inline void add_space_for_lyrics(LUnits space) { m_uMarging += space; }
 
 };
 
@@ -7115,86 +7059,29 @@ public:
     virtual ~ImoLyric();
 
     //getters
-    inline int get_number()
-    {
-        return m_number;
-    }
-    inline int get_placement()
-    {
-        return m_placement;
-    }
-    inline bool is_laughing()
-    {
-        return m_fLaughing;
-    }
-    inline bool is_humming()
-    {
-        return m_fHumming;
-    }
-    inline bool is_end_line()
-    {
-        return m_fEndLine;
-    }
-    inline bool is_end_paragraph()
-    {
-        return m_fEndParagraph;
-    }
-    inline bool has_hyphenation()
-    {
-        return m_fHyphenation;
-    }
-    inline ImoLyric* get_prev_lyric()
-    {
-        return static_cast<ImoLyric*>(m_prevARO);
-    }
-    inline ImoLyric* get_next_lyric()
-    {
-        return static_cast<ImoLyric*>(m_nextARO);
-    }
+    inline int get_number() { return m_number; }
+    inline int get_placement() { return m_placement; }
+    inline bool is_laughing() { return m_fLaughing; }
+    inline bool is_humming() { return m_fHumming; }
+    inline bool is_end_line() { return m_fEndLine; }
+    inline bool is_end_paragraph() { return m_fEndParagraph; }
+    inline bool has_hyphenation() { return m_fHyphenation; }
+    inline ImoLyric* get_prev_lyric() { return static_cast<ImoLyric*>(m_prevARO); }
+    inline ImoLyric* get_next_lyric() { return static_cast<ImoLyric*>(m_nextARO); }
 
     //setters
-    inline void set_number(int number)
-    {
-        m_number = number;
-    }
-    inline void set_placement(int placement)
-    {
-        m_placement = placement;
-    }
-    inline void set_laughing(bool value)
-    {
-        m_fLaughing = value;
-    }
-    inline void set_humming(bool value)
-    {
-        m_fHumming = value;
-    }
-    inline void set_end_line(bool value)
-    {
-        m_fEndLine = value;
-    }
-    inline void set_end_paragraph(bool value)
-    {
-        m_fEndParagraph = value;
-    }
-    inline void set_melisma(bool value)
-    {
-        m_fMelisma = value;
-    }
-    inline void set_hyphenation(bool value)
-    {
-        m_fHyphenation = value;
-    }
+    inline void set_number(int number) { m_number = number; }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_laughing(bool value) { m_fLaughing = value; }
+    inline void set_humming(bool value) { m_fHumming = value; }
+    inline void set_end_line(bool value) { m_fEndLine = value; }
+    inline void set_end_paragraph(bool value) { m_fEndParagraph = value; }
+    inline void set_melisma(bool value) { m_fMelisma = value; }
+    inline void set_hyphenation(bool value) { m_fHyphenation = value; }
 
     //information
-    inline int get_num_text_items()
-    {
-        return m_numTextItems;
-    }
-    inline bool has_melisma()
-    {
-        return m_fMelisma;
-    }
+    inline int get_num_text_items() { return m_numTextItems; }
+    inline bool has_melisma() { return m_fMelisma; }
 
     //data
     ImoLyricsTextInfo* get_text_item(int i);
@@ -7208,14 +7095,8 @@ protected:
     friend class MxlAnalyser;
     friend class MnxAnalyser;
     void add_text_item(ImoLyricsTextInfo* pText);
-    void link_to_next_lyric(ImoLyric* pNext)
-    {
-        link_to_next_ARO(pNext);
-    }
-    void set_prev_lyric(ImoLyric* pPrev)
-    {
-        set_prev_ARO(pPrev);
-    }
+    void link_to_next_lyric(ImoLyric* pNext) { link_to_next_ARO(pNext); }
+    void set_prev_lyric(ImoLyric* pPrev) { set_prev_ARO(pPrev); }
 
 };
 
@@ -7244,49 +7125,19 @@ public:
     enum { k_single, k_begin, k_end, k_middle, };
 
     //getters
-    inline int get_syllable_type()
-    {
-        return m_syllableType;
-    }
-    inline std::string& get_syllable_text()
-    {
-        return m_text.get_text();
-    }
-    inline std::string& get_syllable_language()
-    {
-        return m_text.get_language();
-    }
+    inline int get_syllable_type() { return m_syllableType; }
+    inline std::string& get_syllable_text() { return m_text.get_text(); }
+    inline std::string& get_syllable_language() { return m_text.get_language(); }
     ImoStyle* get_syllable_style();
-    inline bool has_elision()
-    {
-        return !m_elision.empty();
-    }
-    inline std::string& get_elision_text()
-    {
-        return m_elision;
-    }
+    inline bool has_elision() { return !m_elision.empty(); }
+    inline std::string& get_elision_text() { return m_elision; }
 
     //setters
-    inline void set_syllable_type(int value)
-    {
-        m_syllableType = value;
-    }
-    inline void set_syllable_text(const std::string& text)
-    {
-        m_text.set_text(text);
-    }
-    inline void set_syllable_style(ImoStyle* pStyle)
-    {
-        m_text.set_style(pStyle);
-    }
-    inline void set_syllable_language(const std::string& language)
-    {
-        m_text.set_language(language);
-    }
-    inline void set_elision_text(const std::string& text)
-    {
-        m_elision = text;
-    }
+    inline void set_syllable_type(int value) { m_syllableType = value; }
+    inline void set_syllable_text(const std::string& text) { m_text.set_text(text); }
+    inline void set_syllable_style(ImoStyle* pStyle) { m_text.set_style(pStyle); }
+    inline void set_syllable_language(const std::string& language) { m_text.set_language(language); }
+    inline void set_elision_text(const std::string& text) { m_elision = text; }
 
 };
 

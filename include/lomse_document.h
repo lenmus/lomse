@@ -88,18 +88,29 @@ public:
     float page_content_scale() const;
     void set_page_content_scale(float scale);
 
-    //Document page size
-    LUnits page_left_margin() const;
-    LUnits page_right_margin() const;
-    LUnits page_top_margin() const;
-    LUnits page_bottom_margin() const;
+    //Document page size and margins
+        //odd pages
+    LUnits page_left_margin_odd() const;
+    LUnits page_right_margin_odd() const;
+    LUnits page_top_margin_odd() const;
+    LUnits page_bottom_margin_odd() const;
+    void set_page_left_margin_odd(LUnits value);
+    void set_page_right_margin_odd(LUnits value);
+    void set_page_top_margin_odd(LUnits value);
+    void set_page_bottom_margin_odd(LUnits value);
+        //even pages
+    LUnits page_left_margin_even() const;
+    LUnits page_right_margin_even() const;
+    LUnits page_top_margin_even() const;
+    LUnits page_bottom_margin_even() const;
+    void set_page_left_margin_even(LUnits value);
+    void set_page_right_margin_even(LUnits value);
+    void set_page_top_margin_even(LUnits value);
+    void set_page_bottom_margin_even(LUnits value);
+
     USize page_size() const;
     LUnits page_width() const;
     LUnits page_height() const;
-    void set_page_left_margin(LUnits value);
-    void set_page_right_margin(LUnits value);
-    void set_page_top_margin(LUnits value);
-    void set_page_bottom_margin(LUnits value);
     void set_page_size(USize uPageSize);
     void set_page_width(LUnits value);
     void set_page_height(LUnits value);

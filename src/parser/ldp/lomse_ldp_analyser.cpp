@@ -4447,25 +4447,38 @@ public:
             //pDto = &dto;
 
         //left
+        LUnits left = 1500.0f;
         if (get_mandatory(k_number))
-            pDto->set_left_margin( get_float_value(2000.0f) );
+            left = get_float_value(1500.0f);
 
         //top
         if (get_mandatory(k_number))
-            pDto->set_top_margin( get_float_value(2000.0f) );
+        {
+            pDto->set_top_margin_odd( get_float_value(2000.0f) );
+            pDto->set_top_margin_even( get_float_value(2000.0f) );
+        }
 
         //right
+        LUnits right = 1500.0f;
         if (get_mandatory(k_number))
-            pDto->set_right_margin( get_float_value(1500.0f) );
+            right = get_float_value(1500.0f);
 
         //bottom
         if (get_mandatory(k_number))
-            pDto->set_bottom_margin( get_float_value(2000.0f) );
+        {
+            pDto->set_bottom_margin_odd( get_float_value(2000.0f) );
+            pDto->set_bottom_margin_even( get_float_value(2000.0f) );
+        }
 
         //binding
+        LUnits binding = 0.0f;
         if (get_mandatory(k_number))
-            pDto->set_binding_margin( get_float_value(0.0f) );
+            binding = get_float_value(0.0f);
 
+        pDto->set_left_margin_odd(left + binding);
+        pDto->set_left_margin_even(left);
+        pDto->set_right_margin_odd(right);
+        pDto->set_right_margin_even(right + binding);
     }
 
 };

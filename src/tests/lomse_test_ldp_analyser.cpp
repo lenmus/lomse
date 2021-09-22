@@ -8437,46 +8437,14 @@ SUITE(LdpAnalyserTest)
         ImoPageInfo* pInfo = static_cast<ImoPageInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->is_page_info() == true );
-        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
-        CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
-        CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
-        CHECK( pInfo && pInfo->is_portrait() == false );
-
-        delete tree->get_root();
-        // coverity[check_after_deref]
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_PageLayout_AddedToScore)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(score (vers 1.6)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(instrument (musicData)))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-
-        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
-        CHECK( pScore != nullptr );
-        ImoPageInfo* pInfo = pScore->get_page_info();
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo && pInfo->is_page_info() == true );
-        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
+        CHECK( pInfo && pInfo->get_left_margin_odd() == 5000.0f );
+        CHECK( pInfo && pInfo->get_top_margin_odd() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin_odd() == 3000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin_odd() == 2500.0f );
+        CHECK( pInfo && pInfo->get_left_margin_even() == 1000.0f );
+        CHECK( pInfo && pInfo->get_top_margin_even() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin_even() == 7000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin_even() == 2500.0f );
         CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
         CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
         CHECK( pInfo && pInfo->is_portrait() == false );
@@ -8507,11 +8475,14 @@ SUITE(LdpAnalyserTest)
         ImoPageInfo* pInfo = pDoc->get_page_info();
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->is_page_info() == true );
-        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
+        CHECK( pInfo && pInfo->get_left_margin_odd() == 5000.0f );
+        CHECK( pInfo && pInfo->get_top_margin_odd() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin_odd() == 3000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin_odd() == 2500.0f );
+        CHECK( pInfo && pInfo->get_left_margin_even() == 1000.0f );
+        CHECK( pInfo && pInfo->get_top_margin_even() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin_even() == 7000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin_even() == 2500.0f );
         CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
         CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
         CHECK( pInfo && pInfo->is_portrait() == false );
