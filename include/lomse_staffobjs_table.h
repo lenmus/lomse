@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -373,6 +373,7 @@ public:
         : ColStaffObjsBuilderEngine(pScore)
         , m_rCurTime(0.0)
         , m_rCurAlignTime(0.0)
+        , m_pLastBarline(nullptr)
     {
     }
     ~ColStaffObjsBuilderEngine1x() override {}
@@ -380,6 +381,7 @@ public:
 private:
     TimeUnits   m_rCurTime;
     TimeUnits   m_rCurAlignTime;
+    ImoBarline* m_pLastBarline;
 
     //overrides for base class ColStaffObjsBuilderEngine
     void initializations() override;

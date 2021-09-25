@@ -127,6 +127,7 @@ public:
     ColStaffObjsEntry* get_clef_entry_for_instr_staff(int iInstr, int iStaff);
     ColStaffObjsEntry* get_key_entry_for_instr_staff(int iInstr, int iStaff);
     ColStaffObjsEntry* get_time_entry_for_instrument(int iInstr);
+    ColStaffObjsEntry* get_prolog_time_entry_for_instrument(int iInstr);
     std::vector<int> get_applicable_clefs_for_instrument(int iInstr);
     inline ImoBarline* get_previous_barline() { return m_pLastBarline; }
 

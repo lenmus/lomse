@@ -487,13 +487,18 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
         LUnits xPos = xStartPos;
         m_pagePos.y = pInstrEngrv->get_top_line_of_staff(iStaff);
         int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
+
         ColStaffObjsEntry* pClefEntry =
             m_pSpAlgorithm->get_prolog_clef(m_iFirstCol, idxStaff);
-        ColStaffObjsEntry* pKeyEntry =
-            m_pSpAlgorithm->get_prolog_key(m_iFirstCol, idxStaff);
         ImoClef* pClef = pClefEntry ? static_cast<ImoClef*>(pClefEntry->imo_object())
                                     : nullptr;
         int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
+
+        ColStaffObjsEntry* pKeyEntry =
+            m_pSpAlgorithm->get_prolog_key(m_iFirstCol, idxStaff);
+
+        ColStaffObjsEntry* pTimeEntry =
+            m_pSpAlgorithm->get_prolog_time(m_iFirstCol, idxStaff);
 
         //add clef shape
         if (pClefEntry)
@@ -514,13 +519,33 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
         //add key signature shape
         if (pKeyEntry)
         {
-            ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pKeyEntry->imo_object() );
+            ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pKeyEntry->imo_object() );
             if (pKey && pKey->is_visible())
             {
-                xPos += m_pScoreMeter->tenths_to_logical(LOMSE_PROLOG_GAP_BEORE_KEY, iInstr, iStaff);
+                xPos += m_pScoreMeter->tenths_to_logical(LOMSE_PROLOG_GAP_BEFORE_KEY, iInstr, iStaff);
+                m_pagePos.x = xPos;
+                if (pKey->get_fifths() != 0)
+                {
+                    GmoShape* pShape =
+                        m_pShapesCreator->create_staffobj_shape(pKey, iInstr, iStaff,
+                                                                m_pagePos, clefType);
+                    pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
+                    m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
+                    xPos += pShape->get_width();
+                }
+            }
+        }
+
+        //add time signature shape if it changed at end of previous system
+        if (pTimeEntry)
+        {
+            ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>( pTimeEntry->imo_object() );
+            if (pTime && pTime->is_visible())
+            {
+                xPos += m_pScoreMeter->tenths_to_logical(LOMSE_PROLOG_GAP_BEFORE_TIME, iInstr, iStaff);
                 m_pagePos.x = xPos;
                 GmoShape* pShape =
-                    m_pShapesCreator->create_staffobj_shape(pKey, iInstr, iStaff,
+                    m_pShapesCreator->create_staffobj_shape(pTime, iInstr, iStaff,
                                                             m_pagePos, clefType);
                 pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                 m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));

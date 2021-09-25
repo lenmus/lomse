@@ -820,12 +820,14 @@ void ColStaffObjsBuilderEngine1x::create_entries_for_instrument(int nInstr)
 
     ImoObj::children_iterator it = pMusicData->begin();
     reset_counters();
+    m_pLastBarline = nullptr;
     while(it != pMusicData->end())
     {
         if ((*it)->is_go_back_fwd())
         {
             ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>(*it);
             update_time_counter(pGBF);
+            m_pLastBarline = nullptr;
             ++it;
 
             //delete_node(pGBF, pMusicData);
@@ -834,7 +836,10 @@ void ColStaffObjsBuilderEngine1x::create_entries_for_instrument(int nInstr)
         }
         else if ((*it)->is_key_signature() || (*it)->is_time_signature())
         {
+            if (m_pLastBarline)
+                m_pLastBarline->set_tk_change();
             add_entries_for_key_or_time_signature(*it, nInstr);
+            m_pLastBarline = nullptr;
             ++it;
         }
         else
@@ -842,6 +847,8 @@ void ColStaffObjsBuilderEngine1x::create_entries_for_instrument(int nInstr)
             ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
             add_entry_for_staffobj(pSO, nInstr);
             update_measure(pSO);
+            m_pLastBarline = ((*it)->is_barline() ? static_cast<ImoBarline*>(*it)
+                                                  : nullptr);
             ++it;
         }
     }

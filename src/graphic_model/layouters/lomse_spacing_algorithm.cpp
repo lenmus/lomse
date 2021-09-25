@@ -167,10 +167,10 @@ GmoBoxSlice* SpAlgColumn::get_slice_box(int iCol)
 //---------------------------------------------------------------------------------------
 void SpAlgColumn::save_context(int iCol, int iInstr, int iStaff,
                                ColStaffObjsEntry* pClefEntry,
-                               ColStaffObjsEntry* pKeyEntry)
-
+                               ColStaffObjsEntry* pKeyEntry,
+                               ColStaffObjsEntry* pTimeEntry)
 {
-    m_colsData[iCol]->save_context(iInstr, iStaff, pClefEntry, pKeyEntry);
+    m_colsData[iCol]->save_context(iInstr, iStaff, pClefEntry, pKeyEntry, pTimeEntry);
 }
 
 //---------------------------------------------------------------------------------------
@@ -183,6 +183,12 @@ ColStaffObjsEntry* SpAlgColumn::get_prolog_clef(int iCol, ShapeId idx)
 ColStaffObjsEntry* SpAlgColumn::get_prolog_key(int iCol, ShapeId idx)
 {
     return m_colsData[iCol]->get_prolog_key(idx);
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsEntry* SpAlgColumn::get_prolog_time(int iCol, ShapeId idx)
+{
+    return m_colsData[iCol]->get_prolog_time(idx);
 }
 
 //---------------------------------------------------------------------------------------
@@ -479,7 +485,11 @@ void ColumnsBuilder::find_and_save_context_info_for_this_column()
                 m_pSysCursor->get_clef_entry_for_instr_staff(iInstr, iStaff);
             ColStaffObjsEntry* pKeyEntry =
                 m_pSysCursor->get_key_entry_for_instr_staff(iInstr, iStaff);
-            m_pSpAlgorithm->save_context(m_iColumn, iInstr, iStaff, pClefEntry, pKeyEntry);
+            ColStaffObjsEntry* pTimeEntry =
+                m_pSysCursor->get_prolog_time_entry_for_instrument(iInstr);
+
+            m_pSpAlgorithm->save_context(m_iColumn, iInstr, iStaff,
+                                         pClefEntry, pKeyEntry, pTimeEntry);
         }
     }
 }
@@ -658,8 +668,8 @@ ColumnData::~ColumnData()
 void ColumnData::reserve_space_for_prolog_clefs_keys(int numStaves)
 {
     m_prologClefs.assign(numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
-
     m_prologKeys.assign(numStaves, (ColStaffObjsEntry*)nullptr);
+    m_prologTimes.assign(numStaves, (ColStaffObjsEntry*)nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -727,11 +737,13 @@ void ColumnData::set_slice_final_position(LUnits left, LUnits top)
 
 //---------------------------------------------------------------------------------------
 void ColumnData::save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
-                                  ColStaffObjsEntry* pKeyEntry)
+                                  ColStaffObjsEntry* pKeyEntry,
+                                  ColStaffObjsEntry* pTimeEntry)
 {
     int idx = m_pScoreMeter->staff_index(iInstr, iStaff);
     m_prologClefs[idx] = pClefEntry;
     m_prologKeys[idx] = pKeyEntry;
+    m_prologTimes[idx] = pTimeEntry;
 }
 
 

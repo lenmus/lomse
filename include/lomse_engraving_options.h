@@ -94,7 +94,7 @@ namespace lomse
 #define LOMSE_MIN_SPACE_BEFORE_BARLINE  10.0f
     //prolog (opening measures) [Stone80, p.44]
 #define LOMSE_SPACE_BEFORE_PROLOG        7.5f
-#define LOMSE_PROLOG_GAP_BEORE_KEY      10.0f
+#define LOMSE_PROLOG_GAP_BEFORE_KEY     10.0f
 #define LOMSE_PROLOG_GAP_BEFORE_TIME    10.0f
 #define LOMSE_SPACE_AFTER_PROLOG        15.0f
     //staves/systems distances

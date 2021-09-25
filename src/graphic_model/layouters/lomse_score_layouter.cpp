@@ -924,7 +924,6 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
 
     determine_measure_mean_time(pSysCursor);
     determine_initial_break_mode(pSysCursor);
-
 }
 
 //---------------------------------------------------------------------------------------
@@ -934,7 +933,7 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
     bool fBreak = false;
 
     //break at common barlines for all instruments
-    if (!pSO->is_barline()
+    if (!pSO->is_barline() && !pSO->is_key_signature() && !pSO->is_time_signature()
         && m_consecutiveBarlines > 0
         && m_consecutiveBarlines >= m_numInstrWithTS
        )
@@ -1000,7 +999,7 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
                 m_breakMode = k_barlines;
         }
     }
-    else
+    else if (!pSO->is_key_signature())
         m_consecutiveBarlines = 0;
 
     //if suitable point, save break time and clear barlines count

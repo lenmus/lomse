@@ -989,11 +989,12 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
         R *= 2.0f;
     }
 
-    //increase penalty for columns not ended in barline
-    if (!m_columns[iLastCol]->all_instr_have_barline())
+    //increase penalty for columns not ended in barline, except when they end in key
+    //or time signature after the barline
+    if (!m_columns[iLastCol]->all_instr_have_barline_TS_or_KS())
     {
         R *= 4.0f;
-        if (!m_columns[iLastCol]->some_instr_have_barline())
+        if (!m_columns[iLastCol]->some_instr_have_barline_TS_or_KS())
             R *= 4.0f;
     }
     //m_penalty = barlines == 0 ? 0.4f : (barlines < lines ? 0.6f : 1.0f);
@@ -1173,10 +1174,22 @@ LUnits TimeSlice::spacing_function(TimeUnits d, LUnits uSmin, float alpha, TimeU
 //---------------------------------------------------------------------------------------
 int TimeSlice::collect_barlines_information(int numInstruments)
 {
-    int info = 0;
+    //When any instrument finishes in KS or TS, the last Slice is a
+    //TimeSliceNonTimed and barlines are not accesible. As a consequence this method
+    //is assuming that when the column ends in a TimeSliceNonTimed and previous slice
+    //is a TimeSliceBarlines, all instruments not including objects in the
+    //TimeSliceNonTimed have barline. This assumption seems no dangerous but this notice
+    //is here just in case.
+    //TODO: The fix would be to check that previous slice TimeSliceBarlines has the
+    //missing barlines.
+    if (m_type != TimeSlice::k_barline && m_type != TimeSlice::k_non_timed)
+        return 0;   //neither barlines, key signatures and time signatures
 
-    if (m_type != TimeSlice::k_barline)
-        return info;
+    if (m_type == TimeSlice::k_non_timed
+        && (!m_prev || m_prev->get_type() != TimeSlice::k_barline) )
+    {
+        return 0;   //neither barlines, key signatures and time signatures
+    }
 
     //vector: one entry per instrument. Value = barline type or -1 if no barline
     vector<int> barlines;
@@ -1192,20 +1205,32 @@ int TimeSlice::collect_barlines_information(int numInstruments)
             ImoBarline* pBarline = static_cast<ImoBarline*>(pSO);
             barlines[iInstr] = pBarline->get_type();
         }
+        else if (pSO->is_key_signature() || pSO->is_time_signature())
+            barlines[iInstr] = -2;
         else
             barlines[iInstr] = -1;
     }
 
     //summarize information
-    info = k_all_instr_have_barline | k_all_instr_have_final_barline;   //assume this
+    int info = k_all_instr_have_barline
+             | k_all_instr_have_final_barline
+             | k_all_instr_have_barline_TS_or_KS;     //assume this
 
     for (int i=0; i < numInstruments; ++i)
     {
         if (barlines[i] == -1)
+        {
+            info &= ~(k_all_instr_have_barline | k_all_instr_have_final_barline
+                      | k_all_instr_have_barline_TS_or_KS);
+        }
+        else if (barlines[i] == -2)
+        {
             info &= ~(k_all_instr_have_barline | k_all_instr_have_final_barline);
+            info |= k_some_instr_have_barline_TS_or_KS;
+        }
         else
         {
-            info |= k_some_instr_have_barline;
+            info |= (k_some_instr_have_barline | k_some_instr_have_barline_TS_or_KS);
             if (!(barlines[i] == k_barline_end || barlines[i] == k_barline_end_repetition))
                 info &= ~k_all_instr_have_final_barline;
         }
