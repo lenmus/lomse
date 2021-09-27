@@ -965,6 +965,12 @@
           <beat-type>4</beat-type>
           </time>
         </attributes>
+      <direction placement="above">
+        <direction-type>
+          <words relative-x="-60.0" relative-y="20.0">Chg.</words>
+          </direction-type>
+        <staff>1</staff>
+        </direction>
       <note>
         <pitch>
           <step>E</step>

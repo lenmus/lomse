@@ -927,8 +927,8 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
-                                                   int iInstr, int iLine)
+bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, ImoStaffObj* pPrevSO,
+                                                   TimeUnits rTime, int iInstr, int iLine)
 {
     bool fBreak = false;
 
@@ -939,6 +939,14 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
        )
     {
         fBreak = true;
+    }
+
+    //when the score has only barlines, and key/time signatures, force to break
+    //at barlines
+    else if (pSO->is_barline() && m_consecutiveBarlines > 0
+             && m_consecutiveBarlines >= m_numInstrWithTS)
+    {
+        fBreak = !pPrevSO->is_barline();
     }
 
     //in barline mode, change to clear cuts mode when duration exceeded
@@ -983,7 +991,8 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
         for (int i=0; i < m_numInstruments; ++i)
         {
             m_maxMeasureDuration = max(m_maxMeasureDuration, m_measures[i]);
-            m_numInstrWithTS += (m_measures[i] > 0.0f ? 1 : 0);
+            if (m_measures[i] > 0.0f)
+                ++m_numInstrWithTS;
         }
         m_breakMode = k_barlines;
         m_fWasInBarlinesMode = true;

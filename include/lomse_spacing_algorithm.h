@@ -35,7 +35,6 @@
 
 //std
 #include <list>
-using namespace std;
 
 namespace lomse
 {
@@ -417,7 +416,7 @@ protected:
     std::vector<ColumnData*>& m_colsData;
 
 public:
-    ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& colsData,
+    ColumnsBuilder(ScoreMeter* pScoreMeter, std::vector<ColumnData*>& colsData,
                    ScoreLayouter* pScoreLyt, ImoScore* pScore,
                    EngraversMap& engravers,
                    ShapesCreator* pShapesCreator,
@@ -460,8 +459,9 @@ protected:
 
     bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime, int iInstr,
                                    int idx);
-    vector<bool> m_fNoSignatures;   //key/time signature not yet found, for each instrument
-    vector<bool> m_fClefFound;      //for each instrument
+    std::vector<bool> m_fClefFound;     //for each instrument
+    std::vector<bool> m_fSignatures;    //key or time signature found, for each instrument
+    std::vector<bool> m_fOther;         //other objects found, for each instrument
 
     inline bool is_first_column()
     {

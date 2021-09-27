@@ -94,8 +94,6 @@ protected:
     //auxiliary, for controlling objects to include in a prolog slice
     TimeUnits    m_lastPrologTime;
     std::vector<bool> m_prologClefs;
-    std::vector<bool> m_prologKeys;
-    std::vector<bool> m_prologTimes;
 
     //data collected for each slice
     TimeUnits   m_maxNoteDur;
@@ -561,10 +559,14 @@ public:
 
 //---------------------------------------------------------------------------------------
 // TimeSliceBarline
-// An slice for barlines
+// An slice for barlines and any key & time signature defined just after the barlines
 class TimeSliceBarline : public TimeSlice
 {
 protected:
+    LUnits m_barlinesWidth = 0.0f;  //maximum width of all barlines
+    LUnits m_keysWidth = 0.0f;      //maximum width of all key signatures + spacing
+    LUnits m_timesWidth = 0.0f;     //maximum width of all time signatures + spacing
+    bool m_fTherAreKTS = false;     //true when there are key or time signatures in this slice
 
 public:
     TimeSliceBarline(ColStaffObjsEntry* pEntry, int column, int iShape);
@@ -578,6 +580,9 @@ public:
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile) override;
     void join_with_previous();
+
+    //specific
+    bool contains_barline_for_instrument(int iInstr);
 
 };
 

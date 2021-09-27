@@ -97,6 +97,10 @@ namespace lomse
 #define LOMSE_PROLOG_GAP_BEFORE_KEY     10.0f
 #define LOMSE_PROLOG_GAP_BEFORE_TIME    10.0f
 #define LOMSE_SPACE_AFTER_PROLOG        15.0f
+    //space fot key/time signatures after barlines
+#define LOMSE_SPACE_BEFORE_KTS_AFTER_BARLINE    10.0f    //after barline, before key or time signature
+#define LOMSE_SPACE_BETWEEN_KTS_AFTER_BARLINE   10.0f    //between key and time signatures after barline
+#define LOMSE_SPACE_AFTER_KTS_AFTER_BARLINE      7.5f    //space after key+time signatures after barline
     //staves/systems distances
 #define LOMSE_MIN_SPACING_STAVES        15.0f   //Min. vertical space between staves
 #define LOMSE_MIN_SPACING_SYSTEMS       30.0f   //Min. vertical space between systems

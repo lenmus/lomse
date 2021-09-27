@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -88,13 +88,15 @@ public:
         while(!soCursor.is_end() )
         {
             ImoStaffObj* pSO = soCursor.get_staffobj();
+            ColStaffObjsEntry* pEntry =  soCursor.prev_entry();
+            ImoStaffObj* pPrevSO = (pEntry ? pEntry->imo_object() : nullptr);
             int iInstr = soCursor.num_instrument();
 //            int iStaff = soCursor.staff();
             int iLine = soCursor.line();
             TimeUnits rTime = soCursor.time();
             //TimeUnits rNextTime = soCursor.next_staffobj_timepos();
 
-            if ( breaker.feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
+            if (breaker.feasible_break_before_this_obj(pSO, pPrevSO, rTime, iInstr, iLine))
                 break;
 
             soCursor.move_next();
@@ -104,10 +106,12 @@ public:
     bool exec_feasible_break_before_this_obj(ColumnBreaker& breaker, StaffObjsCursor& soCursor)
     {
         ImoStaffObj* pSO = soCursor.get_staffobj();
+        ColStaffObjsEntry* pEntry =  soCursor.prev_entry();
+        ImoStaffObj* pPrevSO = (pEntry ? pEntry->imo_object() : nullptr);
         int iInstr = soCursor.num_instrument();
         int iLine = soCursor.line();
         TimeUnits rTime = soCursor.time();
-        return breaker.feasible_break_before_this_obj(pSO, rTime, iInstr, iLine);
+        return breaker.feasible_break_before_this_obj(pSO, pPrevSO, rTime, iInstr, iLine);
     }
 
     inline const char* test_name()
