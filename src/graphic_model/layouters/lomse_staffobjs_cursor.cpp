@@ -258,6 +258,29 @@ ImoKeySignature* StaffObjsCursor::get_key_for_instr_staff(int iInstr, int iStaff
 }
 
 //---------------------------------------------------------------------------------------
+ColStaffObjsEntry* StaffObjsCursor::get_prolog_time_entry_for_instrument(int iInstr)
+{
+    //return entry for time signature only when the time signature has just been defined,
+    //that is, when cursor is pointing just after time entry for this instrument
+
+    ColStaffObjsEntry* pEntry = get_time_entry_for_instrument(iInstr);
+    ColStaffObjsEntry* pPrev = prev_entry();
+    if (pPrev == pEntry)
+        return pEntry;
+
+    //there could be other time signatures for other instruments, so move backwards
+    ColStaffObjsIterator it(pPrev);
+    while (*it && *it != pEntry &&
+           ((*it)->imo_object()->is_time_signature()
+            || (*it)->imo_object()->is_key_signature()) )
+    {
+        --it;
+    }
+
+    return (*it == pEntry ? pEntry : nullptr);
+}
+
+//---------------------------------------------------------------------------------------
 ImoKeySignature* StaffObjsCursor::get_applicable_key()
 {
     if (m_fScoreIsEmpty)

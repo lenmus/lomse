@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -3688,32 +3688,34 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-/** %ImoBarline represents a barline for an instrument.
+/** %ImoBarline represents a barline for an instrument. Each instrument/staff has its own
+    barlines. System barlines do not explicitly exist, they are just implicit, as a
+    consequence of aligning the barlines in all instruments.
 */
 class ImoBarline : public ImoStaffObj
 {
 protected:
-    int m_barlineType;
-    bool m_fMiddle;
+    int m_barlineType;  //from enum EBarline
+    bool m_fMiddle;     //true when it is in the middle of a measure (e.g.: dotted, dashed)
+    bool m_fTKChange;   //true if Time and/or Key signature change after this barline
 
+    int m_times;    //for k_barline_end_repetition and k_barline_double_repetition,
+                    //indicates the number of times the repeated section must be
+                    //played. If there are volta brackets m_times is updated with
+                    //the number of times implied by the volta bracket.
 
-    int m_times;        //for k_barline_end_repetition and k_barline_double_repetition,
-    //indicates the number of times the repeated section must be
-    //played. If there are volta brackets m_times is updated with
-    //the number of times implied by the volta bracket.
-
-    int m_winged;       //indicates whether the barline has winged extensions above and
-    //below. The k_winged_none value indicates no wings.
+    int m_winged;   //indicates whether the barline has winged extensions above and
+                    //below. The k_winged_none value indicates no wings.
 
     TypeMeasureInfo* m_pMeasureInfo;    //ptr to info for measure ending with this barline.
                                         //nullptr when middle barline
-
 
     friend class ImFactory;
     ImoBarline()
         : ImoStaffObj(k_imo_barline)
         , m_barlineType(k_barline_simple)
         , m_fMiddle(false)
+        , m_fTKChange(false)
         , m_times(0)
         , m_winged(k_wings_none)
         , m_pMeasureInfo(nullptr)
@@ -3729,6 +3731,7 @@ public:
     inline int get_num_repeats() { return m_times; }
     inline int get_winged() { return m_winged; }
     inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+    inline bool tk_change_after() { return m_fTKChange; }
 
 
     //setters
@@ -3746,6 +3749,10 @@ public:
     virtual int get_int_attribute(TIntAttribute attrib) override;
     virtual list<TIntAttribute> get_supported_attributes() override;
 
+protected:
+    friend class ColStaffObjsBuilderEngine1x;
+    friend class ColStaffObjsBuilderEngine2x;
+    inline void set_tk_change() { m_fTKChange = true; }
 };
 
 //---------------------------------------------------------------------------------------

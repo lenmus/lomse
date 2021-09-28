@@ -35,7 +35,6 @@
 
 //std
 #include <list>
-using namespace std;
 
 namespace lomse
 {
@@ -69,9 +68,11 @@ class VerticalProfile;
 // Barlines at the end of a column
 enum EColumnBarlinesInfo
 {
-    k_all_instr_have_barline        = 0x01,
-    k_some_instr_have_barline       = 0x02,
-    k_all_instr_have_final_barline  = 0x04,
+    k_all_instr_have_barline            = 0x01,
+    k_some_instr_have_barline           = 0x02,
+    k_all_instr_have_final_barline      = 0x04,
+    k_all_instr_have_barline_TS_or_KS   = 0x08,
+    k_some_instr_have_barline_TS_or_KS  = 0x10,
 };
 
 
@@ -163,6 +164,7 @@ public:
     //access to info
     virtual ColStaffObjsEntry* get_prolog_clef(int iCol, ShapeId idx) = 0;
     virtual ColStaffObjsEntry* get_prolog_key(int iCol, ShapeId idx) = 0;
+    virtual ColStaffObjsEntry* get_prolog_time(int iCol, ShapeId idx) = 0;
 
     //debug and support for unit tests
     virtual void dump_column_data(int iCol, ostream& outStream) = 0;
@@ -196,6 +198,7 @@ protected:
     //applicable prolog at start of this column. On entry per staff
     std::vector<ColStaffObjsEntry*> m_prologClefs;
     std::vector<ColStaffObjsEntry*> m_prologKeys;
+    std::vector<ColStaffObjsEntry*> m_prologTimes;
 
 
 public:
@@ -206,13 +209,14 @@ public:
     inline void use_this_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
     inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
     void save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
-                      ColStaffObjsEntry* pKeyEntry);
+                      ColStaffObjsEntry* pKeyEntry, ColStaffObjsEntry* pTimeEntry);
 
     //access to info
     inline bool has_system_break() { return m_fHasSystemBreak; }
     inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
     inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
     inline ColStaffObjsEntry* get_prolog_key(ShapeId idx) { return m_prologKeys[idx]; }
+    inline ColStaffObjsEntry* get_prolog_time(ShapeId idx) { return m_prologTimes[idx]; }
 
     //boxes and shapes
     void add_shapes_to_boxes(int iCol);
@@ -352,12 +356,14 @@ public:
     ///Returns the number of columns in which the content has been split
     int get_num_columns() override;
 
-    ///save context information (clef, key) for iCol, and access it
+    ///save context information (clef, key, time) for iCol, and access it
     virtual void save_context(int iCol, int iInstr, int iStaff,
                               ColStaffObjsEntry* pClefEntry,
-                              ColStaffObjsEntry* pKeyEntry);
+                              ColStaffObjsEntry* pKeyEntry,
+                              ColStaffObjsEntry* pTimeEntry);
     ColStaffObjsEntry* get_prolog_clef(int iCol, ShapeId idx) override;
     ColStaffObjsEntry* get_prolog_key(int iCol, ShapeId idx) override;
+    ColStaffObjsEntry* get_prolog_time(int iCol, ShapeId idx) override;
 
     ///system break found while collecting content for iCol
     virtual void set_system_break(int iCol, bool value);
@@ -410,7 +416,7 @@ protected:
     std::vector<ColumnData*>& m_colsData;
 
 public:
-    ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& colsData,
+    ColumnsBuilder(ScoreMeter* pScoreMeter, std::vector<ColumnData*>& colsData,
                    ScoreLayouter* pScoreLyt, ImoScore* pScore,
                    EngraversMap& engravers,
                    ShapesCreator* pShapesCreator,
@@ -453,8 +459,9 @@ protected:
 
     bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime, int iInstr,
                                    int idx);
-    vector<bool> m_fNoSignatures;   //key/time signature not yet found, for each instrument
-    vector<bool> m_fClefFound;      //for each instrument
+    std::vector<bool> m_fClefFound;     //for each instrument
+    std::vector<bool> m_fSignatures;    //key or time signature found, for each instrument
+    std::vector<bool> m_fOther;         //other objects found, for each instrument
 
     inline bool is_first_column()
     {

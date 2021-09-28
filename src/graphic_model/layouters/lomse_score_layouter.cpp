@@ -924,22 +924,29 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
 
     determine_measure_mean_time(pSysCursor);
     determine_initial_break_mode(pSysCursor);
-
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
-                                                   int iInstr, int iLine)
+bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, ImoStaffObj* pPrevSO,
+                                                   TimeUnits rTime, int iInstr, int iLine)
 {
     bool fBreak = false;
 
     //break at common barlines for all instruments
-    if (!pSO->is_barline()
+    if (!pSO->is_barline() && !pSO->is_key_signature() && !pSO->is_time_signature()
         && m_consecutiveBarlines > 0
         && m_consecutiveBarlines >= m_numInstrWithTS
        )
     {
         fBreak = true;
+    }
+
+    //when the score has only barlines, and key/time signatures, force to break
+    //at barlines
+    else if (pSO->is_barline() && m_consecutiveBarlines > 0
+             && m_consecutiveBarlines >= m_numInstrWithTS)
+    {
+        fBreak = !pPrevSO->is_barline();
     }
 
     //in barline mode, change to clear cuts mode when duration exceeded
@@ -984,7 +991,8 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
         for (int i=0; i < m_numInstruments; ++i)
         {
             m_maxMeasureDuration = max(m_maxMeasureDuration, m_measures[i]);
-            m_numInstrWithTS += (m_measures[i] > 0.0f ? 1 : 0);
+            if (m_measures[i] > 0.0f)
+                ++m_numInstrWithTS;
         }
         m_breakMode = k_barlines;
         m_fWasInBarlinesMode = true;
@@ -1000,7 +1008,7 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
                 m_breakMode = k_barlines;
         }
     }
-    else
+    else if (!pSO->is_key_signature())
         m_consecutiveBarlines = 0;
 
     //if suitable point, save break time and clear barlines count

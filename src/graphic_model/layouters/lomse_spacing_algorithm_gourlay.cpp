@@ -168,9 +168,6 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
     //include entry in current or new slice
     if (fCreateNewSlice)
     {
-//        dbgLogger << ", Start new slice. m_prevType:" << m_prevType
-//            << ", m_prevTime:" << m_prevTime << ", curTime:" << curTime
-//            << endl;
         //terminate previous slice
         finish_slice(m_pLastEntry, m_numEntries);
 
@@ -210,7 +207,6 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
     }
     else
     {
-//        dbgLogger << ", Use previous slice." << endl;
         if (pSO->is_note_rest())
         {
             m_maxNoteDur = max(m_maxNoteDur, pSO->get_duration());
@@ -235,8 +231,6 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
             int prevSeq = pPrevSlice->get_sequence(iLine);
             if (is_equal_time(prevDuration, pCurEntry->duration()) )
             {
-//                dbgLogger << "Line " << iLine << ". Equal time. prevSeq=" << prevSeq
-//                    << ", curSeq set to 'continue'";
                 //both notes have equal duration. curSeq = continue
                 curSeq = SeqData::k_seq_continue;
                 if (prevSeq == SeqData::k_seq_isolated)
@@ -248,13 +242,9 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
                     //equal time and prev is continue || start || end_start
                     //nothing to fix in pPrevSlice
                 }
-
-//                dbgLogger << ", prevSeq changed to " << prevSeq << endl;
             }
             else
             {
-//                dbgLogger << "Line " << iLine << ". Different time. prevSeq=" << prevSeq
-//                    << ", curSeq set to 'isolated'";
                 //both notes have different duration. curSeq = isolated || end
                 if (prevSeq == SeqData::k_seq_continue)
                     curSeq = SeqData::k_seq_end;
@@ -269,7 +259,6 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
                     ss << "Impossible case: different duration and prevSeq=" << prevSeq;
                     LOMSE_LOG_ERROR(ss.str());
                 }
-//                dbgLogger << ", prevSeq changed to " << prevSeq << endl;
             }
         }
         pCurSlice->save_seq_data(pCurEntry, curSeq);
@@ -300,8 +289,6 @@ int SpAlgGourlay::determine_required_slice_type(ImoStaffObj* pSO, bool fInProlog
 {
     //determine slice type for the new object to include
 
-//    dbgLogger << "include_object(). StaffObj type = " << pSO->get_name()
-//              << ", id=" << pSO->get_id() << endl;
     if (fInProlog)
         return TimeSlice::k_prolog;
     else
@@ -309,8 +296,6 @@ int SpAlgGourlay::determine_required_slice_type(ImoStaffObj* pSO, bool fInProlog
         switch(pSO->get_obj_type())
         {
             case k_imo_clef:
-            case k_imo_key_signature:
-            case k_imo_time_signature:
             case k_imo_direction:
             case k_imo_metronome_mark:
             case k_imo_go_back_fwd:
@@ -331,6 +316,15 @@ int SpAlgGourlay::determine_required_slice_type(ImoStaffObj* pSO, bool fInProlog
             case k_imo_barline:
                 return TimeSlice::k_barline;
 
+            case k_imo_key_signature:
+            case k_imo_time_signature:
+            {
+                if (m_prevType == TimeSlice::k_barline)
+                    return TimeSlice::k_barline;
+                return TimeSlice::k_non_timed;
+            }
+
+
             default:
                 stringstream ss;
                 ss << "Investigate: un-expected staff object. Name= "
@@ -346,7 +340,11 @@ bool SpAlgGourlay::determine_if_new_slice_needed(ColStaffObjsEntry* pCurEntry,
                                                  TimeUnits curTime, int curType,
                                                  ImoStaffObj* pSO)
 {
+    if (!m_pCurSlice)
+        return true;
+
     bool fCreateNewSlice = false;
+
     if (curType != m_prevType || !is_equal_time(m_prevTime, curTime) )
         fCreateNewSlice = true;
     else if (pSO->is_grace_note())
@@ -358,7 +356,7 @@ bool SpAlgGourlay::determine_if_new_slice_needed(ColStaffObjsEntry* pCurEntry,
 
     //avoid re-using current prolog slice if object is not clef, key or time
     //signature or already exists for this staff.
-    if (!fCreateNewSlice && curType == TimeSlice::k_prolog && m_pCurSlice)
+    if (!fCreateNewSlice && curType == TimeSlice::k_prolog)
     {
         if (!accept_for_prolog_slice(pCurEntry))
         {
@@ -367,16 +365,16 @@ bool SpAlgGourlay::determine_if_new_slice_needed(ColStaffObjsEntry* pCurEntry,
         }
     }
 
-    //avoid starting a new prolog slice when non-timed after prolog
-    if (fCreateNewSlice && curType == TimeSlice::k_prolog)
+    //in scores without notes/rests content between barlines, do not reuse the same barline
+    //slice when a new barline in the same instrument (test 00110-all-key-signatures)
+    if (!fCreateNewSlice && curType == TimeSlice::k_barline && pSO->is_barline())
     {
-        if (is_equal_time(m_lastPrologTime, curTime) && m_prevType == TimeSlice::k_non_timed)
-        {
-            fCreateNewSlice = !m_pCurSlice;
-            curType = TimeSlice::k_non_timed;
-        }
+        TimeSliceBarline* pBS = static_cast<TimeSliceBarline*>(m_pCurSlice);
+        int iInstr = pCurEntry->num_instrument();
+        if (pBS->contains_barline_for_instrument(iInstr))
+            fCreateNewSlice = true;
     }
-//    dbgLogger << ", slice type= " << curType;
+
     return fCreateNewSlice;
 }
 
@@ -439,8 +437,6 @@ void SpAlgGourlay::new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColu
     {
         int numStaves = m_pScoreMeter->num_staves();
         m_prologClefs.assign(numStaves, false);
-        m_prologKeys.assign(numStaves, false);
-        m_prologTimes.assign(numStaves, false);
 
         m_lastPrologTime = pEntry->time();
         accept_for_prolog_slice(pEntry);
@@ -461,18 +457,8 @@ bool SpAlgGourlay::accept_for_prolog_slice(ColStaffObjsEntry* pEntry)
         m_prologClefs[iStaff] = true;
         return true;
     }
-    else if (pSO->is_key_signature())
+    else if (pSO->is_key_signature() || pSO->is_time_signature())
     {
-        if (m_prologKeys[iStaff])
-            return false;
-        m_prologKeys[iStaff] = true;
-        return true;
-    }
-    else if (pSO->is_time_signature())
-    {
-        if (m_prologTimes[iStaff])
-            return false;
-        m_prologTimes[iStaff] = true;
         return true;
     }
     else
@@ -989,11 +975,12 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
         R *= 2.0f;
     }
 
-    //increase penalty for columns not ended in barline
-    if (!m_columns[iLastCol]->all_instr_have_barline())
+    //increase penalty for columns not ended in barline, except when they end in key
+    //or time signature after the barline
+    if (!m_columns[iLastCol]->all_instr_have_barline_TS_or_KS())
     {
         R *= 4.0f;
-        if (!m_columns[iLastCol]->some_instr_have_barline())
+        if (!m_columns[iLastCol]->some_instr_have_barline_TS_or_KS())
             R *= 4.0f;
     }
     //m_penalty = barlines == 0 ? 0.4f : (barlines < lines ? 0.6f : 1.0f);
@@ -1173,12 +1160,11 @@ LUnits TimeSlice::spacing_function(TimeUnits d, LUnits uSmin, float alpha, TimeU
 //---------------------------------------------------------------------------------------
 int TimeSlice::collect_barlines_information(int numInstruments)
 {
-    int info = 0;
-
     if (m_type != TimeSlice::k_barline)
-        return info;
+        return 0;
 
-    //vector: one entry per instrument. Value = barline type or -1 if no barline
+    //vector: one entry per instrument
+    //Value = barline type, -2 for KS/TS or -1 if neither barline,KS,TS
     vector<int> barlines;
     barlines.resize(numInstruments);
 
@@ -1192,20 +1178,32 @@ int TimeSlice::collect_barlines_information(int numInstruments)
             ImoBarline* pBarline = static_cast<ImoBarline*>(pSO);
             barlines[iInstr] = pBarline->get_type();
         }
+        else if (pSO->is_key_signature() || pSO->is_time_signature())
+            barlines[iInstr] = -2;
         else
             barlines[iInstr] = -1;
     }
 
     //summarize information
-    info = k_all_instr_have_barline | k_all_instr_have_final_barline;   //assume this
+    int info = k_all_instr_have_barline
+             | k_all_instr_have_final_barline
+             | k_all_instr_have_barline_TS_or_KS;     //assume this
 
     for (int i=0; i < numInstruments; ++i)
     {
         if (barlines[i] == -1)
+        {
+            info &= ~(k_all_instr_have_barline | k_all_instr_have_final_barline
+                      | k_all_instr_have_barline_TS_or_KS);
+        }
+        else if (barlines[i] == -2)
+        {
             info &= ~(k_all_instr_have_barline | k_all_instr_have_final_barline);
+            info |= k_some_instr_have_barline_TS_or_KS;
+        }
         else
         {
-            info |= k_some_instr_have_barline;
+            info |= (k_some_instr_have_barline | k_some_instr_have_barline_TS_or_KS);
             if (!(barlines[i] == k_barline_end || barlines[i] == k_barline_end_repetition))
                 info &= ~k_all_instr_have_final_barline;
         }
@@ -1900,27 +1898,65 @@ void TimeSliceBarline::assign_spacing_values(vector<ShapeData*>& shapes,
 	//assign fixed space at start of this slice and compute pre-stretching
 	//extend (left and right rods)
 
-	//m_dxLeft = 0. Will always be transferred to previous
-    m_dxL = 0.0f;   //barline shape
-    m_dxR = 0.0f;   //=0
+    //initialize widths and other
+    m_barlinesWidth = 0.0f;
+    m_keysWidth = 0.0f;
+    m_timesWidth = 0.0f;
+    m_dxR = 0.0f;   //always 0
+    m_fTherAreKTS = false;
 
     //assign some space before the barline for separation from very small notes
     //and directions
     //[BL2] test 00619. CHECK: some space between both barlines. It is this minimum space
     m_dxLeft = pMeter->tenths_to_logical_max(LOMSE_EXCEPTIONAL_MIN_SPACE
-                                            + LOMSE_MIN_SPACE_BEFORE_BARLINE);
+                                             + LOMSE_MIN_SPACE_BEFORE_BARLINE);
 
-    //loop for computing rods
+    //loop for computing space for objects in each staff
+    ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstShape + m_numEntries;
-    for (int i=m_iFirstShape; i < iMax; ++i)
+    for (int i=m_iFirstShape; i < iMax; ++i, pEntry = pEntry->get_next())
     {
         GmoShape* pShape = shapes[i]->get_shape();
         if (pShape)
         {
-            LUnits xAnchor = pShape->get_anchor_offset();
-            m_dxL = max(m_dxL, pShape->get_width() + xAnchor);
+            if (pEntry->imo_object()->is_barline())
+            {
+                LUnits width = pShape->get_width() + pShape->get_anchor_offset();
+                m_barlinesWidth = max(m_barlinesWidth, width);
+            }
+            else if (pEntry->imo_object()->is_key_signature())
+            {
+                m_keysWidth = max(m_keysWidth, pShape->get_width());
+            }
+            else if (pEntry->imo_object()->is_time_signature())
+            {
+                m_timesWidth = max(m_timesWidth, pShape->get_width());
+            }
         }
     }
+
+    //compute dxL
+    LUnits spaceBefore = pMeter->tenths_to_logical_max(LOMSE_SPACE_BEFORE_KTS_AFTER_BARLINE);
+    LUnits spaceBetween = pMeter->tenths_to_logical_max(LOMSE_SPACE_BETWEEN_KTS_AFTER_BARLINE);
+    LUnits spaceAfter = pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_KTS_AFTER_BARLINE);
+
+    m_dxL = 0.0f;   //barline, key & time signature shapes
+    if (m_keysWidth > 0.0f)
+    {
+        m_fTherAreKTS = true;
+        m_dxL = spaceAfter;
+        m_keysWidth += spaceBefore;
+        if (m_timesWidth > 0.0f)
+            m_timesWidth += spaceBetween;
+    }
+    else if (m_timesWidth > 0.0f)
+    {
+        m_fTherAreKTS = true;
+        m_dxL = spaceAfter;
+        m_timesWidth += spaceBefore;
+    }
+    m_dxL += m_barlinesWidth + m_keysWidth + m_timesWidth;
+
 
     join_with_previous();
 }
@@ -1970,20 +2006,36 @@ void TimeSliceBarline::join_with_previous()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeSliceBarline::move_shapes_to_final_positions(vector<ShapeData*>& shapes, LUnits xPos,
-                                               LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                               ScoreMeter* UNUSED(pMeter),
-                                               VerticalProfile* pVProfile)
+void TimeSliceBarline::move_shapes_to_final_positions(vector<ShapeData*>& shapes,
+                                                      LUnits xPos, LUnits yPos,
+                                                      LUnits* yMin, LUnits* yMax,
+                                                      ScoreMeter* pMeter,
+                                                      VerticalProfile* pVProfile)
 {
+    LUnits spaceBefore = pMeter->tenths_to_logical_max(LOMSE_SPACE_BEFORE_KTS_AFTER_BARLINE);
+
+    ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstShape + m_numEntries;
-    for (int i=m_iFirstShape; i < iMax; ++i)
+    for (int i=m_iFirstShape; i < iMax; ++i, pEntry = pEntry->get_next())
     {
         ShapeData* pData = shapes[i];
         GmoShape* pShape = pData->get_shape();
         if (pShape)
         {
+            LUnits xLeft = xPos + pShape->get_anchor_offset() + m_dxLeft;
+            if (pEntry->imo_object()->is_barline() && !m_fTherAreKTS)
+            {
+                //when only barlines, force barline position to end of systems to
+                //avoid very small shifts in position (visible) due to accumulated
+                //rounding errors
+                xLeft = xPos + m_width - pShape->get_width();
+            }
+            else if (pEntry->imo_object()->is_key_signature())
+                xLeft += spaceBefore + m_barlinesWidth;
+            else if (pEntry->imo_object()->is_time_signature())
+                xLeft += spaceBefore + m_barlinesWidth + m_keysWidth;
+
             //move shape
-            LUnits xLeft = xPos + m_width - pShape->get_width();
             pShape->set_origin_and_notify_observers(xLeft, yPos);
 
             //save info for vertical profile
@@ -1994,6 +2046,19 @@ void TimeSliceBarline::move_shapes_to_final_positions(vector<ShapeData*>& shapes
             *yMin = min(*yMin, pShape->get_top());
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool TimeSliceBarline::contains_barline_for_instrument(int iInstr)
+{
+    ColStaffObjsEntry* pEntry = m_firstEntry;
+    for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())
+    {
+        ImoStaffObj* pSO = pEntry->imo_object();
+        if (pSO->is_barline() && pEntry->num_instrument() == iInstr)
+            return true;
+    }
+    return false;
 }
 
 

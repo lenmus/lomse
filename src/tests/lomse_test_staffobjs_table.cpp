@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -413,7 +413,8 @@ SUITE(ColStaffObjsBuilderTest)
         //@07. R6. Graces in the same timepos must go before note/rest in that timepos
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/grace-notes/222-graces-two-voices.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/222-graces-two-voices.xml"
+        ,
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -2534,6 +2535,58 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_30)
+    {
+        //@30. Time/Key change after barline detected and marked
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/colstaffobjs/30-time-key-change-after-barlines.musicxml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 24 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        ++it; ++it; ++it;   //first barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        ImoBarline* pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == false );
+        ++it; ++it; ++it;   //2nd barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == true );
+        ++it; ++it; ++it;   //3rd barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == false );
+        ++it; ++it;   //4th barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == true );
+        ++it; ++it; ++it;   //5th barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == false );
+        ++it; ++it;   //6th barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == true );
+        ++it; ++it; ++it; ++it;   //7th barline
+        CHECK( (*it)->imo_object()->is_barline() );
+        pBar = static_cast<ImoBarline*>((*it)->imo_object());
+        CHECK( pBar->tk_change_after() == false );
+        ++it; ++it;   //final barline
+        CHECK_ENTRY0(it, 0,    0,      7,  1536,     0, "(barline end)" );
     }
 
 

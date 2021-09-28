@@ -167,10 +167,10 @@ GmoBoxSlice* SpAlgColumn::get_slice_box(int iCol)
 //---------------------------------------------------------------------------------------
 void SpAlgColumn::save_context(int iCol, int iInstr, int iStaff,
                                ColStaffObjsEntry* pClefEntry,
-                               ColStaffObjsEntry* pKeyEntry)
-
+                               ColStaffObjsEntry* pKeyEntry,
+                               ColStaffObjsEntry* pTimeEntry)
 {
-    m_colsData[iCol]->save_context(iInstr, iStaff, pClefEntry, pKeyEntry);
+    m_colsData[iCol]->save_context(iInstr, iStaff, pClefEntry, pKeyEntry, pTimeEntry);
 }
 
 //---------------------------------------------------------------------------------------
@@ -183,6 +183,12 @@ ColStaffObjsEntry* SpAlgColumn::get_prolog_clef(int iCol, ShapeId idx)
 ColStaffObjsEntry* SpAlgColumn::get_prolog_key(int iCol, ShapeId idx)
 {
     return m_colsData[iCol]->get_prolog_key(idx);
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsEntry* SpAlgColumn::get_prolog_time(int iCol, ShapeId idx)
+{
+    return m_colsData[iCol]->get_prolog_time(idx);
 }
 
 //---------------------------------------------------------------------------------------
@@ -291,8 +297,9 @@ void ColumnsBuilder::create_columns()
     m_iColumn = -1;
     m_iColStartMeasure = 0;
     m_pStartBarlineShape = nullptr;
-    m_fNoSignatures.assign(m_pScore->get_num_instruments(), true);
     m_fClefFound.assign(m_pSysCursor->get_num_staves(), false);
+    m_fSignatures.assign(m_pScore->get_num_instruments(), false);
+    m_fOther.assign(m_pScore->get_num_instruments(), false);
 
     determine_staves_vertical_position();
     while(!m_pSysCursor->is_end())
@@ -346,10 +353,11 @@ void ColumnsBuilder::collect_content_for_this_column()
         pagePos.x = 0.0f;
         pagePos.y = pIE->get_top_line_of_staff(iStaff);
 
-        //if feasible column break, exit loop and finish column
-        if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
+        //if feasible column break, exit loop and finish column.
+        if (m_pBreaker->feasible_break_before_this_obj(pSO, pPrevSO, rTime, iInstr, iLine))
+        {
             break;
-
+        }
 
         if (pSO->is_system_break())
         {
@@ -386,6 +394,7 @@ void ColumnsBuilder::collect_content_for_this_column()
 
             else
             {
+                m_fOther[iInstr] = true;
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 int octaveShift = m_pSysCursor->get_applicable_octave_shift();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
@@ -479,7 +488,11 @@ void ColumnsBuilder::find_and_save_context_info_for_this_column()
                 m_pSysCursor->get_clef_entry_for_instr_staff(iInstr, iStaff);
             ColStaffObjsEntry* pKeyEntry =
                 m_pSysCursor->get_key_entry_for_instr_staff(iInstr, iStaff);
-            m_pSpAlgorithm->save_context(m_iColumn, iInstr, iStaff, pClefEntry, pKeyEntry);
+            ColStaffObjsEntry* pTimeEntry =
+                m_pSysCursor->get_prolog_time_entry_for_instrument(iInstr);
+
+            m_pSpAlgorithm->save_context(m_iColumn, iInstr, iStaff,
+                                         pClefEntry, pKeyEntry, pTimeEntry);
         }
     }
 }
@@ -597,25 +610,33 @@ bool ColumnsBuilder::determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime
     // In prolog only any clef, key & time signature at start of score. And only the
     // first clef before key/time signature. Any other clef will be considered a
     // clef change.
+
     // AWARE: Take into account that when the instrument has more than one staff
     // (e.g. piano) there are more than one clef per instrument. Also, take into
     // account that clef for second instrument could be defined after key and time
-    // signatures for first instrument.
+    // signatures for first instrument (e.g. in test score
+    // 43c-MultiStaff-DifferentKeysAfterBackup )
 
-    if (!is_equal_time(rTime, 0.0))
+    //AWARE: Barlines do not arrive to this method, so flag m_fOther is marked
+    // in method collect_content_for_this_column()
+
+    if (!is_equal_time(rTime, 0.0) || m_fOther[iInstr])
         return false;
 
     if (pSO->is_clef())
     {
         bool fFirstClef = !m_fClefFound[idx];
         m_fClefFound[idx] = true;
-        return fFirstClef || m_fNoSignatures[iInstr];
+        return fFirstClef && !m_fOther[iInstr];
     }
-    else if (pSO->is_key_signature() || pSO->is_time_signature())
+    else if ((pSO->is_key_signature() || pSO->is_time_signature()) && !m_fOther[iInstr])
     {
-        m_fNoSignatures[iInstr] = false;
+        m_fSignatures[iInstr] = true;
         return true;
     }
+    else
+        m_fOther[iInstr] = true;
+
     return false;
 }
 
@@ -658,8 +679,8 @@ ColumnData::~ColumnData()
 void ColumnData::reserve_space_for_prolog_clefs_keys(int numStaves)
 {
     m_prologClefs.assign(numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
-
     m_prologKeys.assign(numStaves, (ColStaffObjsEntry*)nullptr);
+    m_prologTimes.assign(numStaves, (ColStaffObjsEntry*)nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -727,11 +748,13 @@ void ColumnData::set_slice_final_position(LUnits left, LUnits top)
 
 //---------------------------------------------------------------------------------------
 void ColumnData::save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
-                                  ColStaffObjsEntry* pKeyEntry)
+                                  ColStaffObjsEntry* pKeyEntry,
+                                  ColStaffObjsEntry* pTimeEntry)
 {
     int idx = m_pScoreMeter->staff_index(iInstr, iStaff);
     m_prologClefs[idx] = pClefEntry;
     m_prologKeys[idx] = pKeyEntry;
+    m_prologTimes[idx] = pTimeEntry;
 }
 
 

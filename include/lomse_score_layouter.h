@@ -324,8 +324,8 @@ public:
     ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor);
     virtual ~ColumnBreaker() {}
 
-    bool feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
-                                        int iInstr, int iLine);
+    bool feasible_break_before_this_obj(ImoStaffObj* pSO, ImoStaffObj* pPrevSO,
+                                        TimeUnits rTime, int iInstr, int iLine);
 
 protected:
 
