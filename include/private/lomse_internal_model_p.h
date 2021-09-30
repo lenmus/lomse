@@ -6298,19 +6298,14 @@ public:
     //spacing and size
     inline LUnits get_line_spacing() { return m_uSpacing; }
     inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
-    LUnits get_height()
-    {
-        if (m_nNumLines > 1)
-            return (m_nNumLines - 1) * m_uSpacing + m_uLineThickness;
-        else
-            return m_uLineThickness;
-    }
+    LUnits get_height();
 
     //lines
     inline LUnits get_line_thickness() { return m_uLineThickness; }
     inline void set_line_thickness(LUnits uTickness) { m_uLineThickness = uTickness; }
     inline int get_num_lines() { return m_nNumLines; }
     inline void set_num_lines(int nLines) { m_nNumLines = nLines; }
+    bool is_line_visible(int iLine);
 
 protected:
     friend class MxlAnalyser;

@@ -75,10 +75,14 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->begin_path();
     pDrawer->stroke(color);
     pDrawer->stroke_width(m_lineThickness);
-    for (int iL=0; iL < m_pStaff->get_num_lines(); iL++ )
+    int iMax = max(m_pStaff->get_num_lines(), 5);
+    for (int iL=0; iL < iMax; iL++ )
 	{
-        pDrawer->move_to(xStart, yPos);
-        pDrawer->line_to(xEnd, yPos);
+	    if (m_pStaff->is_line_visible(iL))
+	    {
+            pDrawer->move_to(xStart, yPos);
+            pDrawer->line_to(xEnd, yPos);
+	    }
         yPos += spacing;
     }
     pDrawer->end_path();

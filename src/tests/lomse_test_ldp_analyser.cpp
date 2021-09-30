@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -9716,7 +9716,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
         CHECK( pInfo && pInfo->get_staff_margin() == 800.0f );
         CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
-        CHECK( pInfo && pInfo->get_height() == 620.5f );
+        CHECK( pInfo && pInfo->get_height() == 1020.5f );   //5*200+20.5
+
         CHECK( pInfo && pInfo->get_line_thickness() == 20.5f );
         CHECK( pInfo && pInfo->get_num_lines() == 4 );
 
@@ -9751,7 +9752,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
         CHECK( pInfo && pInfo->get_staff_margin() == 800.0f );
         CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
-        CHECK( pInfo && pInfo->get_height() == 620.5f );
+        CHECK( pInfo && pInfo->get_height() == 1020.5f );   //5*200+20.5
         CHECK( pInfo && pInfo->get_line_thickness() == 20.5f );
         CHECK( pInfo && pInfo->get_num_lines() == 4 );
 

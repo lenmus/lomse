@@ -289,6 +289,7 @@ enum EMxlTag
     k_mxl_tag_slur,
     k_mxl_tag_sound,
     k_mxl_tag_string_mute,
+    k_mxl_tag_staff_details,
     k_mxl_tag_staff_layout,
     k_mxl_tag_system_layout,
     k_mxl_tag_system_margins,
@@ -301,6 +302,7 @@ enum EMxlTag
     k_mxl_tag_tuplet,
     k_mxl_tag_tuplet_actual,
     k_mxl_tag_tuplet_normal,
+    k_mxl_tag_unpitched,
     k_mxl_tag_virtual_instr,
     k_mxl_tag_wedge,
     k_mxl_tag_words,
@@ -1220,6 +1222,27 @@ protected:
     // Helper, to check and cast anchor object
     //-----------------------------------------------------------------------------------
 
+    //-----------------------------------------------------------------------------------
+    ImoMusicData* get_anchor_as_music_data()
+    {
+        if (m_pAnchor && m_pAnchor->is_music_data())
+            return static_cast<ImoMusicData*>(m_pAnchor);
+
+        LOMSE_LOG_ERROR("pAnchor is nullptr or it is not musicData");
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoNote* get_anchor_as_note()
+    {
+        if (m_pAnchor && m_pAnchor->is_note())
+            return static_cast<ImoNote*>(m_pAnchor);
+
+        LOMSE_LOG_ERROR("pAnchor is nullptr or it is not note");
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
     ImoScore* get_anchor_as_score()
     {
         if (m_pAnchor && m_pAnchor->is_score())
@@ -2042,7 +2065,9 @@ public:
 
     ImoObj* do_analysis() override
     {
-        ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+        ImoMusicData* pMD = get_anchor_as_music_data();
+        if (pMD == nullptr)
+            return nullptr;
 
         //In MusicXML. Clefs, time signatures and key signatures are
         //treated as attributes of a measure, not as objects and, therefore, ordering
@@ -2120,7 +2145,7 @@ public:
 
         // staff-details*
         while (get_optional("staff-details"))
-            ; //TODO <staff-details>
+            set_staff_details(pMD);
 
         // transpose*
         while (get_optional("transpose"))
@@ -2159,6 +2184,18 @@ protected:
         m_pAnalyser->set_current_divisions( float(divisions) );
     }
 
+    void set_staff_details(ImoMusicData* pMD)
+    {
+        ImoInstrument* pInstr = pMD->get_instrument();
+        if (pInstr == nullptr)
+            return;
+
+        ImoStaffInfo* pInfo =
+            static_cast<ImoStaffInfo*>(m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr));
+
+        if (pInfo)
+            pInstr->replace_staff_info(pInfo);
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3929,14 +3966,9 @@ public:
 
     ImoObj* do_analysis() override
     {
-        ImoMusicData* pMD = nullptr;
-        if (m_pAnchor && m_pAnchor->is_music_data())
-            pMD = static_cast<ImoMusicData*>(m_pAnchor);
-        else
-        {
-            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not musicData");
+        ImoMusicData* pMD = get_anchor_as_music_data();
+        if (pMD == nullptr)
             return nullptr;
-        }
 
         //attrb: number CDATA #REQUIRED
         string num = get_optional_string_attribute("number", "");
@@ -4563,8 +4595,8 @@ public:
                                  : (fIsCue ? k_imo_note_cue : k_imo_note_regular));
             pNote = static_cast<ImoNote*>(ImFactory::inject(type, pDoc));
             pNR = pNote;
-            if (get_optional("unpitched"))
-                pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
+            if (analyse_optional("unpitched", pNote))
+                ;
             else
                 analyse_mandatory("pitch", pNote);
         }
@@ -6675,6 +6707,132 @@ public:
 
 
 //@--------------------------------------------------------------------------------------
+//@ <staff-details>
+//@ <!ELEMENT staff-details
+//@     (staff-type?, (staff-lines, line-detail*)?, staff-tuning*,
+//@      capo?, staff-size?)>
+//@ <!ATTLIST staff-details
+//@     number         CDATA                #IMPLIED
+//@     show-frets     (numbers | letters)  #IMPLIED
+//@     %print-object;
+//@     %print-spacing;
+//@ >
+//@ <!ELEMENT staff-type (#PCDATA)>
+//@ <!ELEMENT staff-lines (#PCDATA)>
+//@
+//
+class StaffDetailsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    StaffDetailsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                        ImFactory::inject(k_imo_staff_info, pDoc) );
+
+            //attributes
+
+        //attrib: number CDATA #IMPLIED
+        int iStaffNum = get_optional_int_attribute("number", 1) - 1;
+        pInfo->set_staff_number(iStaffNum);
+
+        //attrib: show-frets (numbers | letters)  #IMPLIED   (for tablature notation)
+        //TODO: for supporting tablature
+
+        //attrib: %print-object;
+        //bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
+        //TODO: ImoStaffInfo not yet support this
+
+        //attrib: %print-spacing;
+        //TODO:
+
+            //elements
+
+        //staff-type?
+        if (get_optional("staff-type"))
+            set_staff_type(pInfo);
+
+        //(staff-lines, line-detail*)?
+        if (get_optional("staff-lines"))
+        {
+            pInfo->set_num_lines( get_child_value_integer(5) );
+
+            // line-detail*
+            while (get_optional("line-detail"))
+                set_line_detail(pInfo);
+        }
+
+        //staff-tuning*
+        while (get_optional("staff-tuning"))
+            set_staff_tuning(pInfo);
+
+        //capo?
+        if (get_optional("capo"))
+            set_staff_tuning(pInfo);
+
+        //staff-size?
+        if (get_optional("staff-size"))
+            set_staff_size(pInfo);
+
+        return pInfo;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_staff_type(ImoStaffInfo* UNUSED(pInfo))
+    {
+        //@ <!ELEMENT staff-type (#PCDATA)>
+        //@ valid values: ossia, editorial, cue, alternate, or regular
+
+        //TODO: Lomse accepts this but doesn't use it
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_line_detail(ImoStaffInfo* UNUSED(pInfo))
+    {
+        //@ <!ELEMENT line-detail EMPTY>
+        //@ <!ATTLIST line-detail
+        //@     line    CDATA       #REQUIRED
+        //@     width   %tenths;    #IMPLIED
+        //@     %color;
+        //@     %line-type;
+        //@     %print-object;
+        //@ >
+
+        //TODO: ImoStaffInfo not yet support this
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_staff_tuning(ImoStaffInfo* UNUSED(pInfo))
+    {
+        //TODO: for supporting tablature
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_capo(ImoStaffInfo* UNUSED(pInfo))
+    {
+        //TODO: for supporting tablature
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_staff_size(ImoStaffInfo* UNUSED(pInfo))
+    {
+        //@ <!ELEMENT staff-size (#PCDATA)>
+        //@ <!ATTLIST staff-size
+        //@     scaling CDATA #IMPLIED
+        //@ >
+
+        //TODO
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
 //@ <staff-layout>
 //@ <!ELEMENT staff-layout (staff-distance?)>
 //@ <!ELEMENT staff-distance %layout-tenths;>
@@ -7994,6 +8152,54 @@ public:
     }
 };
 
+
+//@--------------------------------------------------------------------------------------
+//@ <unpitched>
+//@ <!ELEMENT unpitched ((display-step, display-octave)?)>
+//@ <!ELEMENT display-step (#PCDATA)>
+//@ <!ELEMENT display-octave (#PCDATA)>
+//
+class UnpitchedMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    UnpitchedMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoNote* pNote = get_anchor_as_note();
+        if (!pNote)
+            return nullptr;
+
+        pNote->set_unpitched();
+
+        if (get_optional("display-step"))
+        {
+            int step = mxl_step_to_step(get_child_value_string(), k_step_B);
+
+            if (get_optional("display-octave"))
+            {
+                int octave = mxl_octave_to_octave(get_child_value_string(), 4);
+                pNote->set_notated_pitch(step, octave, k_no_accidentals);
+            }
+            else
+            {
+                error_msg2("Missing <display-octave> element. Display pitch B4 assumed.");
+                pNote->set_notated_pitch(k_step_B, 4, k_no_accidentals);
+            }
+
+            error_if_more_elements();
+
+            return nullptr;
+        }
+
+        pNote->set_notated_pitch(k_step_undefined, 4, k_no_accidentals);
+        return nullptr;
+    }
+};
+
+
 //@--------------------------------------------------------------------------------------
 //@ <virtual-instrument>
 //<!ELEMENT virtual-instrument
@@ -8385,6 +8591,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["slur"] = k_mxl_tag_slur;
     m_NameToEnum["sound"] = k_mxl_tag_sound;
     m_NameToEnum["string-mute"] = k_mxl_tag_string_mute;
+    m_NameToEnum["staff-details"] = k_mxl_tag_staff_details;
     m_NameToEnum["staff-layout"] = k_mxl_tag_staff_layout;
     m_NameToEnum["system-layout"] = k_mxl_tag_system_layout;
     m_NameToEnum["system-margins"] = k_mxl_tag_system_margins;
@@ -8397,6 +8604,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["tuplet"] = k_mxl_tag_tuplet;
     m_NameToEnum["tuplet-actual"] = k_mxl_tag_tuplet_actual;
     m_NameToEnum["tuplet-normal"] = k_mxl_tag_tuplet_normal;
+    m_NameToEnum["unpitched"] = k_mxl_tag_unpitched;
     m_NameToEnum["virtual-instrument"] = k_mxl_tag_virtual_instr;
     m_NameToEnum["wedge"] = k_mxl_tag_wedge;
     m_NameToEnum["words"] = k_mxl_tag_words;
@@ -9017,6 +9225,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_sound:                return LOMSE_NEW SoundMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_staff_details:        return LOMSE_NEW StaffDetailsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_staff_layout:         return LOMSE_NEW StaffLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_system_layout:        return LOMSE_NEW SystemLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_system_margins:       return LOMSE_NEW SystemMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -9029,6 +9238,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_tuplet:               return LOMSE_NEW TupletMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_actual:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_normal:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_unpitched:            return LOMSE_NEW UnpitchedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_virtual_instr:        return LOMSE_NEW VirtualInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_wedge:                return LOMSE_NEW WedgeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_words:                return LOMSE_NEW WordsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

@@ -111,6 +111,8 @@ protected:
     int get_glyphs_for_accidentals();
     LUnits get_pitch_shift();
     int get_pos_on_staff();
+    static int pos_for_top_ledger_line(int numLines);
+    static int pos_for_bottom_ledger_line(int numLines);
 
     void create_chord();
     void add_to_chord();

@@ -954,9 +954,8 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("TODO: ", m_pImo->get_id());
-        m_source << " No LdpGenerator for Imo. Imo name=" << m_pImo->get_name()
-                 << ", Imo type=" << m_pImo->get_obj_type()
-                 << ", id=" << m_pImo->get_id();
+        m_source << " No LdpGenerator for Imo. Name=" << m_pImo->get_name()
+                 << ", type=" << m_pImo->get_obj_type();
         end_element(k_in_same_line);
         return m_source.str();
     }

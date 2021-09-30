@@ -287,7 +287,7 @@ bool ArticulationEngraver::determine_if_above()
         if (m_pParentShape && m_pParentShape->is_shape_note())
         {
             GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(m_pParentShape);
-            return pNote && !pNote->is_up();
+            return pNote && pNote->has_stem() && !pNote->is_up();
         }
         else
             return true;

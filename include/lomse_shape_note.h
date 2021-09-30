@@ -62,6 +62,8 @@ protected:
     LUnits m_uAnchorOffset;
     bool m_fUpOriented;     //explicit info. about note orientation: up (stem up) or down
     int m_nPosOnStaff;      //required by the beam engraver and ledger lines
+    int m_nTopPosOnStaff;       //pos on staff for 1st ledger line above
+    int m_nBottomPosOnStaff;    //pos on staff for 1st ledger line below
 
     //for leger lines
     LUnits m_uyStaffTopLine;
@@ -101,7 +103,8 @@ public:
 	void add_flag(GmoShapeFlag* pShape);
 	void add_accidentals(GmoShapeAccidentals* pShape);
 	void add_note_in_block(GmoShape* pShape);
-    void add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine, LUnits lineLength,
+    void add_leger_lines_info(int posOnStaff, int topPosOnStaff, int bottomPosOnStaff,
+                              LUnits yStaffTopLine, LUnits lineLength,
                               LUnits lineThickness, LUnits lineSpacing);
     inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
     inline void increment_anchor_offset(LUnits incr) { m_uAnchorOffset += incr; }

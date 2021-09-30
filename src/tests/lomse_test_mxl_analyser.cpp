@@ -1305,9 +1305,15 @@ SUITE(MxlAnalyserTest)
         XmlParser parser;
         stringstream expected;
         parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
             "<attributes>"
                 "<divisions>7</divisions>"
             "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -1317,7 +1323,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot == nullptr);
+        CHECK( pRoot );
         CHECK( a.current_divisions() == 7.0f );
 
         delete pRoot;
@@ -4170,8 +4176,9 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_half );
         CHECK( pNote && pNote->is_pitch_defined() == false );
+        CHECK( pNote && pNote->is_unpitched() == true );
         CHECK( pNote && pNote->get_octave() == 4 );
-        CHECK( pNote && pNote->get_step() == k_no_pitch );
+        CHECK( pNote && pNote->get_step() == k_step_undefined );
         CHECK( pNote && pNote->get_duration() == k_duration_quarter );
         CHECK( pNote && pNote->is_in_chord() == false );
         CHECK( pNote && pNote->is_start_of_chord() == false );
@@ -5737,6 +5744,46 @@ SUITE(MxlAnalyserTest)
                     }
                 }
             }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+
+    //@ staff-details -------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_staff_details_01)
+    {
+        //@01. minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<staff-details><staff-lines>1</staff-lines></staff-details>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_staff_info() == true );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        CHECK( pInfo != nullptr );
+        if (pInfo)
+        {
+            CHECK( pInfo->get_staff_number() == 0 );
+            CHECK( pInfo->get_num_lines() == 1 );
+            CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
+            CHECK( is_equal_float(pInfo->get_line_spacing(), LOMSE_STAFF_LINE_SPACING) );
+            CHECK( is_equal_float(pInfo->get_line_thickness(), LOMSE_STAFF_LINE_THICKNESS) );
+            CHECK( is_equal_float(pInfo->get_staff_margin(), LOMSE_STAFF_TOP_MARGIN) );
         }
 
         a.do_not_delete_instruments_in_destructor();

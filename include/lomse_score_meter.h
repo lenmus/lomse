@@ -41,6 +41,7 @@ namespace lomse
 
 //forward declarations
 class ImoScore;
+class ImoStaffInfo;
 class ImoStyle;
 
 
@@ -133,6 +134,8 @@ public:
     //info about text styles
     ImoStyle* get_style_info(const string& name);
 
+    //info about staves
+    ImoStaffInfo* get_staff_info(int iInstr, int iStaff);
 
 protected:
     void get_options(ImoScore* pScore);

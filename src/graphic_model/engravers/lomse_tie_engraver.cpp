@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -104,7 +104,14 @@ void TieEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 void TieEngraver::decide_placement()
 {
     if (m_pTie->get_orientation() == k_orientation_default)
-        m_fTieBelowNote = m_pStartNoteShape->is_up();
+    {
+        if (m_pStartNoteShape->has_stem())
+            m_fTieBelowNote = m_pStartNoteShape->is_up();
+        else if (m_pEndNoteShape->has_stem())
+            m_fTieBelowNote = m_pEndNoteShape->is_up();
+        else
+            m_fTieBelowNote = true;     //can go either up or down. I prefer below
+    }
     else
         m_fTieBelowNote = m_pTie->get_orientation() == k_orientation_under;
 }

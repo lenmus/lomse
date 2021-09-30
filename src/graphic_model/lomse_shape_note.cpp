@@ -55,6 +55,8 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo,
     , m_uAnchorOffset(0.0f)
     , m_fUpOriented(true)
     , m_nPosOnStaff(1)
+    , m_nTopPosOnStaff(1)
+    , m_nBottomPosOnStaff(1)
     , m_uyStaffTopLine(0)
     , m_uLineOutgoing(0)
     , m_uLineThickness(0)
@@ -122,7 +124,7 @@ void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
 {
     //if note is on staff, nothing to draw
-    if (m_nPosOnStaff > 0 && m_nPosOnStaff < 12)
+    if (m_nPosOnStaff > m_nBottomPosOnStaff && m_nPosOnStaff < m_nTopPosOnStaff)
         return;
 
     pDrawer->begin_path();
@@ -133,10 +135,14 @@ void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
     LUnits xPos = get_notehead_left() - m_uLineOutgoing;
     LUnits lineLength = get_notehead_width() + 2.0f * m_uLineOutgoing;
 
-    if (m_nPosOnStaff > 11)     //lines at top
+    if (m_nPosOnStaff >= m_nTopPosOnStaff)     //lines at top
 	{
-        LUnits yPos = m_uyStaffTopLine + get_notehead_top() - m_lineSpacing;
-        for (int i=12; i <= m_nPosOnStaff; i+=2)
+        //AWARE: m_uyStaffTopLine refers to the fifth line of a five lines staff. It has
+        //to be corrected when m_nTopPosOnStaff < 12 (less than 5 lines)
+        LUnits yPos = m_uyStaffTopLine + get_notehead_top()
+                      + m_lineSpacing * float((10 - m_nTopPosOnStaff)/2);
+
+        for (int i=m_nTopPosOnStaff; i <= m_nPosOnStaff; i+=2)
         {
             pDrawer->move_to(xPos, yPos);
             pDrawer->hline_to(xPos + lineLength);
@@ -145,8 +151,12 @@ void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
     }
 	else    //lines at bottom
 	{
-        LUnits yPos = m_uyStaffTopLine + get_notehead_top() + m_lineSpacing * 5.0f;
-        for (int i=0; i >= m_nPosOnStaff; i-=2)
+        //AWARE: m_uyStaffTopLine refers to the fifth line of a five lines staff. It has
+        //to be corrected when m_nBottomPosOnStaff != 0 (no 5 lines)
+        LUnits yPos = m_uyStaffTopLine + get_notehead_top()
+                      + m_lineSpacing * float((10 - m_nBottomPosOnStaff)/2);
+
+        for (int i=m_nBottomPosOnStaff; i >= m_nPosOnStaff; i-=2)
         {
             pDrawer->move_to(xPos, yPos);
             pDrawer->hline_to(xPos + lineLength);
@@ -186,11 +196,14 @@ void GmoShapeNote::add_accidentals(GmoShapeAccidentals* pShape)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeNote::add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine,
+void GmoShapeNote::add_leger_lines_info(int posOnStaff, int topPosOnStaff,
+                                        int bottomPosOnStaff, LUnits yStaffTopLine,
                                         LUnits lineOutgoing, LUnits lineThickness,
                                         LUnits lineSpacing)
 {
 	m_nPosOnStaff = posOnStaff;
+    m_nTopPosOnStaff = topPosOnStaff;
+    m_nBottomPosOnStaff = bottomPosOnStaff;
 	m_uyStaffTopLine = yStaffTopLine;   //relative to notehead top
     m_uLineOutgoing = lineOutgoing;
     m_uLineThickness = lineThickness;

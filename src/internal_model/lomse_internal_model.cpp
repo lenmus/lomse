@@ -4940,6 +4940,41 @@ bool ImoStyle::is_default_style_with_default_values()
 
 
 //=======================================================================================
+// ImoStaffInfo implementation
+//=======================================================================================
+LUnits ImoStaffInfo::get_height()
+{
+    //Stafflines are shown in the order of middle-line of a five-line staff and add
+    //lines alternating with the next line above this line and the next line below.
+    //
+    //When 1 line or 5 lines, height is 5 lines (4 spaces)
+    //Otherwise, the height is the number of visible lines + 2 (one space above and below)
+
+    int numVisible = 5;
+    if (m_nNumLines != 1 && m_nNumLines != 5)
+        numVisible = m_nNumLines + 2;
+
+    return (numVisible - 1) * m_uSpacing + m_uLineThickness;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStaffInfo::is_line_visible(int iLine)
+{
+    //Stafflines are shown in the order of middle-line of a five-line staff and add
+    //lines alternating with the next line above this line and the next line below.
+
+    switch(m_nNumLines)
+    {
+        case 1:     return iLine == 2;
+        case 2:     return iLine == 1 || iLine == 2;
+        case 3:     return iLine == 1 || iLine == 2 || iLine == 3;
+        case 4:     return iLine <= 3;
+        default:    return true;
+    }
+}
+
+
+//=======================================================================================
 // ImoStyles implementation
 //=======================================================================================
 ImoStyles::ImoStyles(Document* pDoc)

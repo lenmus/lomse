@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -62,7 +62,7 @@ void AutoClef::do_autoclef()
 //---------------------------------------------------------------------------------------
 void AutoClef::find_staves_needing_clef()
 {
-    //An staff needs clef if it has pitched notes before finding a clef.
+    //A staff needs clef if it has pitched notes before finding a clef.
     //This method saves data for each staff in vectors m_fNeedsClef, m_pAt,
     //m_maxPitch, m_minPitch
 
@@ -91,7 +91,7 @@ void AutoClef::find_staves_needing_clef()
             ImoNote* pN = static_cast<ImoNote*>(pSO);
             if (!m_fNeedsClef[iStaff] && !fHasNotes[iStaff])
             {
-                if (pN->is_pitch_defined())
+                if (!pN->is_unpitched() && pN->is_pitch_defined())
                 {
                     int clefType = m_pCursor->get_applicable_clef_type();
                     if (clefType == k_clef_undefined)
@@ -102,7 +102,7 @@ void AutoClef::find_staves_needing_clef()
 
             if (m_fNeedsClef[iStaff])
             {
-                if (pN->is_pitch_defined())
+                if (!pN->is_unpitched() && pN->is_pitch_defined())
                 {
                     FPitch fp = pN->get_fpitch();
                     if (m_maxPitch[iStaff] == k_undefined_fpitch || m_maxPitch[iStaff] < fp)
