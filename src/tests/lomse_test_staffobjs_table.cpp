@@ -623,22 +623,22 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(dir empty)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,	   0, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
-        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=104, id=68) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   192,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(barline simple)" );
         CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(time 2 4)" );
         CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(time 2 4)" );
         CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(n b5 h v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(n b5 h v1 p1 (stem down))" );
-        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=104, id=68) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 0,    0,      1,   320,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(barline simple)" );
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(time 4 4)" );
         CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(time 4 4)" );
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(n b5 w v1 p1)" );
         CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(n a5 w v1 p1)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=104, id=76) p1)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=104, id=76) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 0,    0,      2,   576,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );    }
 

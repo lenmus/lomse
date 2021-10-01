@@ -228,8 +228,18 @@ void NoteEngraver::determine_stem_direction()
         switch (m_pNote->get_stem_direction())
         {
             case k_stem_default:
+            {
                 m_fStemDown = (m_nPosOnStaff >= 6);
+
+                ImoStaffInfo* pInfo = m_pMeter->get_staff_info(m_iInstr, m_iStaff);
+                if (pInfo)
+                {
+                    int numLines = pInfo->get_num_lines();
+                    if (numLines == 1)
+                        m_fStemDown = false;
+                }
                 break;
+            }
             case k_stem_double:
     //            TODO: NoteEngraver stem_double
     //            I understand that "stem double" means two stems: one up and one down.
@@ -422,10 +432,10 @@ int NoteEngraver::get_pos_on_staff()
 int NoteEngraver::pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octaveShift)
 {
     // Returns the position on the staff (line/space) referred to the first ledger line of
-    // the staff. Depends on clef:
-    //        0 - on first ledger line (C note in G clef)
-    //        1 - on next space (D in G clef)
-    //        2 - on first line (E not in G clef)
+    // the staff. It is clef independent:
+    //        0 - on first ledger line (C4 note in G2 clef, E2 note in F4 clef, etc.)
+    //        1 - on next space (D4 note in G2 clef, F2 note in F4 clef, etc.)
+    //        2 - on first line (E4 note in G2 clef, G2 note in F4 clef, etc.)
     //        3 - on first space
     //        4 - on second line
     //        5 - on second space
@@ -443,6 +453,7 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octa
         case k_clef_undefined:
         case k_clef_none:
         case k_clef_G2:
+        case k_clef_percussion:
             return dpitch - C4_DPITCH;
         case k_clef_8_G2:        //8 above
             return dpitch - C4_DPITCH - 7;
@@ -472,8 +483,6 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octa
             return dpitch - C4_DPITCH + 6;
         case k_clef_C4:
             return dpitch - C4_DPITCH + 8;
-        case k_clef_percussion:
-            return 6;       //on 3rd line
         case k_clef_C5:
             return dpitch - C4_DPITCH + 10;
         case k_clef_F5:
@@ -486,9 +495,52 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNoteRest* pNR, int clefType, int octa
         {
             LOMSE_LOG_ERROR("Program maintenance error: No pos.on staff defined for clef type %d",
                             clefType);
-            return dpitch - C4_DPITCH;     //assume G clef
+            return dpitch - C4_DPITCH;     //assume G2 clef
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+int NoteEngraver::pos_for_top_ledger_line(int numLines)
+{
+    //returns pos on staff for 1st ledger line above. It is clef independent.
+
+    //  pos on staff (G2 clef)         lines used depending
+    //    12        --------           on # of visible lines
+    //        11
+    //    10 --------------------------          4  5  6
+    //         9
+    //     8 --------------------------    2  3  4  5  6
+    //         7
+    //     6 -------------------------- 1  2  3  4  5  6
+    //         5
+    //     4 --------------------------       3  4  5  6
+    //         3
+    //     2 --------------------------             5  6
+    //         1
+    //     0        --------                           6
+    //                                                 v  for more lines grows down
+
+    if (numLines == 1)
+        return 8;
+    if (numLines <= 3)
+        return 10;
+
+    return 12;
+}
+
+//---------------------------------------------------------------------------------------
+int NoteEngraver::pos_for_bottom_ledger_line(int numLines)
+{
+    //returns pos on staff for 1st ledger line below. It is clef independent.
+    //See comments in pos_for_top_ledger_line()
+
+    if (numLines <= 2)
+        return 4;
+    if (numLines <= 4)
+        return 2;
+
+    return (numLines - 5) * 2;
 }
 
 //---------------------------------------------------------------------------------------
@@ -583,6 +635,13 @@ void NoteEngraver::add_leger_lines_if_necessary()
     LUnits uStaffLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff);
     LUnits lineThickness = 2.0f * uStaffLine;
 
+    //positions for 1st ledger line above and below
+    ImoStaffInfo* pInfo = m_pMeter->get_staff_info(m_iInstr, m_iStaff);
+    int numLines = (pInfo ? pInfo->get_num_lines() : 5);
+    int topPosOnStaff = pos_for_top_ledger_line(numLines);
+    int bottomPosOnStaff = pos_for_bottom_ledger_line(numLines);
+
+    //line spacing: 10 tenths
     LUnits lineSpacing = tenths_to_logical(10.0f);
 
     //leger lines at top
@@ -590,12 +649,13 @@ void NoteEngraver::add_leger_lines_if_necessary()
     if (m_nPosOnStaff > 11)
         dsplz = m_pMeter->get_upper_ledger_lines_displacement();
 
-    //AWARE: yStart is relative to notehead top
+    //AWARE: yStart is relative to notehead top, and always refers to the fifth line of
+    //a five lines staff
     LUnits yStart =  m_uyStaffTopLine - m_pNoteShape->get_notehead_top()
                      - tenths_to_logical(dsplz);
 
-    m_pNoteShape->add_leger_lines_info(m_nPosOnStaff, yStart, lineOutgoing,
-                                       lineThickness, lineSpacing);
+    m_pNoteShape->add_leger_lines_info(m_nPosOnStaff, topPosOnStaff, bottomPosOnStaff,
+                                       yStart, lineOutgoing, lineThickness, lineSpacing);
 }
 
 //---------------------------------------------------------------------------------------

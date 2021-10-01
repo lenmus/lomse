@@ -73,9 +73,11 @@ enum ENoteStem
 class ImoNoteRest : public ImoStaffObj
 {
 protected:
+    bool        m_fUnpitched = false;           //unpitched note
     int         m_nNoteType = k_quarter;
-    int         m_step = k_step_undefined;      //when rest for placement on the staff
-    int         m_octave = k_octave_undefined;  //when rest for placement on the staff
+    int         m_step = k_step_undefined;      //step and octave are for note's pitch. But
+    int         m_octave = k_octave_undefined;  //also for placement on the staff when
+                                                //unpitched notes and for rests
     int         m_nDots = 0;
     int         m_nVoice = 1;                   //1..n
     int         m_timeModifierTop = 1;          //for tuplets
@@ -117,11 +119,13 @@ public:
     inline void set_playback_duration(TimeUnits value) { m_playDuration = value; }
     inline void set_event_duration(TimeUnits value) { m_eventDuration = value; }
     inline void set_playback_time(TimeUnits value) { m_playTime = value; }
+    inline void set_unpitched() { m_fUnpitched = true; }
 
-    //pitch (notes) or placement on the staff (rests)
+    //pitch (notes) or placement on the staff (rests & unpitched notes)
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
     inline bool is_pitch_defined() { return m_step != k_step_undefined; }
+    inline bool is_unpitched() { return m_fUnpitched; }
 
     /** Methods for doing atomic changes in ImoNote/ImoRest internal variables.
         For rests these methods are used to control placement on the staff and there are

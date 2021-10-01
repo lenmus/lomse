@@ -176,6 +176,16 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
+ImoStaffInfo* ScoreMeter::get_staff_info(int iInstr, int iStaff)
+{
+    if (!m_pScore)   //AWARE: can be nullptr in unit-tests
+        return nullptr;
+
+    ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+    return (pInstr ? pInstr->get_staff(iStaff) : nullptr);
+}
+
+//---------------------------------------------------------------------------------------
 ImoStyle* ScoreMeter::get_style_info(const string& name)
 {
     return m_pScore->get_style_or_default(name);
