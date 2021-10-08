@@ -2586,7 +2586,7 @@ public:
         EAccidentals accidentals = k_no_accidentals;
         float alter = 0.0f;
         ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, pDoc));
-        if (MnxAnalyser::pitch_to_components(pitch, &step, &octave,&accidentals, &alter))
+        if (MnxAnalyser::pitch_to_components(pitch, &step, &octave, &accidentals, &alter))
         {
             error_msg("Unknown note pitch '" + pitch + "'. Replaced by 'C4'.");
             pNR->set_notated_pitch(k_step_C, 4, k_no_accidentals);
@@ -2949,6 +2949,7 @@ protected:
         //add an empty score
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
+        pScore->set_accidentals_model( ImoScore::k_pitch_and_notation_provided );
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
         m_pAnchor = pScore;

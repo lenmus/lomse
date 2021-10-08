@@ -3072,6 +3072,8 @@ public:
 
         error_if_more_elements();
 
+        pKey->set_staff(-1);
+
         add_to_model(pKey);
     }
 

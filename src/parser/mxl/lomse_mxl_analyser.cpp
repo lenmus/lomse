@@ -1164,6 +1164,89 @@ protected:
         return noteType;
     }
 
+    //----------------------------------------------------------------------------------
+    EAccidentals get_accidentals(EAccidentals nDefault=k_no_accidentals)
+    {
+        //@ <!ELEMENT accidental (#PCDATA)>
+        //@ <!ATTLIST accidental
+        //@           cautionary %yes-no; #IMPLIED
+        //@           editorial %yes-no; #IMPLIED
+        //@           %level-display;
+        //@           %print-style;
+        //@>
+
+        string acc = m_childToAnalyse.value();
+
+        //standard accidentals
+        if (acc == "sharp")                     return k_sharp;
+        else if (acc == "natural")              return k_natural;
+        else if (acc == "flat")                 return k_flat;
+        else if (acc == "double-sharp")         return k_double_sharp;
+        else if (acc == "sharp-sharp")          return k_sharp_sharp;
+        else if (acc == "flat-flat")            return k_flat_flat;
+        //else if (acc == "double-flat")
+            //AWARE: double-flat is not in the specification. Lilypond test suite
+            //       uses it and MuseScore imports it correctly. But Michael Good
+            //       is clear about this. See:
+            //http://forums.makemusic.com/viewtopic.php?f=12&t=2253&p=5965#p5964
+            //http://forums.makemusic.com/viewtopic.php?f=12&t=2408&p=6558#p6556
+
+        else if (acc == "natural-sharp")        return k_natural_sharp;
+        else if (acc == "natural-flat")         return k_natural_flat;
+        else if (acc == "triple-sharp")         return k_acc_triple_sharp;
+        else if (acc == "triple-flat")          return k_acc_triple_flat;
+
+        //microtonal: Tartini-style quarter-tone accidentals
+        else if (acc == "quarter-flat")         return k_acc_quarter_flat;
+        else if (acc == "quarter-sharp")        return k_acc_quarter_sharp;
+        else if (acc == "three-quarters-flat")  return k_acc_three_quarters_flat;
+        else if (acc == "three-quarters-sharp") return k_acc_three_quarters_sharp;
+
+        //microtonal: quarter-tone accidentals that include arrows pointing down or up
+        else if (acc == "sharp-down")           return k_acc_sharp_down;
+        else if (acc == "sharp-up")             return k_acc_sharp_up;
+        else if (acc == "natural-down")         return k_acc_natural_down;
+        else if (acc == "natural-up")           return k_acc_natural_up;
+        else if (acc == "flat-down")            return k_acc_flat_down;
+        else if (acc == "flat-up")              return k_acc_flat_up;
+        else if (acc == "double-sharp-down")    return k_acc_double_sharp_down;
+        else if (acc == "double-sharp-up")      return k_acc_double_sharp_up;
+        else if (acc == "flat-flat-down")       return k_acc_flat_flat_down;
+        else if (acc == "flat-flat-up")         return k_acc_flat_flat_up;
+        else if (acc == "arrow-down")           return k_acc_arrow_down;
+        else if (acc == "arrow-up")             return k_acc_arrow_up;
+
+    	//accidentals used in Turkish classical music
+        else if (acc == "slash-quarter-sharp")  return k_acc_slash_quarter_sharp;
+        else if (acc == "slash-sharp")          return k_acc_slash_sharp;
+        else if (acc == "slash-flat")           return k_acc_slash_flat;
+        else if (acc == "double-slash-flat")    return k_acc_double_slash_flat;
+
+        //superscripted versions of the accidental signs, used in Turkish folk music
+        else if (acc == "sharp-1")              return k_acc_sharp_1;
+        else if (acc == "sharp-2")              return k_acc_sharp_2;
+        else if (acc == "sharp-3")              return k_acc_sharp_3;
+        else if (acc == "sharp-5")              return k_acc_sharp_5;
+        else if (acc == "flat-1")               return k_acc_flat_1;
+        else if (acc == "flat-2")               return k_acc_flat_2;
+        else if (acc == "flat-3")               return k_acc_flat_3;
+        else if (acc == "flat-4")               return k_acc_flat_4;
+
+        //microtonal sharp and flat accidentals used in Iranian and Persian music
+        else if (acc == "sori")                 return k_acc_sori;
+        else if (acc == "koron")                return k_acc_koron;
+
+        //other; unspecified. MusicXML file should specify SMuFl glyph to use
+        else if (acc == "other")                return k_acc_other;
+
+        else
+        {
+            error_msg2(
+                "Invalid or not supported <accidentals> value '" + acc + "'.");
+            return nDefault;
+        }
+    }
+
     //-----------------------------------------------------------------------------------
     int mxl_step_to_step(const string& step, int nDefault=k_step_C)
     {
@@ -2095,10 +2178,10 @@ public:
             times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
         // staves?
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
         if (get_optional("staves"))
         {
             const int targetStaves = get_child_value_integer(1);
-            ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
             int iStaff = pInstr->get_num_staves();
             // coverity[tainted_data]
             for (; iStaff < targetStaves; ++iStaff)
@@ -2124,22 +2207,39 @@ public:
         while (get_optional("clef"))
             clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
-        //add clefs, keys and time signatures to model, in right order
+        //add clefs, keys and time signatures to model, in right order.
+        //And fix staff number if greater than <staves>
+        int maxStaves = pInstr->get_num_staves() - 1;
         vector<ImoObj*>::const_iterator it;
         for (it = clefs.begin(); it != clefs.end(); ++it)
         {
             if (*it)
-                add_to_model(*it);
+            {
+                ImoClef* pClef = static_cast<ImoClef*>(*it);
+                if (pClef->get_staff() > maxStaves)
+                    pClef->set_staff(maxStaves);
+                add_to_model(pClef);
+            }
         }
         for (it = keys.begin(); it != keys.end(); ++it)
         {
             if (*it)
-                add_to_model(*it);
+            {
+                ImoKeySignature* pKey = static_cast<ImoKeySignature*>(*it);
+                if (pKey->get_staff() > maxStaves)
+                    pKey->set_staff(maxStaves);
+                add_to_model(pKey);
+            }
         }
         for (it = times.begin(); it != times.end(); ++it)
         {
             if (*it)
-                add_to_model(*it);
+            {
+                ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(*it);
+                if (pTime->get_staff() > maxStaves)
+                    pTime->set_staff(maxStaves);
+                add_to_model(pTime);
+            }
         }
 
 
@@ -2533,26 +2633,23 @@ public:
 class ClefMxlAnalyser : public MxlElementAnalyser
 {
 protected:
-    string m_sign;
-    int m_line;
-    int m_octaveChange;
+    string m_sign = "G";
+    int m_line = 2;
+    int m_octaveChange = 0;
 
 public:
     ClefMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_line(0)
-        , m_octaveChange(0)
     {
     }
-
 
     ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
 
-        // attrib: number CDATA #IMPLIED
+        // attrib: number  CDATA  #IMPLIED
         int nStaffNum = get_optional_int_attribute("number", 1);
         pClef->set_staff(nStaffNum - 1);
 
@@ -2573,138 +2670,103 @@ public:
 
             //content
 
-        // sign         <!ELEMENT sign (#PCDATA)>
-        //TODO sign is mandatory (? check)
-        if (get_optional("sign"))
+        // sign
+        if (get_mandatory("sign"))
             m_sign = get_child_value_string();
 
-        // line?        <!ELEMENT line (#PCDATA)>
+        // line?
         if (get_optional("line"))
             m_line = get_child_value_integer(0);
 
-        // clef-octave-change?      <!ELEMENT clef-octave-change (#PCDATA)>
+        // clef-octave-change?
         if (get_optional("clef-octave-change"))
             m_octaveChange = get_child_value_integer(0);
 
-        int type = determine_clef_type();
-        if (type == k_clef_undefined)
-        {
-            error_msg2(
-                    "Unknown clef '" + m_sign + "'. Assumed 'G' in line 2.");
-            type = k_clef_G2;
-        }
-        pClef->set_clef_type(type);
-
         error_if_more_elements();
 
+        int sign = validate_clef(m_sign);
+        pClef->set_clef(sign, m_line, m_octaveChange);
         pClef->set_visible(fVisible);
         add_to_model(pClef);
+
         return pClef;
     }
 
 protected:
 
-    int determine_clef_type()
+    //-----------------------------------------------------------------------------------
+    int validate_clef(string sign)
     {
-        if (m_octaveChange != 0 && !(m_sign == "F" || m_sign == "G"))
+        if (m_octaveChange != 0 && !(sign == "F" || sign == "G"))
         {
-            error_msg("Warning: <clef-octave-change> only implemented for F and G keys. Ignored.");
+            error_msg("Error: <clef-octave-change> only implemented for F and G keys. Ignored.");
             m_octaveChange=0;
         }
 
         if (m_octaveChange > 2 || m_octaveChange < -2)
         {
-            error_msg("Warning: <clef-octave-change> only supported for up to two octaves. Ignored.");
+            error_msg("Error: <clef-octave-change> only supported for up to two octaves. Ignored.");
             m_octaveChange=0;
         }
 
-        if (m_sign == "G")
+        if (sign == "G")
         {
-            if (m_line==1)
-                return k_clef_G1;
-            else if (m_line==2)
+            if (!(m_line==1 || m_line==2))
             {
-                if (m_octaveChange==0)
-                    return k_clef_G2;
-                else if (m_octaveChange==1)
-                    return k_clef_8_G2;     //G2, 8ve. above
-                else if (m_octaveChange==2)
-                    return k_clef_15_G2;    //G2, 15 above
-                else if (m_octaveChange==-1)
-                    return k_clef_G2_8;     //G2, 8ve. below
-                else // must be m_octaveChange==-2
-                    return k_clef_G2_15;    //G2, 15 below
+                error_msg2("Error: G clef only supported in lines 1 or 2. Line changed to 2.");
+                m_line = 2;
             }
-            else
-            {
-                stringstream msg;
-                msg << "Warning: G clef only supported in lines 1 or 2. Clef G"
-                    << m_line << " changed to G2.";
-                error_msg(msg.str());
-                return k_clef_G2;
-            }
+            return k_clef_sign_G;
         }
-        else if (m_sign == "F")
+
+        if (sign == "F")
         {
             if (m_line==4)
+                return k_clef_sign_F;
+
+            if (m_line==3 || m_line==5)
             {
-                if (m_octaveChange==0)
-                    return k_clef_F4;
-                else if (m_octaveChange==1)
-                    return k_clef_8_F4;     //F4 clef, 8ve. above
-                else if (m_octaveChange==2)
-                    return k_clef_15_F4;    //F4 clef, 15 above
-                else if (m_octaveChange==-1)
-                    return k_clef_F4_8;     //F4 clef, 8ve. below
-                else    //must be m_octaveChange==-2
-                    return k_clef_F4_15;    //F4 clef, 15 below
+                if (m_octaveChange != 0)
+                {
+                    error_msg2("Error: F3 and F5 clefs only supported without octave change. "
+                               "Octave change ignored.");
+                    m_octaveChange=0;
+                }
+                return k_clef_sign_F;
             }
-            else if (m_line==3)
-                return k_clef_F3;
-            else if (m_line==5)
-                return k_clef_F5;
-            else
-            {
-                stringstream msg;
-                msg << "Warning: F clef only supported in lines 3, 4 or 5. Clef F"
-                    << m_line << " changed to F4.";
-                error_msg(msg.str());
-                return k_clef_F4;
-            }
-        }
-        else if (m_sign == "C")
-        {
-            if (m_line==1)
-                return k_clef_C1;
-            else if (m_line==2)
-                return k_clef_C2;
-            else if (m_line==3)
-                return k_clef_C3;
-            else if (m_line==4)
-                return k_clef_C4;
-            else if (m_line==5)
-                return k_clef_C5;
-            else
-            {
-                stringstream msg;
-                msg << "Warning: C clef only supported in lines 1 to 5. Clef C"
-                    << m_line << " changed to C1.";
-                error_msg(msg.str());
-                return k_clef_C1;
-            }
+
+            error_msg2("Error: F clef only supported in lines 3, 4 or 5. Line changed to 4.");
+            m_line = 4;
+            return k_clef_sign_F;
         }
 
-        else if (m_sign == "percussion")
-            return k_clef_percussion;
-        else if (m_sign == "TAB")
-            return k_clef_TAB;
-        else if (m_sign == "none")
-            return k_clef_none;
+        if (sign == "C")
+        {
+            if (m_line < 1 || m_line > 5)
+            {
+                error_msg2("Error: C clef only supported in lines 1 to 5. Line changed to 1.");
+                m_line = 1;
+            }
+            return k_clef_sign_C;
+        }
+
+        m_octaveChange = 0;
+        m_line = 3;
+        if (sign == "percussion")
+            return k_clef_sign_percussion;
+        if (sign == "TAB")
+            return k_clef_sign_TAB;
+        if (sign == "none")
+            return k_clef_sign_none;
         //TODO: Other values: jianpu
-        else
-            return k_clef_undefined;
+
+        error_msg2("Unknown clef '" + sign + "'. Assumed 'G' in line 2.");
+        m_line = 2;
+        m_octaveChange = 0;
+        return k_clef_sign_G;
     }
 
+//    //-----------------------------------------------------------------------------------
 //    void set_symbol_size(ImoClef* pClef)
 //    {
 //        const std::string& value = m_childToAnalyse.first_child().value();
@@ -3636,41 +3698,28 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <key> = <fifths><mode> ????
-//@ attrb:   ??
-//            /*
-//            Traditional key signatures are represented by the number
-//            of flats and sharps, plus an optional mode for major/minor mode
-//            distinctions. Negative numbers are used for
-//            flats and positive numbers for sharps, reflecting the
-//            key's placement within the circle of fifths (hence the
-//            element name). A cancel element indicates that the old
-//            key signature should be cancelled before the new one
-//            appears. This will always happen when changing to C major
-//            or A minor and need not be specified then. The cancel
-//            value matches the fifths value of the cancelled key
-//            signature (e.g., a cancel of -2 will provide an explicit
-//            cancellation for changing from B flat major to F major).
+//@ <key>
+//@ <!ELEMENT key (((cancel?, fifths, mode?) |
+//@ 	((key-step, key-alter, key-accidental?)*)), key-octave*)>
+//@ <!ATTLIST key
+//@     number CDATA #IMPLIED
+//@     %print-style;
+//@     %print-object;
+//@     %optional-unique-id;
+//@ >
+//@ <!ELEMENT cancel (#PCDATA)>
+//@ <!ATTLIST cancel
+//@     location (left | right | before-barline) #IMPLIED
+//@ >
+//@ <!ELEMENT fifths (#PCDATA)>
+//@ <!ELEMENT mode (#PCDATA)>
+//@ <!ELEMENT key-step (#PCDATA)>
+//@ <!ELEMENT key-alter (#PCDATA)>
+//@ <!ELEMENT key-accidental (#PCDATA)>
+//@ <!ATTLIST key-accidental
+//@     %smufl;
+//@ >
 //
-//            Non-traditional key signatures can be represented using
-//            the Humdrum/Scot concept of a list of altered tones.
-//            The key-step and key-alter elements are represented the
-//            same way as the step and alter elements are in the pitch
-//            element in note.dtd. The different element names indicate
-//            the different meaning of altering notes in a scale versus
-//            altering a sounding pitch.
-//
-//            Valid mode values include major, minor, dorian, phrygian,
-//            lydian, mixolydian, aeolian, ionian, and locrian.
-//
-//            <!ELEMENT key ((cancel?, fifths, mode?) |
-//                ((key-step, key-alter)*))>
-//            <!ELEMENT cancel (#PCDATA)>
-//            <!ELEMENT fifths (#PCDATA)>
-//            <!ELEMENT mode (#PCDATA)>
-//            <!ELEMENT key-step (#PCDATA)>
-//            <!ELEMENT key-alter (#PCDATA)>
-
 class KeyMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -3684,141 +3733,173 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
                                     ImFactory::inject(k_imo_key_signature, pDoc) );
+        bool fStandard = false;
 
-        //TODO: Here we are dealing only with "traditional" key signatures:
-        //      chromatic scale in major and minor modes).
+            //attribs
+        //attrb: number  CDATA  #IMPLIED
+        pKey->set_staff( get_attribute_as_integer("number", 0) - 1 );
 
-        int fifths = 0;
-        bool fMajor = true;
+        //attrb: %print-style;
+            //TODO
 
-        // <fifths> (num)
-        if (get_mandatory("fifths"))
-            fifths = get_child_value_integer(0);
+        //attrb: %print-object;
+            //TODO
 
-        // <mode>
-        if (get_optional("mode"))
-            fMajor = (get_child_value_string() == "major");
+        //attrb: %optional-unique-id;
+            //TODO
 
 
+            //elements for standard key signatures
+
+        //cancel?
+        if (get_optional("cancel"))
+        {
+            fStandard = true;
+            analyse_cancel(pKey);
+        }
+
+        //fifths (num)
+        if (get_optional("fifths"))
+        {
+            fStandard = true;
+            int fifths = get_child_value_integer(0);
+
+            //mode?
+            bool fMajor = true;
+            if (get_optional("mode"))
+                fMajor = (get_child_value_string() == "major");
+
+            analyse_optional_key_octave(pKey);
+            error_if_more_elements();
+
+            pKey->set_standard_key(fifths, fMajor);
+            add_to_model(pKey);
+            return pKey;
+        }
+        else if (fStandard)
+        {
+            error_msg2("No <fifths> for standard key signature. Key ignored.");
+            delete pKey;
+            return nullptr;
+        }
+
+        //control arrives here only when non-standard key signatures
+
+        //(key-step, key-alter, key-accidental?)*
+        KeyAccidental acc[7];
+        int i=0;
+        while (get_optional("key-step"))
+        {
+            if (i == 7)
+            {
+                error_msg2("More than 7 <key-step> elements. Ignored.");
+                break;
+            }
+
+            int step = mxl_step_to_step(m_childToAnalyse.value(), -1);
+            if (step == -1)
+            {
+                error_msg2("Invalid step '" + m_childToAnalyse.value()
+                           + "'. Key signature ignored.");
+                delete pKey;
+                return nullptr;
+            }
+            acc[i].step = step;
+
+            if (get_mandatory("key-alter"))
+                acc[i].alter = get_child_value_float();
+
+            if (get_optional("key-accidental"))
+            {
+                acc[i].accidental = get_accidentals();
+
+                //TODO: attrib %smufl
+            }
+
+            if (acc[i].accidental == k_no_accidentals)
+                acc[i].accidental = alter_to_accidental(acc[i].alter);
+
+            ++i;
+        }
+
+        analyse_optional_key_octave(pKey);
         error_if_more_elements();
 
-        //set key
-        pKey->set_key_type( fifths_to_key_signature(fifths, fMajor) );
-
+        //set non-standard key
+        pKey->set_non_standard_key(acc);
         add_to_model(pKey);
         return pKey;
     }
 
 protected:
 
-    int fifths_to_key_signature(int fifths, bool fMajor)
+    //-----------------------------------------------------------------------------------
+    void analyse_cancel(ImoKeySignature* UNUSED(pKey))
     {
-        // Returns the key signature for the given number of fifths and mode
+        //@ <!ELEMENT cancel (#PCDATA)>
+        //@ <!ATTLIST cancel
+        //@     location (left | right | before-barline) #IMPLIED
+        //@ >
 
-        if (fMajor)
+        //TODO: Clarify what is this for and how to use it
+    }
+
+    //-----------------------------------------------------------------------------------
+    int alter_to_accidental(float alter)
+    {
+        if (is_equal_float(alter, -2.0f))
+            return k_flat_flat;
+        if (is_equal_float(alter, -1.5f))
+            return k_acc_three_quarters_flat;
+        if (is_equal_float(alter, -1.0f))
+            return k_flat;
+        if (is_equal_float(alter, -0.5f))
+            return k_acc_quarter_flat;
+        if (is_equal_float(alter, 0.0f))
+            return k_natural;
+        if (is_equal_float(alter, 0.5f))
+            return k_acc_quarter_sharp;
+        if (is_equal_float(alter, 1.0f))
+            return k_sharp;
+        if (is_equal_float(alter, 1.5f))
+            return k_acc_three_quarters_sharp;
+        if (is_equal_float(alter, 2.0f))
+            return k_double_sharp;
+
+        return k_natural;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void analyse_optional_key_octave(ImoKeySignature* pKey)
+    {
+        //@ <!ELEMENT key-octave (#PCDATA)>
+        //@ <!ATTLIST key-octave
+        //@     number NMTOKEN #REQUIRED
+        //@     cancel %yes-no; #IMPLIED
+        //@ >
+
+        //key-octave*
+        while (get_optional("key-octave"))
         {
-            switch(fifths)
+            //attrb: number  NMTOKEN  #REQUIRED
+            int number = get_node_attribute_as_integer(&m_childToAnalyse, "number", 0);
+            if (number != 0)
             {
-                case 0:
-                    return k_key_C;
+                //attrb: cancel %yes-no; #IMPLIED
+                bool fCancel = get_child_optional_yes_no_attribute("cancel", false);
+                //TODO: Clarify what is 'cancel' for and how to use it
 
-                //Sharps ---------------------------------------
-                case 1:
-                    return k_key_G;
-                case 2:
-                    return k_key_D;
-                case 3:
-                    return k_key_A;
-                case 4:
-                    return k_key_E;
-                case 5:
-                    return k_key_B;
-                case 6:
-                    return k_key_Fs;
-                case 7:
-                    return k_key_Cs;
+                //key-octave
+                int octave = get_child_pcdata_int("key-octave", -8, 8, 0);
 
-                //Flats -------------------------------------------
-                case -1:
-                    return k_key_F;
-                case -2:
-                    return k_key_Bf;
-                case -3:
-                    return k_key_Ef;
-                case -4:
-                    return k_key_Af;
-                case -5:
-                    return k_key_Df;
-                case -6:
-                    return k_key_Gf;
-                case -7:
-                    return k_key_Cf;
-
-                default:
-                {
-                    stringstream msg;
-                    msg << "Invalid number of fifths " <<
-                           fifths ;
-                    error_msg(msg.str());
-    //                LOMSE_LOG_ERROR(msg.str());
-    //                throw runtime_error(msg.str());
-                    return k_key_C;
-                }
+                pKey->set_octave(number-1, octave, fCancel);
             }
-        }
-        else
-        {
-            switch(fifths)
+            else
             {
-                case 0:
-                    return k_key_a;
-
-                //Sharps ---------------------------------------
-                case 1:
-                    return k_key_e;
-                case 2:
-                    return k_key_b;
-                case 3:
-                    return k_key_fs;
-                case 4:
-                    return k_key_cs;
-                case 5:
-                    return k_key_gs;
-                case 6:
-                    return k_key_ds;
-                case 7:
-                    return k_key_as;
-
-                //Flats -------------------------------------------
-                case -1:
-                    return k_key_d;
-                case -2:
-                    return k_key_g;
-                case -3:
-                    return k_key_c;
-                case -4:
-                    return k_key_f;
-                case -5:
-                    return k_key_bf;
-                case -6:
-                    return k_key_ef;
-                case -7:
-                    return k_key_af;
-
-                default:
-                {
-                    stringstream msg;
-                    msg << "Invalid number of fifths " <<
-                           fifths ;
-                    error_msg(msg.str());
-    //                LOMSE_LOG_ERROR(msg.str());
-    //                throw runtime_error(msg.str());
-                    return k_key_a;
-                }
+                error_msg2("Invalid number attribute in <key-octave>. Element ignored");
             }
         }
     }
-
 
 };
 
@@ -4594,6 +4675,7 @@ public:
             int type = (fIsGrace ? k_imo_note_grace
                                  : (fIsCue ? k_imo_note_cue : k_imo_note_regular));
             pNote = static_cast<ImoNote*>(ImFactory::inject(type, pDoc));
+            pNote->set_notated_accidentals(k_no_accidentals);
             pNR = pNote;
             if (analyse_optional("unpitched", pNote))
                 ;
@@ -4863,73 +4945,10 @@ protected:
         //@           %level-display;
         //@           %print-style;
         //@>
-        EAccidentals accidentals = k_no_accidentals;
-        string acc = m_childToAnalyse.value();  //get_child_value_string();
-        if (acc == "sharp")
-            accidentals = k_sharp;
-        else if (acc == "natural")
-            accidentals = k_natural;
-        else if (acc == "flat")
-            accidentals = k_flat;
-        else if (acc == "double-sharp")
-            accidentals = k_double_sharp;
-        else if (acc == "sharp-sharp")
-            accidentals = k_sharp_sharp;
-        else if (acc == "flat-flat")
-            accidentals = k_flat_flat;
-        //else if (acc == "double-flat")
-            //AWARE: double-flat is not in the specification. Lilypond test suite
-            //       uses it and MuseScore imports it correctly. But Michael Good
-            //       is clear about this. See:
-            //http://forums.makemusic.com/viewtopic.php?f=12&t=2253&p=5965#p5964
-            //http://forums.makemusic.com/viewtopic.php?f=12&t=2408&p=6558#p6556
-            //accidentals = k_flat_flat;
-        else if (acc == "natural-sharp")
-            accidentals = k_natural_sharp;
-        else if (acc == "natural-flat")
-            accidentals = k_natural_flat;
 
-//        //Tartini-style quarter-tone accidentals
-//        else if (acc == "quarter-flat")
-//        else if (acc == "quarter-sharp")
-//        else if (acc == "three-quarters-flat")
-//        else if (acc == "three-quarters-sharp")
-//        //quarter-tone accidentals that include arrows pointing down or up
-//        else if (acc == "sharp-down")
-//        else if (acc == "sharp-up")
-//        else if (acc == "natural-down")
-//        else if (acc == "natural-up")
-//        else if (acc == "flat-down")
-//        else if (acc == "flat-up")
-//        else if (acc == "triple-sharp")
-//        else if (acc == "triple-flat")
-//        //used in Turkish classical music
-//        else if (acc == "slash-quarter-sharp")
-//        else if (acc == "slash-sharp")
-//        else if (acc == "slash-flat")
-//        else if (acc == "double-slash-flat")
-//        //superscripted versions of the accidental signs, used in Turkish folk music
-//        else if (acc == "sharp-1")
-//        else if (acc == "sharp-2")
-//        else if (acc == "sharp-3")
-//        else if (acc == "sharp-5")
-//        else if (acc == "flat-1")
-//        else if (acc == "flat-2")
-//        else if (acc == "flat-3")
-//        else if (acc == "flat-4")
-//        //microtonal sharp and flat accidentals used in Iranian and Persian music
-//        else if (acc == "sori")
-//        else if (acc == "koron")
-
-        else
-        {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-            error_msg2(
-                "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
-        }
+        EAccidentals accidentals = get_accidentals();
         pNote->set_notated_accidentals(accidentals);
-        if (accidentals != k_no_accidentals)
-            pNote->force_to_display_accidentals();
+        pNote->force_to_display_accidentals();
     }
 
     //----------------------------------------------------------------------------------
@@ -5972,9 +5991,12 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <pitch> = <step>[<alter>]<octave>
-//@ attrb:   none
-
+//@ <pitch>
+//@ <!ELEMENT pitch (step, alter?, octave)>
+//@ <!ELEMENT step (#PCDATA)>
+//@ <!ELEMENT alter (#PCDATA)>
+//@ <!ELEMENT octave (#PCDATA)>
+//
 class PitchMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5986,28 +6008,23 @@ public:
     ImoObj* do_analysis() override
     {
         //anchor object is ImoNote
-        ImoNote* pNote = nullptr;
-        if (m_pAnchor && m_pAnchor->is_note())
-            pNote = static_cast<ImoNote*>(m_pAnchor);
-        else
-        {
-            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not note");
+        ImoNote* pNote = get_anchor_as_note();
+        if (!pNote)
             return nullptr;
-        }
 
-        // <step>
+        // step
         string step = (get_mandatory("step") ? m_childToAnalyse.value() : "C");
 
-        // [<alter>]
-        string accidentals = (get_optional("alter") ? m_childToAnalyse.value() : "0");
+        // alter?
+        string alter = (get_optional("alter") ? m_childToAnalyse.value() : "0");
 
-        // <octave>
+        // octave
         string octave = (get_mandatory("octave") ? m_childToAnalyse.value() : "4");
 
         error_if_more_elements();
 
         int nStep = mxl_step_to_step(step);
-        float acc = mxl_alter_to_accidentals(accidentals);
+        float acc = mxl_alter_to_accidentals(alter);
         int nOctave = mxl_octave_to_octave(octave);
         pNote->set_pitch(nStep, nOctave, acc);
         return pNote;
@@ -6015,25 +6032,21 @@ public:
 
 protected:
 
-    float mxl_alter_to_accidentals(const string& accidentals)
+    float mxl_alter_to_accidentals(const string& alter)
     {
-        //@ The <alter> element is needed for the sounding pitch, whether the
-        //@ accidental is in the key signature or not. If you want to see an
-        //@ accidental, you need to use the <accidental> element. The <alter> is
-        //@ for what you hear; the <accidental> is for what you see.
+        //@ AWARE: <alter> is for pitch, not for displayed accidental. The displayed
+        //@ accidentals is encoded in an <accidental> element
         //@
         //@ The alter element represents chromatic alteration in number of
         //@ semitones (e.g., -1 for flat, 1 for sharp). Decimal values like 0.5
         //@ (quarter tone sharp) are used for microtones.
-        //@ AWARE: <alter> is for pitch, not for displayed accidental. The displayed
-        //@ accidentals is encoded in an <accidental> element
 
         float number;
-        std::istringstream iss(accidentals);
+        std::istringstream iss(alter);
         if ((iss >> number).fail())
         {
             error_msg2(
-                "Invalid or not supported <alter> value '" + accidentals + "'. Ignored.");
+                "Invalid or not supported <alter> value '" + alter + "'. Ignored.");
             return 0.0f;
         }
         return number;
@@ -6483,6 +6496,7 @@ protected:
                         ImFactory::inject(k_imo_content, pDoc) );
         add_to_model(pContent);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
+        pScore->set_accidentals_model( ImoScore::k_pitch_and_notation_provided );
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
         m_pAnchor = pScore;

@@ -40,6 +40,7 @@ namespace lomse
 
 //forward declarations
 class GmoShapeAccidentals;
+class GmoShapeAccidental;
 class GmoShape;
 class ScoreMeter;
 
@@ -64,12 +65,18 @@ public:
                                       bool fCautionary=false,
                                       Color color=Color(0,0,0));
 
+    //helper, for KeyEngraver or other
+    GmoShapeAccidental* create_shape_for_glyph(int iGlyph, UPoint pos, Color color,
+                                               ImoObj* pCreatorImo, ShapeId idx);
+    static int get_glyph_for(int accidental);
+
+
 protected:
     void find_glyphs();
     void create_container_shape(UPoint pos);
     void add_glyphs_to_container_shape(UPoint pos);
-    LUnits glyph_offset(int iGlyph);
     void add_voice(VoiceRelatedShape* pVRS);
+    LUnits glyph_offset(int iGlyph);
 
     int m_glyphs[4];
     int m_numGlyphs;

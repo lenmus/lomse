@@ -81,6 +81,7 @@ class ColStaffObjsEntry;
 class LdpElement;
 class SoundEventsTable;
 class Document;
+class DiatonicPitch;
 class EventHandler;
 class Control;
 class ScorePlayerCtrl;
@@ -270,6 +271,14 @@ enum EClef
     k_clef_TAB,             ///< Tablature scores
     k_clef_none,            ///< none displayed, but behave as G2
     k_max_clef,             ///< Last element, for loops and checks
+
+    //clef sign, for clefs specified as sign and line
+    k_clef_sign_G,              ///< G clef
+    k_clef_sign_F,              ///< F clef
+    k_clef_sign_C,              ///< C clef
+    k_clef_sign_percussion,     ///< Percussion clef
+    k_clef_sign_TAB,            ///< For tablature
+    k_clef_sign_none,           ///< none
 };
 
 //-----------------------------------------------------------------------------
@@ -320,6 +329,8 @@ enum EKeySignature
     k_key_d,                    ///< D minor key signature
     k_max_minor_key = k_key_d,  ///< Maximum value for valid minor key signatures = D minor
     k_max_key = k_key_d,        ///< Maximum value for valid key signatures = D minor
+
+    k_key_non_standard,         ///< For non-standard keys
 };
 #define k_num_keys k_max_key - k_min_key + 1
 
@@ -343,6 +354,7 @@ enum EKeyMode
     k_key_mode_ionian,
     k_key_mode_locrian,
 };
+
 
 //-----------------------------------------------------------------------------
 /** @ingroup enumerations
@@ -368,6 +380,125 @@ enum EKeyFifths
     k_fifths_B,                    ///< B
     k_fifths_Fs,                   ///< F-sharp
     k_fifths_Cs,                   ///< C-sharp
+};
+
+
+//---------------------------------------------------------------------------------------
+// Note steps: 'step' refers to the diatonic note name in the octave
+/** @ingroup enumerations
+
+    This enum describes valid note steps. 'step' refers to the diatonic note name in the octave
+
+    @#include <lomse_pitch.h>
+*/
+enum ESteps
+{
+    k_no_pitch = -1,    ///< No pitch assigned
+    k_step_undefined = -1,  ///< No step assigned
+    k_step_C = 0,       ///< C note (Do)
+    k_step_D,           ///< D note (Re)
+    k_step_E,           ///< E note (Mi)
+    k_step_F,           ///< F note (Fa)
+    k_step_G,           ///< G note (Sol)
+    k_step_A,           ///< A note (La)
+    k_step_B,           ///< B note (Si)
+};
+
+
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes valid octave numbers.
+    The octave is represented by a number in the range 0..9 (scientific notation).
+    This is the same meaning as in MIDI (note A in octave 4 = 440Hz).
+    The lowest MIDI octave (-1) is not defined.
+
+    @#include <lomse_pitch.h>
+*/
+enum EOctave
+{
+    k_octave_undefined = -9,    ///< Octave is not defined
+    k_octave_0 = 0,     ///< Octave 0. C0 = 16.352 Hz
+    k_octave_1,         ///< Octave 1 (first octave, contra octave). C1 = 32.703 Hz
+    k_octave_2,         ///< Octave 2
+    k_octave_3,         ///< Octave 3
+    k_octave_4,         ///< Octave 4. C4 = middle C. A4 = 440 Hz
+    k_octave_5,         ///< Octave 5
+    k_octave_6,         ///< Octave 6
+    k_octave_7,         ///< Octave 7
+    k_octave_8,         ///< Octave 8
+    k_octave_9,         ///< Octave 9. B9 = 15,804.3 Hz
+};
+
+
+//---------------------------------------------------------------------------------------
+// Accidentals
+/** @ingroup enumerations
+
+    This enum describes valid accidentals.
+
+    @#include <lomse_pitch.h>
+*/
+enum EAccidentals
+{
+    k_invalid_accidentals = -1,     ///< Invalid value for accidentals
+    k_no_accidentals = 0,           ///< No accidental sign
+
+    //standard accidentals
+    k_natural,                      ///< Natural accidental sign
+    k_flat,                         ///< Flat accidental sign (b)
+    k_sharp,                        ///< Sharp accidental sign (#)
+    k_flat_flat,                    ///< Two consecutive flat signs (bb)
+    k_double_sharp,                 ///< The double sharp symbol (x)
+    k_sharp_sharp,                  ///< Two consecutive sharp signs (##)
+    k_natural_flat,                 ///< Natural sign followed by flat sign
+    k_natural_sharp,                ///< Natural sign followed by sharp sign
+	k_acc_triple_sharp,             ///< Triple sharp accidental
+	k_acc_triple_flat,              ///< Triple flat accidental
+
+    //microtonal accidentals: Tartini-style quarter-tone accidentals
+    k_acc_quarter_flat,             ///< microtonal: quarter flat accidental
+    k_acc_quarter_sharp,            ///< microtonal: quarter sharp accidental
+	k_acc_three_quarters_flat,      ///< microtonal: three quarters flat accidental
+	k_acc_three_quarters_sharp,     ///< microtonal: three quarters sharp accidental
+
+    //microtonal accidentals: quarter-tone accidentals that include arrows pointing down or up
+	k_acc_sharp_down,               ///< microtonal: sharp down accidental
+	k_acc_sharp_up,                 ///< microtonal: sharp up accidental
+	k_acc_natural_down,             ///< microtonal: natural down accidental
+	k_acc_natural_up,               ///< microtonal: natural up accidental
+	k_acc_flat_down,                ///< microtonal: flat down accidental
+	k_acc_flat_up,                  ///< microtonal: flat up accidental
+	k_acc_double_sharp_down,        ///< microtonal: double sharp down accidental
+	k_acc_double_sharp_up,          ///< microtonal: double sharp up accidental
+	k_acc_flat_flat_down,           ///< microtonal: flat flat down accidental
+	k_acc_flat_flat_up,             ///< microtonal: flat flat up accidental
+	k_acc_arrow_down,               ///< microtonal: arrow down accidental
+	k_acc_arrow_up,                 ///< microtonal: arrow up accidental
+
+	//accidentals used in Turkish classical music
+	k_acc_slash_quarter_sharp,      ///< Turkish classical music Küçük mücenneb (sharp)
+	k_acc_slash_sharp,              ///< Turkish classical music: Büyük mücenneb (sharp)
+	k_acc_slash_flat,               ///< Turkish classical music: Bakiye (flat)
+	k_acc_double_slash_flat,        ///< Turkish classical music: Büyük mücenneb (flat)
+
+	//superscripted versions of standard accidental signs, used in Turkish folk music
+	k_acc_sharp_1,                  ///< Turkish folk music: sharp 1 accidental
+	k_acc_sharp_2,                  ///< Turkish folk music: sharp 2 accidental
+	k_acc_sharp_3,                  ///< Turkish folk music: sharp 3 accidental
+	k_acc_sharp_5,                  ///< Turkish folk music: sharp 5 accidental
+	k_acc_flat_1,                   ///< Turkish folk music: flat 1 accidental
+	k_acc_flat_2,                   ///< Turkish folk music: flat 2 accidental
+	k_acc_flat_3,                   ///< Turkish folk music: flat 3 accidental
+	k_acc_flat_4,                   ///< Turkish folk music: flat 4 accidental
+
+    //microtonal flat and sharp accidentals used in Iranian and Persian music
+	k_acc_sori,                     ///< Persian sori accidental
+	k_acc_koron,                    ///< Persian koron accidental
+
+	//the ‘other’ accidental covers accidentals other than those listed here.
+    //it is usually used in combination with the SMuFl glyph to use
+	k_acc_other,                    ///< other. Should specify SMuFl glyph to use
 };
 
 
@@ -3959,40 +4090,35 @@ public:
 class ImoClef : public ImoStaffObj
 {
 protected:
-    int m_clefType;
-    int m_symbolSize;
+    int m_sign = k_clef_sign_G;
+    int m_line = 2;
+    int m_octaveChange = 0;
+    int m_symbolSize = k_size_default;
 
     friend class ImFactory;
-    ImoClef()
-        : ImoStaffObj(k_imo_clef)
-        , m_clefType(k_clef_G2)
-        , m_symbolSize(k_size_default)
-    {
-    }
+    ImoClef() : ImoStaffObj(k_imo_clef) {}
 
 public:
     ~ImoClef() override {}
 
-    //getters and setters
-    inline int get_clef_type()
-    {
-        return m_clefType;
-    }
-    inline void set_clef_type(int type)
-    {
-        m_clefType = type;
-    }
-    inline int get_symbol_size()
-    {
-        return m_symbolSize;
-    }
-    inline void set_symbol_size(int symbolSize)
-    {
-        m_symbolSize = symbolSize;
-    }
+    //building
+    void set_clef(int sign, int line, int octaveChange);
+    inline void set_symbol_size(int symbolSize) { m_symbolSize = symbolSize; }
 
-    //properties
+    //deprecated, use set_clef()
+    void set_clef_type(int type);
+
+    //getters and info
+    int get_clef_type() const;
+    inline int get_sign() { return m_sign; }
+    inline int get_line() { return m_line; }
+    inline int get_octave_change() { return m_octaveChange; }
+    inline int get_symbol_size() { return m_symbolSize; }
+    int get_default_octave();
+    int get_octave();
+    DiatonicPitch get_first_ledger_line_pitch();
     bool can_generate_secondary_shapes() override { return true; }
+    bool supports_accidentals();
 
 };
 
@@ -5243,45 +5369,108 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** Helper struct with all the information for a key signature accidental
+*/
+struct KeyAccidental
+{
+    int step;           //as step for notes pitch
+    float alter;        //as alter for notes pitch
+    int accidental;     //symbol to use, from EAccidentals, for disambiguating microtonal accidentals
+    //bool cancel,      //default = no
+    //smufl,            //SMuFl symbol to use
+
+    KeyAccidental()
+    {
+        initialize();
+    }
+
+    KeyAccidental(int s, float alt, int acc)
+        : step(s)
+        , alter(alt)
+        , accidental(acc)
+    {
+    }
+
+    void initialize()
+    {
+        step = k_step_undefined;
+        alter = 0.0f;
+        accidental = k_no_accidentals;
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class ImoKeySignature : public ImoStaffObj
 {
 protected:
 
-    //Variable only valid for standard key signatures
+    bool m_fStandard = true;       //true for standard key signatures
+
+        //Variables only valid for standard key signatures (is_standard() == true)
+
     //Standard key signatures are represented by the number of flats and sharps, plus an
     //optional mode for major/minor/other distinctions.
-    /** Number of flats or sharps (negative numbers are used for flats and positive
-        numbers for sharps), reflecting the key's placement within the circle of fifths
-        (hence the name of this variable).
-    */
-    int m_fifths;
-    int m_keyMode;      ///< A value from EKeyModes
+    int m_fifths = 0;                   //flats or sharps number. Negative: flats, positive: sharps
+    int m_keyMode = k_key_mode_none;    //a value from enum EKeyMode
+    bool m_fCancel = false;             //true to cancel any previous key before this one appears
+    //int m_cancelLocation = (left | right | before-barline)
+
+
+        //Variables only valid for non-standard key signatures (is_standard() == false)
+
+    //Non-traditional key signatures are represented using a vector of altered tones.
+	KeyAccidental m_accidentals[7];
+
+
+        //Common variables, valid for all key signatures, standard and non-standard
+
+    //octave for each accidental, from left to right, to place the accidental in
+    //non-standard positions. Value -1 means 'not defined', that is, use standard
+    //positions for standard keys; for non-standard keys the position is not defined:
+    //do your best
+	int m_octave[7] = {-1,-1,-1,-1,-1,-1,-1};
+
+
 
     friend class ImFactory;
-    ImoKeySignature()
-        : ImoStaffObj(k_imo_key_signature)
-        , m_fifths(0)
-        , m_keyMode(k_key_mode_major)
-    {
-    }
+    ImoKeySignature() : ImoStaffObj(k_imo_key_signature) { m_staff = -1; }
+    //AWARE: In constructor m_staff is set to -1, meaning “common for all staves”. Then,
+    //in model builder, in method:
+    //    void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature()
+    //the entry is added to all staves and m_staff is changed to 0. But if m_staff is
+    //set (e.g. in MusicXML analyser), the key signature is added only to that staff
+    //and the value of m_staff is preserved.
+
 
 public:
     ~ImoKeySignature() override {}
 
-    //getters and setters
-    int get_key_type();
-    void set_key_type(int type);
-    inline int get_fifths() { return m_fifths; }
-    inline void set_fifths(int fifths) { m_fifths = fifths; }
+    //building
+    void set_standard_key(int fifths, bool fMajor);
+    void set_non_standard_key(const KeyAccidental (&acc)[7]);
+    void set_key_type(int type);    //TODO: remove. Still used in some methods
+    inline void set_octave(int i, int value, bool UNUSED(fCancel)) { m_octave[i] = value; }
+
+
+    //information and getters
+    int get_key_type() const;
+    inline int get_fifths() const { return m_fifths; }
+    inline bool is_standard() const { return m_fStandard; }
+    inline KeyAccidental& get_accidental(int i) { return m_accidentals[i]; }
+    bool has_accidentals();
+    inline int get_octave(int i) { return m_octave[i]; }
+
 
     //operations
     void transpose(const int semitones);
 
-    //overrides: key signatures always in staff 0
-    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
+//    //overrides: key signatures always in staff 0
+//    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
 
     //properties
     bool can_generate_secondary_shapes() override { return true; }
+
+protected:
 
 };
 
@@ -5953,14 +6142,15 @@ public:
 class ImoScore : public ImoBlockLevelObj      //ImoBlocksContainer
 {
 protected:
-    int             m_version;
-    ColStaffObjs*   m_pColStaffObjs;
-    SoundEventsTable* m_pMidiTable;
-    float           m_scaling;              //global scaling tenths -> LUnits
-    ImoSystemInfo   m_systemInfoFirst;
-    ImoSystemInfo   m_systemInfoOther;
+    int m_version = 0;                      //LDP source file version
+    int m_accidentalsModel = k_only_notation_provided;  //how pitch//accidentals are initialized
+    ColStaffObjs* m_pColStaffObjs = nullptr;
+    SoundEventsTable* m_pMidiTable = nullptr;
+    float m_scaling;                        //global scaling tenths -> LUnits
+    ImoSystemInfo m_systemInfoFirst;
+    ImoSystemInfo m_systemInfoOther;
     std::list<ImoScoreTitle*> m_titles;     //titles are added as children nodes. This list is
-                                            //kept for quick access. Do not delete in destructor.
+                                            //  kept for quick access. Do not delete in destructor.
     std::map<string, ImoStyle*> m_nameToStyle;
 
     friend class ImFactory;
@@ -5971,16 +6161,28 @@ protected:
 public:
     ~ImoScore() override;
 
-    //getters and setters
+    //to support different models for encoding notes in source files
+    enum {
+        k_pitch_and_notation_provided = 0,  //notes are instantiated with pitch and accidentals
+                                            //  (e.g. MusicXML). Nothing to compute
+        k_only_notation_provided,           //notes are instantiated with notated accidentals
+                                            //  (e.g. LDP). Pitch has to be computed
+    };
+
+    //building
+    inline void set_version(int version) { m_version = version; }
+    void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
+    void set_global_scaling(float millimeters, float tenths);
+    inline void set_accidentals_model(int value) { m_accidentalsModel = value; }
+
+    //getters and info
     std::string get_version_string();
     inline int get_version_major() { return m_version/100; }
     inline int get_version_minor() { return m_version % 100; }
     inline int get_version_number() { return m_version; }
-    inline void set_version(int version) { m_version = version; }
+    inline int get_accidentals_model() { return m_accidentalsModel; }
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
-    void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
-    void set_global_scaling(float millimeters, float tenths);
     inline LUnits tenths_to_logical(Tenths value) { return m_scaling * value; }
 
     //required by Visitable parent class

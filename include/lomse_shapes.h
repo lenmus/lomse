@@ -92,7 +92,6 @@ class GmoShapeAccidental : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class AccidentalsEngraver;
-    friend class KeyEngraver;
     GmoShapeAccidental(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,

@@ -35,6 +35,7 @@
 #include "lomse_shapes.h"
 #include "lomse_score_meter.h"
 #include "lomse_staffobjs_cursor.h"
+#include "lomse_accidentals_engraver.h"
 
 
 namespace lomse
@@ -54,408 +55,344 @@ KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos,
-                                    StaffObjsCursor* pCursor,
-                                    Color color)
+GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, ImoClef* pClef, UPoint uPos,
+                                    StaffObjsCursor* pCursor, Color color)
 {
     m_pCreatorImo = pKey;
     m_nKeyType = pKey->get_key_type();
     m_fontSize = determine_font_size();
     m_color = color;
 
+    if (pKey->is_standard())
+        return create_shape_for_standard_key(pKey, pClef, uPos, pCursor);
+    else
+        return create_shape_for_non_standard_key(pKey, pClef, uPos, pCursor);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* KeyEngraver::create_shape_for_standard_key(ImoKeySignature* pKey,
+                                                     ImoClef* pClef, UPoint uPos,
+                                                     StaffObjsCursor* pCursor)
+{
     //create the container shape object
     ShapeId idx = 0;
-    m_pKeyShape = LOMSE_NEW GmoShapeKeySignature(pKey, idx, uPos, color, m_libraryScope);
-    //m_pKeyShape->SetShapeLevel(lm_eMainShape);
+    m_pKeyShape = LOMSE_NEW GmoShapeKeySignature(pKey, idx, uPos, m_color, m_libraryScope);
 
-    int numAccidentals = get_num_fifths(m_nKeyType);
+    if (!pClef || !pClef->supports_accidentals())
+        return m_pKeyShape;
+
+    //add accidentals to the shape
+    int numAccidentals = pKey->get_fifths();
     if (numAccidentals == 0)
     {
+        //cancel_previous_key
         ImoKeySignature* pPrevKey = pCursor ? pCursor->get_key_for_instr_staff(m_iInstr, m_iStaff) : nullptr;
-
-        if (pPrevKey)
-        {
-            const int prevNumAccidentals = get_num_fifths(pPrevKey->get_key_type());
-
-            //display naturals to let a performer know about the key change
-            if (prevNumAccidentals > 0)
-            {
-                compute_positions_for_sharps(clefType);
-                add_accidentals(prevNumAccidentals, k_glyph_natural_accidental, uPos);
-            }
-            else if (prevNumAccidentals < 0)
-            {
-                compute_positions_for_flats(clefType);
-                add_accidentals(-prevNumAccidentals, k_glyph_natural_accidental, uPos);
-            }
-        }
+        if (pPrevKey && pPrevKey->has_accidentals())
+            cancel_key(pPrevKey, pClef, uPos);
     }
     else if (numAccidentals > 0)
     {
-        compute_positions_for_sharps(clefType);
-        if (m_nKeyType != k_key_C)      //for TAB clef
-            add_accidentals(numAccidentals, k_glyph_sharp_accidental, uPos);
+        if (numAccidentals <= 7)
+            add_sharps(1, numAccidentals, uPos, k_glyph_sharp_accidental, pClef, pKey);
+        else
+        {
+            int iStart = numAccidentals - 6;
+            uPos = add_sharps(iStart, 7, uPos, k_glyph_sharp_accidental, pClef, pKey);
+            add_sharps(1, iStart-1, uPos, k_glyph_double_sharp_accidental, pClef, pKey);
+        }
     }
     else
     {
-        compute_positions_for_flats(clefType);
-        if (m_nKeyType != k_key_C)      //for TAB clef
-            add_accidentals(-numAccidentals, k_glyph_flat_accidental, uPos);
+        if (numAccidentals >= -7)
+            add_flats(1, -numAccidentals, uPos, k_glyph_flat_accidental, pClef, pKey);
+        else
+        {
+            int iStart = -numAccidentals - 6;
+            uPos = add_flats(iStart, 7, uPos, k_glyph_flat_accidental, pClef, pKey);
+            add_flats(1, iStart-1, uPos, k_glyph_double_flat_accidental, pClef, pKey);
+        }
     }
     return m_pKeyShape;
 }
 
 //---------------------------------------------------------------------------------------
-void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
+GmoShape* KeyEngraver::create_shape_for_non_standard_key(ImoKeySignature* pKey,
+                                                         ImoClef* pClef, UPoint uPos,
+                                                         StaffObjsCursor* pCursor)
 {
-    LUnits x = uPos.x;
-    const LUnits space = (iGlyph == k_glyph_natural_accidental) ? tenths_to_logical(LOMSE_SPACE_BETWEEN_KEY_NATURALS) : 0.0f;
-    for (int i=1; i <= numAccidentals; i++)
+    //create the container shape object
+    ShapeId idx = 0;
+    m_pKeyShape = LOMSE_NEW GmoShapeKeySignature(pKey, idx, uPos, m_color, m_libraryScope);
+
+    if (!pClef || !pClef->supports_accidentals())
+        return m_pKeyShape;
+
+    //space between accidentals
+    const LUnits space = tenths_to_logical(LOMSE_SPACE_BETWEEN_KEY_ACCIDENTALS);
+
+    //cancel_previous_key
+    //TODO: cancel only when new key signature is 0 accidentals?
+    //  This behaviour is not coherent with that of standard key signatures. An option at
+    //  document level (overriding a global option for default behaviour) is needed. And
+    //  the behaviour should be the same for standard and non-standard.
+    ImoKeySignature* pPrevKey = pCursor ? pCursor->get_key_for_instr_staff(m_iInstr, m_iStaff) : nullptr;
+    if (pPrevKey && pPrevKey->has_accidentals())
+        uPos = cancel_key(pPrevKey, pClef, uPos);
+
+    //add accidentals to the shape
+    for (int i=0; i < 7; ++i)
     {
-        Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph)
-                         + m_tPos[i] + 50.0f;
-        LUnits y = uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
-        GmoShape* pSA = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
-                                               m_color, m_libraryScope, m_fontSize);
+        KeyAccidental& acc = pKey->get_accidental(i);
+        if (acc.step != k_step_undefined && acc.accidental != k_no_accidentals)
+        {
+            //accidental position is not standardized. Use positions for sharps
+            Tenths yShift = compute_accidental_shift(acc.step, pKey->get_octave(i), pClef, true);
+            uPos = add_accidental(acc.accidental, uPos, yShift);
+            uPos.x += space;
+        }
+    }
+    return m_pKeyShape;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint KeyEngraver::cancel_key(ImoKeySignature* pKey, ImoClef* pClef, UPoint uPos)
+{
+    if (pKey->is_standard())
+    {
+        const int numAccidentals = pKey->get_fifths();
+
+        //display naturals to let a performer know about the key change
+        if (numAccidentals > 0)
+        {
+            int iMax = (numAccidentals <= 7 ? numAccidentals : 7);
+            uPos = add_sharps(1, iMax, uPos, k_glyph_natural_accidental, pClef, pKey);
+        }
+        else if (numAccidentals < 0)
+        {
+            int iMax = (-numAccidentals <= 7 ? -numAccidentals : 7);
+            uPos = add_flats(1, iMax, uPos, k_glyph_natural_accidental, pClef, pKey);
+        }
+    }
+    else
+    {
+        const LUnits space = tenths_to_logical(LOMSE_SPACE_BETWEEN_KEY_ACCIDENTALS);
+
+        for (int i=0; i < 7; ++i)
+        {
+            KeyAccidental& acc = pKey->get_accidental(i);
+            if (acc.step != k_step_undefined && acc.accidental != k_no_accidentals)
+            {
+                //accidental position is not standardized. Use positions for sharps
+                Tenths yShift = compute_accidental_shift(acc.step, pKey->get_octave(i), pClef, true);
+                uPos = add_accidental(k_glyph_natural_accidental, uPos, yShift);
+                uPos.x += space;
+            }
+        }
+    }
+
+    return uPos;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint KeyEngraver::add_accidental(int acc, UPoint uPos, Tenths yShift)
+{
+    int iGlyph = AccidentalsEngraver::get_glyph_for(acc);
+    LUnits y = uPos.y + tenths_to_logical(yShift);
+
+    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff, m_fontSize);
+    GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(uPos.x, y),
+                                                 m_color, m_pCreatorImo, 0);
+    m_pKeyShape->add(pSA);
+    uPos.x += pSA->get_width();
+
+    return uPos;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint KeyEngraver::add_flats(int iStart, int iEnd, UPoint uPos, int iGlyph,
+                              ImoClef* pClef, ImoKeySignature* pKey)
+{
+    return add_accidentals(iStart, iEnd, uPos, iGlyph, pClef, pKey, false);
+}
+
+//---------------------------------------------------------------------------------------
+UPoint KeyEngraver::add_sharps(int iStart, int iEnd, UPoint uPos, int iGlyph,
+                               ImoClef* pClef, ImoKeySignature* pKey)
+{
+    return add_accidentals(iStart, iEnd, uPos, iGlyph, pClef, pKey, true);
+}
+
+//---------------------------------------------------------------------------------------
+UPoint KeyEngraver::add_accidentals(int iStart, int iEnd, UPoint uPos, int iGlyph,
+                                    ImoClef* pClef, ImoKeySignature* pKey,
+                                    bool fAtSharpPosition)
+{
+    const LUnits space = tenths_to_logical(LOMSE_SPACE_BETWEEN_KEY_ACCIDENTALS);
+    const int sharps[7] = { k_step_F, k_step_C, k_step_G, k_step_D, k_step_A, k_step_E, k_step_B };
+    const int flats[7] = { k_step_B, k_step_E, k_step_A, k_step_D, k_step_G, k_step_C, k_step_F };
+
+    LUnits x = uPos.x;
+    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff, m_fontSize);
+
+    for (int i=iStart-1; i < iEnd; i++)
+    {
+        int j = (i < 7 ? i : i - 8);
+
+        int accOctave = pKey->get_octave(j);
+        int step = (fAtSharpPosition ? sharps[j] : flats[j]);
+        Tenths shift = compute_accidental_shift(step, accOctave, pClef, fAtSharpPosition);
+        LUnits y = uPos.y + tenths_to_logical(shift);
+
+        GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(x, y),
+                                                     m_color, m_pCreatorImo, 0);
         m_pKeyShape->add(pSA);
         x += pSA->get_width() + space;
     }
+    return UPoint(x, uPos.y);
 }
 
 //---------------------------------------------------------------------------------------
-void KeyEngraver::compute_positions_for_sharps(int clefType)
+Tenths KeyEngraver::compute_accidental_shift(int accStep, int accOctave, ImoClef* pClef,
+                                             bool fAtSharpPosition)
 {
-    switch(clefType)
+    // Returns the shift (Tenths) referred to the first ledger line of the staff (bellow)
+
+    DiatonicPitch clefPitch = pClef->get_first_ledger_line_pitch();
+
+    //compute pitch for accidental line/space
+    if (accOctave == -1)
     {
-        case k_clef_G2:
-        case k_clef_8_G2:
-        case k_clef_G2_8:
-        case k_clef_15_G2:
-        case k_clef_G2_15:
-            m_tPos[1] = - 50.0f;        //line 5 (Fa)
-            m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Do)
-            m_tPos[3] = - 55.0f;        //space above line 5 (Sol)
-            m_tPos[4] = - 40.0f;        //line 4 (Re)
-            m_tPos[5] = - 25.0f;        //space between lines 2 & 3 (La)
-            m_tPos[6] = - 45.0f;        //space between lines 4 & 5 (Mi)
-            m_tPos[7] = - 30.0f;        //line 3 (Si)
-            break;
-
-        case k_clef_F4:
-        case k_clef_8_F4:
-        case k_clef_F4_8:
-        case k_clef_15_F4:
-        case k_clef_F4_15:
-            m_tPos[1] = - 40.0f;        //line 4 (Fa)
-            m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Do)
-            m_tPos[3] = - 45.0f;        //space between lines 4 & 5 (Sol)
-            m_tPos[4] = - 30.0f;        //line 3 (Re)
-            m_tPos[5] = - 15.0f;        //line 5 (La)
-            m_tPos[6] = - 35.0f;        //space between lines 3 & 4 (Mi)
-            m_tPos[7] = - 20.0f;        //space aboveline 5 (Si)
-            break;
-
-        case k_clef_F3:
-            m_tPos[1] = - 30.0f;		//line 3 (Fa)
-            m_tPos[2] = - 50.0f;      //line 5 (Do)
-            m_tPos[3] = - 35.0f;      //space between lines 3 & 4 (Sol)
-            m_tPos[4] = - 20.0f;      //line 2 (Re)
-            m_tPos[5] = - 40.0f;      //line 4 (La)
-            m_tPos[6] = - 25.0f;      //space between lines 2 & 3 (Mi)
-            m_tPos[7] = - 45.0f;      //space between lines 4 & 5 (Si)
-            break;
-
-        case k_clef_C1:
-            m_tPos[1] = - 25.0f;        //space between lines 2 & 3 (Fa)
-            m_tPos[2] = - 10.0f;        //line 1 (Do)
-            m_tPos[3] = - 30.0f;        //line 3 (Sol)
-            m_tPos[4] = - 15.0f;        //space between lines 1 & 2 (Re)
-            m_tPos[5] = - 35.0f;        //space between lines 3 & 4 (La)
-            m_tPos[6] = - 20.0f;        //line 2 (Mi)
-            m_tPos[7] = - 40.0f;        //linea 4 (Si)
-            break;
-
-        case k_clef_C2:
-            m_tPos[1] = - 35.0f;		//space between lines 3 & 4 (Fa)
-            m_tPos[2] = - 20.0f;        //line 2 (Do)
-            m_tPos[3] = - 40.0f;        //line 4 (Sol)
-            m_tPos[4] = - 25.0f;        //space between lines 2 & 3 (Re)
-            m_tPos[5] = - 10.0f;        //line 1 (La)
-            m_tPos[6] = - 30.0f;        //line 3 (Mi)
-            m_tPos[7] = - 15.0f;        //space between lines 1 & 2 (Si)
-            break;
-
-        case k_clef_C3:
-            m_tPos[1] = - 45.0f;		//space between lines 4 & 5 (Fa)
-            m_tPos[2] = - 30.0f;        //line 3 (Do)
-            m_tPos[3] = - 50.0f;        //line 5 (Sol)
-            m_tPos[4] = - 35.0f;        //space between lines 3 & 4 (Re)
-            m_tPos[5] = - 20.0f;        //line 2 (La)
-            m_tPos[6] = - 40.0f;        //line 4 (Mi)
-            m_tPos[7] = - 25.0f;        //space between lines 2 & 3 (Si)
-            break;
-
-        case k_clef_C4:
-            m_tPos[1] = - 20.0f;		//line 2 (Fa)
-            m_tPos[2] = - 40.0f;      //line 4 (Do)
-            m_tPos[3] = - 25.0f;      //space between lines 2 & 3 (Sol)
-            m_tPos[4] = - 45.0f;      //space between lines 4 & 5 (Re)
-            m_tPos[5] = - 30.0f;      //line 3 (La)
-            m_tPos[6] = - 50.0f;      //line 5 (Mi)
-            m_tPos[7] = - 35.0f;      //space between lines 3 & 4 (Si)
-            break;
-
-        case k_clef_C5:
-            m_tPos[1] = - 30.0f;        //line 3 (Fa)
-            m_tPos[2] = - 50.0f;        //line 5 (Do)
-            m_tPos[3] = - 35.0f;        //space between lines 3 & 4 (Sol)
-            m_tPos[4] = - 20.0f;        //line 2 (Re)
-            m_tPos[5] = - 40.0f;        //line 4 (La)
-            m_tPos[6] = - 25.0f;        //space between lines 2 & 3 (Mi)
-            m_tPos[7] = - 45.0f;        //space between lines 4 & 5 (Si)
-            break;
-
-        case k_clef_F5:
-            m_tPos[1] = - 50.0f;        //line 5 (Fa)
-            m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Do)
-            m_tPos[3] = - 20.0f;        //line 2 (Sol)
-            m_tPos[4] = - 40.0f;        //line 4 (Re)
-            m_tPos[5] = - 25.0f;        //space between lines 2 & 3 (La)
-            m_tPos[6] = - 45.0f;        //space between lines 4 & 5 (Mi)
-            m_tPos[7] = - 30.0f;        //line 3 (Si)
-            break;
-
-        case k_clef_G1:
-            m_tPos[1] = - 40.0f;        //line 4 (Fa)
-            m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Do)
-            m_tPos[3] = - 10.0f;        //line 1 (Sol)
-            m_tPos[4] = - 30.0f;        //line 3 (Re)
-            m_tPos[5] = - 15.0f;        //space between lines 1 & 2 (La)
-            m_tPos[6] = - 35.0f;        //space between lines 3 & 4 (Mi)
-            m_tPos[7] = - 20.0f;        //line 2 (Si)
-            break;
-
-        case k_clef_percussion:
-        case k_clef_TAB:
-        case k_clef_none:
-        case k_clef_undefined:
-            m_nKeyType = k_key_C;    //force not to draw any accidentals
-            break;
-
-        default:
-        {
-            LOMSE_LOG_ERROR("Program maintenance error: clef type %d not supported here!",
-                            clefType);
-            m_nKeyType = k_key_C;    //force not to draw any accidentals
-        }
+        accOctave = pClef->get_octave_change();
+        if (fAtSharpPosition)
+            accOctave += get_sharp_default_octave(accStep, pClef->get_sign(), pClef->get_line());
+        else
+            accOctave += get_flat_default_octave(accStep, pClef->get_sign(), pClef->get_line());
     }
+    DiatonicPitch accPitch(accStep, accOctave);
+
+    //compute shift
+    return Tenths((accPitch - clefPitch) * -5);
 }
 
 //---------------------------------------------------------------------------------------
-void KeyEngraver::compute_positions_for_flats(int clefType)
+int KeyEngraver::get_sharp_default_octave(int step, int clefSign, int clefLine)
 {
-    switch(clefType)
+    if (clefSign == k_clef_sign_G)
     {
-        case k_clef_G2:
-        case k_clef_8_G2:
-        case k_clef_G2_8:
-        case k_clef_15_G2:
-        case k_clef_G2_15:
-            m_tPos[1] = - 30.0f;		//line 3 (Si)
-            m_tPos[2] = - 45.0f;       //space between lines 4 & 5 (Mi)
-            m_tPos[3] = - 25.0f;       //space between lines 2 & 3 (La)
-            m_tPos[4] = - 40.0f;       //line 4 (Re)
-            m_tPos[5] = - 20.0f;       //line 2 (Sol)
-            m_tPos[6] = - 35.0f;       //space between lines 3 & 4 (Do)
-            m_tPos[7] = - 15.0f;       //space between lines 1 & 2 (Fa)
-            break;
-
-        case k_clef_F4:
-        case k_clef_8_F4:
-        case k_clef_F4_8:
-        case k_clef_15_F4:
-        case k_clef_F4_15:
-            m_tPos[1] = - 20.0f;		//line 2 (Si)
-            m_tPos[2] = - 35.0f;       //space between lines 3 & 4 (Mi)
-            m_tPos[3] = - 15.0f;       //space between lines 1 & 2 (La)
-            m_tPos[4] = - 30.0f;       //line 3 (Re)
-            m_tPos[5] = - 10.0f;      //line 1 (Sol)
-            m_tPos[6] = - 25.0f;       //space between lines 2 & 3 (Do)
-            m_tPos[7] = - 40.0f;       //linea 4 (Fa)
-            break;
-
-        case k_clef_F3:
-            m_tPos[1] = - 45.0f;		//space between lines 4 & 5 (Si)
-            m_tPos[2] = - 25.0f;       //space between lines 2 & 3 (Mi)
-            m_tPos[3] = - 40.0f;       //line 4 (La)
-            m_tPos[4] = - 20.0f;       //line 2 (Re)
-            m_tPos[5] = - 35.0f;       //space between lines 3 & 4 (Sol)
-            m_tPos[6] = - 50.0f;       //line 5 (Do)
-            m_tPos[7] = - 30.0f;       //line 3 (Fa)
-            break;
-
-        case k_clef_C1:
-            m_tPos[1] = - 40.0f;		//line 4 (Si)
-            m_tPos[2] = - 20.0f;       //line 2 (Mi)
-            m_tPos[3] = - 35.0f;       //space between lines 3 & 4 (La)
-            m_tPos[4] = - 15.0f;       //space between lines 1 & 2 (Re)
-            m_tPos[5] = - 30.0f;       //line 3 (Sol)
-            m_tPos[6] = - 10.0f;      //line 1 (Do)
-            m_tPos[7] = - 25.0f;       //space between lines 2 & 3 (Fa)
-            break;
-
-        case k_clef_C2:
-            m_tPos[1] = - 15.0f;       //space between lines 1 & 2 (Si)
-            m_tPos[2] = - 30.0f;       //line 3 (Mi)
-            m_tPos[3] = - 10.0f;      //line 1 (La)
-            m_tPos[4] = - 25.0f;       //space between lines 2 & 3 (Re)
-            m_tPos[5] = - 40.0f;       //line 4 (Sol)
-            m_tPos[6] = - 20.0f;       //line 2 (Do)
-            m_tPos[7] = - 35.0f;       //space between lines 3 & 4 (Fa)
-            break;
-
-        case k_clef_C3:
-            m_tPos[1] = - 25.0f;       //space between lines 2 & 3 (Si)
-            m_tPos[2] = - 40.0f;       //line 4 (Mi)
-            m_tPos[3] = - 20.0f;       //line 2 (La)
-            m_tPos[4] = - 35.0f;       //space between lines 3 & 4 (Re)
-            m_tPos[5] = - 50.0f;       //line 5 (Sol)
-            m_tPos[6] = - 30.0f;       //line 3 (Do)
-            m_tPos[7] = - 45.0f;       //space between lines 4 & 5 (Fa)
-            break;
-
-        case k_clef_C4:
-            m_tPos[1] = - 35.0f;       //space between lines 3 & 4 (Si)
-            m_tPos[2] = - 50.0f;       //line 5 (Mi)
-            m_tPos[3] = - 30.0f;       //line 3 (La)
-            m_tPos[4] = - 45.0f;       //space between lines 4 & 5 (Re)
-            m_tPos[5] = - 25.0f;       //space between lines 2 & 3 (Sol)
-            m_tPos[6] = - 40.0f;       //line 4 (Do)
-            m_tPos[7] = - 20.0f;       //line 2 (Fa)
-            break;
-
-        case k_clef_C5:
-            m_tPos[1] = - 45.0f;        //space between lines 4 & 5 (Si)
-            m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Mi)
-            m_tPos[3] = - 40.0f;        //line 4 (La)
-            m_tPos[4] = - 20.0f;        //line 2 (Re)
-            m_tPos[5] = - 35.0f;        //space between lines 3 & 4 (Sol)
-            m_tPos[6] = - 50.0f;        //line 5 (Do)
-            m_tPos[7] = - 30.0f;        //line 3 (Fa)
-            break;
-
-        case k_clef_F5:
-            m_tPos[1] = - 30.0f;        //line 3 (Si)
-            m_tPos[2] = - 45.0f;        //space between lines 4 & 5 (Mi)
-            m_tPos[3] = - 25.0f;        //space between lines 2 & 3 (La)
-            m_tPos[4] = - 40.0f;        //line 4 (Re)
-            m_tPos[5] = - 20.0f;        //line 2 (Sol)
-            m_tPos[6] = - 35.0f;        //space between lines 3 & 4 (Do)
-            m_tPos[7] = - 50.0f;        //linea 5 (Fa)
-            break;
-
-        case k_clef_G1:
-            m_tPos[1] = - 20.0f;		//line 2 (Si)
-            m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Mi)
-            m_tPos[3] = - 15.0f;        //space between lines 1 & 2 (La)
-            m_tPos[4] = - 30.0f;        //line 3 (Re)
-            m_tPos[5] = - 10.0f;        //line 1 (Sol)
-            m_tPos[6] = - 25.0f;        //space between lines 2 & 3 (Do)
-            m_tPos[7] = - 40.0f;        //line 4 (Fa)
-            break;
-
-        case k_clef_percussion:
-        case k_clef_TAB:
-        case k_clef_none:
-        case k_clef_undefined:
-            m_nKeyType = k_key_C;    //force not to draw any accidentals
-            break;
-
-        default:
-        {
-            LOMSE_LOG_ERROR("Program maintenance error: clef type %d not supported here!",
-                            clefType);
-            m_nKeyType = k_key_C;    //force not to draw any accidentals
-        }
+        if (step == k_step_A || step == k_step_B)
+            return 4;
+        else
+            return 5;
     }
-}
 
-//---------------------------------------------------------------------------------------
-int KeyEngraver::get_num_fifths(int keyType)
-{
-    switch(keyType)
+    if (clefSign == k_clef_sign_F)
     {
-        case k_key_C:
-        case k_key_a:
-            return 0;
-
-        //Sharps ---------------------------------------
-        case k_key_G:
-        case k_key_e:
-            return 1;
-
-        case k_key_D:
-        case k_key_b:
-            return 2;
-
-        case k_key_A:
-        case k_key_fs:
+        if (clefLine == 4 || clefLine == 5)
+        {
+            if (step == k_step_A || step == k_step_B)
+                return 2;
+            else
+                return 3;
+        }
+        else if (clefLine == 3)
             return 3;
+    }
 
-        case k_key_E:
-        case k_key_cs:
+    if (clefSign == k_clef_sign_C)
+    {
+        if (clefLine == 1)  //C1
+        {
+            if (step == k_step_C || step == k_step_D || step == k_step_E)
+                return 5;
+            else
+                return 4;
+        }
+
+        else if (clefLine == 2) //C2
             return 4;
 
-        case k_key_B:
-        case k_key_gs:
-            return 5;
-
-        case k_key_Fs:
-        case k_key_ds:
-            return 6;
-
-        case k_key_Cs:
-        case k_key_as:
-            return 7;
-
-
-        //Flats -------------------------------------------
-        case k_key_F:
-        case k_key_d:
-            return -1;
-
-        case k_key_Bf:
-        case k_key_g:
-            return -2;
-
-        case k_key_Ef:
-        case k_key_c:
-            return -3;
-
-        case k_key_Af:
-        case k_key_f:
-            return -4;
-
-        case k_key_Df:
-        case k_key_bf:
-            return -5;
-
-        case k_key_Gf:
-        case k_key_ef:
-            return -6;
-
-        case k_key_Cf:
-        case k_key_af:
-            return -7;
-
-        default:
+        else if (clefLine == 3) //C3
         {
-            LOMSE_LOG_ERROR("Program maintenance error: key type %d not supported here!",
-                            keyType);
-            return -7;
+            if (step == k_step_A || step == k_step_B)
+                return 3;
+            else
+                return 4;
+        }
+
+        else if (clefLine == 4) //C4
+        {
+            if (step == k_step_C || step == k_step_D || step == k_step_E)
+                return 4;
+            else
+                return 3;
+        }
+
+        else if (clefLine == 5) //C5
+        {
+            if (step == k_step_C || step == k_step_D)
+                return 4;
+            else
+                return 3;
         }
     }
+
+    return 4;
 }
+
+//---------------------------------------------------------------------------------------
+int KeyEngraver::get_flat_default_octave(int step, int clefSign, int clefLine)
+{
+    if (clefSign == k_clef_sign_G)
+    {
+        if (clefLine == 1)  //G1
+        {
+            if (step == k_step_C)
+                return 5;
+            else
+                return 4;
+        }
+        else if (clefLine == 2)  //G2
+        {
+            if (step == k_step_C || step == k_step_D || step == k_step_E)
+                return 5;
+            else
+                return 4;
+        }
+    }
+
+    if (clefSign == k_clef_sign_F)
+    {
+        if (clefLine == 4 || clefLine == 5)
+        {
+            if (step == k_step_E || step == k_step_D || step == k_step_C)
+                return 3;
+            else
+                return 2;
+        }
+        else if (clefLine == 3)
+            return 3;
+    }
+
+    if (clefSign == k_clef_sign_C)
+    {
+        if (clefLine == 1 || clefLine == 2)  //C1, C2
+            return 4;
+
+        else if (clefLine == 3 || clefLine == 4) //C3, C4
+        {
+            if (step == k_step_C || step == k_step_D || step == k_step_E)
+                return 4;
+            else
+                return 3;
+        }
+
+        else if (clefLine == 5) //C5
+            return 3;
+    }
+
+    return 4;
+}
+
 
 
 }  //namespace lomse

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -33,11 +33,13 @@
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
+#include "lomse_pitch.h"
 
 namespace lomse
 {
 
 //forward declarations
+class ImoClef;
 class ImoKeySignature;
 class GmoShape;
 class GmoShapeKeySignature;
@@ -60,15 +62,30 @@ public:
                 int iStaff);
     ~KeyEngraver() {}
 
-    GmoShape* create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos,
-                           StaffObjsCursor* pCursor,
-                           Color color=Color(0,0,0));
+    GmoShape* create_shape(ImoKeySignature* pKey, ImoClef* pClef, UPoint uPos,
+                           StaffObjsCursor* pCursor, Color color=Color(0,0,0));
 
 protected:
-    void compute_positions_for_flats(int clefType);
-    void compute_positions_for_sharps(int clefType);
-    void add_accidentals(int numAccidentals, int iGlyph, UPoint uPos);
-    int get_num_fifths(int keyType);
+    UPoint cancel_key(ImoKeySignature* pKey, ImoClef* pClef, UPoint uPos);
+
+    Tenths compute_accidental_shift(int accStep, int accOctave, ImoClef* pClef,
+                                    bool fAtSharpPosition);
+
+    int get_sharp_default_octave(int step, int clefSign, int clefLine);
+    int get_flat_default_octave(int step, int clefSign, int clefLine);
+
+    UPoint add_accidental(int iGlyph, UPoint uPos, LUnits yShift);
+    UPoint add_accidentals(int iStart, int iEnd, UPoint uPos, int iGlyph, ImoClef* pClef,
+                           ImoKeySignature* pKey, bool fAtSharpPosition);
+    UPoint add_flats(int iStart, int iEnd, UPoint uPos, int iGlyph, ImoClef* pClef,
+                     ImoKeySignature* pKey);
+    UPoint add_sharps(int iStart, int iEnd, UPoint uPos, int iGlyph, ImoClef* pClef,
+                      ImoKeySignature* pKey);
+
+    GmoShape* create_shape_for_standard_key(ImoKeySignature* pKey, ImoClef* pClef,
+                                            UPoint uPos, StaffObjsCursor* pCursor);
+    GmoShape* create_shape_for_non_standard_key(ImoKeySignature* pKey, ImoClef* pClef,
+                                                UPoint uPos, StaffObjsCursor* pCursor);
 
 };
 

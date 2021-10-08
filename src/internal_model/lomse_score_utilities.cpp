@@ -522,10 +522,7 @@ EKeySignature KeyUtilities::key_components_to_key_type(int fifths, EKeyMode mode
             case 7:         return k_key_Cs;
             default:
             {
-                stringstream ss;
-                ss << "[get_key_type] Invalid number of fifths (" << fifths
-                   << ") for major key.";
-                LOMSE_LOG_ERROR(ss.str());
+                //too many fifths. Not possible to convert to enum
                 return k_key_C;
             }
         }
@@ -551,10 +548,7 @@ EKeySignature KeyUtilities::key_components_to_key_type(int fifths, EKeyMode mode
             case 7:         return k_key_as;
             default:
             {
-                stringstream ss;
-                ss << "[get_key_type] Invalid number of fifths (" << fifths
-                   << ") for minor key.";
-                LOMSE_LOG_ERROR(ss.str());
+                //too many fifths. Not possible to convert to enum
                 return k_key_a;
             }
         }

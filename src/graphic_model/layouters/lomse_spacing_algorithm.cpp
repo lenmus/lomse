@@ -371,9 +371,8 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int idx = m_pSysCursor->staff_index();
                 bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 unsigned flags = fInProlog ? 0 : ShapesCreator::k_flag_small_clef;
-                int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         pagePos, clefType, 0, flags);
+                         pagePos, pClef, 0, flags);
                 pShape->assign_id_as_main_shape();
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iInstr, iStaff, pSO, pShape, fInProlog);
@@ -384,9 +383,9 @@ void ColumnsBuilder::collect_content_for_this_column()
                 unsigned flags = 0;
                 int idx = m_pSysCursor->staff_index();
                 bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
-                int clefType = m_pSysCursor->get_applicable_clef_type();
+                ImoClef* pClef = m_pSysCursor->get_applicable_clef();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         pagePos, clefType, 0, flags, m_pSysCursor);
+                         pagePos, pClef, 0, flags, m_pSysCursor);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iInstr, iStaff, pSO, pShape, fInProlog);
@@ -395,10 +394,10 @@ void ColumnsBuilder::collect_content_for_this_column()
             else
             {
                 m_fOther[iInstr] = true;
-                int clefType = m_pSysCursor->get_applicable_clef_type();
                 int octaveShift = m_pSysCursor->get_applicable_octave_shift();
+                ImoClef* pClef = m_pSysCursor->get_applicable_clef();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         pagePos, clefType, octaveShift, 0, m_pSysCursor);
+                         pagePos, pClef, octaveShift, 0, m_pSysCursor);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iInstr, iStaff, pSO, pShape);
 

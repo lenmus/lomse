@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -90,56 +90,82 @@ void AccidentalsEngraver::find_glyphs()
     if (m_fCautionary)
         m_glyphs[i++] = k_glyph_open_cautionary_accidental;
 
-    switch(m_accidentals)
-    {
-        case k_natural:
-            m_glyphs[i++] = k_glyph_natural_accidental;
-            break;
-        case k_sharp:
-            m_glyphs[i++] = k_glyph_sharp_accidental;
-            break;
-        case k_flat:
-            m_glyphs[i++] = k_glyph_flat_accidental;
-            break;
-        case k_flat_flat:
-            m_glyphs[i++] = k_glyph_double_flat_accidental;
-            break;
-        case k_double_sharp:
-            m_glyphs[i++] = k_glyph_double_sharp_accidental;
-            break;
-        case k_natural_flat:
-            m_glyphs[i++] = k_glyph_natural_accidental;
-            m_glyphs[i++] = k_glyph_flat_accidental;
-            break;
-        case k_natural_sharp:
-            m_glyphs[i++] = k_glyph_natural_accidental;
-            m_glyphs[i++] = k_glyph_sharp_accidental;
-            break;
-        case k_sharp_sharp:
-            m_glyphs[i++] = k_glyph_sharp_accidental;
-            m_glyphs[i++] = k_glyph_sharp_accidental;
-            break;
-        //case lm_eQuarterFlat:
-        //    m_glyphs[i++] = k_glyph_natural_accidental;
-        //    break;
-        //case lm_eQuarterSharp:
-        //    m_glyphs[i++] = k_glyph_natural_accidental;
-        //    break;
-        //case lm_eThreeQuartersFlat:
-        //    m_glyphs[i++] = k_glyph_natural_accidental;
-        //    break;
-        //case lm_eThreeQuartersSharp:
-        //    m_glyphs[i++] = k_glyph_natural_accidental;
-        //    break;
-        default:
-            m_glyphs[i++] = k_glyph_natural_accidental;
-            //LogMessage
-    }
+    m_glyphs[i++] = get_glyph_for(m_accidentals);
 
     if (m_fCautionary)
         m_glyphs[i++] = k_glyph_close_cautionary_accidental;
 
     m_numGlyphs = i;
+}
+
+//---------------------------------------------------------------------------------------
+int AccidentalsEngraver::get_glyph_for(int accidental)
+{
+    switch(accidental)
+    {
+        //standard accidentals
+        case k_natural:             return k_glyph_natural_accidental;
+        case k_sharp:               return k_glyph_sharp_accidental;
+        case k_flat:                return k_glyph_flat_accidental;
+        case k_flat_flat:           return k_glyph_double_flat_accidental;
+        case k_double_sharp:        return k_glyph_double_sharp_accidental;
+        case k_natural_flat:        return k_glyph_accidentalNaturalFlat;
+        case k_natural_sharp:       return k_glyph_accidentalNaturalSharp;
+        case k_sharp_sharp:         return k_glyph_accidentalSharpSharp;
+        case k_acc_triple_sharp:    return k_glyph_accidentalTripleSharp;
+        case k_acc_triple_flat:     return k_glyph_accidentalTripleFlat;
+
+        //microtonal accidentals: Tartini-style quarter-tone accidentals
+        case k_acc_quarter_flat:            return k_glyph_accidentalQuarterToneFlatStein;
+        case k_acc_quarter_sharp:           return k_glyph_accidentalQuarterToneSharpStein;
+        case k_acc_three_quarters_flat:     return k_glyph_accidentalThreeQuarterTonesFlatCouper;
+        case k_acc_three_quarters_sharp:    return k_glyph_accidentalThreeQuarterTonesSharpStein;
+
+        //microtonal accidentals: quarter-tone accidentals that include arrows pointing down or up
+        case k_acc_sharp_down:          return k_glyph_accidentalQuarterToneSharpArrowDown;
+        case k_acc_sharp_up:            return k_glyph_accidentalThreeQuarterTonesSharpArrowUp;
+        case k_acc_natural_down:        return k_glyph_accidentalQuarterToneFlatNaturalArrowDown;
+        case k_acc_natural_up:          return k_glyph_accidentalQuarterToneSharpNaturalArrowUp;
+        case k_acc_flat_down:           return k_glyph_accidentalThreeQuarterTonesFlatArrowDown;
+        case k_acc_flat_up:             return k_glyph_accidentalQuarterToneFlatArrowUp;
+        case k_acc_double_sharp_down:   return k_glyph_accidentalThreeQuarterTonesSharpArrowDown;
+        case k_acc_double_sharp_up:     return k_glyph_accidentalFiveQuarterTonesSharpArrowUp;
+        case k_acc_flat_flat_down:      return k_glyph_accidentalFiveQuarterTonesFlatArrowDown;
+        case k_acc_flat_flat_up:        return k_glyph_accidentalThreeQuarterTonesFlatArrowUp;
+        case k_acc_arrow_down:          return k_glyph_accidentalArrowDown;
+        case k_acc_arrow_up:            return k_glyph_accidentalArrowUp;
+
+        //accidentals used in Turkish classical music
+        case k_acc_slash_quarter_sharp: return k_glyph_accidentalKucukMucennebSharp;
+        case k_acc_slash_sharp:         return k_glyph_accidentalBuyukMucennebSharp;
+        case k_acc_slash_flat:          return k_glyph_accidentalBakiyeFlat;
+        case k_acc_double_slash_flat:   return k_glyph_accidentalBuyukMucennebFlat;
+
+    	//superscripted versions of standard accidental signs, used in Turkish folk music
+        case k_acc_sharp_1:     return k_glyph_accidental1CommaSharp;
+        case k_acc_sharp_2:     return k_glyph_accidental2CommaSharp;
+        case k_acc_sharp_3:     return k_glyph_accidental3CommaSharp;
+        case k_acc_sharp_5:     return k_glyph_accidental5CommaSharp;
+        case k_acc_flat_1:      return k_glyph_accidental1CommaFlat;
+        case k_acc_flat_2:      return k_glyph_accidental2CommaFlat;
+        case k_acc_flat_3:      return k_glyph_accidental3CommaFlat;
+        case k_acc_flat_4:      return k_glyph_accidental4CommaFlat;
+
+        //microtonal flat and sharp accidentals used in Iranian and Persian music
+        case k_acc_sori:    return k_glyph_accidentalSori;
+        case k_acc_koron:   return k_glyph_accidentalKoron;
+
+	    //other, usually used in combination with the SMuFl glyph
+        case k_acc_other:   return k_glyph_natural_accidental;
+            //TODO: use SMuFl glyph if specified
+
+        default:
+        {
+            LOMSE_LOG_ERROR("Program maintenance error?: Missing case for accidental %d. Natural accidental used.",
+                            accidental);
+            return k_glyph_natural_accidental;
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -156,17 +182,26 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
     LUnits x = pos.x;
     for (int i=0; i < m_numGlyphs; ++i)
     {
-        int iGlyph = m_glyphs[i];
-        LUnits y = pos.y + glyph_offset(iGlyph);
         GmoShapeAccidental* pShape =
-            LOMSE_NEW GmoShapeAccidental(m_pNote, 0, iGlyph, UPoint(x, y),
-                                         m_color, m_libraryScope, m_fontSize);
+                create_shape_for_glyph(m_glyphs[i], pos, m_color, m_pNote, 0);
+
         add_voice(pShape);
         m_pContainer->add(pShape);
         x += (pShape->get_left() - x) + pShape->get_width();
-        x += m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
-                                         m_iInstr, m_iStaff);
+        x += tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS);
     }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeAccidental* AccidentalsEngraver::create_shape_for_glyph(int iGlyph, UPoint pos,
+                                                                Color color,
+                                                                ImoObj* pCreatorImo,
+                                                                ShapeId idx)
+{
+    pos.y += glyph_offset(iGlyph);
+
+    return LOMSE_NEW GmoShapeAccidental(pCreatorImo, idx, iGlyph, pos, color,
+                                        m_libraryScope, m_fontSize);
 }
 
 //---------------------------------------------------------------------------------------
