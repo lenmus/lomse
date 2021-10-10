@@ -107,7 +107,7 @@ void TieEngraver::decide_placement()
     {
         if (m_pStartNoteShape->has_stem())
             m_fTieBelowNote = m_pStartNoteShape->is_up();
-        else if (m_pEndNoteShape->has_stem())
+        else if (m_pEndNoteShape && m_pEndNoteShape->has_stem())
             m_fTieBelowNote = m_pEndNoteShape->is_up();
         else
             m_fTieBelowNote = true;     //can go either up or down. I prefer below
