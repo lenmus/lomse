@@ -47,6 +47,7 @@ namespace lomse
 //forward declarations
 class FontStorage;
 class GraphicModel;
+class ImoClef;
 class ImoContentObj;
 class ImoScore;
 class ImoStaffObj;
@@ -363,7 +364,7 @@ public:
 
     //StaffObj shapes
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
-                                    UPoint pos, int clefType=0, int octaveShift=0,
+                                    UPoint pos, ImoClef* pClef=nullptr, int octaveShift=0,
                                     unsigned flags=0, StaffObjsCursor* pCursor=nullptr);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
                                   int idxStaff, VerticalProfile* pVProfile,

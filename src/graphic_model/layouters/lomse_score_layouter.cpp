@@ -1122,13 +1122,15 @@ ShapesCreator::~ShapesCreator()
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
-                                               UPoint pos, int clefType, int octaveShift,
+                                               UPoint pos, ImoClef* pClef, int octaveShift,
                                                unsigned flags, StaffObjsCursor* pCursor)
 {
     //factory method to create shapes for staffobjs
 
     if (!pSO->is_visible())
         return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
+
+    int clefType (pClef ? pClef->get_clef_type() : k_clef_undefined);
 
     switch (pSO->get_obj_type())
     {
@@ -1159,7 +1161,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             ImoKeySignature* pImo = static_cast<ImoKeySignature*>(pSO);
             KeyEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
-            return engrv.create_shape(pImo, clefType, pos, pCursor, color);
+            return engrv.create_shape(pImo, pClef, pos, pCursor, color);
         }
         case k_imo_note_regular:
         case k_imo_note_grace:

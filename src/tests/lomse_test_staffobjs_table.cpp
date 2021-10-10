@@ -488,7 +488,7 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n +f4 q v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 ++))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +f4 s v1 p1 (stem up)(beam 44 ==))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 --))" );
@@ -636,7 +636,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(time 4 4)" );
         CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(time 4 4)" );
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(n b5 w v1 p1)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(n a5 w v1 p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(n +a5 w v1 p1)" );
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 0,    0,      2,   576,   0, "(barline simple)" );

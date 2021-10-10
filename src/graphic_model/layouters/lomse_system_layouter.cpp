@@ -492,7 +492,6 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
             m_pSpAlgorithm->get_prolog_clef(m_iFirstCol, idxStaff);
         ImoClef* pClef = pClefEntry ? static_cast<ImoClef*>(pClefEntry->imo_object())
                                     : nullptr;
-        int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
 
         ColStaffObjsEntry* pKeyEntry =
             m_pSpAlgorithm->get_prolog_key(m_iFirstCol, idxStaff);
@@ -509,7 +508,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                 m_pagePos.x = xPos;
                 GmoShape* pShape =
                     m_pShapesCreator->create_staffobj_shape(pClef, iInstr, iStaff,
-                                                            m_pagePos, clefType);
+                                                            m_pagePos, pClef);
                 pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                 m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
                 xPos += pShape->get_width();
@@ -528,7 +527,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                 {
                     GmoShape* pShape =
                         m_pShapesCreator->create_staffobj_shape(pKey, iInstr, iStaff,
-                                                                m_pagePos, clefType);
+                                                                m_pagePos, pClef);
                     pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                     m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
                     xPos += pShape->get_width();
@@ -546,7 +545,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                 m_pagePos.x = xPos;
                 GmoShape* pShape =
                     m_pShapesCreator->create_staffobj_shape(pTime, iInstr, iStaff,
-                                                            m_pagePos, clefType);
+                                                            m_pagePos, pClef);
                 pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                 m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
                 xPos += pShape->get_width();

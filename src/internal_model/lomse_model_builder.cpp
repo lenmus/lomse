@@ -126,6 +126,9 @@ void ModelBuilder::structurize(ImoObj* pImo)
 //=======================================================================================
 void PitchAssigner::assign_pitch(ImoScore* pScore)
 {
+    if (pScore->get_accidentals_model() == ImoScore::k_pitch_and_notation_provided)
+        return;
+
     StaffObjsCursor cursor(pScore);
 
     int staves = cursor.get_num_staves();
@@ -282,6 +285,7 @@ void PitchAssigner::compute_notated_accidentals(ImoNote* pNote, int context)
         {
             if (pNote->is_display_naturals_forced())
                 acc = k_natural;
+
             else if (pNote->get_notated_accidentals() == k_natural)
             {
                 acc = k_natural;
@@ -343,18 +347,40 @@ void PitchAssigner::compute_pitch(ImoNote* pNote, int idx)
 //---------------------------------------------------------------------------------------
 void PitchAssigner::reset_accidentals(ImoKeySignature* pKey, int idx)
 {
-    if (pKey)
-    {
-        int keyType = pKey->get_key_type();
-        int accidentals[7];
-        KeyUtilities::get_accidentals_for_key(keyType, accidentals);
-        for (int i=0; i < 7; ++i)
-            m_context[idx][i] = accidentals[i];
-    }
-    else
+    if (!pKey)
     {
         for (int i=0; i < 7; ++i)
             m_context[idx][i] = 0;
+    }
+    else
+    {
+        if(pKey->is_standard())
+        {
+            int keyType = pKey->get_key_type();
+            int accidentals[7];
+            KeyUtilities::get_accidentals_for_key(keyType, accidentals);
+            for (int i=0; i < 7; ++i)
+                m_context[idx][i] = accidentals[i];
+        }
+        else
+        {
+            for (int i=0; i < 7; ++i)
+            {
+                // Each element of the array refers to one step: 0=C, 1=D, 2=E, ...
+                // & its value can be one of:
+                //     0  = no accidental
+                //    -1  = a flat
+                //     1  = a sharp
+                KeyAccidental& acc = pKey->get_accidental(i);
+                if (is_equal_float(acc.alter, 0.0f) || is_equal_float(acc.alter, 1.0f)
+                    || is_equal_float(acc.alter, -1.0f))
+                {
+                    m_context[idx][acc.step] = acc.alter;
+                }
+                else
+                    m_context[idx][acc.step] = 0;
+            }
+        }
     }
 }
 

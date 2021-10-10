@@ -3515,7 +3515,7 @@ SUITE(LdpAnalyserTest)
         ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_G );
-        CHECK( pKeySignature->get_staff() == 0 );
+        CHECK( pKeySignature->get_staff() == -1 );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -3579,7 +3579,7 @@ SUITE(LdpAnalyserTest)
         ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_d );
-        CHECK( pKeySignature->get_staff() == 0 );
+        CHECK( pKeySignature->get_staff() == -1 );
         CHECK( pKeySignature->is_visible() );
         CHECK( pKeySignature->get_user_location_x() == 70.0f );
         CHECK( pKeySignature->get_user_location_y() == 0.0f );

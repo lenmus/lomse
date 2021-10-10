@@ -63,6 +63,11 @@ public:
     {
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -1734,6 +1739,49 @@ SUITE(InternalModelTest)
 //        CHECK( supported.find(k_attr_barline) == ? );
 
         delete pImo;
+    }
+
+    //@ ImoClef -------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, clef_01)
+    {
+        //@01. get first ledger line pitch
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+
+        //G2
+        pClef->set_clef(k_clef_sign_G, 2, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == C4_DPITCH );
+//        cout << test_name() << ", G2=" << pClef->get_first_ledger_line_pitch() << endl;
+        //G1
+        pClef->set_clef(k_clef_sign_G, 1, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_E, 4) );
+        //F5
+        pClef->set_clef(k_clef_sign_F, 5, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_C, 2) );
+        //F4
+        pClef->set_clef(k_clef_sign_F, 4, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_E, 2) );
+        //F3
+        pClef->set_clef(k_clef_sign_F, 3, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_G, 2) );
+        //C5
+        pClef->set_clef(k_clef_sign_C, 5, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_G, 2) );
+        //C4
+        pClef->set_clef(k_clef_sign_C, 4, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_B, 2) );
+        //C3
+        pClef->set_clef(k_clef_sign_C, 3, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_D, 3) );
+        //C2
+        pClef->set_clef(k_clef_sign_C, 2, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_F, 3) );
+        //C1
+        pClef->set_clef(k_clef_sign_C, 1, 0);
+        CHECK( pClef->get_first_ledger_line_pitch() == DiatonicPitch(k_step_A, 3) );
+
+        delete pClef;
     }
 
 

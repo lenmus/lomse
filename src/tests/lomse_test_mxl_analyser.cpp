@@ -1623,7 +1623,7 @@ SUITE(MxlAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. Warning: <clef-octave-change> only supported for up to two octaves. Ignored."
+        expected << "Line 0. Error: <clef-octave-change> only supported for up to two octaves. Ignored."
             << endl;
         parser.parse_text(
             "<clef number='2'>"
@@ -1659,7 +1659,7 @@ SUITE(MxlAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. Warning: G clef only supported in lines 1 or 2. Clef G3 changed to G2."
+        expected << "Line 0. Part '', measure ''. Error: G clef only supported in lines 1 or 2. Line changed to 2."
             << endl;
         parser.parse_text(
             "<clef number='2'>"
@@ -1694,7 +1694,7 @@ SUITE(MxlAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. Warning: F clef only supported in lines 3, 4 or 5. Clef F2 changed to F4."
+        expected << "Line 0. Part '', measure ''. Error: F clef only supported in lines 3, 4 or 5. Line changed to 4."
             << endl;
         parser.parse_text(
             "<clef number='2'>"
@@ -1729,7 +1729,7 @@ SUITE(MxlAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. Warning: C clef only supported in lines 1 to 5. Clef C6 changed to C1."
+        expected << "Line 0. Part '', measure ''. Error: C clef only supported in lines 1 to 5. Line changed to 1."
             << endl;
         parser.parse_text(
             "<clef number='2'>"
@@ -2815,12 +2815,13 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
-        CHECK( pKeySignature != nullptr );
-        if (pKeySignature)
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
         {
-            CHECK( pKeySignature->get_key_type() == k_key_D );
-            CHECK( pKeySignature->get_staff() == 0 );
+            CHECK( pKey->get_key_type() == k_key_D );
+            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->is_standard() == true );
         }
 
         a.do_not_delete_instruments_in_destructor();
@@ -2845,12 +2846,259 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
-        CHECK( pKeySignature != nullptr );
-        if (pKeySignature)
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
         {
-            CHECK( pKeySignature->get_key_type() == k_key_gs );
-            CHECK( pKeySignature->get_staff() == 0 );
+            CHECK( pKey->get_key_type() == k_key_gs );
+            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->is_standard() == true );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_03)
+    {
+        //@03 non-standard key. Error in step
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part '', measure ''. Unknown note step 'Z'. Ignored." << endl
+            << "Line 0. Part '', measure ''. Invalid step 'Z'. Key signature ignored." << endl;
+        parser.parse_text("<key><key-step>Z</key-step><key-alter>-1</key-alter></key>");
+
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot == nullptr);
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_04)
+    {
+        //@04 non-standard key. Error in accidental, key accepted
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part '', measure ''. Invalid or not supported <accidentals> value 'round-flat'."
+            << endl;
+        parser.parse_text(
+            "<key>"
+                "<key-step>A</key-step>"
+                "<key-alter>-1</key-alter>"
+                "<key-accidental>round-flat</key-accidental>"
+            "</key>"
+        );
+
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
+        {
+            CHECK( pKey->is_standard() == false );
+            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_key_type() == k_key_non_standard );
+            CHECK( pKey->has_accidentals() == true );
+
+            KeyAccidental& acc = pKey->get_accidental(0);
+            CHECK( acc.step == k_step_A );
+            CHECK( is_equal_float(acc.alter, -1.0f) );
+            CHECK( acc.accidental == k_flat );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_05)
+    {
+        //@05 non-standard key. Several accidentals. Accidentals computed from alter
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<key>"
+                "<key-step>G</key-step>"
+                "<key-alter>-1.5</key-alter>"
+                "<key-step>A</key-step>"
+                "<key-alter>1.5</key-alter>"
+                "<key-step>B</key-step>"
+                "<key-alter>-0.5</key-alter>"
+            "</key>"
+        );
+
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
+        {
+            CHECK( pKey->is_standard() == false );
+            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_key_type() == k_key_non_standard );
+            CHECK( pKey->has_accidentals() == true );
+
+            CHECK( pKey->get_octave(0) == -1 );
+            CHECK( pKey->get_octave(1) == -1 );
+            CHECK( pKey->get_octave(2) == -1 );
+            CHECK( pKey->get_octave(3) == -1 );
+
+            KeyAccidental& acc = pKey->get_accidental(0);
+            CHECK( acc.step == k_step_G );
+            CHECK( is_equal_float(acc.alter, -1.5f) );
+            CHECK( acc.accidental == k_acc_three_quarters_flat );
+
+            acc = pKey->get_accidental(1);
+            CHECK( acc.step == k_step_A );
+            CHECK( is_equal_float(acc.alter, 1.5f) );
+            CHECK( acc.accidental == k_acc_three_quarters_sharp );
+
+            acc = pKey->get_accidental(2);
+            CHECK( acc.step == k_step_B );
+            CHECK( is_equal_float(acc.alter, -0.5f) );
+            CHECK( acc.accidental == k_acc_quarter_flat );
+
+            acc = pKey->get_accidental(3);
+            CHECK( acc.step == k_step_undefined );
+            CHECK( is_equal_float(acc.alter, 0.0f) );
+            CHECK( acc.accidental == k_no_accidentals );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_06)
+    {
+        //@06 non-standard key. Several accidentals with octaves
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<key>"
+              "<key-step>C</key-step>"
+              "<key-alter>-2</key-alter>"
+              "<key-step>G</key-step>"
+              "<key-alter>2</key-alter>"
+              "<key-step>D</key-step>"
+              "<key-alter>-1</key-alter>"
+              "<key-octave number='1'>2</key-octave>"
+              "<key-octave number='2'>3</key-octave>"
+              "<key-octave number='3'>6</key-octave>"
+            "</key>"
+        );
+
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
+        {
+            CHECK( pKey->is_standard() == false );
+            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_key_type() == k_key_non_standard );
+            CHECK( pKey->has_accidentals() == true );
+
+            CHECK( pKey->get_octave(0) == 2 );
+            CHECK( pKey->get_octave(1) == 3 );
+            CHECK( pKey->get_octave(2) == 6 );
+            CHECK( pKey->get_octave(3) == -1 );
+
+            KeyAccidental& acc = pKey->get_accidental(0);
+            CHECK( acc.step == k_step_C );
+            CHECK( is_equal_float(acc.alter, -2.0f) );
+            CHECK( acc.accidental == k_flat_flat );
+
+            acc = pKey->get_accidental(1);
+            CHECK( acc.step == k_step_G );
+            CHECK( is_equal_float(acc.alter, 2.0f) );
+            CHECK( acc.accidental == k_double_sharp );
+
+            acc = pKey->get_accidental(2);
+            CHECK( acc.step == k_step_D );
+            CHECK( is_equal_float(acc.alter, -1.0f) );
+            CHECK( acc.accidental == k_flat );
+
+            acc = pKey->get_accidental(3);
+            CHECK( acc.step == k_step_undefined );
+            CHECK( is_equal_float(acc.alter, 0.0f) );
+            CHECK( acc.accidental == k_no_accidentals );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_10)
+    {
+        //@10 standard key, with key-octave
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<key number='1'>"
+                "<fifths>3</fifths>"
+                "<key-octave number='1'>4</key-octave>"
+                "<key-octave number='3'>4</key-octave>"
+            "</key>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_key_signature() == true );
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
+        {
+            CHECK( pKey->get_key_type() == k_key_A );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_standard() == true );
+            CHECK( pKey->get_octave(0) == 4 );
+            CHECK( pKey->get_octave(1) == -1 );
+            CHECK( pKey->get_octave(2) == 4 );
         }
 
         a.do_not_delete_instruments_in_destructor();
@@ -3754,7 +4002,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -3791,7 +4039,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 4 );
@@ -3827,7 +4075,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_quarter );
         CHECK( pNote && pNote->get_octave() == 4 );
@@ -3864,7 +4112,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_eighth );
         CHECK( pNote && pNote->get_octave() == 5 );
@@ -3940,7 +4188,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -3979,7 +4227,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_quarter );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -4134,7 +4382,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_half );
         CHECK( pNote && pNote->get_octave() == 5 );
@@ -4212,7 +4460,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), 2.0f) );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_quarter );
         CHECK( pNote && pNote->get_octave() == 2 );
@@ -5880,7 +6128,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_eighth );
         CHECK( pNote && pNote->get_octave() == 5 );

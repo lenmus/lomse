@@ -1891,6 +1891,176 @@ ImoNote* ImoChord::get_end_note()
 
 
 //=======================================================================================
+// ImoClef implementation
+//=======================================================================================
+void ImoClef::set_clef(int sign, int line, int octaveChange)
+{
+    m_sign = sign;
+    m_line = line;
+    m_octaveChange = octaveChange;
+}
+
+//---------------------------------------------------------------------------------------
+int ImoClef::get_clef_type() const
+{
+    if (m_sign == k_clef_sign_G)
+    {
+        if (m_line==1)
+            return k_clef_G1;
+        else if (m_line==2)
+        {
+            if (m_octaveChange==0)
+                return k_clef_G2;
+            else if (m_octaveChange==1)
+                return k_clef_8_G2;     //G2, 8ve. above
+            else if (m_octaveChange==2)
+                return k_clef_15_G2;    //G2, 15 above
+            else if (m_octaveChange==-1)
+                return k_clef_G2_8;     //G2, 8ve. below
+            else // must be m_octaveChange==-2
+                return k_clef_G2_15;    //G2, 15 below
+        }
+    }
+    else if (m_sign == k_clef_sign_F)
+    {
+        if (m_line==4)
+        {
+            if (m_octaveChange==0)
+                return k_clef_F4;
+            else if (m_octaveChange==1)
+                return k_clef_8_F4;     //F4 clef, 8ve. above
+            else if (m_octaveChange==2)
+                return k_clef_15_F4;    //F4 clef, 15 above
+            else if (m_octaveChange==-1)
+                return k_clef_F4_8;     //F4 clef, 8ve. below
+            else    //must be m_octaveChange==-2
+                return k_clef_F4_15;    //F4 clef, 15 below
+        }
+        else if (m_line==3)
+            return k_clef_F3;
+        else if (m_line==5)
+            return k_clef_F5;
+    }
+    else if (m_sign == k_clef_sign_C)
+    {
+        if (m_line==1)
+            return k_clef_C1;
+        else if (m_line==2)
+            return k_clef_C2;
+        else if (m_line==3)
+            return k_clef_C3;
+        else if (m_line==4)
+            return k_clef_C4;
+        else if (m_line==5)
+            return k_clef_C5;
+    }
+
+    else if (m_sign == k_clef_sign_percussion)
+        return k_clef_percussion;
+    else if (m_sign == k_clef_sign_TAB)
+        return k_clef_TAB;
+    else if (m_sign == k_clef_sign_none)
+        return k_clef_none;
+    //TODO: Other values: jianpu
+
+    return k_clef_undefined;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoClef::set_clef_type(int type)
+{
+    switch(type)
+    {
+        case k_clef_15_G2:  set_clef(k_clef_sign_G, 2, 2);      break;
+        case k_clef_8_G2:   set_clef(k_clef_sign_G, 2, 1);      break;
+        case k_clef_G2:     set_clef(k_clef_sign_G, 2, 0);      break;
+        case k_clef_G2_8:   set_clef(k_clef_sign_G, 2, -1);     break;
+        case k_clef_G2_15:  set_clef(k_clef_sign_G, 2, -2);     break;
+        case k_clef_15_F4:  set_clef(k_clef_sign_F, 4, 2);      break;
+        case k_clef_8_F4:   set_clef(k_clef_sign_F, 4, 1);      break;
+        case k_clef_F4:     set_clef(k_clef_sign_F, 4, 0);      break;
+        case k_clef_F4_8:   set_clef(k_clef_sign_F, 4, -1);     break;
+        case k_clef_F4_15:  set_clef(k_clef_sign_F, 4, -2);     break;
+        case k_clef_F3:     set_clef(k_clef_sign_F, 3, 0);      break;
+        case k_clef_C1:     set_clef(k_clef_sign_C, 1, 0);      break;
+        case k_clef_C2:     set_clef(k_clef_sign_C, 2, 0);      break;
+        case k_clef_C3:     set_clef(k_clef_sign_C, 3, 0);      break;
+        case k_clef_C4:     set_clef(k_clef_sign_C, 4, 0);      break;
+        case k_clef_C5:     set_clef(k_clef_sign_C, 5, 0);      break;
+        case k_clef_F5:     set_clef(k_clef_sign_F, 5, 0);      break;
+        case k_clef_G1:     set_clef(k_clef_sign_G, 1, 0);      break;
+        case k_clef_percussion: set_clef(k_clef_sign_percussion, 3, 0);     break;
+        case k_clef_TAB:        set_clef(k_clef_sign_TAB, 3, 0);    break;
+        case k_clef_none:       set_clef(k_clef_sign_none, 3, 0);   break;
+        case k_clef_undefined:  set_clef(k_clef_sign_none, 3, 0);   break;
+        default:
+        {
+            LOMSE_LOG_ERROR("Program maintenance error: missing clef type %d", type);
+            set_clef(k_clef_sign_none, 3, 0);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoClef::get_default_octave()
+{
+    switch(m_sign)
+    {
+        case k_clef_sign_G:     return 4;
+        case k_clef_sign_F:     return 3;
+        case k_clef_sign_C:     return 4;
+        default:
+            return 0;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoClef::get_octave()
+{
+    return m_octaveChange + get_default_octave();
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoClef::supports_accidentals()
+{
+    switch(m_sign)
+    {
+        case k_clef_sign_G:     return true;
+        case k_clef_sign_F:     return true;
+        case k_clef_sign_C:     return true;
+        default:
+            return false;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+DiatonicPitch ImoClef::get_first_ledger_line_pitch()
+{
+    //return diatonic pitch for first line
+
+    int step = 0;
+    if (m_sign == k_clef_sign_G)
+        step = k_step_G;
+    else if (m_sign == k_clef_sign_F)
+        step = k_step_F;
+    else if (m_sign == k_clef_sign_C)
+        step = k_step_C;
+    else
+        return DiatonicPitch(-1);
+
+    step -= m_line * 2;
+    int octave = get_octave();
+    while (step < 0)
+    {
+        step += 7;
+        --octave;
+    }
+
+    return DiatonicPitch(step, octave);
+}
+
+
+//=======================================================================================
 // ImoControl implementation
 //=======================================================================================
 ImoControl::~ImoControl()
@@ -3079,16 +3249,55 @@ void ImoInstrGroup::add_instrument(int iInstr)
 //=======================================================================================
 // ImoKeySignature implementation
 //=======================================================================================
-int ImoKeySignature::get_key_type()
+int ImoKeySignature::get_key_type() const
 {
-    return int( KeyUtilities::key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
+    if (m_fStandard)
+        return int( KeyUtilities::key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
+    else
+        return int(k_key_non_standard);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoKeySignature::set_key_type(int type)
 {
+    m_fStandard = true;
     m_keyMode = KeyUtilities::get_key_mode(EKeySignature(type));
     m_fifths = KeyUtilities::key_signature_to_num_fifths(EKeySignature(type));
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::set_standard_key(int fifths, bool fMajor)
+{
+    m_fStandard = true;
+    m_keyMode = (fMajor ? k_key_mode_major : k_key_mode_minor);
+    m_fifths = fifths;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::set_non_standard_key(const KeyAccidental (&acc)[7])
+{
+    m_fStandard = false;
+    m_keyMode = k_key_mode_none;
+    m_fifths = 0;
+
+    for (size_t i=0; i < 7; ++i)
+    	m_accidentals[i] = acc[i];
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoKeySignature::has_accidentals()
+{
+    if (m_fStandard)
+        return m_fifths != 0;
+    else
+    {
+        for (size_t i=0; i < 7; ++i)
+        {
+            if (m_accidentals[i].accidental != k_no_accidentals)
+                return true;
+        }
+        return false;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -3097,6 +3306,9 @@ void ImoKeySignature::transpose(const int semitones)
                        //fifths  -7 -6 -5 -4  -3 -2 -1  0  1  2  3   4  5  6  7
                        //Key:     C- G- D- A-  E- B- F  C  G  D  A   E  B  F+ C+
     static int fifthsToIndex[] = {1, 8, 3, 10, 5, 0, 7, 2, 9, 4, 11, 6, 1, 8, 3};
+
+    if (!m_fStandard)
+        return;         //TODO? transpose is currently only supported for standard keys
 
     int index = fifthsToIndex[m_fifths+7];
     int newIndex = index + semitones;
@@ -3396,9 +3608,6 @@ static const LongOption m_LongOptions[] =
 //---------------------------------------------------------------------------------------
 ImoScore::ImoScore(Document* pDoc)
     : ImoBlockLevelObj(k_imo_score)
-    , m_version(0)
-    , m_pColStaffObjs(nullptr)
-    , m_pMidiTable(nullptr)
     , m_scaling(LOMSE_STAFF_LINE_SPACING / 10.0f)     //default staff: 7.2mm = 40 tenths
     , m_systemInfoFirst()
     , m_systemInfoOther()

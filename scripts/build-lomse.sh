@@ -115,6 +115,7 @@ if [ ${fOnlyTests} -eq 0 ]; then
     echo -e "${enhanced}Creating makefile${reset}"
     cmake -G "Unix Makefiles" ${sources} || exit 1
 	#cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
+	#cmake -G "Unix Makefiles" -DLOMSE_RUN_TESTS:BOOL=OFF ${sources} || exit 1
 
     # build lomse
     echo -e "${enhanced}Building liblomse. Will use ${num_jobs} jobs.${reset}"

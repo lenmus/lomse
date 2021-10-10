@@ -502,10 +502,23 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
 
     ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
     determine_timepos(pSO);
-    for (int nStaff=0; nStaff < numStaves; nStaff++)
+
+    int staff = pSO->get_staff();
+    if (staff == -1 || pSO->is_time_signature())
     {
-        int nLine = get_line_for(0, nStaff);
-        m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+        //key signature common to all staves, or time signature
+        pSO->set_staff(0);
+        for (int nStaff=0; nStaff < numStaves; nStaff++)
+        {
+            int nLine = get_line_for(0, nStaff);
+            m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+        }
+    }
+    else
+    {
+        //key signature, specific for one staff
+        int nLine = get_line_for(0, staff);
+        m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, staff, pSO);
     }
 }
 
