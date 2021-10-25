@@ -4188,26 +4188,20 @@ public:
 class ImoDirection : public ImoStaffObj
 {
 protected:
-    Tenths  m_space;
-    int     m_placement;
+    Tenths  m_space = 0.0f;
+    int     m_placement = k_placement_default;
+    int     m_nVoice = 0;       //1..n. voice==0 means not defined
 
     // When the <direction> element contains a <sound> children related to repetition
     // marks or a <direction-type> children of type <segno>/<coda>, or a <words>
     // related to repetition marks, these members contains the type of mark.
     // Otherwise, contains k_repeat_none.
-    int	    m_displayRepeat;
-    int     m_soundRepeat;
+    int	    m_displayRepeat = k_repeat_none;
+    int     m_soundRepeat = k_repeat_none;
 
 
     friend class ImFactory;
-    ImoDirection()
-        : ImoStaffObj(k_imo_direction)
-        , m_space(0.0f)
-        , m_placement(k_placement_default)
-        , m_displayRepeat(k_repeat_none)
-        , m_soundRepeat(k_repeat_none)
-    {
-    }
+    ImoDirection() : ImoStaffObj(k_imo_direction) {}
 
 public:
     virtual ~ImoDirection() {}
@@ -4217,12 +4211,14 @@ public:
     inline int get_placement() { return m_placement; }
     inline int get_display_repeat() { return m_displayRepeat; }
     inline int get_sound_repeat() { return m_soundRepeat; }
+    inline int get_voice() { return m_nVoice; }
 
     //setters
     inline void set_width(Tenths space) { m_space = space; }
     inline void set_placement(int placement) { m_placement = placement; }
     inline void set_display_repeat(int repeat) { m_displayRepeat = repeat; }
     inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
+    inline void set_voice(int voice) { m_nVoice = voice; }
 
     //info
     inline bool is_display_repeat() { return m_displayRepeat != k_repeat_none; }

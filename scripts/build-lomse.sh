@@ -15,10 +15,11 @@ function DisplayHelp()
     echo ""
     echo "Options:"
     echo "    -h --help        Print this help text."
+    echo "    -n --no-tests    Do not run unit tests."
+    echo "    -t --only-tests  Do not build. Only run unit tests if enabled."
     echo "    -w --web         Generate test results in local website folder."
     echo "                     If option -w is not specified, the results are"
     echo "                     generated in build folder."
-    echo "    -t --only-tests  Do not build. Only run unit tests."
     echo ""
 }
 
@@ -53,7 +54,8 @@ website_root="/datos/cecilio/WebSite/mws"
 website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
 
 fGenerateForWeb=0
-fOnlyTests=0
+fRunTests=1
+fBuild=1
 
 
 #parse command line parameters
@@ -68,8 +70,11 @@ do
         DisplayHelp
         exit 1
         ;;
+        -n|--no-tests)
+        fRunTests=0
+        ;;
         -t|--only-tests)
-        fOnlyTests=1
+        fBuild=0
         ;;
         -w|--web)
         fGenerateForWeb=1
@@ -85,9 +90,12 @@ done
 # define the number of jobs to create (as many as the number of processors)
 num_jobs=`getconf _NPROCESSORS_ONLN`
 
+if [ ${fRunTests} -eq 0 ] && [ ${fBuild} -eq 0 ]; then
+    echo "You have specified Build=No and RunTests=No. Nothing to do!"
+fi
 
 #build the local branch
-if [ ${fOnlyTests} -eq 0 ]; then
+if [ ${fBuild} -eq 1 ]; then
 #create or clear build folder
     if [[ ! -e ${build_path} ]]; then
         #create build folder
@@ -113,9 +121,12 @@ if [ ${fOnlyTests} -eq 0 ]; then
     # create the makefile
     cd "${build_path}"
     echo -e "${enhanced}Creating makefile${reset}"
-    cmake -G "Unix Makefiles" ${sources} || exit 1
-	#cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
-	#cmake -G "Unix Makefiles" -DLOMSE_RUN_TESTS:BOOL=OFF ${sources} || exit 1
+    if [ ${fRunTests} -eq 0 ]; then
+	    cmake -G "Unix Makefiles" -DLOMSE_RUN_TESTS:BOOL=OFF ${sources} || exit 1
+    else
+        cmake -G "Unix Makefiles" ${sources} || exit 1
+	    #cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
+    fi
 
     # build lomse
     echo -e "${enhanced}Building liblomse. Will use ${num_jobs} jobs.${reset}"

@@ -113,6 +113,10 @@ SUITE(StaffVoiceLineTableTest)
             CHECK( (*it)->to_string() == _object );             \
             ++it;
 
+// helper macros
+#define CHECK_MD_OBJECT(it, _object) \
+            CHECK( (*it)->to_string() == _object );   \
+            ++it;
 
 //=======================================================================================
 // ColStaffObjsBuilder test
@@ -193,9 +197,24 @@ public:
         if (!(fTypeOK && fLineOK && fPlayTimeOK && fDurationOK))
         {
             cout << test_name() << " (line " << iLine << ") " << endl;
-            cout << "    imo=" << pEntry->imo_object()->get_name() << " expected: "
-                 << playtime << "  " << playdur << "  " << line << "  "
-                 << pNote->to_string_with_ids() << endl;
+            cout << "    imo=" << pEntry->imo_object()->get_name() << endl
+                 << "    expected: "
+                 << line << "  " << playtime << "  " << playdur << "  "
+                 << pNote->to_string_with_ids() << endl
+                 << "          real:  " << pNote->get_playback_time()
+                 << "  " << pNote->get_playback_duration() << endl << endl;
+        }
+    }
+
+    void dump_music_data(ImoScore* pScore)
+    {
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        TreeNode<ImoObj>::children_iterator it = pMD->begin();
+        int numObjs = pMD->get_num_children();
+        for (int i=0; i < numObjs; ++i, ++it)
+        {
+            cout << test_name() << " i=," << i << ", " << (*it)->to_string() << endl;
         }
     }
 
@@ -235,17 +254,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_02)
     {
         //@02. R2. Two lines: By timepos. Non-timed before timed
-        create_score(
-            "(score (vers 2.0)"
-            "(instrument (musicData "
-            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
-            "))"
-            "(instrument (musicData "
-            "(clef G)(time 2 4)(n c4 h)(barline)"
-            ")))"
-        );
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(m_pScore);
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/lower-entry/02-rule-2.lms",
+                      Document::k_format_ldp);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -337,19 +352,12 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_05)
     {
         //@05. R4. <direction> and <sound> can not go between clefs/key/time
-        stringstream errormsg;
-        create_score(
-            "(score (vers 2.0)"
-            "(instrument (musicData"
-            "(clef G)(r q)(barline)"
-            "(dir (dyn 'p'))(n a4 q)(barline) ))"
-            "(instrument (musicData"
-            "(clef G)(r q)(barline)"
-            "(dir (dyn 'p'))(n e4 q)(barline)"
-            ")))"
-        , errormsg);
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(m_pScore);
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/lower-entry/05-rule-4.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -367,8 +375,8 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	  0,	64,	  1,	"(barline simple)" );
         CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(dir empty)" );
         CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(dir empty)" );
-        CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(n a4 q v1 p1)" );
-        CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(n e4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(n a4 q v1 p1 (dyn \"p\"))" );
+        CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(n e4 q v1 p1 (dyn \"p\"))" );
         CHECK_ENTRY0(it, 0,	    0,	  1,	128,  0,	"(barline simple)" );
         CHECK_ENTRY0(it, 1,	    0,	  1,	128,  1,	"(barline simple)" );
     }
@@ -459,9 +467,9 @@ SUITE(ColStaffObjsBuilderTest)
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 51 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 50 ++))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 51 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 50 --))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
@@ -640,7 +648,8 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
         CHECK_ENTRY0(it, 0,    0,      2,   576,   0, "(barline simple)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );    }
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );
+    }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
     {
@@ -902,6 +911,7 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
 //        cout << test_name() << endl;
 //        cout << pColStaffObjs->dump();
+//        dump_music_data(pScore);
 
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 8 );
@@ -933,16 +943,20 @@ SUITE(ColStaffObjsBuilderTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
         ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+
 //        cout << test_name() << endl;
 //        cout << pColStaffObjs->dump();
+//        dump_music_data(pScore);
 
         CHECK( pColStaffObjs->num_lines() == 2 );
-        CHECK( pColStaffObjs->num_entries() == 8 );
+        CHECK( pColStaffObjs->num_entries() == 9 );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                    // (clef G p1)
         ++it;       //(n g4 q v1 p1)
         check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(goFwd q v2 p1)
+        check_note(__LINE__, *it, k_imo_rest, 1, 0.0, 64.0);            //second voice goFwd. dur 100%
         ++it;       //(grace d5 e v1 p1)
         check_note(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
         ++it;       //(grace b4 e v1 p1)
@@ -951,7 +965,7 @@ SUITE(ColStaffObjsBuilderTest)
         check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
         ++it;       //(n e5 h v1 p1))
         check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
-        ++it;       //(n e5 h v1 p1))
+        ++it;       //(n e4 h v2 p1))
         check_note(__LINE__, *it, k_imo_note_regular, 1, 64.0, 128.0);   //second voice. dur 100%
     }
 
@@ -1840,6 +1854,490 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_15)
+    {
+        //@15. align timepos assigned to grace notes
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/223-beamed-graces.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 5 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 ++))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 41 --))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n b4 q v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_16)
+    {
+        //@16. align timepos for grace notes in two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/222-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 e v1 p1 (stem up))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace b4 e v2 p1 (stem down))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e5 h v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 h v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_17)
+    {
+        //@17. key change after backup.
+        //@    AutoClef interferes and can create problems
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/17-key-change-after-backup.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 8 );
+        if (pMD->get_num_children() == 8)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 4 4)" );
+            CHECK_MD_OBJECT(it, "(n f4 w v1 p1)" );
+            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+            CHECK_MD_OBJECT(it, "(key D)" );
+            CHECK_MD_OBJECT(it, "(n b2 w v2 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 9 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 256.0 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,     0,	    0,	  0,    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(key C)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(time 4 4)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(time 4 4)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(clef F4 p2)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(key D)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(n f4 w v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(n b2 w v2 p2)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	256,    0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_18)
+    {
+        //@18. clef change after <forward>
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/18-clef-change-after-forward.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 10 );
+        if (pMD->get_num_children() == 10)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
+            CHECK_MD_OBJECT(it, "(time 2 4)" );
+            CHECK_MD_OBJECT(it, "(n d3 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n b3 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+            CHECK_MD_OBJECT(it, "(goFwd q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n a3 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 10 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 64.0 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,     0,	    0,	  0,    0,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(time 2 4)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(n d3 q v2 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 64,    0,	"(n b3 q v2 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	128,    0,	"(barline simple)" );
+        CHECK_ENTRY0(it, 0, 	0,  	1,	128,	1,	"(goFwd q v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	128,    0,	"(n a3 q v2 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	192,    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	192,    1,	"(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	256,    0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_19)
+    {
+        //@19. <forward> just before a barline
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/19-foward-before-barline.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 9 );
+        if (pMD->get_num_children() == 9)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 2 4)" );
+            CHECK_MD_OBJECT(it, "(n e3 e v1 p1 (stem up))" );
+            CHECK_MD_OBJECT(it, "(n e3 e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n c3 e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n a2 e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(r q v3 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 9 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 32.0 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,     0,	    0,	  0,    0,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(key C)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(time 2 4)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(n e3 e v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    1,	"(r q v3 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 32,    0,	"(n e3 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 64,    0,	"(n c3 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 96,    0,	"(n a2 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	128,    0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_20)
+    {
+        //@20. wedge after barline.
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/20-wedge.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 21 );
+        if (pMD->get_num_children() == 21)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 2 4)" );
+            CHECK_MD_OBJECT(it, "(goFwd q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(r e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n d3 q v2 p2)" );
+            CHECK_MD_OBJECT(it, "(r q v3 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(n f5 q v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(n b4 e v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 e v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(n e3 q v3 p2 (stem down))" );
+            CHECK_MD_OBJECT(it, "(r q v3 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 4 );
+        CHECK( pTable->num_entries() == 23 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 32.0 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(clef F4 p2)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(key C)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(key C)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(time 2 4)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(time 2 4)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(goFwd q v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	  0,	2,	"(n g4 q v2 p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,	3,	"(r q v3 p2)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,   64,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 64,	0,	"(r e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	 64,	1,	"(n d3 q v2 p2)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 96,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 96,	0,	"(n g4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	128,    0,	"(barline simple)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	128,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	128,	0,	"(n f5 q v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,	    1,	    1,	128,	3,	"(n e3 q v3 p2 (stem down))" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	192,	0,	"(n b4 e v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,	    1,	    1,	192,	3,	"(r q v3 p2)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	224,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	224,	0,	"(n g4 e v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	256,    0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_21)
+    {
+        //@21. time is advanced in all staves after a barline
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/21-time-after-barline.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 12 );
+        if (pMD->get_num_children() == 12)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(clef G p2)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 3 8)" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 43 +))" );
+            CHECK_MD_OBJECT(it, "(n g3 e v2 p2 (stem up)(beam 43 =))" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 43 -))" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+            CHECK_MD_OBJECT(it, "(r q. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n c3 q. v2 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 3 );
+        CHECK( pTable->num_entries() == 14 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 32.0 );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it,	0,	1,	    0,	0,	    1,	"(clef G p2)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(key C)" );
+        CHECK_ENTRY0(it,	0,	1,	    0,	0,	    1,	"(key C)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(time 3 8)" );
+        CHECK_ENTRY0(it,	0,	1,	    0,	0,	    1,	"(time 3 8)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,      0,	"(n g4 e v2 p1 (stem down)(beam 43 +))" );
+        CHECK_ENTRY0(it,	0,	1,	    0,	32,	    1,	"(n g3 e v2 p2 (stem up)(beam 43 =))" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	64,	    0,	"(n g4 e v2 p1 (stem down)(beam 43 -))" );
+        CHECK_ENTRY0(it,	0,	1,	    1,	96,	    1,	"(clef F4 p2)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	96,	    0,	"(barline simple)" );
+        CHECK_ENTRY0(it,	0,	0,	    1,	96,	    2,	"(r q. v1 p1)" );
+        CHECK_ENTRY0(it,	0,	1,	    1,	96,	    1,	"(n c3 q. v2 p2)" );
+        CHECK_ENTRY0(it,	0,	0,	    1,	192,	0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_22)
+    {
+        //@22. trick to draw an staccato by using a wedge and a small forward
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/22-forward-to-move-end-of-wedge.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 10 );
+        if (pMD->get_num_children() == 10)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 3 4)" );
+            CHECK_MD_OBJECT(it, "(n e3 h. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(goFwd f v2 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+            CHECK_MD_OBJECT(it, "(r w v1 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 10 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 12.0 );  //12.0, goFwd f v2 or 160 h. ?
+//        cout << "Min.duration=" << pTable->min_note_duration() << endl;
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(key C)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(time 3 4)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    1,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(n e3 h. v1 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    1,	"(goFwd f v2 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	12,	    1,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge, type=104) p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	192,	0,	"(barline simple)" );
+        CHECK_ENTRY0(it,	0,	0,	    1,	192,	0,	"(r w v1 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    1,	384,	0,	"(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_23)
+    {
+        //@23. word direction after voice change using <backup> <forward>
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/23-word-direction.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+//        dump_music_data(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_children() == 11 );
+        if (pMD->get_num_children() == 11)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 3 8)" );
+            CHECK_MD_OBJECT(it, "(n d5 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(r e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(goFwd q. v2 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 p1 (text \"(a 2)\"))" );
+            CHECK_MD_OBJECT(it, "(n d4 q. v3 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+            CHECK_MD_OBJECT(it, "(n b4 q. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 3 );
+        CHECK( pTable->num_entries() == 11 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->min_note_duration() == 32.0 );
+//        cout << "Min.duration=" << pTable->min_note_duration() << endl;
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    0,	"(key C)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    0,	"(time 3 8)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    0,	"(n d5 q v1 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    1,	"(goFwd q. v2 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    0,	    2,	"(n d4 q. v3 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    64,	    0,	"(r e v1 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    96,	    1,	"(dir 0 p1 (text \"(a 2)\"))" );
+        CHECK_ENTRY0(it,	0,	0,	0,	    96,	    0,	"(barline simple)" );
+        CHECK_ENTRY0(it,	0,	0,	1,	    96,	    0,	"(n b4 q. v1 p1)" );
+        CHECK_ENTRY0(it,	0,	0,	1,	    192,	0,	"(barline simple)" );
+    }
+
     // ColStaffObjsBuilderEngine1x ------------------------------------------------------
 
 
@@ -2488,7 +2986,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 51 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 50 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
@@ -2496,7 +2994,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 51 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 50 --))" );
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );

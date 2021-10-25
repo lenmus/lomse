@@ -53,7 +53,10 @@ function GenerateImages()
         fi
         testfile="${testfile%.*}"
         IMAGE="${generated_path}${testfile}"
-        msg=$(lclt -import "$f" -export "${IMAGE}")
+        msg=$(lclt -import "$f" -export "${IMAGE}") || {
+            echo "crash in $f"
+            cp "$scripts_path/crash.jpg" "${IMAGE}-1.jpg"
+        }
         if [ ! -z "${msg}" -a "${msg}" != " " ]; then
             echo -e "\n${testfile}"
             echo -e "${msg}" | sed 's/^/     /'

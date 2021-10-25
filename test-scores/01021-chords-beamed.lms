@@ -1,16 +1,16 @@
 (score
-   (vers 1.6)
+   (vers 2.0)
    (instrument
       (musicData
          (clef F4)
          (key C)
          (time 4 4)
          (chord
-            (n a3 e g+ v1)
+            (n a3 e v1 (beam 1 +))
             (n d3 e v1)
          )
          (chord
-             (n d4 e g- v1)
+             (n d4 e v1 (beam 1 -))
              (n f4 e v1)
              (n g4 e v1)
          )

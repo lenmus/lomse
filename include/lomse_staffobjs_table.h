@@ -256,21 +256,26 @@ typedef  ColStaffObjs::iterator      ColStaffObjsIterator;
 
 
 //---------------------------------------------------------------------------------------
-// StaffVoiceLineTable: algorithm assign line number to voices/staves
-//---------------------------------------------------------------------------------------
+/** StaffVoiceLineTable: algorithm assign line number to voices/staves
+    The algorithm is very simple:
+    - It assigns a default voice to each staff, to be used when no voice (voice == 0)
+      and for first voice defined in that staff.
+    - All other voices receive a different line number
+*/
 class StaffVoiceLineTable
 {
 protected:
-    int                 m_lastAssignedLine;
-    std::map<int, int>  m_lineForStaffVoice;    //key = 100*staff + voice
-    std::vector<int>    m_firstVoiceForStaff;   //key = staff
+    int                 m_lastDefinedLine;      //number of the last defined line, initially -1
+    std::vector<int>    m_firstVoiceForStaff;   //default line assigned to each staff
+    std::map<int, int>  m_lineForStaffVoice;    //voice assigned to each (staff, voice) combination.
+                                                //The key for the map is key = 100*staff + voice
 
 public:
     StaffVoiceLineTable();
 
     int get_line_assigned_to(int nVoice, int nStaff);
     void new_instrument();
-    inline int get_number_of_lines() { return m_lastAssignedLine; }
+    inline int get_number_of_lines() { return m_lastDefinedLine; }
 
 private:
     int assign_line_to(int nVoice, int nStaff);
@@ -409,13 +414,21 @@ private:
 class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
 {
 protected:
-    std::vector<TimeUnits> m_rCurTime;
-    int m_curVoice;
+    std::vector<TimeUnits> m_rCurTime;      //time for each voice
+    std::vector<TimeUnits> m_rStaffTime;    //time for each staff
+    int         m_curVoice;
+    int         m_prevVoice;
+    int         m_numStaves;            //in current instrument
+    TimeUnits   m_rCurAlignTime;
+    ImoBarline* m_pLastBarline;
 
 public:
     ColStaffObjsBuilderEngine2x(ImoScore* pScore)
         : ColStaffObjsBuilderEngine(pScore)
         , m_curVoice(0)
+        , m_prevVoice(0)
+        , m_rCurAlignTime(0.0)
+        , m_pLastBarline(nullptr)
     {
     }
     ~ColStaffObjsBuilderEngine2x() override {}

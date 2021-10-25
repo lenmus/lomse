@@ -178,6 +178,8 @@ protected:
     friend class GoBackFwdAnalyser;
     friend class GoBackFwdLmdAnalyser;
     friend class FwdBackMxlAnalyser;
+    friend class MxlAnalyser;
+    friend class MxlTimeKeeper;
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
 
     friend class RestMxlAnalyser;
