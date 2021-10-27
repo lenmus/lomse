@@ -187,7 +187,7 @@ public:
     void add_all_instruments(ImoScore* pScore);
     void check_if_missing_parts(ostream& reporter);
 
-    //for unit tests
+    //debug, for unit tests
     void do_not_delete_instruments_in_destructor() { m_fInstrumentsAdded = true; }
 
 protected:
@@ -224,6 +224,69 @@ public:
     bool group_exists(int number);
     ImoInstrGroup* get_group(int number);
     void check_if_all_groups_are_closed(ostream& reporter);
+
+};
+
+//---------------------------------------------------------------------------------------
+//MxlTimeKeeper: Helper class to manage time and keep track of current time for
+//each voice. It encloses the knowledge to manage note/rests voices, duration,
+//divisions, backup, forward, and anything related to time position.
+//
+class MxlTimeKeeper
+{
+protected:
+    ostream&        m_reporter;
+    MxlAnalyser*    m_pAnalyser = nullptr;
+    long            m_divisions = 1L;   //fractions of quarter note, to use as units for 'duration' values
+
+    //global times ("global" means "referred to start of score")
+    TimeUnits       m_time = 0.0;       //current time (global, in TimeUnits)
+    TimeUnits       m_maxTime = 0.0;    //max time-position reached (global)
+    TimeUnits       m_startTime = 0.0;  //global time at start of current measure, for conversions local time <--> global time
+
+    //voices
+    std::map<int, int> m_voiceStaff;    //map(voice, staff) staff for each voice
+
+    //local times ("local" means "referred to start of current measure). All times in <divisions>
+    std::map<int, long> m_voiceTime;    //current time reached by each voice. Reset at each measure
+    long m_curTime = 0L;                //current time (local, in divisions)
+
+    //other
+    bool m_fResetVoiceTime = true;      //for debug: when false vector is never reset so that values can be checked
+
+
+public:
+    MxlTimeKeeper(ostream& reporter, MxlAnalyser* pAnalyser);
+//    MxlTimeKeeper::~MxlTimeKeeper()
+
+    long current_divisions() { return m_divisions; }
+    void set_current_divisions(long value) { m_divisions = value; }
+
+    //conversion to TimeUnits
+    TimeUnits duration_to_time_units(long duration);
+
+    //current timepos and voices position
+    TimeUnits get_current_time() { return m_time; }
+    void forward_timepos(long amount, int voice, int staff);
+    void backup_timepos(long amount);
+    long get_timepos_for_voice(int voice);
+    void increment_time(int voice, int staff, long amount);
+    int determine_voice_and_timepos(int voice, int staff);
+    void move_time_as_required_by_voice(int voice, int staff);
+
+    //staves management
+    int get_staff_for_voice(int voice);
+
+    //reset counters
+    void reset_for_new_measure();
+    void full_reset();
+
+    //debug, for unit tests
+    void dbg_do_not_reset_voice_times() { m_fResetVoiceTime = false; }
+    std::map<int, long>& dbg_get_voice_times() { return m_voiceTime; }
+
+protected:
+    int assign_voice();
 
 };
 
@@ -280,20 +343,23 @@ protected:
     ImoDocument*    m_pImoDoc;          //the document containing the score
     PartList        m_partList;         //the list of instruments
     PartGroups      m_partGroups;       //the list of intrument groups
-    TimeUnits       m_time;             //time-position counter
-    TimeUnits       m_maxTime;          //max time-position reached
-    float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
+    MxlTimeKeeper   m_timeKeeper;       //time position & voices manager
     std::string     m_curPartId;        //Part Id being analysed
     std::string     m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
 
-    std::vector<ImoNote*> m_notes;           //last note for each staff
+    std::vector<ImoNote*> m_notes;          //last note for each staff
 
     //default fonts
     ImoFontStyleDto* m_pMusicFont = nullptr;
     ImoFontStyleDto* m_pWordFont = nullptr;
     std::map<int, ImoStyle*> m_lyricStyle;
     std::map<int, std::string> m_lyricLang;
+
+    //<backup> and <forward> managemet
+    std::list<ImoStaffObj*> m_pendingStaffObjs;     //non-timed, after a <backup> or <forward>
+    bool m_fPendingBackFwd = false;             //last processed element was a <backup> or <forward>
+    ImoMusicData* m_currentMD = nullptr;        //current ImoMusicData
 
     //inherited values
 //    int m_curStaff;
@@ -340,23 +406,24 @@ public:
     int set_musicxml_version(const std::string& version);
     inline int get_musicxml_version() { return m_musicxmlVersion; }
     ImoInstrument* get_instrument(const std::string& id) { return m_partList.get_instrument(id); }
-    float current_divisions() { return m_divisions; }
-    void set_current_divisions(float value) { m_divisions = value; }
-    TimeUnits duration_to_time_units(int duration);
 
-    //timepos
-    TimeUnits get_current_time() { return m_time; }
-    void set_current_time(TimeUnits value)
-    {
-        m_time = value;
-        m_maxTime = max<TimeUnits>(m_time, m_maxTime);
-    }
-    void shift_time(TimeUnits amount)
-    {
-        m_time += amount;
-        m_maxTime = max<TimeUnits>(m_time, m_maxTime);
-    }
-    TimeUnits get_max_time() { return m_maxTime; }
+    //timepos management
+    void increment_time(int voice, int staff, long amount) { m_timeKeeper.increment_time(voice, staff, amount); }
+    void save_current_music_data(ImoMusicData* pMD) { m_currentMD = pMD; }
+    void forward_timepos(long amount, int voice, int staff);
+    void backup_timepos(long amount);
+    void add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor);
+    void add_note_to_model(ImoNoteRest* pNR, bool fInChord, long duration, ImoObj* pAnchor);
+
+    //current timepos and voices position
+    TimeUnits get_current_time() { return m_timeKeeper.get_current_time(); }
+    int determine_voice_and_timepos(int voice, int staff) { return m_timeKeeper.determine_voice_and_timepos(voice, staff); }
+    long current_divisions() { return m_timeKeeper.current_divisions(); }
+    void set_current_divisions(long value) { m_timeKeeper.set_current_divisions(value); }
+    TimeUnits duration_to_time_units(int duration) { return m_timeKeeper.duration_to_time_units(long(duration)); }
+    TimeUnits duration_to_time_units(long duration) { return m_timeKeeper.duration_to_time_units(duration); }
+    void set_type_duration(ImoNoteRest* pNR, long duration);
+    void insert_go_fwd(int voice, long shift);
 
 //    //inherited and saved values setters & getters
 //    inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
@@ -432,7 +499,10 @@ public:
 
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
-    inline void save_current_measure_num(const std::string& num) { m_curMeasureNum = num; }
+    inline void save_current_measure_num(const std::string& num) {
+        m_curMeasureNum = num;
+        m_timeKeeper.reset_for_new_measure();
+    }
     inline int get_measures_counter() { return m_measuresCounter; }
 
     //interface for building relations
@@ -499,11 +569,14 @@ public:
     int name_to_enum(const std::string& name) const;
     bool to_integer(const std::string& text, int* pResult);
 
+    //debug, for unit tests
+    void dbg_do_not_reset_voice_times() { m_timeKeeper.dbg_do_not_reset_voice_times(); }
 
 protected:
     MxlElementAnalyser* new_analyser(const std::string& name, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
+    void add_pending_staffobjs(int voice);
 };
 
 //defined in WordsMxlAnalyser to simplify unit testing of the regex

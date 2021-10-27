@@ -2505,7 +2505,7 @@ protected:
 
         // <duration> (label)
         //AWARE: As goFwd is a rest, only note/rest duration is allowed (e.g., "e.")
-        //       Duration for goFwd is no longer alloed as number (e.g., 32)
+        //       Duration for goFwd is no longer allowed as number (e.g., 32)
         if (get_mandatory(k_label))
             set_duration(pImo);
 

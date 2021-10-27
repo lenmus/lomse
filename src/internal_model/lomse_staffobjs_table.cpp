@@ -254,10 +254,6 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     if (pB->is_grace_note() && (pA->is_rest() || pA->is_regular_note() || pA->is_cue_note()) )
         return true;    //B (grace) cannot go after A, Try with A-1
 
-    //R7. Graces in the same timepos go ordered by align timepos
-    if (pB->is_grace_note() && (pA->is_rest() || pA->is_regular_note() || pA->is_cue_note()) )
-        return true;    //B (grace) cannot go after A, Try with A-1
-
     //R5. Non-timed must go before barlines at the same timepos with equal measure
     //    number. But if non-timed is also a barline preserve insertion order
     if (pB->is_barline() && pA->is_barline())
@@ -268,6 +264,11 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     //R2. note/rest can not go before non-timed at same timepos
     if (pA->is_note_rest() && pB->get_duration() == 0.0f && !pB->is_grace_note())
         return true;    //B cannot go after A, Try with A-1
+
+//    //R2. note/rest can not go before clef,key or time signature at same timepos
+//    if (pA->is_note_rest()
+//        && (pB->is_barline() || pB->is_clef() || pB->is_key_signature() || pB->is_time_signature()) )
+//        return true;    //B cannot go after A, Try with A-1
 
     //R3. <direction>, <sound> and <transpose> can not go between clefs/key/time ==>
     //    clef/key/time can not go after direction. Missing: in other instruments/staves
@@ -281,6 +282,12 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     if (pB->is_clef() && pA->is_barline())
         return true;   //move B after A
 
+//    //R?. If all other conditions met, order by line
+//    if (b->line() < a->line())
+//        return true;    //B (high line) cannot go after A, Try with A-1
+//    //R?. If all other conditions met, order by staff
+//    if (b->staff() < a->staff())
+//        return true;    //B (high staff) cannot go after A, Try with A-1
 
     //R999. Both have equal time. If no other rule triggers preserve definition order
     return false;   //insert B after A
@@ -512,6 +519,7 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
         {
             int nLine = get_line_for(0, nStaff);
             m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+//            cout << "        add_entry_for_staffobj() pSO=" << pSO->to_string() << endl;
         }
     }
     else
@@ -519,6 +527,7 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
         //key signature, specific for one staff
         int nLine = get_line_for(0, staff);
         m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, staff, pSO);
+//        cout << "        add_entry_for_staffobj() pSO=" << pSO->to_string() << endl;
     }
 }
 
@@ -998,30 +1007,43 @@ void ColStaffObjsBuilderEngine2x::initializations()
     m_rCurTime.reserve(k_max_voices);
     m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
     m_curVoice = 0;
+    m_prevVoice = 0;
 }
 
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilderEngine2x::create_entries_for_instrument(int nInstr)
 {
+//    cout << "**** ColStaffObjsBuilderEngine2x::create_entries_for_instrument()" << endl;
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
     ImoMusicData* pMusicData = pInstr->get_musicdata();
     if (!pMusicData)
         return;
 
+    m_numStaves = pInstr->get_num_staves();
     reset_counters();
+    m_pLastBarline = nullptr;
     ImoObj::children_iterator it;
     for(it = pMusicData->begin(); it != pMusicData->end(); ++it)
     {
+//        cout << "  processing MD object. pSO=" << (*it)->to_string() << endl;
         if ((*it)->is_key_signature() || (*it)->is_time_signature())
         {
+            if (m_pLastBarline)
+                m_pLastBarline->set_tk_change();
             add_entries_for_key_or_time_signature(*it, nInstr);
+            m_pLastBarline = nullptr;
         }
         else
         {
             ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
             add_entry_for_staffobj(pSO, nInstr);
+            m_pLastBarline = nullptr;
+
             if (pSO->is_barline())
+            {
                 update_measure();
+                m_pLastBarline = static_cast<ImoBarline*>(pSO);
+            }
         }
     }
 }
@@ -1050,12 +1072,27 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         }
     }
     else if (pSO->is_barline())
+    {
         nVoice = 0;
+        m_curVoice = 0;
+    }
+    else if (pSO->is_clef() || pSO->is_key_signature() || pSO->is_time_signature())
+        //objects not associable to any specific voice
+        nVoice = 0;
+    else if (pSO->is_direction())
+        nVoice = static_cast<ImoDirection*>(pImo)->get_voice();
     else
         nVoice = m_curVoice;
 
     int nLine = get_line_for(nVoice, nStaff);
-    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+    ColStaffObjsEntry* pEntry = m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr,
+                                                           nLine, nStaff, pSO);
+//    cout << "    add_entry_for_staffobj() pSO=" << pSO->to_string()
+//        << ", time=" << pSO->get_time()
+//        << ", get_line_for(nVoice=" << nVoice << ", nStaff=" << nStaff
+//        << ") = " << nLine << endl << endl;
+    if (pSO->is_grace_note())
+        m_graces.push_back(pEntry);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1063,17 +1100,22 @@ void ColStaffObjsBuilderEngine2x::reset_counters()
 {
     m_curVoice = 0;
     m_nCurMeasure = 0;
+    m_rCurAlignTime = 0.0;
     m_rMaxSegmentTime = 0.0;
     m_rStartSegmentTime = 0.0;
     m_rCurTime.assign(k_max_voices, 0.0);
+    m_rStaffTime.assign(m_numStaves, 0.0);
 }
 
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
 {
-    TimeUnits time;
+    TimeUnits time = 0.0;
     TimeUnits duration = pSO->get_duration();
+    int staff = (pSO->get_staff() == -1 ? 0 : pSO->get_staff());
 
+//    cout << "determine_timepos(), pSO=" << pSO->get_name() << ", staff=" << staff << ", duration="
+//        << duration << ", staffTime=" << m_rStaffTime[staff] << endl;
     if (pSO->is_note_rest())
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
@@ -1082,11 +1124,28 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
 
         if (pSO->is_note())
         {
-            ImoNote* pNote = static_cast<ImoNote*>(pSO);
-            if (pNote->is_in_chord() && !pNote->is_end_of_chord())
+            if (pSO->is_grace_note())
+            {
                 duration = 0.0;
+                ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(pSO);
+                if (m_prevVoice == 0 || m_prevVoice != pGrace->get_voice())
+                    m_rCurAlignTime = time;
+                pGrace->set_align_timepos(m_rCurAlignTime);
+                if (!pGrace->is_in_chord() || pGrace->is_end_of_chord())
+                    m_rCurAlignTime += 1.0;
+                m_prevVoice = pGrace->get_voice();
+            }
+            else
+            {
+                ImoNote* pNote = static_cast<ImoNote*>(pSO);
+                if (pNote->is_in_chord() && !pNote->is_end_of_chord())
+                    duration = 0.0;
+
+                m_rCurAlignTime = time + duration;
+            }
         }
         m_rCurTime[voice] += duration;
+        m_rStaffTime[staff] = m_rCurTime[voice];
 
         if (duration > 0.0)
             m_minNoteDuration = min(m_minNoteDuration, duration);
@@ -1094,10 +1153,20 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
     else if (pSO->is_barline())
     {
         time = m_rMaxSegmentTime;
+        for (int i=0; i < m_numStaves; ++i)
+            m_rStaffTime[i] = time;
+    }
+    else if (pSO->is_direction())
+    {
+        int voice = static_cast<ImoDirection*>(pSO)->get_voice();
+        if (voice > 0)
+            time = m_rCurTime[voice];
+        else
+            time = m_rStaffTime[staff];
     }
     else
     {
-        time = m_rCurTime[m_curVoice];
+        time = m_rStaffTime[staff];
     }
 
     pSO->set_time(time);
@@ -1125,7 +1194,7 @@ void ColStaffObjsBuilderEngine2x::prepare_for_next_instrument()
 // StaffVoiceLineTable implementation
 //=======================================================================================
 StaffVoiceLineTable::StaffVoiceLineTable()
-    : m_lastAssignedLine(-1)
+    : m_lastDefinedLine(-1)
 {
     assign_line_to(0, 0);
 
@@ -1138,6 +1207,8 @@ StaffVoiceLineTable::StaffVoiceLineTable()
 int StaffVoiceLineTable::get_line_assigned_to(int nVoice, int nStaff)
 {
     int key = form_key(nVoice, nStaff);
+//    cout << "get_line_assigned_to(nVoice=" << nVoice << ", nStaff=" << nStaff
+//        << "), key=" << key << endl;
     std::map<int, int>::iterator it = m_lineForStaffVoice.find(key);
     if (it != m_lineForStaffVoice.end())
         return it->second;
@@ -1154,7 +1225,7 @@ int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
         if (m_firstVoiceForStaff[nStaff] == 0)
         {
             //No voice yet assigned to this staff. Save voice nVoice as
-            //first voice in this staff and assign it the sSame line than
+            //first voice in this staff and assign it the same line than
             //voice 0 (nStaff)
             m_firstVoiceForStaff[nStaff] = nVoice;
             int line = get_line_assigned_to(0, nStaff);
@@ -1172,7 +1243,7 @@ int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
 
     //voice == 0 or voice is not first voice for this staff.
     //assign it the next available line number
-    int line = ++m_lastAssignedLine;
+    int line = ++m_lastDefinedLine;
     m_lineForStaffVoice[key] = line;
     return line;
 }

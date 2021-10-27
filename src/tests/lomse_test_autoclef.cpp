@@ -309,7 +309,6 @@ SUITE(AutoClefTest)
     {
         //@22. fix MusicXML score. Missing clef in first staff
 
-
         Document doc(m_libraryScope);
         doc.from_string("<?xml version='1.0' encoding='utf-8'?>"
             "<!DOCTYPE score-partwise PUBLIC '-//Recordare//DTD MusicXML 3.0 Partwise//EN' "

@@ -63,9 +63,11 @@
 #include <regex>
 using namespace std;
 
+#define LOMSE_TRACE_GOBACK  0
 
 namespace lomse
 {
+
 
 //=======================================================================================
 // PartList implementation: helper class to save part-list info
@@ -227,6 +229,199 @@ void PartGroups::check_if_all_groups_are_closed(ostream& reporter)
                  << it->first << "'." << endl;
     }
 }
+
+
+//=======================================================================================
+// MxlTimeKeeper implementation: helper class to manage time
+//=======================================================================================
+MxlTimeKeeper::MxlTimeKeeper(ostream& reporter, MxlAnalyser* pAnalyser)
+    : m_reporter(reporter)
+    , m_pAnalyser(pAnalyser)
+{
+}
+
+////---------------------------------------------------------------------------------------
+//MxlTimeKeeper::~MxlTimeKeeper()
+//{
+//}
+
+//---------------------------------------------------------------------------------------
+TimeUnits MxlTimeKeeper::duration_to_time_units(long duration)
+{
+    //AWARE: 'divisions' indicates how many divisions per quarter note
+    //       and 'duration' is expressed in 'divisions'
+    float timeUnitsPerDivision = float(k_duration_quarter) / float(m_divisions);
+    return TimeUnits( float(duration) * timeUnitsPerDivision);
+}
+
+//---------------------------------------------------------------------------------------
+int MxlTimeKeeper::determine_voice_and_timepos(int voice, int staff)
+{
+    //determines current time for a <note> and inserts a goFwd if necessary
+    //AWARE staff=1..n. voice=1..n, but can be voice==0 when no <voice> element
+
+    if (voice == 0)
+    {
+        //if no <voice> element assign a voice
+        voice = assign_voice();
+    }
+
+    //determine time for this voice. If first time this voice is processed, save its staff
+    long voiceTime = get_timepos_for_voice(voice);
+    if (voiceTime == 0L)
+            m_voiceStaff[voice] = staff;
+
+    //set m_curTime and insert goFwd if necessary
+    move_time_as_required_by_voice(voice, staff);
+
+    return voice;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::move_time_as_required_by_voice(int voice, int UNUSED(staff))
+{
+    //set curent time to current time for voice. Insert a goFwd if necessary
+    //AWARE staff=1..n. voice=1..n, but can be voice==0 when no <voice> element
+
+    if (voice > 0)
+    {
+        //determine time for this voice. If first time this voice is processed, save its staff
+        long voiceTime = get_timepos_for_voice(voice);
+        if (voiceTime < m_curTime)
+        {
+            long gap = m_curTime - voiceTime;
+            m_curTime = voiceTime;
+            m_time = m_startTime + duration_to_time_units(m_curTime);
+
+            m_pAnalyser->insert_go_fwd(voice, gap);
+        }
+        else if (voiceTime == m_curTime)
+        {
+            //voice in sequence or backup just to end of previous note in the same voice
+            //no need to insert goFwd
+        }
+        else
+        {
+            //advance position to voiceTime
+            m_curTime = voiceTime;
+        }
+
+        m_time = m_startTime + duration_to_time_units(m_curTime);
+        m_maxTime = max<TimeUnits>(m_time, m_maxTime);
+        m_voiceTime[voice] = m_curTime;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::increment_time(int voice, int UNUSED(staff), long amount)
+{
+    //AWARE voice=1..n
+
+    m_curTime = get_timepos_for_voice(voice) + amount;
+    if (m_curTime < 0L)
+        m_curTime = 0L;
+    m_time = m_startTime + duration_to_time_units(m_curTime);
+    m_maxTime = max<TimeUnits>(m_time, m_maxTime);
+
+    m_voiceTime[voice] = m_curTime;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::forward_timepos(long amount, int voice, int UNUSED(staff))
+{
+    //AWARE staff=1..n (0 if no staff specified)
+    //      voice=1..n (0 if no voice specified)
+
+    m_curTime += amount;
+    m_time = m_startTime + duration_to_time_units(m_curTime);
+    m_maxTime = max<TimeUnits>(m_time, m_maxTime);
+
+    if (voice > 0)
+        m_pAnalyser->set_current_voice(voice);
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::backup_timepos(long amount)
+{
+    m_curTime -= amount;
+    if (m_curTime < 0L)
+        m_curTime = 0L;
+    m_time = m_startTime + duration_to_time_units(m_curTime);
+    m_maxTime = max<TimeUnits>(m_time, m_maxTime);
+
+    m_pAnalyser->set_current_voice(0);
+}
+
+//---------------------------------------------------------------------------------------
+int MxlTimeKeeper::assign_voice()
+{
+    //Find voice with last timepos <= current Timepos and assign that voice.
+    //If none found, start a new voice
+
+    int voice = 0;
+    while (voice <= int(m_voiceTime.size()) && voice < 100)
+    {
+        ++voice;
+        long voiceTime = get_timepos_for_voice(voice);
+        if (voiceTime <= m_curTime)
+            return voice;
+    }
+    if (voice >= 100)
+        LOMSE_LOG_ERROR("Probable bug: more than 100 voices!");
+
+    return voice;   //1..n
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::reset_for_new_measure()
+{
+    if (m_fResetVoiceTime)
+    {
+        m_voiceTime.clear();
+        m_voiceStaff.clear();
+    }
+
+    m_curTime = 0L;
+    m_startTime = m_time;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTimeKeeper::full_reset()
+{
+    reset_for_new_measure();
+    m_time = 0.0;
+    m_maxTime = 0.0;
+}
+
+//---------------------------------------------------------------------------------------
+long MxlTimeKeeper::get_timepos_for_voice(int voice)
+{
+    // AWARE voice=1..n, staff=1..n
+
+    if (m_voiceTime.size() > 0)
+    {
+        map<int, long>::iterator it = m_voiceTime.find(voice);
+        if (it != m_voiceTime.end())
+            return it->second;
+    }
+
+    //first note/rest for this voice
+    m_voiceTime[voice] = 0L;
+    return 0L;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlTimeKeeper::get_staff_for_voice(int voice)
+{
+    if (m_voiceStaff.size() > 0)
+    {
+        map<int, int>::iterator it = m_voiceStaff.find(voice);
+        if (it != m_voiceStaff.end())
+            return it->second;
+    }
+    return 1;   //staff=1..n
+}
+
 
 
 //=======================================================================================
@@ -417,6 +612,7 @@ protected:
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
+    void add_note_to_model(ImoNoteRest* pNR, bool fInChord, long duration);
 
     //auxiliary
     inline const string& get_document_locator() {
@@ -1819,8 +2015,13 @@ bool MxlElementAnalyser::error_if_more_elements()
 //---------------------------------------------------------------------------------------
 void MxlElementAnalyser::add_to_model(ImoObj* pImo, int type)
 {
-    Linker linker( m_pAnalyser->get_document_being_analysed() );
-    linker.add_child_to_model(m_pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
+    m_pAnalyser->add_to_model(pImo, type, m_pAnchor);
+}
+
+//---------------------------------------------------------------------------------------
+void MxlElementAnalyser::add_note_to_model(ImoNoteRest* pNR, bool fInChord, long duration)
+{
+    m_pAnalyser->add_note_to_model(pNR, fInChord, duration, m_pAnchor);
 }
 
 
@@ -2280,8 +2481,7 @@ protected:
         // representation. If maximum compatibility with Standard MIDI 1.0 files is
         // important, do not have the divisions value exceed 16383.
 
-        int divisions = get_child_value_integer(4);
-        m_pAnalyser->set_current_divisions( float(divisions) );
+        m_pAnalyser->set_current_divisions( get_child_value_long(4L) );
     }
 
     void set_staff_details(ImoMusicData* pMD)
@@ -2323,7 +2523,7 @@ protected:
 
 public:
     BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
+                       ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_fNewBarline(false)
         , m_pBarline(nullptr)
@@ -2405,7 +2605,6 @@ public:
 
         if (m_fNewBarline)
         {
-            advance_timepos_if_required();
             add_to_model(m_pBarline);
             m_pAnalyser->save_last_barline(m_pBarline);
         }
@@ -2581,23 +2780,6 @@ protected:
         {
             pBarline->set_num_repeats(1);           //TODO: extract from <repeat>
         }
-    }
-
-    void advance_timepos_if_required()
-    {
-        TimeUnits curTime = m_pAnalyser->get_current_time();
-        TimeUnits maxTime = m_pAnalyser->get_max_time();
-        if (maxTime <= curTime)
-            return;
-
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
-                                ImFactory::inject(k_imo_go_back_fwd, pDoc) );
-        pImo->set_forward(true);
-        pImo->set_time_shift(maxTime - curTime);
-
-        m_pAnalyser->set_current_time(maxTime);
-        add_to_model(pImo);
     }
 
 };
@@ -3593,18 +3775,7 @@ protected:
 //@ <!ELEMENT backup (duration, %editorial;)>
 //@ <!ELEMENT forward
 //@     (duration, %editorial-voice;, staff?)>
-//@
-//@ attrb: none
-//@ Doc:
-//    The backup and forward elements are required to coordinate
-//    multiple voices in one part, including music on multiple
-//    staves. The forward element is generally used within voices
-//    and staves, while the backup element is generally used to
-//    move between voices and staves. Thus the backup element
-//    does not include voice or staff elements. Duration values
-//    should always be positive, and should not cross measure
-//    boundaries or mid-measure changes in the divisions value.
-
+//
 class FwdBackMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -3616,52 +3787,32 @@ public:
     ImoObj* do_analysis() override
     {
         bool fFwd = (m_analysedNode.name() == "forward");
-        ImoStaffObj* pSO = nullptr;
 
         // <duration>
         if (!get_mandatory("duration"))
             return nullptr;
-        int duration = get_child_value_integer(0);
-        TimeUnits shift = m_pAnalyser->duration_to_time_units(duration);
+        long duration = get_child_value_long(0L);
 
-        //<voice>
-        if (fFwd && get_optional("voice"))
+        if (fFwd)
         {
-            int voice = get_child_value_integer( m_pAnalyser->get_current_voice() );
+            // voice?
+            int voice = 0;
+            if (get_optional("voice"))
+                voice = get_child_value_integer(voice);
 
             // staff?
             int staff = 0;
             if (get_optional("staff"))
-                staff = get_child_value_integer(1) - 1;
+                staff = get_child_value_integer(staff);
 
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            ImoRest* pImo = static_cast<ImoRest*>(
-                                    ImFactory::inject(k_imo_rest, pDoc) );
-            pImo->mark_as_go_fwd();
-            pImo->set_visible(false);
-            pImo->set_type_dots_duration(k_quarter, 0, shift);
-            pImo->set_staff(staff);
-            pImo->set_voice(voice);
-            pSO = pImo;
+            m_pAnalyser->forward_timepos(duration, voice, staff);
         }
         else
         {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
-                                    ImFactory::inject(k_imo_go_back_fwd, pDoc) );
-            pImo->set_forward(fFwd);
-            pImo->set_time_shift(shift);
-            pSO = pImo;
+            m_pAnalyser->backup_timepos(duration);
         }
-
-        m_pAnalyser->shift_time( fFwd ? shift : -shift);
-        add_to_model(pSO);
-        return pSO;
-
+        return nullptr;
     }
-
-protected:
-
 };
 
 
@@ -4027,9 +4178,9 @@ protected:
 //@--------------------------------------------------------------------------------------
 //@ <!ELEMENT measure (%music-data;)>
 //@ <!ENTITY % music-data
-//@     "(note | backup | forward | direction | attributes |
-//@       harmony | figured-bass | print | sound | barline |
-//@       grouping | link | bookmark)*">
+//@ 	"(note | backup | forward | direction | attributes |
+//@ 	  harmony | figured-bass | print | sound | listening |
+//@ 	  barline | grouping | link | bookmark)*">
 //@ <!ATTLIST measure
 //@     number CDATA #REQUIRED
 //@     implicit %yes-no; #IMPLIED
@@ -4050,6 +4201,8 @@ public:
         ImoMusicData* pMD = get_anchor_as_music_data();
         if (pMD == nullptr)
             return nullptr;
+
+        m_pAnalyser->save_current_music_data(pMD);
 
         //attrb: number CDATA #REQUIRED
         string num = get_optional_string_attribute("number", "");
@@ -4083,6 +4236,12 @@ public:
                   || analyse_optional("backup", pMD)
                   || analyse_optional("print")
                   || analyse_optional("sound", pMD)
+                  || analyse_optional("harmony", pMD)
+                  || analyse_optional("figured-bass", pMD)
+//                  || analyse_optional("listening", pMD)
+//                  || analyse_optional("grouping", pMD)
+//                  || analyse_optional("link", pMD)
+//                  || analyse_optional("bookmark", pMD)
                  )
                )
             {
@@ -4115,32 +4274,15 @@ protected:
 
     void add_barline(TypeMeasureInfo* pInfo)
     {
-        advance_timepos_if_required();
-
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
         pBarline->set_type(k_barline_simple);
         pBarline->set_measure_info(pInfo);
+
         add_to_model(pBarline);
+
         m_pAnalyser->save_last_barline(pBarline);
-    }
-
-    void advance_timepos_if_required()
-    {
-        TimeUnits curTime = m_pAnalyser->get_current_time();
-        TimeUnits maxTime = m_pAnalyser->get_max_time();
-        if (maxTime <= curTime)
-            return;
-
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
-                                ImFactory::inject(k_imo_go_back_fwd, pDoc) );
-        pImo->set_forward(true);
-        pImo->set_time_shift(maxTime - curTime);
-
-        m_pAnalyser->set_current_time(maxTime);
-        add_to_model(pImo);
     }
 
 };
@@ -4714,10 +4856,9 @@ public:
         }
 
         // [<voice>]
-        int voice = m_pAnalyser->get_current_voice();
+        int notatedVoice = 0;      // 0 means 'no <voice> element'
         if (get_optional("voice"))
-            voice = get_child_value_integer( voice );
-        set_voice(pNR, voice);
+            notatedVoice = get_child_value_integer(0);
 
         // [<type>]
         string type;
@@ -4753,8 +4894,13 @@ public:
         }
 
         // [<staff>]
+        int staff = 1;
         if (get_optional("staff"))
-            set_staff(pNR);
+            staff = set_staff(pNR);
+
+        //voice must be computed before processing <notations>, as soon as staff is known
+        int voice = m_pAnalyser->determine_voice_and_timepos(notatedVoice, staff);
+        set_voice(pNR, voice);
 
         // <beam>*
         while (get_optional("beam"))
@@ -4776,7 +4922,9 @@ public:
         error_if_more_elements();
 
         pNR->set_visible(fVisible);
-        add_to_model(pNR);
+
+        add_note_to_model(pNR, fInChord, long(duration));
+
         attach_pending_dynamics_marks(pNR);
         add_to_spanners(pNR);
 
@@ -4835,6 +4983,7 @@ public:
 //      //  }
         }
 
+        //deal with arpeggio
         ImoArpeggioDto* pArpeggioDto = m_pAnalyser->get_arpeggio_data();
         if (pArpeggioDto)
         {
@@ -4859,7 +5008,6 @@ public:
         if (!fIsRest)
             m_pAnalyser->save_last_note(pNote);
 
-        m_pAnalyser->shift_time( pNR->get_duration() );
         return pNR;
     }
 
@@ -4919,7 +5067,7 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-    void set_staff(ImoNoteRest* pNR)
+    int set_staff(ImoNoteRest* pNR)
     {
         int iStaff = get_child_value_integer(1);
         ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
@@ -4933,6 +5081,7 @@ protected:
             iStaff = 1;
         }
         pNR->set_staff(iStaff-1);
+        return iStaff;
     }
 
     //----------------------------------------------------------------------------------
@@ -6501,7 +6650,7 @@ protected:
         add_to_model(pScore);
         m_pAnchor = pScore;
 
-        pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
+        pScore->set_version(200);   //use version 2.0 as <backup> elements have been removed
         pScore->add_required_text_styles();
 
         return pScore;
@@ -7571,14 +7720,9 @@ public:
 
     ImoObj* do_analysis() override
     {
-        ImoNote* pNote = nullptr;
-        if (m_pAnchor && m_pAnchor->is_note())
-            pNote = static_cast<ImoNote*>(m_pAnchor);
-        else
-        {
-            LOMSE_LOG_ERROR("nullptr pAnchor or it is not ImoNote");
+        ImoNote* pNote = get_anchor_as_note();
+        if (pNote == nullptr)
             return nullptr;
-        }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         m_pInfo1 = static_cast<ImoTieDto*>(
@@ -8543,12 +8687,10 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pArpeggioDto(nullptr)
     , m_pLastBarline(nullptr)
     , m_pImoDoc(nullptr)
-    , m_time(0.0)
-    , m_maxTime(0.0)
-    , m_divisions(1.0f)
+    , m_timeKeeper(m_reporter, this)
     , m_curMeasureNum("")
     , m_measuresCounter(0)
-    , m_curVoice(0)
+    , m_curVoice(1)
 {
     //populate the name to enum conversion map
     m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
@@ -8708,8 +8850,7 @@ int MxlAnalyser::get_line_number(XmlNode* node)
 void MxlAnalyser::prepare_for_new_instrument_content()
 {
     clear_pending_relations();
-    m_time = 0.0;
-    m_maxTime = 0.0;
+    m_timeKeeper.full_reset();
     save_last_barline(nullptr);
     m_measuresCounter = 0;
 }
@@ -8728,6 +8869,248 @@ void MxlAnalyser::save_last_note(ImoNote* pNote)
 ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
 {
     return m_notes[iStaff];
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
+{
+    if (pAnchor && pAnchor->is_music_data() && pImo->is_staffobj() && m_fPendingBackFwd)
+    {
+        //barline
+        if (pImo->is_barline())
+        {
+            if (m_pendingStaffObjs.size() > 0)
+            {
+                int voice = get_current_voice();
+                m_timeKeeper.move_time_as_required_by_voice(voice, 0);
+                add_pending_staffobjs(voice);
+            }
+
+            Linker linker( get_document_being_analysed() );
+            linker.add_child_to_model(pAnchor, pImo, k_imo_barline);
+
+            set_current_voice(0);
+            return;
+        }
+
+        //direction
+        if (pImo->is_direction())
+        {
+            int voice = get_current_voice();
+            if (voice > 0)
+            {
+                m_timeKeeper.move_time_as_required_by_voice(voice, 0);
+                m_fPendingBackFwd = false;
+                if (m_pendingStaffObjs.size() > 0)
+                    add_pending_staffobjs(voice);
+
+                static_cast<ImoDirection*>(pImo)->set_voice(voice);
+                Linker linker( get_document_being_analysed() );
+                linker.add_child_to_model(pAnchor, pImo, pImo->get_obj_type());
+            }
+            else
+                m_pendingStaffObjs.push_back( static_cast<ImoStaffObj*>(pImo) );
+
+            return;
+        }
+
+        //other
+        m_pendingStaffObjs.push_back( static_cast<ImoStaffObj*>(pImo) );
+        return;
+    }
+
+    //no anchor, it is not StaffObj or no pending <backup> or <forward>. Add to model
+    Linker linker( get_document_being_analysed() );
+    linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::add_note_to_model(ImoNoteRest* pNR, bool fInChord, long duration,
+                                    ImoObj* pAnchor)
+{
+    if (m_pendingStaffObjs.size() > 0)
+        add_pending_staffobjs(pNR->get_voice());
+
+    Linker linker( get_document_being_analysed() );
+    linker.add_child_to_model(pAnchor, pNR, pNR->get_obj_type());
+
+    if (!fInChord)
+        increment_time(pNR->get_voice(), pNR->get_staff(), duration);
+
+    m_fPendingBackFwd = false;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::add_pending_staffobjs(int voice)
+{
+    if (m_currentMD)
+    {
+        for (auto pSO : m_pendingStaffObjs)
+        {
+            m_currentMD->append_child_imo(pSO);
+            if (pSO->is_direction())
+                static_cast<ImoDirection*>(pSO)->set_voice(voice);
+        }
+    }
+
+    m_pendingStaffObjs.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::forward_timepos(long amount, int voice, int staff)
+{
+    //AWARE: voice 1..n (0=no voice), staff=1..n (0=no staff)
+
+    if (voice != 0)
+        set_current_voice(voice);
+
+    if (m_fPendingBackFwd && m_pendingStaffObjs.size() > 0)
+    {
+        m_timeKeeper.move_time_as_required_by_voice(voice, staff);
+        add_pending_staffobjs(voice);
+    }
+
+    m_timeKeeper.forward_timepos(amount, voice, staff);
+    m_fPendingBackFwd = true;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::backup_timepos(long amount)
+{
+    m_timeKeeper.backup_timepos(amount);
+    m_fPendingBackFwd = true;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::insert_go_fwd(int voice, long shift)
+{
+    // AWARE voice = 1..n
+
+    if (!m_currentMD)
+        return;
+
+    int staff = m_timeKeeper.get_staff_for_voice(voice) - 1;
+    Document* pDoc = get_document_being_analysed();
+
+    long remaining = shift;
+    long longaNote = 8L * current_divisions();
+    while (remaining > 0L)
+    {
+        if (remaining > longaNote)
+            shift = longaNote;
+
+        ImoRest* pFwd = static_cast<ImoRest*>(
+                                ImFactory::inject(k_imo_rest, pDoc) );
+        pFwd->mark_as_go_fwd();
+        pFwd->set_visible(false);
+        set_type_duration(pFwd, shift);
+        pFwd->set_staff(staff);
+        pFwd->set_voice(voice);
+
+        Linker linker(pDoc);
+        linker.add_child_to_model(m_currentMD, pFwd, k_imo_rest);
+
+        remaining -= shift;
+        m_timeKeeper.increment_time(voice, staff, shift);
+    }
+}
+
+//----------------------------------------------------------------------------------
+void MxlAnalyser::set_type_duration(ImoNoteRest* pNR, long duration)
+{
+    int noteType = k_unknown_notetype;
+    int dots = 0;
+
+    long divisions = current_divisions();
+    long assigned = 0L;
+
+    if (duration == 16L * divisions)
+    {
+        noteType = k_longa;
+        dots = 0;
+        assigned = 16L * divisions;
+    }
+    else if (duration >= 8L * divisions)
+    {
+        noteType = k_breve;
+        dots = 0;
+        assigned = 8L * divisions;
+    }
+    else if (duration >= 4L * divisions)
+    {
+        noteType = k_whole;
+        dots = 0;
+        assigned = 4L * divisions;
+    }
+    else if (duration >= 2L * divisions)
+    {
+        noteType = k_half;
+        dots = 0;
+        assigned = 2L * divisions;
+    }
+    else if (duration >= divisions)
+    {
+        noteType = k_quarter;
+        dots = 0;
+        assigned = divisions;
+    }
+    else if (duration >= divisions / 2L)
+    {
+        noteType = k_eighth;
+        dots = 0;
+        assigned =divisions / 2L;
+    }
+    else if (duration >= divisions / 4L)
+    {
+        noteType = k_16th;
+        dots = 0;
+        assigned = divisions / 4L;
+    }
+    else if (duration >= divisions / 8L)
+    {
+        noteType = k_32nd;
+        dots = 0;
+        assigned = divisions / 8L;
+    }
+    else if (duration >= divisions / 16L)
+    {
+        noteType = k_64th;
+        dots = 0;
+        assigned = divisions / 16L;
+    }
+    else if (duration >= divisions / 32L)
+    {
+        noteType = k_128th;
+        dots = 0;
+        assigned = divisions / 32L;
+    }
+    else if (duration >= divisions / 64L)
+    {
+        noteType = k_256th;
+        dots = 0;
+        assigned = divisions / 64L;
+    }
+    else
+    {
+        stringstream msg;
+        msg << "Bug? Invalid duration=" << duration << ", divisions=" << divisions;
+        LOMSE_LOG_ERROR(msg.str());
+
+        noteType = k_256th;
+        pNR->set_type_dots_duration(noteType, dots, duration);
+        return;
+    }
+
+    //add dots if necessary
+    long missing = duration - assigned;
+    while (assigned > 0L && missing > 0L)
+    {
+        ++dots;
+        assigned /= 2L;
+        missing -= assigned;
+    }
+
+    pNR->set_type_dots_duration(noteType, dots, duration_to_time_units(duration));
 }
 
 //---------------------------------------------------------------------------------------
@@ -9109,15 +9492,6 @@ int MxlAnalyser::get_octave_shift_id_and_close(int num)
     int id = m_octaveShiftIds[num];
     m_octaveShiftIds[num] = -1;
     return id;
-}
-
-//---------------------------------------------------------------------------------------
-TimeUnits MxlAnalyser::duration_to_time_units(int duration)
-{
-    //AWARE: 'divisions' indicates how many divisions per quarter note
-    //       and 'duration' is expressed in 'divisions'
-    float LdpTimeUnitsPerDivision = k_duration_quarter / m_divisions;
-    return TimeUnits( float(duration) * LdpTimeUnitsPerDivision);
 }
 
 //---------------------------------------------------------------------------------------

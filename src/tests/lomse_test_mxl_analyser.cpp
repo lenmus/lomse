@@ -53,6 +53,12 @@ using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
+//---------------------------------------------------------------------------------------
+// helper macros
+#define CHECK_MD_OBJECT(it, _object) \
+            CHECK( (*it)->to_string() == _object );   \
+            ++it;
+
 
 //=======================================================================================
 // MusicXmlOptions tests
@@ -151,6 +157,10 @@ public:
         m_partList.do_not_delete_instruments_in_destructor();
     }
 
+    std::map<int, long>& my_get_voice_times() { return m_timeKeeper.dbg_get_voice_times(); }
+    long my_get_timepos_for_voice(int voice) { return m_timeKeeper.get_timepos_for_voice(voice); }
+    size_t my_get_num_voices() { return my_get_voice_times().size(); }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -161,13 +171,14 @@ public:
     int m_requestType;
     bool m_fRequestReceived;
     ImoDocument* m_pDoc;
-
+    std::string m_scores_path;
 
     MxlAnalyserTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
         , m_pDoc(nullptr)
+        , m_scores_path(TESTLIB_SCORES_PATH)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -213,6 +224,25 @@ public:
             }
         }
         return tuplets;
+    }
+
+    void dump_timepos_for_voices(MyMxlAnalyser& a)
+    {
+        std::map<int, long>& voices = a.my_get_voice_times();
+        for (map<int, long>::iterator it=voices.begin(); it!=voices.end(); ++it)
+        {
+            cout << test_name() << ", voice=" << it->first << ", time=" << it->second << endl;
+        }
+    }
+
+    void dump_music_data(ImoMusicData* pMD)
+    {
+        TreeNode<ImoObj>::children_iterator it = pMD->begin();
+        int numObjs = pMD->get_num_children();
+        for (int i=0; i < numObjs; ++i, ++it)
+        {
+            cout << test_name() << " i=," << i << ", " << (*it)->to_string() << endl;
+        }
     }
 
 };
@@ -327,7 +357,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore && pScore->get_version_number() == 160 );
+        CHECK( pScore && pScore->get_version_number() == 200 );
         CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
@@ -1324,7 +1354,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot );
-        CHECK( a.current_divisions() == 7.0f );
+        CHECK( a.current_divisions() == 7L );
 
         delete pRoot;
     }
@@ -1354,7 +1384,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( a.current_divisions() == 1.0f );
+        CHECK( a.current_divisions() == 1L );
 
         delete pRoot;
     }
@@ -1463,36 +1493,6 @@ SUITE(MxlAnalyserTest)
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
-
-
-    //@ backup --------------------------------------------------------------------------
-    //@ forward -------------------------------------------------------------------------
-
-
-//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_backup_01)
-//    {
-//        //@01 backup
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        XmlParser parser;
-//        stringstream expected;
-//        parser.parse_text("<backup><duration>18</duration></backup>");
-//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//        XmlNode* tree = parser.get_tree_root();
-//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pRoot == nullptr);
-//        //AWARE: initialy <divisions>==1 ==> duration is expressed in quarter notes
-//        CHECK( is_equal_time(a.get_current_time(), -18.0f*k_duration_64th) );
-//        cout << "420: timepos= " << a.get_current_time() << endl;
-//
-//        a.do_not_delete_instruments_in_destructor();
-//        delete pRoot;
-//    }
 
 
     //@ clef -------------------------------------------------------------
@@ -4474,6 +4474,35 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_12)
+    {
+        //@12 note updates time counter
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\">"
+            "<note><pitch><step>B</step><alter>2</alter><octave>2</octave></pitch>"
+            "<duration>3</duration><type>half</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+       //AWARE: initialy <divisions>==1
+        CHECK( is_equal_time(a.get_current_time(), 3.0f*k_duration_quarter) );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
 
     //@ grace notes ---------------------------------------------------------------------
 
@@ -4512,6 +4541,8 @@ SUITE(MxlAnalyserTest)
             ImoInstrument* pInstr = pScore->get_instrument(0);
             ImoMusicData* pMD = pInstr->get_musicdata();
             CHECK( pMD != nullptr );
+//            dump_music_data(pMD);
+
             CHECK( pMD->get_num_children() == 5 );
 
             ImoObj::children_iterator it = pMD->begin();
@@ -5491,69 +5522,64 @@ SUITE(MxlAnalyserTest)
                 ImoMusicData* pMD = pInstr->get_musicdata();
                 CHECK( pMD != nullptr );
 
-                CHECK( pMD->get_num_children() == 11 );
-
-                ImoObj::children_iterator it = pMD->begin();    //clef G2
-                CHECK( (*it)->is_clef() );
-                ++it;   //clef F4
-                CHECK( (*it)->is_clef() );
-                ++it;   //note C5
-                CHECK( (*it)->is_note() );
-                ++it;   //note C5
-                CHECK( (*it)->is_note() );
-                ++it;   //goback-fwd
-                CHECK( (*it)->is_go_back_fwd() );
-                ++it;   //rest
-                CHECK( (*it)->is_rest() );
-
-                ++it;   //note F4. End of slur
-                CHECK( (*it)->is_note() );
-                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-                CHECK( pNote != nullptr );
-                if (pNote)
+//                dump_music_data(pMD);
+                CHECK( pMD->get_num_children() == 9 );
+                if (pMD->get_num_children() == 9)
                 {
-                    CHECK( pNote->get_num_relations() == 1 );
-                    if (pNote->get_num_relations() > 0)
+                    ImoObj::children_iterator it = pMD->begin();
+                    CHECK_MD_OBJECT(it, "(clef G p1)" );
+                    CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+                    CHECK_MD_OBJECT(it, "(n c5 q v1 p1 (stem up))" );
+                    CHECK_MD_OBJECT(it, "(n c5 q v1 p1 (stem up))" );
+                    CHECK_MD_OBJECT(it, "(goFwd q v2 p1)" );
+                    ImoObj::children_iterator itN2 = it;
+                    CHECK_MD_OBJECT(it, "(n f4 q v2 p1 (stem down)(slur 1 stop))" );
+                    ImoObj::children_iterator itN1 = it;
+                    CHECK_MD_OBJECT(it, "(n d3 q v3 p2 (stem up)(slur 1 start))" );
+                    CHECK_MD_OBJECT(it, "(n d4 q v3 p2 (stem down))" );
+                    CHECK_MD_OBJECT(it, "(barline simple)" );
+
+                    //note D3. Start of slur
+                    ImoNote* pNoteStart = dynamic_cast<ImoNote*>( *itN1 );
+                    CHECK( pNoteStart != nullptr );
+                    if (pNoteStart)
                     {
-                        ImoRelations* pRelObjs = pNote->get_relations();
-                        CHECK( pRelObjs->get_num_items() == 1);
-                        ImoRelObj* pRO = pRelObjs->get_item(0);
-                        if (pRO)
+                        CHECK( pNoteStart->get_num_relations() == 1 );
+                        if (pNoteStart->get_num_relations() > 0)
                         {
-                            CHECK( pRO->is_slur() );
-                            ImoNote* pN1 = (static_cast<ImoSlur*>(pRO))->get_end_note();
-                            CHECK( pN1 == pNote );
+                            ImoRelations* pRelObjs = pNoteStart->get_relations();
+                            CHECK( pRelObjs->get_num_items() == 1);
+                            ImoRelObj* pRO = pRelObjs->get_item(0);
+                            if (pRO)
+                            {
+                                CHECK( pRO->is_slur() );
+                                ImoNote* pN2 = (static_cast<ImoSlur*>(pRO))->get_start_note();
+                                CHECK( pN2 == pNoteStart );
+                            }
+                        }
+                    }
+                    //note F4. End of slur
+                    ImoNote* pNoteEnd = dynamic_cast<ImoNote*>( *itN2 );
+                    CHECK( pNoteEnd != nullptr );
+                    if (pNoteEnd)
+                    {
+                        CHECK( pNoteEnd->get_num_relations() == 1 );
+                        if (pNoteEnd->get_num_relations() > 0)
+                        {
+                            ImoRelations* pRelObjs = pNoteEnd->get_relations();
+                            CHECK( pRelObjs->get_num_items() == 1);
+                            ImoRelObj* pRO = pRelObjs->get_item(0);
+                            if (pRO)
+                            {
+                                CHECK( pRO->is_slur() );
+                                ImoNote* pN1 = (static_cast<ImoSlur*>(pRO))->get_start_note();
+                                ImoNote* pN2 = (static_cast<ImoSlur*>(pRO))->get_end_note();
+                                CHECK( pN1 == pNoteStart );
+                                CHECK( pN2 == pNoteEnd );
+                            }
                         }
                     }
                 }
-
-                ++it;   //goback-fwd
-                CHECK( (*it)->is_go_back_fwd() );
-
-                ++it;   //note D3. Start of slur
-                CHECK( (*it)->is_note() );
-                pNote = dynamic_cast<ImoNote*>( *it );
-                CHECK( pNote != nullptr );
-                if (pNote)
-                {
-                    CHECK( pNote->get_num_relations() == 1 );
-                    if (pNote->get_num_relations() > 0)
-                    {
-                        ImoRelations* pRelObjs = pNote->get_relations();
-                        CHECK( pRelObjs->get_num_items() == 1);
-                        ImoRelObj* pRO = pRelObjs->get_item(0);
-                        if (pRO)
-                        {
-                            CHECK( pRO->is_slur() );
-                            ImoNote* pN2 = (static_cast<ImoSlur*>(pRO))->get_start_note();
-                            CHECK( pN2 == pNote );
-                        }
-                    }
-                }
-                ++it;   //note D4
-                CHECK( (*it)->is_note() );
-                ++it;   //barline
-                CHECK( (*it)->is_barline() );
             }
         }
 
@@ -7587,6 +7613,908 @@ SUITE(MxlAnalyserTest)
 
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
+    }
+
+
+    //@ conversion to IM without goBackFwd ----------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_01)
+    {
+        //@01 backup parsed. It updates time counter but negative values not possible
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<backup><duration>18</duration></backup>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot == nullptr);
+        //AWARE: initialy <divisions>==1
+        CHECK( is_equal_time(a.get_current_time(), 0.0f) );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_02)
+    {
+        //@02 notes update voices time. Consecutive notes
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>A</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<note><pitch><step>F</step><octave>5</octave></pitch>"
+                    "<duration>3</duration><voice>1</voice><type>eighth</type><dot/>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 1 );
+        //AWARE: initialy <divisions>==1
+        CHECK( a.my_get_timepos_for_voice(1) == 7L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 3 );
+        if (pMD->get_num_children() == 3)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n a5 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f5 e. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_03)
+    {
+        //@03 notes update voices time. No <voice> elements
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>A</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+                "<note><pitch><step>F</step><octave>5</octave></pitch>"
+                    "<duration>3</duration><type>eighth</type><dot/>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        CHECK( a.my_get_num_voices() == 1 );
+        CHECK( a.my_get_timepos_for_voice(1) == 7L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 3 );
+        if (pMD->get_num_children() == 3)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n a5 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f5 e. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_04)
+    {
+        //@04 notes in chord do not increment timepos
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>A</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<note><chord/><pitch><step>C</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 1 );
+        CHECK( a.my_get_timepos_for_voice(1) == 4L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 3 );
+        if (pMD->get_num_children() == 3)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(chord (n a5 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n c5 q v1 p1))" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_05)
+    {
+        //@05. backup to middle replaced by goFwd
+        //(n c5 q v1)(n b4 e. v1)(n a4 s v1) (back q) (n f4 q v2)
+        //-> (n c5 q v1)(n b4 e. v1)(n a4 s v1) (goFwd q v2) (n f4 q v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>3</duration><voice>1</voice><type>eighth</type><dot/>"
+                "</note>"
+                "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                    "<duration>1</duration><voice>1</voice><type>16th</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>2</voice><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        CHECK( a.my_get_num_voices() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 8L );
+        CHECK( a.my_get_timepos_for_voice(2) == 8L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 6 );
+        if (pMD->get_num_children() == 6)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n c5 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
+            CHECK_MD_OBJECT(it, "(goFwd q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_06)
+    {
+        //@06. backup to start does not create goFwd
+        //(n b4 e. v1)(n a4 s v1) (back q) (n f4 q v2)
+        //-> (n b4 e. v1)(n a4 s v1) (n f4 q v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>3</duration><voice>1</voice><type>eighth</type><dot/>"
+                "</note>"
+                "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                    "<duration>1</duration><voice>1</voice><type>16th</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>2</voice><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 4L );
+        CHECK( a.my_get_timepos_for_voice(2) == 4L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 4 );
+        if (pMD->get_num_children() == 4)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_07)
+    {
+        //@07. backup to last note in same voice does not create goFwd
+        //(n b4 q v1)(back q)(n f4 q v2)(n c4 q v1) (back q) (n g4 q v2)
+        //-> (n b4 q v1)(n f4 q v2)(n c4 q v1) (n g4 q v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>2</voice><type>quarter</type>"
+                "</note>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>2</voice><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 8L );
+        CHECK( a.my_get_timepos_for_voice(2) == 8L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 5 );
+        if (pMD->get_num_children() == 5)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_08)
+    {
+        //@08. backup after last note in same voice creates goFwd
+        //(n b4 q v1)(back q)(n f4 e v2)(n c4 q v1) (back q) (n g4 e v2)
+        //-> (n b4 q v1)(n f4 e v2)(n c4 q v1) (goFwd e v2) (n g4 e v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>2</duration><voice>2</voice><type>eighth</type>"
+                "</note>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                    "<duration>2</duration><voice>2</voice><type>eighth</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 8L );
+        CHECK( a.my_get_timepos_for_voice(2) == 6L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 6 );
+        if (pMD->get_num_children() == 6)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(goFwd e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_09)
+    {
+        //@09. backup to start and no voices assigns voices correctly
+        //@    (n b4 e.)(n a4 s) (back q) (n f4 q)
+        //@    -> (n b4 e. v1)(n a4 s v1) (n f4 q v2))
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>3</duration><type>eighth</type><dot/>"
+                "</note>"
+                "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                    "<duration>1</duration><type>16th</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 4L );
+        CHECK( a.my_get_timepos_for_voice(2) == 4L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 4 );
+        if (pMD->get_num_children() == 4)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            //                  time,  scr
+            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_10)
+    {
+        //@10. backup to last note. No <voice> elements. Voices assigned in order
+        //@    (n b4 q) (back q) (n f4 q)(n c4 q) (back q) (n g4 q)
+        //@    ->(n b4 q v1) (n f4 q v2)(n c4 q v1) (n g4 q v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><type>quarter</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 8L );
+        CHECK( a.my_get_timepos_for_voice(2) == 8L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 5 );
+        if (pMD->get_num_children() == 5)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_11)
+    {
+        //@11. backup after last note creates goFwd. No <voice> in 2nd voice
+        //@    (n b4 q v1)(back q)(n f4 e)(n c4 q v1)(back q)(n g4 e)
+        //@    -> (n b4 q v1)(n f4 e v2)(n c4 q v1) (goFwd e v2) (n g4 e v2)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes><divisions>4</divisions></attributes>"
+                "<note><pitch><step>B</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>2</duration><type>eighth</type>"
+                "</note>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>quarter</type>"
+                "</note>"
+                "<backup><duration>4</duration></backup>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                    "<duration>2</duration><type>eighth</type>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 8L );
+        CHECK( a.my_get_timepos_for_voice(2) == 6L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 6 );
+        if (pMD->get_num_children() == 6)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(n f4 e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(goFwd e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_12)
+    {
+        //@12. directions between chord notes. Preserve definition order
+        //@    (n a4 q v1)(dir 1)(na f4 q v1)(dir 2)(na d4 q v1)(r q v1)(r h v1)
+        //@    -> the same
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/12-directions-in-chord.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 10 );
+        if (pMD->get_num_children() == 10)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(time 4 4)" );
+            CHECK_MD_OBJECT(it, "(chord (n a4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark, type=79))" );
+            CHECK_MD_OBJECT(it, "(n f4 q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir empty)" );
+            CHECK_MD_OBJECT(it, "(n d4 q v1 p1 (dyn \"p\")))" );
+            CHECK_MD_OBJECT(it, "(r q v1 p1)" );
+            CHECK_MD_OBJECT(it, "(r h v1 p1)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_13)
+    {
+        //@13. two tied chords. To fix a bug: <notations> were processed before setting
+        //@    the voice and thus, start-end of ties were not properly matched
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope, errormsg);
+        doc.from_file(m_scores_path + "unit-tests/conversion/13-tied-chords.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( errormsg.str() == expected.str() );
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 7 );
+        if (pMD->get_num_children() == 7)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
+            CHECK_MD_OBJECT(it, "(time 3 4)" );
+            CHECK_MD_OBJECT(it, "(chord (n e2 h v3 p1 (stem up)(tie 1 start))" );
+            CHECK_MD_OBJECT(it, "(n e3 h v3 p1 (stem up)(tie 2 start)))" );
+            CHECK_MD_OBJECT(it, "(chord (n e2 q v3 p1 (stem up)(tie 1 stop))" );
+            CHECK_MD_OBJECT(it, "(n e3 q v3 p1 (stem up)(tie 2 stop)))" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_14)
+    {
+        //@14. words. To fix a bug: <direction> incorrectly moved after first note
+        //@    of second voice
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope, errormsg);
+        doc.from_file(m_scores_path + "unit-tests/conversion/14-words.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( errormsg.str() == expected.str() );
+
+//        cout << test_name() << endl;
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 11 );
+        if (pMD->get_num_children() == 11)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
+            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+            CHECK_MD_OBJECT(it, "(time 3 4)" );
+            CHECK_MD_OBJECT(it, "(r e v1 p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 p1 (text \"dolce\"))" );
+            CHECK_MD_OBJECT(it, "(n e3 e v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(n e3 q v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(n c4 q v1 p1 (stem down))" );
+            CHECK_MD_OBJECT(it, "(n a2 q v2 p2 (stem up))" );
+            CHECK_MD_OBJECT(it, "(r h v2 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_15)
+    {
+        //@15. key change after backup. To fix a bug
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'>"
+            "<measure number='1'>"
+                "<attributes>"
+                    "<divisions>4</divisions>"
+                    "<key number='1'><fifths>0</fifths></key>"
+                    "<time><beats>4</beats><beat-type>4</beat-type></time>"
+                    "<staves>2</staves>"
+                    "<clef number='1'><sign>G</sign><line>2</line></clef>"
+                "</attributes>"
+                "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                    "<duration>16</duration><voice>1</voice><type>whole</type>"
+                    "<staff>1</staff></note>"
+                "<backup><duration>16</duration></backup>"
+                "<attributes>"
+                    "<key number='2'><fifths>2</fifths></key>"
+                    "<clef number='2'><sign>F</sign><line>4</line></clef>"
+                "</attributes>"
+                "<note><pitch><step>B</step><octave>2</octave></pitch>"
+                    "<duration>16</duration><voice>2</voice><type>whole</type>"
+                    "<staff>2</staff></note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 16L );
+        CHECK( a.my_get_timepos_for_voice(2) == 16L );
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+//        dump_music_data(pMD);
+        CHECK( pMD->get_num_children() == 8 );
+        if (pMD->get_num_children() == 8)
+        {
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK_MD_OBJECT(it, "(clef G p1)" );
+            CHECK_MD_OBJECT(it, "(key C)" );
+            CHECK_MD_OBJECT(it, "(time 4 4)" );
+            CHECK_MD_OBJECT(it, "(n f4 w v1 p1)" );
+            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
+            CHECK_MD_OBJECT(it, "(key D)" );
+            CHECK_MD_OBJECT(it, "(n b2 w v2 p2)" );
+            CHECK_MD_OBJECT(it, "(barline simple)" );
+        }
     }
 
 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1">
+      <part-name/>
+    </score-part>
+  </part-list>
+  <!--=========================================================-->
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1024</divisions>
+        <key>
+          <fifths>0</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>F</sign>
+          <line>4</line>
+        </clef>
+      </attributes>
+      <note>
+        <pitch>
+          <step>E</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>3072</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <dot/>
+      </note>
+      <backup>
+        <duration>3072</duration>
+      </backup>
+      <direction placement="below">
+        <direction-type>
+          <wedge default-y="-75" spread="16" type="diminuendo"/>
+        </direction-type>
+        <offset>-98</offset>
+      </direction>
+      <forward>
+        <duration>12</duration>
+        <voice>2</voice>
+      </forward>
+      <direction>
+        <direction-type>
+          <wedge type="stop"/>
+        </direction-type>
+        <offset>-76</offset>
+      </direction>
+    </measure>
+    <!--=======================================================-->
+    <measure number="2">
+      <note>
+        <rest measure="yes"/>
+        <duration>3072</duration>
+        <voice>1</voice>
+      </note>
+    </measure>
+  </part>
+  <!--=========================================================-->
+</score-partwise>
