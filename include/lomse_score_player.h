@@ -357,18 +357,26 @@ protected:
 
     //helper, for do_play()
     //-----------------------------------------------------------------------------------
+    int m_beatType;     //beat definition to use, from EBeatDuration: k_beat_specified,
+                        //  k_beat_implied or k_beat_bottom_ts
+    long m_prevGuiBpm;      //last known value of metronome setting in GUI, for detecting
+                            // user changes in metronome setting during playback
     long m_nMtrPulseDuration;       //a beat duration, in Time Units
-    int m_beatType;                 //beat definition to use
-    TimeUnits m_beatDuration;       //for no time signature or beatType == k_beat_specified
     float m_conversionFactor;       //to convert TimeUnits (delta time) to millisecs
-    long m_nPrevMeasureDuration;    //previous TS: measure duration, in TU
-    long m_nCurMeasureDuration;     //current TS: measure duration, in TU
-    long m_nPrevNumPulses;          //previous TS: number of metronome pulses per measure                                            //assume 4/4 time signature
-    long m_nCurNumPulses;           //current TS: number of metronome pulses per measure                                            //assume 4/4 time signature
-    long m_nPrevMtrIntval;          //previous TS: metronome click interval, in milliseconds
-    long m_nCurMtrIntval;           //current TS: metronome click interval, in milliseconds
-    long m_prevGuiBpm;              //last known value of metronome setting in GUI
 
+    //current time signature (TS) info
+    long m_nCurMeasureDuration;     //current TS: measure duration, in TU
+    long m_nCurNumPulses;           //current TS: number of beats per measure
+    long m_nCurMtrIntval;           //current TS: metronome click interval, in milliseconds
+
+    //previous TS info, required to adjust metronome clicks interval for maintaining
+    //notes duration equivalence when a time signature change.
+    long m_nPrevMeasureDuration;    //previous TS: measure duration, in TU
+    long m_nPrevNumPulses;          //previous TS: number of beats per measure
+    long m_nPrevMtrIntval;          //previous TS: metronome click interval, in milliseconds
+
+
+    //helper, to conver TimeUnits to milliseconds. Depends on current metronome setting
     inline long time_units_to_milliseconds(long deltaTime) {
         return long( float(deltaTime) * m_conversionFactor );
     }
