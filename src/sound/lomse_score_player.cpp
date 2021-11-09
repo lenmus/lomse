@@ -479,7 +479,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //determine last metronome pulse before first note to play.
     //First note could be syncopated or an off-beat note. Round time to nearest
     //lower pulse time
-    long nMissingTime = long( m_pTable->get_anacruxis_missing_time() );
+    long nMissingTime = long( m_pTable->get_anacrusis_missing_time() );
     long nDeltaShift = m_nCurMeasureDuration - nMissingTime;
 
     while (nMissingTime > 0)
@@ -488,7 +488,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     nMtrEvDeltaTime -= nMissingTime;
     curTime = time_units_to_milliseconds( nMtrEvDeltaTime );
-    long nExtraTime = long( m_pTable->get_anacruxis_extra_time() );
+    long nExtraTime = long( m_pTable->get_anacrusis_extra_time() );
 
     LOMSE_LOG_DEBUG(Logger::k_score_player,
                     "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacruxis missing time=%f, "
