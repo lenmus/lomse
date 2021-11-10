@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mnx>
+   <global>
+      <measure>
+         <directions>
+            <time signature="4/4"/>
+         </directions>
+      </measure>
+      <measure/>
+   </global>
+   <part>
+      <part-name>Music</part-name>
+      <measure>
+         <directions>
+            <clef line="2" sign="G"/>
+         </directions>
+         <sequence>
+            <beams>
+               <beam events="event3 event4 event5"/>
+            </beams>
+            <tuplet inner="3/8" outer="2/8">
+               <event value="/4">
+                  <note pitch="C5"/>
+               </event>
+               <event value="/8">
+                  <note pitch="G4"/>
+               </event>
+            </tuplet>
+            <tuplet inner="3/8" outer="2/8">
+               <event id="event3" value="/8">
+                  <note pitch="E4"/>
+               </event>
+               <event id="event4" value="/8">
+                  <note pitch="F4"/>
+               </event>
+               <event id="event5" value="/8">
+                  <note pitch="G4"/>
+               </event>
+            </tuplet>
+            <event value="/4">
+               <note pitch="E5"/>
+            </event>
+            <event value="/4">
+               <note pitch="D5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <tuplet inner="6/4" outer="4/4">
+               <event value="/4">
+                  <note pitch="C5"/>
+               </event>
+               <event value="/4">
+                  <note pitch="D5"/>
+               </event>
+               <event value="/4">
+                  <note pitch="C5"/>
+               </event>
+               <event value="/4">
+                  <note pitch="G4"/>
+               </event>
+               <event value="/4">
+                  <note pitch="E5"/>
+               </event>
+               <event value="/4">
+                  <note pitch="C5"/>
+               </event>
+            </tuplet>
+         </sequence>
+      </measure>
+   </part>
+</mnx>
+

@@ -83,6 +83,7 @@ enum EImoAttribute
     k_attr_tempo,               //float
     k_attr_time_only,           //string
     k_attr_tocoda,              //string
+    k_attr_right_located,       //bool. Only used by MNX importer to deal with <global>
 };
 
 //data types

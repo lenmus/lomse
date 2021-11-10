@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,7 +55,6 @@
 #include "lomse_document.h"
 
 #include <sstream>
-using namespace std;
 
 ///@cond INTERNALS
 namespace lomse
@@ -184,7 +183,7 @@ public:
         - Errors detected while parsing the file are reported to the reporter object
             defined in %Document constructor. By default, to `cout` stream.
     */
-    int from_file(const string& filename, int format=k_format_ldp);
+    int from_file(const std::string& filename, int format=k_format_ldp);
 
     /** Add content to an uninitialized %Document (a %Document created by just invoking
         the %Document constructor) by parsing the passed string.
@@ -202,7 +201,7 @@ public:
         - Errors detected while parsing the source string are reported to the reporter
             object defined in %Document constructor. By default, to `cout` stream.
     */
-    int from_string(const string& source, int format=k_format_ldp);
+    int from_string(const std::string& source, int format=k_format_ldp);
 
     /** Add content to an uninitialized %Document (a %Document created by just invoking
         the %Document constructor) by parsing data from LdpReader object.
@@ -255,6 +254,7 @@ public:
 
     // ptr to ImoDocument or nullptr if no object found with the given ID.
     ImoObj* get_pointer_to_imo(ImoId id) const;
+    ImoObj* get_pointer_to_imo(const std::string& xmlId) const;
 
     //ptr. to ImoControl or value `k_no_imoid` (-1) if no ImoControl with the given ID
     Control* get_pointer_to_control(ImoId id) const;
@@ -269,7 +269,7 @@ public:
         For %Document objects created from sources in other formats it will return
         'en' (English).
     */
-    inline string get_language() {
+    inline std::string get_language() {
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
 
@@ -286,7 +286,7 @@ public:
     /** Set the language used in this %Document. Parameter 'language' is a language code
     drawn from ISO 639, optionally extended with a country code drawn from ISO 3166, as
     'en-US'. It represents the default language for all texts in the document. */
-    inline void set_language(const string& language) { m_pImoDoc->m_language = language; }
+    inline void set_language(const std::string& language) { m_pImoDoc->m_language = language; }
 
     inline void set_page_content_scale(float scale) {
         if (m_pImoDoc)
@@ -326,8 +326,8 @@ public:
     /// @name Low level edition API: adding first level objects
     //@{
 
-//    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=nullptr);
-//    ImoButton* create_button(const string& label, const USize& size,
+//    ImoTextItem* create_text_item(const std::string& text, ImoStyle* pStyle=nullptr);
+//    ImoButton* create_button(const std::string& label, const USize& size,
 //                             ImoStyle* pStyle=nullptr);
 
     /** Append a new empty score (no instruments) at the end of the %Document. Returns a
@@ -363,7 +363,7 @@ public:
 
     /** Append content to the ImoMusicData object passed as parameter. The content to
         add is created by parsing the source code passed in the 'source' string. This
-        string must be in LDP format.
+        std::string must be in LDP format.
 
         Example. Append some notes to the first instrument in the score:
         @code
@@ -377,7 +377,7 @@ public:
         pInstr->add_staff_objects("(n c4 q)(n e4 q)(barline simple)", pMD);
         @endcode
     */
-    void add_staff_objects(const string& source, ImoMusicData* pMD);
+    void add_staff_objects(const std::string& source, ImoMusicData* pMD);
 
     /** Removes a relation between staff objects.
 
@@ -418,15 +418,15 @@ public:
 
         Example. Join three notes to form a triplet:
         @code
-        stringstream msg;
+        std::stringstream msg;
         ImoNoteRest* pStart = ...   //the first note in the triplet
         ImoNoteRest* pEnd = ...     //the last note in the triplet
-        string source = "";
+        std::string source = "";
         ImoTuplet* pTuplet = pDoc->add_tuplet(pStart, pEnd, "(t + 2 3)", msg);
         @endcode
     */
     ImoTuplet* add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
-                          const string& source, ostream& reporter);
+                          const std::string& source, ostream& reporter);
 
 
     /** Join several notes/rests to form a beamed group. All notes/rests must be eighth
@@ -444,7 +444,7 @@ public:
         ImoBeam* pBeam = pDoc->add_beam(notes);
         @endcode
     */
-    ImoBeam* add_beam(const list<ImoNoteRest*>& notes);
+    ImoBeam* add_beam(const std::list<ImoNoteRest*>& notes);
 
     /** Tie two notes
         @param pStart       The first note
@@ -459,7 +459,7 @@ public:
 
         Example. Tie two notes:
         @code
-        stringstream msg;
+        std::stringstream msg;
         ImoNote* pStart = ...   //the first note
         ImoNote* pEnd = ...     //the last note
         ImoTie* pTie = pDoc->add_tie(pStart, pEnd, msg);
@@ -493,18 +493,18 @@ public:
         @param name     The name to assign to this new style.
         @param parent   The name of an existing style from which the new style will
             inherit all its values. By default, from "Default style"   */
-    ImoStyle* create_style(const string& name, const string& parent="Default style");
+    ImoStyle* create_style(const std::string& name, const std::string& parent="Default style");
 
     /** Define a new style. The created style will be private, that is, it does not have
         name and cannot be used to derive other styles from it.
         @param parent   The name of an existing style from which the new style will
             inherit all its values. By default, from "Default style"   */
-    ImoStyle* create_private_style(const string& parent="Default style");
+    ImoStyle* create_private_style(const std::string& parent="Default style");
 
     /** Return the style whose name is passed as parameter. If the style name is not
         defined returns nullptr.
     */
-    ImoStyle* find_style(const string& name);
+    ImoStyle* find_style(const std::string& name);
 
     /** Return the style whose name is passed as parameter. If the style name is not
         defined returns the default style.
@@ -573,9 +573,9 @@ public:
     long get_model_ref();
 
     //excluded from low level edition API
-    ImoObj* create_object_from_ldp(const string& source, ostream& reporter);
-    ImoObj* create_object_from_ldp(const string& source);
-    ImoObj* create_object_from_lmd(const string& source);
+    ImoObj* create_object_from_ldp(const std::string& source, ostream& reporter);
+    ImoObj* create_object_from_ldp(const std::string& source);
+    ImoObj* create_object_from_lmd(const std::string& source);
 
     /** Add to the document a child object of type ImoContent. */
     ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_content_wrapper(pStyle); }
@@ -605,10 +605,10 @@ public:
     void on_removed_from_model(ImoObj* pImo);
 
     //undo/redo support
-    int from_checkpoint(const string& data);
-    int replace_object_from_checkpoint_data(ImoId id, const string& data);
-    string get_checkpoint_data();
-    string get_checkpoint_data_for(ImoId id);
+    int from_checkpoint(const std::string& data);
+    int replace_object_from_checkpoint_data(ImoId id, const std::string& data);
+    std::string get_checkpoint_data();
+    std::string get_checkpoint_data_for(ImoId id);
 
     //modified since last 'save to file' operation
     inline void clear_modified() { m_modified = 0; }
@@ -617,10 +617,10 @@ public:
     inline void reset_modified() { if (m_modified > 0) --m_modified; }
 
     //debug
-    string dump_ids() const;
+    std::string dump_ids() const;
     size_t id_assigner_size() const;
-    string dump_tree() const;
-    string to_string(bool fWithIds = false);
+    std::string dump_tree() const;
+    std::string to_string(bool fWithIds = false);
 
     //inherited from LenMos 3.0. Not yet used
     void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
@@ -636,6 +636,10 @@ protected:
     friend class InstrumentAnalyser;
     void assign_id(ImoObj* pImo);
     ImoId reserve_id(ImoId id);
+
+    friend class ImoObj;
+    std::string get_xml_id_for(ImoId id);
+    void set_xml_id_for(ImoId id, const std::string& value);
 
     friend class Control;
     void assign_id(Control* pControl);

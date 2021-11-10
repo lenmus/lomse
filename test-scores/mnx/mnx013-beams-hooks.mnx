@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mnx>
+   <global>
+      <measure>
+         <directions>
+            <time signature="4/4"/>
+         </directions>
+      </measure>
+   </global>
+   <part>
+      <part-name>Music</part-name>
+      <measure>
+         <directions>
+            <clef line="2" sign="G"/>
+         </directions>
+         <sequence>
+            <beams>
+               <beam events="ev1 ev2 ev3">
+                  <beam-hook direction="right" event="ev1"/>
+                  <beam-hook direction="left" event="ev3"/>
+               </beam>
+               <beam events="ev4 ev5 ev6">
+                  <beam-hook direction="right" event="ev4"/>
+                  <beam-hook direction="left" event="ev6"/>
+               </beam>
+               <beam events="ev7 ev8 ev9">
+                  <beam-hook direction="right" event="ev7"/>
+                  <beam-hook direction="left" event="ev9"/>
+               </beam>
+            </beams>
+            <event id="ev1" value="/16">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev2" value="/8">
+               <note pitch="D5"/>
+            </event>
+            <event id="ev3" value="/16">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev4" value="/16">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev5" value="/8">
+               <note pitch="F5"/>
+            </event>
+            <event id="ev6" value="/16">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev7" value="/16">
+               <note pitch="G5"/>
+            </event>
+            <event id="ev8" value="/8">
+               <note pitch="A5"/>
+            </event>
+            <event id="ev9" value="/16">
+               <note pitch="G5"/>
+            </event>
+            <event value="/4">
+               <note pitch="C6"/>
+            </event>
+         </sequence>
+      </measure>
+   </part>
+</mnx>
+

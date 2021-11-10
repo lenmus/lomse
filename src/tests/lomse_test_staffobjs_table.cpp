@@ -651,6 +651,36 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_14)
+    {
+        //@14. Rx. Clef, key signature and time signature always in that order and other
+        //@        non-timed after them
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/lower-entry/14-rule12-clef-key-time.mnx",
+                      Document::k_format_mnx);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 7 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it,	0,	0,		0,	0,		0,	"(clef G p1)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	0,		0,	"(key G)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	0,		0,	"(time 3 4)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	0,		0,	"(n f5 q v2 p1)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	64,		0,	"(n g5 q v2 p1)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	128,	0,	"(n g5 q v2 p1)" );
+        CHECK_ENTRY0(it,	0,	0,		0,	192,	0,	"(barline simple)" );
+    }
+
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
     {
         //@200. One grace. From previous 10%
@@ -1968,9 +1998,9 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,     0,	    0,	  0,    0,	"(clef G p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(key C)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(time 4 4)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(time 4 4)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(clef F4 p2)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(key D)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(time 4 4)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(n f4 w v1 p1)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	  0,    1,	"(n b2 w v2 p2)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	256,    0,	"(barline simple)" );

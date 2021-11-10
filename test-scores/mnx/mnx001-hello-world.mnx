@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mnx>
-    <score>
-        <mnx-common profile="standard">
-            <global>
-                <measure>
-                    <directions>
-                        <time signature="4/4"/>
-                    </directions>
-                </measure>
-            </global>
-            <part>
-                <part-name>Music</part-name>
-                <measure>
-                    <sequence>
-                        <directions>
-                            <clef sign="G" line="2"/>
-                        </directions>
-                        <event value="/1">
-                            <note pitch="C4"/>
-                        </event>
-                    </sequence>
-                </measure>
-            </part>
-        </mnx-common>
-    </score>
+   <global>
+      <measure>
+         <directions>
+            <time signature="4/4"/>
+         </directions>
+      </measure>
+   </global>
+   <part>
+      <part-name>Music</part-name>
+      <measure barline="regular">
+         <directions>
+            <clef sign="G" line="2"/>
+         </directions>
+         <sequence>
+            <event value="/1">
+               <note pitch="C4"/>
+            </event>
+         </sequence>
+      </measure>
+   </part>
 </mnx>

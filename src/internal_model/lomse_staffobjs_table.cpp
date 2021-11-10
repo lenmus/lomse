@@ -280,7 +280,18 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
 
     //R11. Clefs must go before barlines at the same timepos
     if (pB->is_clef() && pA->is_barline())
-        return true;   //move B after A
+        return true;   //move B before A
+
+    //R12. When at the same timepos and same instrument and staff, clef goes before
+    //     key signature; key signature goes before time signature; and time signature
+    //     goes before any other non-timed object.
+    if (a->num_instrument() == b->num_instrument() && a->staff() == b->staff())
+    {
+        if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature()))
+            return true;   //move B before A
+        if (pB->is_key_signature() && pA->is_time_signature())
+            return true;   //move B before A
+    }
 
 //    //R?. If all other conditions met, order by line
 //    if (b->line() < a->line())

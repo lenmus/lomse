@@ -52,6 +52,8 @@ protected:
     ImoId m_idCounter;
     std::map<ImoId, ImoObj*> m_idToImo;
     std::map<ImoId, Control*> m_idToControl;
+    std::map<ImoId, std::string> m_idToXmlId;
+    std::map<std::string, ImoId> m_xmlIdToId;
 
 public:
     IdAssigner();
@@ -63,9 +65,12 @@ public:
     void assign_id(Control* pControl);
     ImoId reserve_id(ImoId id);
     ImoObj* get_pointer_to_imo(ImoId id) const;
+    ImoObj* get_pointer_to_imo(const std::string& xmlId) const;
     Control* get_pointer_to_control(ImoId id) const;
     void remove(ImoObj* pImo);
     void copy_ids_to(IdAssigner* assigner, ImoId idMin);
+    std::string get_xml_id_for(ImoId id);
+    void set_xml_id_for(ImoId id, const std::string& xmlId);
 
     //debug
     string dump() const;

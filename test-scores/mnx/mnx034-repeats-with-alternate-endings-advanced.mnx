@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mnx>
+   <global>
+      <measure>
+         <directions>
+            <time signature="3/4"/>
+            <repeat type="start"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <ending type="start" number="1,2"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <repeat type="end"/>
+            <ending type="stop"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <ending type="start" number="3"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <ending type="discontinue"/>
+         </directions>
+      </measure>
+      <measure/>
+   </global>
+   <part>
+      <part-name>Music</part-name>
+      <measure>
+         <directions>
+            <clef sign="G" line="2"/>
+         </directions>
+         <sequence>
+            <event value="/2d">
+               <note pitch="C5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/2d">
+               <note pitch="E5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/2">
+               <note pitch="E5"/>
+            </event>
+            <event value="/4">
+               <note pitch="D5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/2d">
+               <note pitch="G5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/2">
+               <note pitch="G5"/>
+            </event>
+            <event value="/4">
+               <note pitch="F5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/2d">
+               <note pitch="E5"/>
+            </event>
+         </sequence>
+      </measure>
+   </part>
+</mnx>
+

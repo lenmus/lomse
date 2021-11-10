@@ -4,8 +4,10 @@
       <measure>
          <directions>
             <time signature="4/4"/>
+            <key fifths="-2"/>
          </directions>
       </measure>
+      <measure/>
       <measure/>
    </global>
    <part>
@@ -15,43 +17,37 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
-               <note pitch="C4"/>
+            <event value="/4">
+               <note pitch="F4"/>
             </event>
-            <event value="/2">
-               <note pitch="G3"/>
+            <event value="/4">
+               <note pitch="G4"/>
+            </event>
+            <event value="/4">
+               <note pitch="G#4" accidental="sharp"/>
+            </event>
+            <event value="/4">
+               <note pitch="A4"/>
             </event>
          </sequence>
+      </measure>
+      <measure>
          <sequence>
-            <event value="/4">
-               <note pitch="E5"/>
+            <event value="/2">
+               <note pitch="Bb4"/>
             </event>
             <event value="/4">
-               <note pitch="F5"/>
+               <note pitch="Db5" accidental="flat"/>
             </event>
             <event value="/4">
-               <note pitch="G5"/>
-            </event>
-            <event value="/4">
-               <note pitch="B4"/>
+               <note pitch="Db5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
             <event value="/1">
-               <note pitch="C4"/>
-            </event>
-         </sequence>
-         <sequence>
-            <event value="/4">
-               <note pitch="D5"/>
-            </event>
-            <event value="/4">
-               <note pitch="C5"/>
-            </event>
-            <event value="/2">
-               <note pitch="C6"/>
+               <note pitch="D5" accidental="natural"/>
             </event>
          </sequence>
       </measure>

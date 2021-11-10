@@ -1408,10 +1408,7 @@ protected:
     ImoObj(int objtype, ImoId id=k_no_imoid);
 
     friend class ImFactory;
-    inline void set_owner_document(Document* pDoc)
-    {
-        m_pDoc = pDoc;
-    }
+    inline void set_owner_document(Document* pDoc) { m_pDoc = pDoc; }
     virtual void initialize_object(Document* pDoc);
 
 public:
@@ -1429,80 +1426,38 @@ public:
     };
 
     //dirty
-    inline bool is_dirty()
-    {
-        return (m_flags & k_dirty) != 0;
-    }
+    inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
     void set_dirty(bool value);
-    inline bool are_children_dirty()
-    {
-        return (m_flags & k_children_dirty) != 0;
-    }
+    inline bool are_children_dirty() { return (m_flags & k_children_dirty) != 0; }
     void set_children_dirty(bool value);
 
     //edition flags
-    inline bool is_edit_terminal()
-    {
-        return (m_flags & k_edit_terminal) != 0;
-    }
-    inline void set_edit_terminal(bool value)
-    {
-        value ? m_flags |= k_edit_terminal
-                           : m_flags &= ~k_edit_terminal;
-    }
-    inline bool is_editable()
-    {
-        return (m_flags & k_editable) != 0;
-    }
-    inline void set_editable(bool value)
-    {
-        value ? m_flags |= k_editable
-                           : m_flags &= ~k_editable;
-    }
-    inline bool is_deletable()
-    {
-        return (m_flags & k_deletable) != 0;
-    }
-    inline void set_deletable(bool value)
-    {
-        value ? m_flags |= k_deletable
-                           : m_flags &= ~k_deletable;
-    }
-    inline bool is_expandable()
-    {
-        return (m_flags & k_expandable) != 0;
-    }
-    inline void set_expandable(bool value)
-    {
-        value ? m_flags |= k_expandable
-                           : m_flags &= ~k_expandable;
-    }
+    inline bool is_edit_terminal() { return (m_flags & k_edit_terminal) != 0; }
+    inline void set_edit_terminal(bool value) { value ? m_flags |= k_edit_terminal
+                                                      : m_flags &= ~k_edit_terminal; }
+    inline bool is_editable() { return (m_flags & k_editable) != 0; }
+    inline void set_editable(bool value) { value ? m_flags |= k_editable
+                                                 : m_flags &= ~k_editable; }
+    inline bool is_deletable() { return (m_flags & k_deletable) != 0; }
+    inline void set_deletable(bool value) { value ? m_flags |= k_deletable
+                                                  : m_flags &= ~k_deletable; }
+    inline bool is_expandable() { return (m_flags & k_expandable) != 0; }
+    inline void set_expandable(bool value) { value ? m_flags |= k_expandable
+                                                   : m_flags &= ~k_expandable; }
 
-    //getters
-    inline ImoId get_id()
-    {
-        return m_id;
-    }
-
-    //setters
-    inline void set_id(ImoId id)
-    {
-        m_id = id;
-    }
+    //id
+    inline ImoId get_id() { return m_id; }
+    inline void set_id(ImoId id) { m_id = id; }
+    std::string get_xml_id();
+    void set_xml_id(const std::string& value);
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
-    virtual bool has_visitable_children()
-    {
-        return has_children();
-    }
+    virtual bool has_visitable_children() { return has_children(); }
 
     //parent / children
     ImoObj* get_child_of_type(int objtype);
-    virtual ImoObj* get_parent_imo()
-    {
-        return static_cast<ImoObj*>(get_parent());
-    }
+    virtual ImoObj* get_parent_imo() { return static_cast<ImoObj*>(get_parent()); }
     void append_child_imo(ImoObj* pImo);
     void remove_child_imo(ImoObj* pImo);
     Document* get_the_document();
@@ -1515,16 +1470,10 @@ public:
     static const std::string& get_name(int type);
     const std::string& get_name() const;
     std::string to_string(bool fWithIds=false);
-    inline std::string to_string_with_ids()
-    {
-        return to_string(true);
-    }
+    inline std::string to_string_with_ids() { return to_string(true); }
 
     //properties
-    virtual bool can_generate_secondary_shapes()
-    {
-        return false;
-    }
+    virtual bool can_generate_secondary_shapes() { return false; }
 
     //IM attributes interface
     //set attribute value
@@ -1543,12 +1492,10 @@ public:
     virtual string get_string_attribute(TIntAttribute idx);
     //attribute nodes
     ImoAttr* get_attribute_node(TIntAttribute idx);
+    void remove_attribute(TIntAttribute idx);
     //miscellaneous
     virtual int get_num_attributes();
-    inline ImoAttr* get_first_attribute()
-    {
-        return m_pAttribs;
-    }
+    inline ImoAttr* get_first_attribute() { return m_pAttribs; }
     virtual list<TIntAttribute> get_supported_attributes()
     {
         list<TIntAttribute> supported;
@@ -1556,14 +1503,8 @@ public:
     }
 
     //object classification
-    inline int get_obj_type()
-    {
-        return m_objtype;
-    }
-    inline bool has_children()
-    {
-        return !is_terminal();
-    }
+    inline int get_obj_type() { return m_objtype; }
+    inline bool has_children() { return !is_terminal(); }
 
     //groups
     inline bool is_dto() { return m_objtype > k_imo_dto
@@ -1721,7 +1662,6 @@ protected:
 
     //attributes
     ImoAttr* set_attribute_node(ImoAttr* newAttr);
-    void remove_attribute(TIntAttribute idx);
     ImoAttr* get_last_attribute();
 
 };
@@ -3072,35 +3012,22 @@ public:
 class ImoBeamData : public ImoRelDataObj
 {
 protected:
-    int m_beamNum;
     int m_beamType[6];
     bool m_repeat[6];
 
     friend class ImFactory;
     ImoBeamData(ImoBeamDto* pDto);
+    ImoBeamData();
 
 public:
     virtual ~ImoBeamData() {}
 
     //getters
-    inline int get_beam_number()
-    {
-        return m_beamNum;
-    }
-    inline int get_beam_type(int level)
-    {
-        return m_beamType[level];
-    }
-    inline bool get_repeat(int level)
-    {
-        return m_repeat[level];
-    }
+    inline int get_beam_type(int level) { return m_beamType[level]; }
+    inline bool get_repeat(int level) { return m_repeat[level]; }
 
     //setters
-    inline void set_beam_type(int level, int type)
-    {
-        m_beamType[level] = type;
-    }
+    inline void set_beam_type(int level, int type) { m_beamType[level] = type; }
 
     //properties
     bool is_end_of_beam();
@@ -4250,14 +4177,10 @@ public:
 class ImoSymbolRepetitionMark : public ImoAuxObj
 {
 protected:
-    int m_symbol;       //a value from enum ESymbolRepetitionMark
+    int m_symbol = ImoSymbolRepetitionMark::k_undefined;       //a value from enum ESymbolRepetitionMark
 
     friend class ImFactory;
-    ImoSymbolRepetitionMark()
-        : ImoAuxObj(k_imo_symbol_repetition_mark)
-        , m_symbol(ImoSymbolRepetitionMark::k_undefined)
-    {
-    }
+    ImoSymbolRepetitionMark() : ImoAuxObj(k_imo_symbol_repetition_mark) {}
 
 public:
     virtual ~ImoSymbolRepetitionMark() {}
@@ -4269,17 +4192,9 @@ public:
         k_segno,
     };
 
-    //getters
-    inline int get_symbol()
-    {
-        return m_symbol;
-    }
-
-    //setters
-    inline void set_symbol(int value)
-    {
-        m_symbol = value;
-    }
+    //getters and setters
+    inline int get_symbol() { return m_symbol; }
+    inline void set_symbol(int value) { m_symbol = value; }
 
 };
 
@@ -6159,10 +6074,9 @@ public:
 
     //to support different models for encoding notes in source files
     enum {
-        k_pitch_and_notation_provided = 0,  //notes are instantiated with pitch and accidentals
-                                            //  (e.g. MusicXML). Nothing to compute
-        k_only_notation_provided,           //notes are instantiated with notated accidentals
-                                            //  (e.g. LDP). Pitch has to be computed
+        k_pitch_and_notation_provided = 0,  //both notated and actual acc provided. Nothing to compute (e.g. MusicXML).
+        k_only_notation_provided,           //actual acc. has to be computed (e.g. LDP)
+        k_pitch_provided_notation_optional, //notated acc. has to be computed when not provided (e.g. MNX).
     };
 
     //building
@@ -6747,6 +6661,7 @@ protected:
 
     friend class ImFactory;
     ImoTieData(ImoTieDto* pDto);
+    ImoTieData();
 
 public:
     virtual ~ImoTieData();
@@ -7171,22 +7086,14 @@ public:
 class ImoTuplet : public ImoRelObj
 {
 protected:
-    int m_nActualNum;
-    int m_nNormalNum;
-    int m_nShowBracket;
-    int m_nShowNumber;
-    int m_nPlacement;
+    int m_nActualNum = 0;
+    int m_nNormalNum = 0;
+    int m_nShowBracket = k_yesno_default;       //a value from enum EYesNo
+    int m_nShowNumber = k_number_actual;        //a value from ImoTuplet enum
+    int m_nPlacement = k_placement_default;     //a value from enum EPlacement
 
     friend class ImFactory;
-    ImoTuplet()
-        : ImoRelObj(k_imo_tuplet)
-        , m_nActualNum(0)
-        , m_nNormalNum(0)
-        , m_nShowBracket(0)
-        , m_nShowNumber(0)
-        , m_nPlacement(0)
-    {
-    }
+    ImoTuplet() : ImoRelObj(k_imo_tuplet) {}
     ImoTuplet(ImoTupletDto* dto);
 
 public:
@@ -7196,29 +7103,22 @@ public:
     enum { k_number_actual=0, k_number_both, k_number_none, };
 
     //getters
-    inline int get_actual_number()
-    {
-        return m_nActualNum;
-    }
-    inline int get_normal_number()
-    {
-        return m_nNormalNum;
-    }
-    inline int get_show_bracket()
-    {
-        return m_nShowBracket;
-    }
-    inline int get_show_number()
-    {
-        return m_nShowNumber;
-    }
-    inline int get_placement()
-    {
-        return m_nPlacement;
-    }
+    inline int get_actual_number() { return m_nActualNum; }
+    inline int get_normal_number() { return m_nNormalNum; }
+    inline int get_show_bracket() { return m_nShowBracket; }
+    inline int get_show_number() { return m_nShowNumber; }
+    inline int get_placement() { return m_nPlacement; }
+
+    //setters
+    inline void set_actual_number(int value) { m_nActualNum = value; }
+    inline void set_normal_number(int value) { m_nNormalNum = value; }
+    inline void set_show_bracket(int value) { m_nShowBracket = value; }
+    inline void set_show_number(int value) { m_nShowNumber = value; }
+    inline void set_placement(int value) { m_nPlacement = value; }
 
     //required override for ImoRelObj
     void reorganize_after_object_deletion() override;
+
 };
 
 //---------------------------------------------------------------------------------------

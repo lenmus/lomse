@@ -491,9 +491,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     long nExtraTime = long( m_pTable->get_anacrusis_extra_time() );
 
     LOMSE_LOG_DEBUG(Logger::k_score_player,
-                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacruxis missing time=%f, "
+                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacrusis missing time=%f, "
                     "curTime=%ld, nMissingTime=%ld, nExtraTime=%ld, nDeltaShift=%ld",
-                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacruxis_missing_time(),
+                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacrusis_missing_time(),
                     curTime, nMissingTime, nExtraTime, nDeltaShift);
 
     //prepare weak_ptr to interactor

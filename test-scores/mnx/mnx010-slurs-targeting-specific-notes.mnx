@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <mnx>
    <global>
       <measure>
@@ -6,7 +7,8 @@
          </directions>
       </measure>
    </global>
-   <part name="Music">
+   <part>
+      <part-name>Music</part-name>
       <measure>
          <directions>
             <clef sign="G" line="2"/>

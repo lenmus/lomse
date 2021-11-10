@@ -14,12 +14,19 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
+            <event value="/4d">
+               <note pitch="G4"/>
                <note pitch="C5"/>
             </event>
-            <event value="/2">
+            <event value="/8">
+               <note pitch="E5"/>
+            </event>
+            <event value="/4d">
+               <note pitch="F4"/>
                <note pitch="D5"/>
-               <slur side="up" location="outgoing"/>
+            </event>
+            <event value="/8">
+               <note pitch="F5"/>
             </event>
          </sequence>
       </measure>

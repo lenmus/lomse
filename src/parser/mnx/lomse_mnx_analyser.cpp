@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,6 +50,7 @@
 #include "lomse_time.h"
 #include "lomse_autobeamer.h"
 #include "lomse_im_measures_table.h"
+#include "lomse_im_attributes.h"
 
 
 #include <iostream>
@@ -70,11 +71,24 @@ namespace lomse
 //=======================================================================================
 // Helper classes to return intermediate values during analysis
 //=======================================================================================
+//---------------------------------------------------------------------------------------
+//for <events> analysis
 struct EventData
 {
     bool fMeasure;      //it is a full measure event
+    ImoNoteRest* pNR;   //single, note, rest or chord base note
 
-    EventData(bool value) : fMeasure(value) {}
+    EventData(bool value, ImoNoteRest* nr) : fMeasure(value), pNR(nr) {}
+};
+
+//---------------------------------------------------------------------------------------
+//for <jump> analysis
+struct JumpData
+{
+    ImoDirection* pDirection;
+    ImoSoundChange* pSC;
+
+    JumpData(ImoDirection* dir, ImoSoundChange* sc) : pDirection(dir), pSC(sc) {}
 };
 
 
@@ -144,8 +158,14 @@ int MnxPartList::find_index_for(const string& id)
 void MnxPartList::add_all_instruments(ImoScore* pScore)
 {
     m_fInstrumentsAdded = true;
-    for (int i=0; i < m_numInstrs; ++i)
-        pScore->add_instrument(m_instruments[i]);
+
+    if (m_numInstrs < 1)        //sanity check, when invalid MNX format
+        pScore->add_instrument();   //add empty instrument
+    else
+    {
+        for (int i=0; i < m_numInstrs; ++i)
+            pScore->add_instrument(m_instruments[i]);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -238,7 +258,7 @@ void MnxPartGroups::check_if_all_groups_are_closed(ostream& reporter)
 
 
 //=======================================================================================
-// Enum to assign a int to each valid MusicXML element
+// Enum to assign a int to each valid MNX element
 enum EMnxTag
 {
     k_mnx_tag_undefined = -1,
@@ -247,7 +267,9 @@ enum EMnxTag
 //    k_mnx_tag_articulations,
 //    k_mnx_tag_backup,
 //    k_mnx_tag_barline,
-    k_mnx_tag_beamed,
+    k_mnx_tag_beam,
+    k_mnx_tag_beam_hook,
+    k_mnx_tag_beams,
 //    k_mnx_tag_bracket,
     k_mnx_tag_clef,
 //    k_mnx_tag_coda,
@@ -264,11 +286,14 @@ enum EMnxTag
 //    k_mnx_tag_eyeglasses,
 //    k_mnx_tag_fermata,
 //    k_mnx_tag_forward,
+    k_mnx_tag_fine,
     k_mnx_tag_global,
+    k_mnx_tag_grace,
 //    k_mnx_tag_harp_pedals,
     k_mnx_tag_head,
 //    k_mnx_tag_image,
     k_mnx_tag_instrument_sound,
+    k_mnx_tag_jump,
     k_mnx_tag_key,
 //    k_mnx_tag_lyric,
     k_mnx_tag_measure,
@@ -276,10 +301,9 @@ enum EMnxTag
 //    k_mnx_tag_midi_device,
 //    k_mnx_tag_midi_instrument,
     k_mnx_tag_mnx,
-    k_mnx_tag_mnx_common,
 //    k_mnx_tag_notations,
     k_mnx_tag_note,
-//    k_mnx_tag_octave_shift,
+    k_mnx_tag_octave_shift,
 //    k_mnx_tag_ornaments,
     k_mnx_tag_part,
 //    k_mnx_tag_part_group,
@@ -291,13 +315,14 @@ enum EMnxTag
 //    k_mnx_tag_principal_voice,
 //    k_mnx_tag_print,
 //    k_mnx_tag_rehearsal,
+    k_mnx_tag_repeat,
     k_mnx_tag_rest,
 //    k_mnx_tag_scordatura,
     k_mnx_tag_score,
 //    k_mnx_tag_score_instrument,
 //    k_mnx_tag_score_part,
 //    k_mnx_tag_score_partwise,
-//    k_mnx_tag_segno,
+    k_mnx_tag_segno,
     k_mnx_tag_sequence,
     k_mnx_tag_sequence_content,
 //    k_mnx_tag_slur,
@@ -306,7 +331,7 @@ enum EMnxTag
 //    k_mnx_tag_string_mute,
 //    k_mnx_tag_technical,
 //    k_mnx_tag_text,
-//    k_mnx_tag_tied,
+    k_mnx_tag_tied,
     k_mnx_tag_time,
 //    k_mnx_tag_time_modification,
     k_mnx_tag_tuplet,
@@ -384,6 +409,9 @@ protected:
     void set_result(void* pResult) { m_pAnalyser->set_result(pResult); }
     void* get_result() { return m_pAnalyser->get_result(); }
 
+    //very common operations
+    void analyse_and_set_xml_id(ImoObj* pObj);
+
     //analysers for common elements
     int analyse_optional_staff(int nDefault);
 
@@ -409,15 +437,6 @@ protected:
     void get_attributes_for_position(ImoObj* pObj);
     void get_attribute_color(ImoObj* pImo);
 
-    // Analysers for notational syntaxes
-    bool get_note_value(const string& value, int* noteType, int* dots);
-    bool get_note_value_quantity(const string& value, int* noteType, int* dots,
-                                 int* multiplier);
-    //bool get_time_signature_value(const string& value, );
-    //bool get_chromatic_pitch_value(const string& value, );
-    //bool get_measure_location_value(const string& value, );
-    //bool get_smufl_glyph_name(const string& value, );
-
     //methods to get value of current node
     int get_cur_node_value_as_integer(int nDefault);
 
@@ -436,14 +455,10 @@ protected:
     void add_to_model(ImoObj* pImo, int type=-1);
 
     //auxiliary
-    inline const string& get_document_locator() {
-        return m_pAnalyser->get_document_locator();
-    }
+    inline const string& get_document_locator() { return m_pAnalyser->get_document_locator(); }
+    int get_line_number() { return m_pAnalyser->get_line_number(&m_analysedNode); }
+    ImoNoteRest* get_noterest(const std::string& xmlId, const std::string& element);
 
-    int get_line_number()
-    {
-        return m_pAnalyser->get_line_number(&m_analysedNode);
-    }
 
 
 
@@ -453,6 +468,7 @@ protected:
     {
         return node->attribute(name.c_str()) != nullptr;
     }
+
     inline string get_attribute(XmlNode* node, const string& name)
     {
         XmlAttribute attr = node->attribute(name.c_str());
@@ -489,6 +505,58 @@ protected:
         prepare_next_one();
     }
 
+
+    //-----------------------------------------------------------------------------------
+    // Helper, to check and cast anchor object
+    //-----------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------
+    ImoDirection* get_anchor_as_direction()
+    {
+        if (m_pAnchor && m_pAnchor->is_direction())
+            return static_cast<ImoDirection*>(m_pAnchor);
+
+        const string msg("pAnchor is nullptr or it is not direction");
+        LOMSE_LOG_ERROR(msg);
+        error_msg(msg);
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoMusicData* get_anchor_as_music_data()
+    {
+        if (m_pAnchor && m_pAnchor->is_music_data())
+            return static_cast<ImoMusicData*>(m_pAnchor);
+
+        const string msg("pAnchor is nullptr or it is not musicData");
+        LOMSE_LOG_ERROR(msg);
+        error_msg(msg);
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoNote* get_anchor_as_note()
+    {
+        if (m_pAnchor && m_pAnchor->is_note())
+            return static_cast<ImoNote*>(m_pAnchor);
+
+        const string msg("pAnchor is nullptr or it is not note");
+        LOMSE_LOG_ERROR(msg);
+        error_msg(msg);
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoScore* get_anchor_as_score()
+    {
+        if (m_pAnchor && m_pAnchor->is_score())
+            return static_cast<ImoScore*>(m_pAnchor);
+
+        const string msg("pAnchor is nullptr or it is not ImoScore");
+        LOMSE_LOG_ERROR(msg);
+        error_msg(msg);
+        return nullptr;
+    }
 };
 
 
@@ -801,37 +869,6 @@ int MnxElementAnalyser::get_cur_node_value_as_integer(int nDefault)
         return int(nNumber);
 }
 
-////---------------------------------------------------------------------------------------
-//void MnxElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
-//{
-//    while(more_children_to_analyse())
-//    {
-//        m_childToAnalyse = get_child_to_analyse();
-//
-//        ELdpElement type = get_type(m_childToAnalyse);
-//        if (contains(type, pValid, nValid))
-//        {
-//            move_to_next_child();
-//            m_pAnalyser->analyse_node(&m_childToAnalyse);
-//        }
-//        else
-//        {
-//            string name = m_childToAnalyse.name();
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Element '" + name + "' unknown or not possible here. Ignored.");
-//        }
-//        move_to_next_child();
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool MnxElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid)
-//{
-//    for (int i=0; i < nValid; i++, pValid++)
-//        if (*pValid == type) return true;
-//    return false;
-//}
-
 //---------------------------------------------------------------------------------------
 void MnxElementAnalyser::error_invalid_child()
 {
@@ -880,6 +917,21 @@ void MnxElementAnalyser::add_to_model(ImoObj* pImo, int type)
     linker.add_child_to_model(m_pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
 }
 
+//---------------------------------------------------------------------------------------
+ImoNoteRest* MnxElementAnalyser::get_noterest(const string& xmlId, const string& element)
+{
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+    ImoObj* pImo = pDoc->get_pointer_to_imo(xmlId);
+    if (pImo)
+    {
+        if (pImo->is_note_rest())
+            return static_cast<ImoNoteRest*>(pImo);
+        else
+            error_msg("<" + element + ">: @xml:id '" + xmlId
+                + "' is not a note/rest but a " + pImo->get_name() );
+    }
+    return nullptr;
+}
 
 //---------------------------------------------------------------------------------------
 bool MnxElementAnalyser::is_child_value_long()
@@ -986,118 +1038,15 @@ int MnxElementAnalyser::get_child_value_yes_no(int nDefault)
     }
 }
 
-
 //-----------------------------------------------------------------------------------
-// Analysers for notational syntaxes
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
-//Note value
-bool MnxElementAnalyser::get_note_value(const string& value, int* noteType, int* dots)
+void MnxElementAnalyser::analyse_and_set_xml_id(ImoObj* pImo)
 {
-    *dots = 0;
-    bool fFractional = false;
-    string::const_iterator it = value.begin();
+    string id = get_optional_string_attribute("id", "");
+    if (id.empty() || pImo == nullptr)
+        return;
 
-    //get initial '*' or '/'
-    if (it != value.end())
-    {
-        if (*it == '*')
-            fFractional = false;
-        else if (*it == '/')
-            fFractional = true;
-        else
-            return false;   //error_invalid_start();
-        ++it;
-    }
-
-    if (it == value.end())
-        return false;   //error_missing_number();
-
-    //get number
-    string::const_iterator start = it;
-    ++it;
-    while(it != value.end() && isdigit(*it))
-    {
-        ++it;
-    }
-    string number(start, it);
-
-    //get dots: count and remove trailing 'd'
-    while(it != value.end() && *it == 'd')
-    {
-        *dots += 1;
-        ++it;
-    }
-
-    if (it != value.end())
-        return false;   //error_invalid_chars_at_end();
-
-    //determine note type
-    if (number == "2" && !fFractional)
-        *noteType = k_longa;
-    else if (number == "1")
-        *noteType = k_whole;
-    else if (number == "2" && fFractional)
-        *noteType = k_half;
-    else if (number == "4")
-        *noteType = k_quarter;
-    else if (number == "8")
-        *noteType = k_eighth;
-    else if (number == "16")
-        *noteType = k_16th;
-    else if (number == "32")
-        *noteType = k_32nd;
-    else if (number == "64")
-        *noteType = k_64th;
-    else if (number == "128")
-        *noteType = k_128th;
-    else
-        *noteType = k_256th;
-
-//            s << ". Value=" << value << ", noteType=" << *noteType
-//              << ", dots=" << *dots;
-//            LOMSE_LOG_DEBUG(Logger::k_all, s.str());
-
-    return true;
+    pImo->set_xml_id(id);
 }
-
-//-----------------------------------------------------------------------------------
-//Note value quantity
-bool MnxElementAnalyser::get_note_value_quantity(const string& UNUSED(value), int* UNUSED(noteType),
-                                                 int* UNUSED(dots), int* UNUSED(multiplier))
-{
-    //TODO
-    return false;
-}
-
-////-----------------------------------------------------------------------------------
-////Time signature value
-//bool MnxElementAnalyser::get_time_signature_value(const string& value, )
-//{
-//
-//}
-//
-////-----------------------------------------------------------------------------------
-////Chromatic pitch
-//bool MnxElementAnalyser::get_chromatic_pitch_value(const string& value, )
-//{
-//
-//}
-//
-////-----------------------------------------------------------------------------------
-////Measure location
-//bool MnxElementAnalyser::get_measure_location_value(const string& value, )
-//{
-//
-//}
-//
-////-----------------------------------------------------------------------------------
-////SMuFL glyph name
-//bool MnxElementAnalyser::get_smufl_glyph_name(const string& value, )
-//{
-//
-//}
 
 
 //-----------------------------------------------------------------------------------
@@ -1116,12 +1065,11 @@ bool MnxElementAnalyser::get_attribute_note_value(int* noteType, int* dots)
 
 //            stringstream s;
 //            s << "get_attribute_note_value. value=" << value;
-        return get_note_value(value, noteType, dots);
+        return MnxAnalyser::get_note_value(value, noteType, dots);
     }
     else
         return false;
 }
-
 
 //-----------------------------------------------------------------------------------
 //@ % tenths
@@ -1374,44 +1322,239 @@ public:
         return true;    //success
     }
 };
+
 //@--------------------------------------------------------------------------------------
-//@ <beamed>
-//@Contexts:
-//@    sequence, tuplet, grace, beamed
-//@Content Model:
-//@    Metadata content
-//@    Sequence content = event, beamed, tuplet, forward, grace
-//@    Interpretation content
-//@Attributes:
-//@    value - optional value of a beamed group within a parent
-//@    continue - optional beam group in following measure which continues this one //
-class BeamedMnxAnalyser : public MnxElementAnalyser
+//@ <beam>
+//@ Parent elements: <beam>, <beams>
+//@ Context:
+//@    In any order: <beam>*, <beam-hook>*
+//@ Attributes:
+//@    events - mandatory. A space-separated list of event IDs for events that comprise
+//@             this beam — in order by their position in the beam.
+//@
+class BeamMnxAnalyser : public MnxElementAnalyser
 {
 public:
-    BeamedMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                      LibraryScope& libraryScope, ImoObj* pAnchor)
+    BeamMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                    LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     bool do_analysis() override
     {
-        // attrib: value - optional value of a beamed group within a parent
-        //TODO
+        //attrib: events
+        string events = get_mandatory_string_attribute("events", "", "beam");
+        process_beam(events);
 
-        // attrib: continue - optional beam group in following measure which continues this one //
-        //TODO
+        while (more_children_to_analyse())
+        {
+            if (get_optional("beam"))
+            {
+                m_pAnalyser->increment_beam_level();
+                analyse_child();
+                m_pAnalyser->decrement_beam_level();
+            }
+            else if (get_optional("beam-hook"))
+                analyse_child();
+            else
+                break;
+        }
 
-        m_pAnalyser->increment_beam_level();
+        set_result(nullptr);
+        return true;    //success
+    }
 
-        // Metadata content
-        //TODO: analyse_metadata_content(m_pAnchor);
+protected:
 
-        // Sequence content
-        analyse_content("sequence_content", m_pAnchor);
+    //-----------------------------------------------------------------------------------
+    void process_beam(const string& events)
+    {
+        //extract ids
+        vector<string> xmlId;
+        istringstream iss(events);
+        string id;
+        while (getline(iss, id, ' '))
+        {
+            if (!id.empty())
+                xmlId.push_back(id);
+        }
 
-        // Interpretation content
-        //TODO: analyse_interpretation_content(m_pAnchor);
+        //get referenced note/rests
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        vector<ImoNoteRest*> notes;
+        for (size_t i=0; i < xmlId.size(); ++i)
+        {
+            ImoObj* pImo = pDoc->get_pointer_to_imo(xmlId[i]);
+            if (pImo)
+            {
+                if (pImo->is_note_rest())
+                    notes.push_back( static_cast<ImoNoteRest*>(pImo) );
+                else
+                    error_msg("<beam>: @xml:id '" + xmlId[i]
+                        + "' is not a note/rest but a " + pImo->get_name() );
+            }
+            else
+                error_msg("<beam>: No object found with @xml:id = '" + xmlId[i] + "'");
+        }
 
-        m_pAnalyser->decrement_beam_level();
+        //create the beam
+        if (notes.size() > 1)
+        {
+            if (m_pAnalyser->get_beam_level() == 0)
+                create_beam(notes);
+            else
+                add_secondary_beam(notes);
+        }
+        else
+        {
+            stringstream ss;
+            ss << "<beam>: Less than two note/rests in <beam> (found " << notes.size()
+               << "). <beam> ignored.";
+            error_msg(ss.str());
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void create_beam(vector<ImoNoteRest*>& notes)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
+
+//        bool fErrors = false;
+        size_t lastNR = notes.size() - 1;
+        for (size_t i=0; i <= lastNR; ++i)
+        {
+            //determine beam type
+            int type = ImoBeam::k_continue;
+            if (i == 0)
+                type = ImoBeam::k_begin;
+            else if (i == lastNR)
+                type = ImoBeam::k_end;
+
+            ImoNoteRest* pNR = notes[i];
+            ImoBeamData* pData = static_cast<ImoBeamData*>(
+                                        ImFactory::inject(k_imo_beam_data, pDoc) );
+            pData->set_beam_type(0, type);
+            pNR->include_in_relation(pDoc, pBeam, pData);
+
+//            //check if beam is congruent with note type
+//            int level = 0;
+//            for (int i=0; i < 6; ++i)
+//            {
+//                if ((*it)->get_beam_type(i) == ImoBeam::k_none)
+//                    break;
+//                ++level;
+//            }
+//            int type = pNR->get_note_type();
+//            switch(level)
+//            {
+//                case 0: fErrors = true;                 break;
+//                case 1: fErrors |= (type != k_eighth);  break;
+//                case 2: fErrors |= (type != k_16th);    break;
+//                case 3: fErrors |= (type != k_32nd);    break;
+//                case 4: fErrors |= (type != k_64th);    break;
+//                case 5: fErrors |= (type != k_128th);   break;
+//                case 6: fErrors |= (type != k_256th);   break;
+//            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_secondary_beam(vector<ImoNoteRest*>& notes)
+    {
+//        bool fErrors = false;
+        int level = m_pAnalyser->get_beam_level();
+        size_t lastNR = notes.size() - 1;
+        for (size_t i=0; i <= lastNR; ++i)
+        {
+            //determine beam type
+            int type = ImoBeam::k_continue;
+            if (i == 0)
+                type = ImoBeam::k_begin;
+            else if (i == lastNR)
+                type = ImoBeam::k_end;
+
+            ImoNoteRest* pNR = notes[i];
+            ImoBeam* pBeam = pNR->get_beam();
+            ImoBeamData* pData = static_cast<ImoBeamData*>( pBeam->get_data_for(pNR) );
+            pData->set_beam_type(level, type);
+        }
+        //TODO: validation
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <beam-hook>
+//@ Parent element: <beam>
+//@ Context
+//@     Always empty.
+//@ Attributes
+//@     event - mandatory. event ID
+//@     direction - optional. Beam hook direction
+//@
+class BeamHookMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    BeamHookMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        string xmlId = get_mandatory_string_attribute("event", "", "beam-hook");
+        string direction = get_mandatory_string_attribute("direction", "", "beam-hook");
+//        cout << "process_beam_hook(). id='" << xmlId << "', dir=" << direction << endl;
+
+        int level = m_pAnalyser->get_beam_level() + 1;
+
+        //determine beam type
+        int type = ImoBeam::k_continue;
+        if (direction == "right")
+            type = ImoBeam::k_forward;
+        else if (direction == "left")
+            type = ImoBeam::k_backward;
+        else
+        {
+            //TODO
+            set_result(nullptr);
+            return false;    //failure
+        }
+
+        ImoNoteRest* pNR = get_noterest(xmlId, "beam-hook");
+        ImoBeam* pBeam = pNR->get_beam();
+        ImoBeamData* pData = static_cast<ImoBeamData*>( pBeam->get_data_for(pNR) );
+        pData->set_beam_type(level, type);
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <beams>
+//@ Contexts:
+//@    <sequence>
+//@ Context Model:
+//@    One or more <beam> elements
+//@ Attributes:
+//@    None.
+//@
+class BeamsMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    BeamsMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        //beam*
+        m_pAnalyser->reset_beam_level();
+        while (analyse_optional("beam", nullptr))
+        {
+            m_pAnalyser->reset_beam_level();
+        }
 
         set_result(nullptr);
         return true;    //success
@@ -1453,20 +1596,20 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
 
-        // attrib: staff
+        //attrib: staff
         int staff = get_optional_int_attribute("staff", m_pAnalyser->get_current_staff()+1);
         pClef->set_staff(staff - 1);
 
-        // attrib: sign
+        //attrib: sign
         m_sign = get_optional_string_attribute("sign", "G");
 
-        // attrib: line
+        //attrib: line
         m_line = get_optional_int_attribute("line", 0);
 
-        // attrib: %print-style;
+        //attrib: %print-style;
         //get_attributes_for_print_style(pClef);
 
-        // attrib: %print-object;
+        //attrib: %print-object;
         //TODO
 
 //        //TODO: Remove this debug code
@@ -1607,67 +1750,12 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <mnx-common>
-//@<!ELEMENT mnx-common (global, part*) )>
-//@<!ATTLIST mnx-common
-//@    profile="standard"
-//@>
-//
-//@Contexts:
-//@    Wherever a musical body is expected.
-//@Content Model:
-//@    Metadata content.
-//@    Stylesheet definitions.
-//@    One or more global elements - measure content shared by sets of parts within the score
-//@    One or more part elements - description and measure content of each part in the score.
-//@Attributes:
-//@    profile — profile describing constraints on the contents of this score
-//
-class MnxCommonMnxAnalyser : public MnxElementAnalyser
-{
-public:
-    MnxCommonMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                     LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    bool do_analysis() override
-    {
-        // attrb: profile
-        if (get_attribute("profile") != "standard")
-        {
-            error_msg("Invalid or unsupported mnx-common score profile '"
-                      + get_attribute("profile") + "'.");
-            set_result(nullptr);
-            return false;
-        }
-
-        // global*
-        analyse_mandatory("global");
-        while (analyse_optional("global")) mark_score_as_polymetric_polytonal();
-
-        // part*
-        analyse_mandatory("part", m_pAnchor);
-        while (analyse_optional("part", m_pAnchor));
-
-        set_result(nullptr);
-        return true;    //success
-    }
-
-protected:
-
-    void mark_score_as_polymetric_polytonal()
-    {
-        //TODO: mark the score
-    }
-};
-
-//@--------------------------------------------------------------------------------------
 //@ <collection>
-//@Contexts:
+//@ Contexts:
 //@    <mnx>,<collection>
-//@Content Model:
+//@ Context Model:
 //@    Any combination of <collection> and <score> elements.
-//@Attributes:
+//@ Attributes:
 //@    type - The type of the collection
 //
 class CollectionMnxAnalyser : public MnxElementAnalyser
@@ -1690,13 +1778,10 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <directions>
-//@Contexts:
-//@    measure, sequence
-//@Content Model:
-//@    Direction content = staves | clef | key | wedge | tempo | time
-//@Attributes:
+//@
+//@ Attributes
 //@    None.
-//
+//@
 //Scope for contained directions:
 //    Directions in a measure within the global element apply to:
 //      - all sequences of the measure in all parts.
@@ -1719,6 +1804,42 @@ public:
 
     bool do_analysis() override
     {
+        if (m_pAnalyser->get_parent_for_directions() == "measure-global")
+            return do_analysis_for_measure_global();
+
+        else if (m_pAnalyser->get_parent_for_directions() == "measure-part")
+            return do_analysis_for_measure_part();
+
+        else if (m_pAnalyser->get_parent_for_directions() == "sequence")
+            return do_analysis_for_sequence();
+
+        else
+        {
+            cout << "Directions parent is '" << m_pAnalyser->get_parent_for_directions()
+                << "'" << endl;
+            cout << "cur.node. Name=" << m_childToAnalyse.name() << ", value="
+                << m_childToAnalyse.value() << endl;
+        }
+
+        set_result(nullptr);
+        return false;    //failure
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    bool do_analysis_for_measure_global()
+    {
+        //@ Parent element: <measure> (global)
+        //@     Content: In any order:  (time | repeat | ending | segno | jump | fine | key)
+        //@         <time> (Optional)
+        //@         <repeat> (0 to 2 times)
+        //@         <ending> (0 to 2 times)
+        //@         <segno> (Optional)
+        //@         <jump> (Optional)
+        //@         <fine> (Optional)
+        //@         <key> (Optional)
+
         //In MNX Clefs, time signatures and key signatures are
         //treated as attributes of a measure, not as objects and, therefore, ordering
         //is not important for MNX and this information is
@@ -1728,8 +1849,107 @@ public:
         vector<ImoObj*> times;
         vector<ImoObj*> keys;
         vector<ImoObj*> clefs;
+        vector<ImoObj*> other;
 
-        // (staff | instrument-sound | tempo | time)*    alternatives: zero or more
+        while (more_children_to_analyse())
+        {
+            if (get_optional("clef"))
+            {
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                    clefs.push_back( static_cast<ImoClef*>(get_result()) );
+            }
+            else if (get_optional("key"))
+            {
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                    keys.push_back( static_cast<ImoKeySignature*>(get_result()) );
+            }
+            else if (get_optional("time"))
+            {
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                    times.push_back( static_cast<ImoTimeSignature*>(get_result()) );
+            }
+            else if (analyse_optional("repeat"))
+            {
+                //TODO:
+                // Defines the two dots in barlines for repetions
+                // repeat type='start' creates the two dots in left barline, and
+                // type='end' creates the two dots in right barline
+                // Thus, <repeat> (0 to 2 times)
+            }
+            else if (analyse_optional("ending"))
+            {
+                //TODO
+//                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+//                    other.push_back( static_cast<ImoObj*>(get_result()) );
+            }
+            else if (analyse_optional("segno"))
+            {
+                //Defines a 'segno' symbol and a point for playback jumps
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                    other.push_back( static_cast<ImoObj*>(get_result()) );
+            }
+            else if (analyse_optional("jump"))
+            {
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                {
+                    JumpData* result = static_cast<JumpData*>(get_result());
+                    if (result->pDirection)
+                        other.push_back(result->pDirection);
+                    if (result->pSC)
+                        other.push_back(result->pSC);
+                    set_result(nullptr);
+                    delete result;
+                }
+            }
+            else if (analyse_optional("fine"))
+            {
+                //Defines a 'Fine' symbol and a point for playback jumps
+                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
+                    other.push_back( static_cast<ImoObj*>(get_result()) );
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
+        }
+
+        //add elements to model, in right order
+        vector<ImoObj*>::const_iterator it;
+        for (it = clefs.begin(); it != clefs.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = keys.begin(); it != keys.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = times.begin(); it != times.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = other.begin(); it != other.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool do_analysis_for_measure_part()
+    {
+        //@ Parent element: <measure> (part)
+        //@     Content: In any order
+        //@         <clef> (Optional)
+        //@         <key> (Optional)
+        //@         <staves> (Optional)  <-- //TODO: No está claro dónde va
+
         int staves = 0;
         while (more_children_to_analyse())
         {
@@ -1755,25 +1975,12 @@ public:
             else if (get_optional("clef"))
             {
                 if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    clefs.push_back( static_cast<ImoClef*>(get_result()) );
+                    add_to_model( static_cast<ImoObj*>(get_result()) );
             }
             else if (get_optional("key"))
             {
                 if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    keys.push_back( static_cast<ImoKeySignature*>(get_result()) );
-            }
-            else if (get_optional("time"))
-            {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    times.push_back( static_cast<ImoTimeSignature*>(get_result()) );
-            }
-            else if (analyse_optional("tempo"))
-            {
-                //TODO
-            }
-            else if (analyse_optional("wedge"))
-            {
-                //TODO
+                    add_to_model( static_cast<ImoObj*>(get_result()) );
             }
             else
             {
@@ -1781,7 +1988,6 @@ public:
                 move_to_next_child();
             }
         }
-
 
         //set staves
         if (staves > 1)
@@ -1792,29 +1998,69 @@ public:
                 pInstr->add_staff();
         }
 
-        //add elements to model, in right order
-        vector<ImoObj*>::const_iterator it;
-        for (it = clefs.begin(); it != clefs.end(); ++it)
+        set_result(nullptr);
+        return true;    //success
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool do_analysis_for_sequence()
+    {
+        //@ Parent element: <sequence>
+        //@     Content: In any order
+        //@         <octave-shift> (Zero or more times)
+        //@         <dynamics> (Zero or more times)
+        //@         <instruction> (Zero or more times)
+        //@         <expression> (Zero or more times)
+        //@         <wedge> (Zero or more times)
+        //@         <cresc> (Zero or more times)
+        //@         <dim> (Zero or more times)
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, pDoc) );
+
+        while (more_children_to_analyse())
         {
-            if (*it)
-                add_to_model(*it);
-        }
-        for (it = keys.begin(); it != keys.end(); ++it)
-        {
-            if (*it)
-                add_to_model(*it);
-        }
-        for (it = times.begin(); it != times.end(); ++it)
-        {
-            if (*it)
-                add_to_model(*it);
+            if (get_optional("octave-shift"))
+            {
+                m_pAnalyser->analyse_node(&m_childToAnalyse, pDirection);
+            }
+            else if (analyse_optional("dynamics"))
+            {
+                //TODO
+            }
+            else if (analyse_optional("instruction"))
+            {
+                //TODO
+            }
+            else if (analyse_optional("expression"))
+            {
+                //TODO
+            }
+            else if (analyse_optional("wedge"))
+            {
+                //TODO
+            }
+            else if (analyse_optional("cresc"))
+            {
+                //TODO
+            }
+            else if (analyse_optional("dim"))
+            {
+                //TODO
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
         }
 
         set_result(nullptr);
         return true;    //success
     }
 
-protected:
+    //-----------------------------------------------------------------------------------
     void set_divisions()
     {
         // Musical notation duration is commonly represented as fractions. The divisions
@@ -1835,11 +2081,11 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <dynamics>
-//@Contexts:
+//@ Contexts:
 //@    x
-//@Content Model:
+//@ Context Model:
 //@    y
-//@Attributes:
+//@ Attributes:
 //@    z
 //
 class DynamicsMnxAnalyser : public MnxElementAnalyser
@@ -1859,20 +2105,22 @@ public:
 
 //---------------------------------------------------------------------------------------
 //@ <event>
-//@Contexts:
-//@    sequence, tuplet, beamed
-//@Content Model:
+//@ Parent elements: <grace>, <sequence>, <tuplet>
+//@ Context Model:
 //@    Metadata content
-//@    Either zero or more note elements, or one rest element = (note* | rest)
-//@    Event content = (articulations | lyric | ornaments | technical)
+//@    content, in any order: (note* | rest? | slur*)
+//@    Event content: (articulations | lyric | ornaments | technical)
 //@    Interpretation content
-//@Attributes:
-//@    value - the metrical duration of this event
+//@ Attributes:
+//@    color - optional
+//@    id - optional @xml:id
+//@    smufl-font - optional glyph to render this event
+//@    value - the metrical duration. Required unless this event has measure="yes"
 //@    measure - optional flag indicating that the event occupies the entire measure.
 //@    orient - optional orientation of this event
 //@    staff - optional staff index of this event
-//@Style properties:
-//@    stem-direction - the stem direction of this event
+//@    duration - optional performed metrical duration, if different from value
+//@    stem-direction - optional: up | down
 //
 class EventMnxAnalyser : public MnxElementAnalyser
 {
@@ -1889,7 +2137,7 @@ public:
     {
         //First step: extract information -----------------------------------------------
 
-        // attrib: measure
+        //attrib: measure
         bool fMeasure = false;
         if (has_attribute("measure"))
         {
@@ -1898,7 +2146,7 @@ public:
             //string value = get_optional_string_attribute("measure");
         }
 
-        // attrib: value
+        //attrib: value
         int noteType = k_quarter;
         int dots = 0;
         if (!fMeasure && !get_attribute_note_value(&noteType, &dots))
@@ -1908,11 +2156,24 @@ public:
             return false;
         }
 
-        // attrib: orient
+        //attrib: orient
         //TODO
 
-        // attrib: staff
+        //attrib: staff
         //TODO
+
+        //attrib: duration
+        //TODO
+
+        //attrib: color
+        //TODO
+
+        //attrib: smufl-font
+        //TODO
+
+        //attrib: stem-direction
+        //TODO
+
 
             // Content
 
@@ -1921,21 +2182,34 @@ public:
 
         //Either zero or more note elements, or one rest element = (note* | rest)
         // (xxxx | yyyy | zzzz)*    alternatives: zero or more
+        ImoNoteRest* pFirstNR = nullptr;
         while (more_children_to_analyse())
         {
             if (get_optional("note"))
             {
                 if (analyse_child())
-                    m_notes.push_back( static_cast<ImoNote*>(get_result()) );
+                {
+                    ImoNote* pNote = static_cast<ImoNote*>(get_result());
+                    m_notes.push_back(pNote);
+                    if (pFirstNR == nullptr)
+                        pFirstNR = pNote;
+                }
             }
             else if (get_optional("rest"))
             {
                 if (analyse_child())
-                    m_rests.push_back( static_cast<ImoRest*>(get_result()) );
+                {
+                    ImoRest* pRest = static_cast<ImoRest*>(get_result());
+                    m_rests.push_back(pRest);
+                    if (pFirstNR == nullptr)
+                        pFirstNR = pRest;
+                }
             }
             else
                 break;
         }
+
+        analyse_and_set_xml_id(pFirstNR);
 
         //Event content = (articulations | lyric | ornaments | technical)
         // (xxxx | yyyy | zzzz)*    alternatives: zero or more
@@ -1982,6 +2256,7 @@ public:
             ImoNote* pNR = *itN;
             pNR->set_note_type_and_dots(noteType, dots);
             add_to_model(pNR);
+            m_pAnalyser->save_last_note(pNR);
 
             //deal with notes in chord
             if (fIsChord)
@@ -2017,18 +2292,19 @@ public:
 
 //        m_pAnalyser->shift_time( pNR->get_duration() );
 
-        set_result( LOMSE_NEW EventData(fMeasure) );
+        set_result( LOMSE_NEW EventData(fMeasure, pFirstNR) );
         return true;    //success
     }
+
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <expression>
-//@Contexts:
+//@ Contexts:
 //@    x
-//@Content Model:
+//@ Context Model:
 //@    y
-//@Attributes:
+//@ Attributes:
 //@    z
 //
 class ExpressionMnxAnalyser : public MnxElementAnalyser
@@ -2047,12 +2323,47 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <fine>
+//@ Parent element: <directions> (global)
+//@ Context: Always empty.
+//@ Attributes: None
+//@
+class FineMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    FineMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, pDoc) );
+
+        pDirection->set_display_repeat(k_repeat_fine);
+
+        ImoTextRepetitionMark* pRM = static_cast<ImoTextRepetitionMark*>(
+                ImFactory::inject(k_imo_text_repetition_mark, pDoc) );
+
+        pRM->set_repeat_mark(k_repeat_fine);
+        pRM->set_language("it");
+        pRM->set_text("Fine");
+
+        pDirection->add_attachment(pDoc, pRM);
+
+        set_result(pDirection);
+        return true;    //success
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <global>
-//@Contexts:
+//@ Contexts:
 //@    <mnx-common>
-//@Content Model:
+//@ Context Model:
 //@    Measure content, which must not include any sequence content
-//@Attributes:
+//@ Attributes:
 //@    parts - an optional set of IDs of parts to which this global applies
 //
 class GlobalMnxAnalyser : public MnxElementAnalyser
@@ -2067,7 +2378,7 @@ public:
 
     bool do_analysis() override
     {
-        // attrib: parts
+        //attrib: parts
         string parts = get_optional_string_attribute("parts", "*$SINGLE-PART$*");
 
         // attrib 'parts' is an optional set of IDs of part elements to which this
@@ -2075,6 +2386,7 @@ public:
         // as an unordered set of space-separated tokens.
 
         MeasuresVector* pMeasures = nullptr;
+        m_pAnalyser->set_parent_for_directions("measure-global");
 
         //fill the table
         int numMeasures = 0;
@@ -2109,15 +2421,129 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <grace>
+//@ Parent elements:
+//@    <sequence>, <tuplet>
+//@ Context:
+//@    <event>+
+//@ Attributes:
+//@    slash -	Yes or no. Optional, default: "yes"
+//@    type - Optional, default: "steal-previous"
+//@
+class GraceMnxAnalyser : public MnxElementAnalyser
+{
+protected:
+    int m_graceType = ImoGraceRelObj::k_grace_steal_previous;
+    bool m_fSlash = true;
+    float m_percentage = LOMSE_STEAL_TIME_SHORT;
+    TimeUnits m_makeTime = 0.0;
+
+public:
+    GraceMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        ImoMusicData* pMD = get_anchor_as_music_data();
+        if (!pMD)
+            return false;    //failure
+
+        //attrib: slash
+        m_fSlash = get_optional_yes_no_attribute("slash", true);
+
+        //attrib: type
+        string type = get_optional_string_attribute("type", "steal-previous");
+        m_graceType = ImoGraceRelObj::k_grace_steal_previous;
+        m_percentage = (m_fSlash ? LOMSE_STEAL_TIME_SHORT : LOMSE_STEAL_TIME_LONG);
+        if (type == "steal-previous")
+        {
+            m_graceType = ImoGraceRelObj::k_grace_steal_previous;
+//            m_percentage = get_child_attribute_as_float("steal-time-previous", m_percentage);
+        }
+        else if (type == "steal-following")
+        {
+            m_graceType = ImoGraceRelObj::k_grace_steal_following;
+//            m_percentage = get_child_attribute_as_float("steal-time-following", m_percentage);
+        }
+        else
+        {
+            error_msg("<grace>. Invalid type '" + type + "'. steal-previous assumed.");
+        }
+        m_percentage /= 100.0f;
+
+
+        //event+
+        m_pAnalyser->set_note_class(k_imo_note_grace);
+        if (analyse_mandatory("event", pMD))
+        {
+            ImoGraceRelObj* pGraceRO = create_grace_notes_relationship();
+
+            while (analyse_optional("event", pMD))
+            {
+                add_to_grace_notes_relationship(pGraceRO);
+            }
+        }
+        m_pAnalyser->set_note_class(k_imo_note_regular);
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    ImoNote* get_grace_note()
+    {
+        ImoNote* pPrevNote = m_pAnalyser->get_last_note();
+        return pPrevNote;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoGraceRelObj* create_grace_notes_relationship()
+    {
+        ImoNote* pNote = get_grace_note();
+        if (pNote)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+            ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
+                                        ImFactory::inject(k_imo_grace_relobj, pDoc));
+
+            pNote->include_in_relation(pDoc, pGraceRO);
+            pGraceRO->set_grace_type(m_graceType);
+            pGraceRO->set_slash(m_fSlash);
+            pGraceRO->set_percentage(m_percentage);
+            pGraceRO->set_time_to_make(m_makeTime);
+
+            return pGraceRO;
+        }
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_to_grace_notes_relationship(ImoGraceRelObj* pGraceRO)
+    {
+        ImoNote* pNote = get_grace_note();
+        if (pNote)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            pNote->include_in_relation(pDoc, pGraceRO);
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <head>
-//@Contexts:
+//@ Contexts:
 //@    Any.
-//@Content Model:
+//@ Context Model:
 //@    Metadata content:
 //@     <title> <subtitle> <creator>+ <rights>
 //@    Stylesheet definitions:
 //@     (style-class | style-selector)+
-//@Attributes:
+//@ Attributes:
 //@    None.
 //
 class HeadMnxAnalyser : public MnxElementAnalyser
@@ -2140,11 +2566,11 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <instrument-sound>
-//@Contexts:
+//@ Contexts:
 //@    x
-//@Content Model:
+//@ Context Model:
 //@    y
-//@Attributes:
+//@ Attributes:
 //@    z
 //
 class InstrumentSoundMnxAnalyser : public MnxElementAnalyser
@@ -2163,12 +2589,155 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <jump>
+//@ Parent element: <directions> (global)
+//@ Context: Always empty.
+//@ Attributes:
+//@    type - mandatory, jump type: segno, dsalfine,
+//@             Other probably: dacapo, dalsegno, tocoda,
+//@
+class JumpMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    JumpMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    bool do_analysis() override
+    {
+        //attrib: type
+        const string& type = get_mandatory_string_attribute("type", "", "jump");
+        if (type.empty())
+            return false;   //failure
+
+        //AWARE: <jump> elements can just define playback instruction (e.g. type='????')
+        //or also define a symbol (e.g. type='????')
+        int symbol = 0;
+        int instruction = k_repeat_none;
+        bool fAtStart = true;
+        if (type == "segno")    //D.S.
+        {
+            symbol = k_attr_segno;
+            instruction = k_repeat_dal_segno;
+            fAtStart = false;
+        }
+        else if (type == "dsalfine")    //D.S. al Fine
+        {
+            symbol = k_attr_segno;
+            instruction = k_repeat_dal_segno_al_fine;
+            fAtStart = false;
+        }
+        else if (type == "dacapo")
+        {
+            //TODO
+            symbol = k_attr_dacapo;
+//            instruction = k_repeat_da_capo_al_fine;
+//            instruction = k_repeat_da_capo_al_coda
+            instruction = k_repeat_da_capo;
+//            fAtStart = false;
+        }
+        else if (type == "dalsegno")
+        {
+            //TODO
+            symbol = k_attr_dalsegno;
+//            instruction = k_repeat_dal_segno_al_coda;
+            instruction = k_repeat_dal_segno;
+//            fAtStart = false;
+        }
+        else if (type == "tocoda")
+        {
+            //TODO
+            symbol = k_attr_tocoda;
+            instruction = k_repeat_to_coda;
+//            fAtStart = false;
+        }
+        else
+        {
+            error_msg("<jump>: invalid type '" + type + "'. Jump ignored.");
+            set_result(nullptr);
+            return false;    //failure
+        }
+
+        //create objects
+        ImoDirection* pDirection = create_symbol(type, instruction, fAtStart);
+        ImoSoundChange* pSC = create_instruction(symbol, fAtStart);
+
+        set_result( LOMSE_NEW JumpData(pDirection, pSC) );
+        return true;    //success
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    ImoSoundChange* create_instruction(int symbol, bool fAtStart)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSoundChange* pSC = static_cast<ImoSoundChange*>(
+                                    ImFactory::inject(k_imo_sound_change, pDoc));
+
+        pSC->set_bool_attribute(symbol, true);
+        if (!fAtStart)
+            pSC->set_bool_attribute(k_attr_right_located, true);
+
+        return pSC;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoDirection* create_symbol(const string& type, int instruction, bool fAtStart)
+    {
+        if (instruction == k_repeat_none)
+            return nullptr;
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, pDoc) );
+
+        pDirection->set_display_repeat(instruction);
+        if (!fAtStart)
+            pDirection->set_bool_attribute(k_attr_right_located, true);
+
+        ImoTextRepetitionMark* pRM = static_cast<ImoTextRepetitionMark*>(
+                ImFactory::inject(k_imo_text_repetition_mark, pDoc) );
+
+        pRM->set_repeat_mark(instruction);
+        pRM->set_language("it");
+        pRM->set_text( determine_text(type) );
+//        if (!fAtStart)
+//            pRM->set_?????              //TODO: left justification
+
+
+        pDirection->add_attachment(pDoc, pRM);
+        return pDirection;
+    }
+
+    //-----------------------------------------------------------------------------------
+    string determine_text(const string& type)
+    {
+        if (type == "segno")       return("D.S.");
+        else if (type == "dsalfine")    return("D.S. al Fine");
+//        else if (type == "dacapo")           return("D.C."); //TODO
+//        else if (type == "dalsegno")    return("D.C."); //TODO
+//        else if (type == "tocoda")      return("D.C."); //TODO
+        else
+        {
+            stringstream ss;
+            ss << "Missing case: jump label '" << type << "'.";
+            LOMSE_LOG_ERROR(ss.str());
+            error_msg(ss.str());
+            return("??????");
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <key>
-//@Contexts:
+//@ Contexts:
 //@    Direction content
-//@Content Model:
+//@ Context Model:
 //@    None
-//@Attributes:
+//@ Attributes:
 //@    fifths - the transposition from concert pitch in fifths
 //@    mode - { major | minor }
 //
@@ -2191,10 +2760,10 @@ public:
 
         bool fMajor = true;
 
-        // attrib: fifths
+        //attrib: fifths
         int fifths = get_mandatory_integer_attribute("fifths", 0, "key");
 
-        // attrib: mode
+        //attrib: mode
         string mode = get_optional_string_attribute("mode", "major");
         fMajor = (mode == "major");
 
@@ -2322,17 +2891,18 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <measure>
-//@Contexts:
-//@    global, part
-//@Content Model:
-//@    Metadata content
-//@    Zero or one directions elements = directions?
-//@    One or more sequence elements (for measures within part elements only) = sequence+
-//@    Interpretation content
-//@Attributes:
-//@    index - an optional integer index for the measure
-//@    number - an optional textual number to be displayed for the measure
-//@    barline - an optional ending barline type for the measure //
+//@ Parent element: <part>
+//@ Content, in any order
+//@     <directions> (One, optional)
+//@     <sequence> (One or more times)
+//@
+//@ Attributes
+//@     barline - optional. Default: "light-heavy" for last measure, otherwise "regular".
+//@     index - optional, one-based index, Default 1 for the first <measure> in the <part>
+//@     number - optional, measure number to display. Deafult: same as index.
+//@
+//@ measure = directions?, sequence+
+//@
 class MeasureMnxAnalyser : public MnxElementAnalyser
 {
 protected:
@@ -2346,86 +2916,89 @@ public:
     {
     }
 
-
     bool do_analysis() override
     {
-        ImoMusicData* pMD = nullptr;
-        if (m_pAnchor && m_pAnchor->is_music_data())
-            pMD = static_cast<ImoMusicData*>(m_pAnchor);
+        if (m_fGlobalMeasure)
+            return do_measure_global_analysis();
         else
-        {
-            LOMSE_LOG_ERROR("nullptr pAnchor or it is not musicData");
-            return false;    //error
-        }
-        bool fSomethingAdded = false;
-
-        //attributes are only parsed for normal measures, not for global measures
-        TypeMeasureInfo* pInfo = nullptr;
-        if (!m_fGlobalMeasure)
-        {
-            //attrb: number
-            string num = get_optional_string_attribute("number", "");
-            m_pAnalyser->save_current_measure_num(num);
-
-            pInfo = create_measure_info(num);
-
-            //attrb: index
-            //TODO
-
-            //attrb: barline
-            //TODO
-        }
-
-
-        //before adding measure content, add global content. But not when parsing global
-        //measures
-        if (!m_fGlobalMeasure)
-            m_pAnalyser->add_data_from_global_measure(pMD);
-
-
-        // directions?
-        analyse_optional("directions", pMD);
-
-        // sequence+ (only for normal measures)
-        if (!m_fGlobalMeasure && analyse_mandatory("sequence", pMD))
-        {
-            fSomethingAdded = true;
-            while (analyse_optional("sequence", pMD))
-                move_to_next_child();
-        }
-
-        //error_if_more_elements();
-
-        //For normal measures, delete the measure if empty. And if it has
-        //content, add implicit barline if necessary
-        if (!m_fGlobalMeasure)
-        {
-            if (fSomethingAdded)
-            {
-                ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
-                if (pSO == nullptr || !pSO->is_barline())
-                    add_barline(pInfo);
-                else
-                    delete pInfo;
-
-                set_result(pMD);
-                return true;    //success
-            }
-            else
-            {
-                delete pInfo;
-                delete pMD;
-                set_result(nullptr);
-                return false;    //error
-            }
-        }
-        set_result(pMD);
-        return true;    //success
-
+            return do_measure_part_analysis();
     }
 
 protected:
 
+    //-----------------------------------------------------------------------------------
+    bool do_measure_global_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, pDoc) );
+
+        // directions?
+        analyse_optional("directions", pMD);
+
+        //TODO
+        //error_if_more_elements();
+
+        set_result(pMD);
+        return true;    //success
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool do_measure_part_analysis()
+    {
+        ImoMusicData* pMD = get_anchor_as_music_data();
+        if (!pMD)
+            return false;    //error
+
+        //attrb: number
+        string num = get_optional_string_attribute("number", "");
+        m_pAnalyser->save_current_measure_num(num);
+        TypeMeasureInfo* pInfo = create_measure_info(num);
+
+        //attrb: index
+        //TODO
+
+        //attrb: barline
+        //pMeasures = m_pAnalyser->new_global(parts);
+        string barType = get_optional_string_attribute("barline", "regular");
+
+            //content
+
+        //before adding measure content, add global content
+        m_pAnalyser->add_left_data_from_global_measure(pMD);
+
+        // directions?
+        analyse_optional("directions", pMD);
+
+        // sequence+
+        if (analyse_mandatory("sequence", pMD))
+        {
+            while (analyse_optional("sequence", pMD))
+                move_to_next_child();
+        }
+
+        //TODO
+        //error_if_more_elements();
+
+        //add global content at end of measure
+        m_pAnalyser->add_right_data_from_global_measure(pMD);
+
+        //if there is a <repeat type='start'> element, fix previous barline to
+        //add the repeat dots
+        fix_prev_barline_if_start_repeat();
+
+        ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
+        if (pSO == nullptr || !pSO->is_barline())
+            add_barline(pInfo, barType);
+        else
+            delete pInfo;
+
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+    //-----------------------------------------------------------------------------------
     TypeMeasureInfo* create_measure_info(const string& num)
     {
         TypeMeasureInfo* pInfo = LOMSE_NEW TypeMeasureInfo();
@@ -2435,50 +3008,161 @@ protected:
         return pInfo;
     }
 
-    void add_barline(TypeMeasureInfo* pInfo)
+    //-----------------------------------------------------------------------------------
+    void add_barline(TypeMeasureInfo* pInfo, const string& barType)
     {
         advance_timepos_if_required();
+
+        int endTimes = m_pAnalyser->get_end_repeat_info();
+        string repeat = (endTimes == 0 ? "" : "backward");
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
-        pBarline->set_type(k_barline_simple);
+
+        int barline = find_barline_type(barType, repeat);
+        pBarline->set_type(barline);
         pBarline->set_measure_info(pInfo);
+        pBarline->set_num_repeats(endTimes);
         add_to_model(pBarline);
         m_pAnalyser->save_last_barline(pBarline);
     }
 
-    void advance_timepos_if_required()
+    //-----------------------------------------------------------------------------------
+    void fix_prev_barline_if_start_repeat()
     {
-        TimeUnits curTime = m_pAnalyser->get_current_time();
-        TimeUnits maxTime = m_pAnalyser->get_max_time();
-        if (maxTime <= curTime)
+        int startTimes = m_pAnalyser->get_start_repeat_info();
+        if (startTimes == 0)
             return;
 
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
-                                ImFactory::inject(k_imo_go_back_fwd, pDoc) );
-        pImo->set_forward(true);
-        pImo->set_time_shift(maxTime - curTime);
+        ImoBarline* pBarline = m_pAnalyser->get_last_barline();
+        if (pBarline)
+        {
+            int type = pBarline->get_type();
 
-        m_pAnalyser->set_current_time(maxTime);
-        add_to_model(pImo);
+            if (type == k_barline_simple)
+                pBarline->set_type( k_barline_start_repetition );
+            else if (type == k_barline_end)
+                pBarline->set_type( k_barline_start_repetition );
+            else if (type == k_barline_end_repetition)
+                pBarline->set_type( k_barline_double_repetition );
+            else
+            {
+                error_msg2(
+                    "Not possible to add repetion dots to barline '"
+                    + LdpExporter::barline_type_to_ldp(type)
+                    + "'. <repeat> ignored.");
+                return;
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    EBarline find_barline_type(const string& barType, const string& repeat)
+    {
+        bool fError = false;
+        EBarline type = k_barline_simple;
+
+        if (barType == "none")
+            type = k_barline_none;
+        else if (barType == "regular")      //TODO: regular should require repeat=""
+            if (repeat == "backward")
+                type = k_barline_end_repetition;
+            else if (repeat.empty())
+                type = k_barline_simple;
+            else
+                fError = true;
+//        else if (barType == "dotted")
+//            type = ?
+//        else if (barType == "dashed")
+//            type = ?
+//        else if (barType == "heavy")
+//            type = ?
+        else if (barType == "light-light")
+            type = k_barline_double;
+        else if (barType == "light-heavy")
+        {
+            if (repeat == "backward")
+                type = k_barline_end_repetition;
+            else if (repeat.empty())
+                type = k_barline_end;
+            else
+                fError = true;
+        }
+        else if (barType == "heavy-light")
+        {
+            if (repeat == "forward")
+                type = k_barline_start_repetition;
+            else if (repeat.empty())
+                type = k_barline_start;
+            else
+                fError = true;
+        }
+        else if (barType == "heavy-heavy")
+        {
+            if (repeat == "backward")
+                type = k_barline_double_repetition_alt;     //heavy-heavy. See E.Gould, p.234
+            else if (repeat.empty())
+                type = k_barline_double;
+            else
+                fError = true;
+        }
+//        else if (barType == "tick")   //a short stroke through the top line
+//            type = ?
+//        else if (barType == "short")  //a partial barline between the 2nd and 4th lines
+//            type = ?
+//        else if (barType == "none")
+//            type =
+
+        else
+            fError = true;
+
+        if (fError)
+        {
+            error_msg2(
+                "Invalid or not supported 'barline' attribute '" + barType
+                + "' and/or <repeat> type '" + repeat
+                + "' values. Replaced by 'regular' barline.");
+        }
+
+        return type;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void advance_timepos_if_required()
+    {
+//        TimeUnits curTime = m_pAnalyser->get_current_time();
+//        TimeUnits maxTime = m_pAnalyser->get_max_time();
+//        if (maxTime <= curTime)
+//            return;
+//
+//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//        ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
+//                                ImFactory::inject(k_imo_go_back_fwd, pDoc) );
+//        pImo->set_forward(true);
+//        pImo->set_time_shift(maxTime - curTime);
+//
+//        m_pAnalyser->set_current_time(maxTime);
+//        add_to_model(pImo);
     }
 
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <mnx>
-//@Contexts:
+//@ Contexts:
 //@    None: this is the top-level element.
-//@Content Model:
-//@    A single, optional head element.
-//@    Either a collection or a score element.
-//@Attributes:
+//@ Context Model:
+//@    Metadata content.
+//@    <stylesheet>.
+//@    One or more <global> elements - measure content shared by sets of parts within the score.
+//@    One or more <part> elements - description and measure content of each part in the score.
+//@    Zero or more <score-audio> elements - recordings of the score and their associated synchronization date.
+//@ Attributes:
 //@    None.
 //@
-//@<!ELEMENT mnx (head?, (collection | score)) >
-//@ Attributes: None
+//@ mnx = stylesheet?, global+, part+, score-audio*
+//@
 class MnxMnxAnalyser : public MnxElementAnalyser
 {
 public:
@@ -2488,33 +3172,90 @@ public:
 
     bool do_analysis() override
     {
-        ImoDocument* pImoDoc = nullptr;
-
         //create the document
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        pImoDoc = static_cast<ImoDocument*>(
-                    ImFactory::inject(k_imo_document, pDoc));
+        ImoDocument* pImoDoc = static_cast<ImoDocument*>(
+                                    ImFactory::inject(k_imo_document, pDoc));
         pImoDoc->set_version("0.0");    //AWARE: This is lenmusdoc version!
         pImoDoc->set_language("en");    //TODO: analyse language
-        m_pAnalyser->save_root_imo_document(pImoDoc);
         m_pAnchor = pImoDoc;
+        m_pAnalyser->save_root_imo_document(pImoDoc);
+
+        ImoScore* pScore = create_score();
 
         // add default styles
         add_default(pImoDoc);
 
-		// head?
-        analyse_optional("head", pImoDoc);
+        //stylesheet?
+        //TODO
 
-        // (collection | score)
-        analyse_optional("score", pImoDoc);
+        //global+
+        analyse_mandatory("global");
+        while (analyse_optional("global"))
+            mark_score_as_polymetric_polytonal();
 
-        //TODO: collection
+        //head?
+        //TODO: Confirm it goes here
 
+        //part+
+        analyse_mandatory("part", m_pAnchor);
+        while (analyse_optional("part", m_pAnchor));
+
+        //score-audio*
+        //TODO
+
+        m_pAnalyser->add_all_instruments(pScore);
+
+        set_options(pScore);
         set_result(pImoDoc);
         return true;    //success
     }
 
 protected:
+
+    ImoScore* create_score()
+    {
+        //add an empty score
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoContent* pContent = static_cast<ImoContent*>(
+                        ImFactory::inject(k_imo_content, pDoc) );
+        add_to_model(pContent);
+        m_pAnchor = pContent;
+
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
+        pScore->set_accidentals_model( ImoScore::k_pitch_and_notation_provided );
+        m_pAnalyser->score_analysis_begin(pScore);
+        add_to_model(pScore);
+        m_pAnchor = pScore;
+
+        pScore->set_version(200);   //2.0
+        pScore->add_required_text_styles();
+
+        return pScore;
+    }
+
+    void set_options(ImoScore* pScore)
+    {
+        //justify last system except for very short scores (less than 5 measures)
+        ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
+        if (m_pAnalyser->get_measures_counter() < 5)
+        {
+            pOpt->set_long_value(k_justify_never);
+            pOpt = pScore->get_option("StaffLines.Truncate");
+            pOpt->set_long_value(k_truncate_always);
+        }
+        else
+            pOpt->set_long_value(k_justify_always);
+
+        //spacing options
+        pOpt = pScore->get_option("Render.SpacingOptions");
+        pOpt->set_long_value(k_render_opt_breaker_optimal);
+    }
+
+    void mark_score_as_polymetric_polytonal()
+    {
+        //TODO: mark the score
+    }
 
     void add_default(ImoDocument* pImoDoc)
     {
@@ -2530,23 +3271,20 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <note>
-//@<!ELEMENT note EMPTY )>
-//@<!ATTLIST note
-//@    pitch
-//@>
-//
-//@Contexts:
-//@    event
-//@Content Model:
-//@    Metadata content
-//@    Note content = (notehaed | fret | string)
-//@    Liaison content
-//@Attributes:
-//@    pitch - the musical pitch of this note
-//@    staff - an optional staff index for this note
-//@    accidental - an optional accidental for this note
-//@    value - an optional note value for this note
-//
+//@ Parent elements: <event>
+//@ Context
+//@    <tied>?
+//@ Attributes:
+//@    accidental - The accidental to display. Must match the alteration of the "pitch" attribute
+//@    color - Optional
+//@    display - Optional
+//@    id - Optional
+//@    perform - Optional. Controls whether this note is performed by consuming software.
+//@    pitch - Optional. The note's pitch.
+//@    smufl-font - Optional. The SMuFL-compliant font to be used when rendering this note.
+//@    staff - Optional. If not provided, the value is inherited from any ancestor element that specified it.
+//@    visibility - Optional
+//@
 class NoteMnxAnalyser : public MnxElementAnalyser
 {
 public:
@@ -2556,25 +3294,33 @@ public:
 
     bool do_analysis() override
     {
-        // attrib: pitch
+        //attrib: accidental
+        string acc = get_optional_string_attribute("accidental", "");
+        EAccidentals accidentals = get_notated_accidentals(acc);
+
+        //attrib: color - Optional
+        //TODO
+
+        //attrib: display - Optional
+        //TODO
+
+        //attrib: perform - Optional. Controls whether this note is performed by consuming software.
+        //TODO
+
+        //attrib: pitch  (the written pitch of the note as a chromatic pitch: step, alter, octave)
         string pitch = get_mandatory_string_attribute("pitch", "", "note");
         if (pitch == "")
             return false;
 
-        // attrib: staff
+        //attrib: smufl-font - Optional. The SMuFL-compliant font to be used when rendering this note.
+        //TODO
+
+        //attrib: staff
         int defStaff = m_pAnalyser->get_current_staff() + 1;
         int staff = get_optional_int_attribute("staff", defStaff) - 1;
         //TODO: check that staff < maxStaff set in part
 
-            // content
-
-        // Metadata content
-        //TODO
-
-        // Note content = (notehaed | fret | string)
-        //TODO
-
-        // Liaison content
+        //attrib: visibility - Optional
         //TODO
 
 
@@ -2583,108 +3329,222 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         int step = k_step_C;
         int octave = 4;
-        EAccidentals accidentals = k_no_accidentals;
         float alter = 0.0f;
-        ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, pDoc));
-        if (MnxAnalyser::pitch_to_components(pitch, &step, &octave, &accidentals, &alter))
+        int type = m_pAnalyser->get_note_class();
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(type, pDoc));
+
+        //set pitch and accidentals
+        if (MnxAnalyser::pitch_to_components(pitch, &step, &octave, &alter))
         {
             error_msg("Unknown note pitch '" + pitch + "'. Replaced by 'C4'.");
-            pNR->set_notated_pitch(k_step_C, 4, k_no_accidentals);
+            pNote->set_pitch(k_step_C, 4, k_no_accidentals);
         }
         else
-            pNR->set_notated_pitch(step, octave, accidentals);
+            pNote->set_pitch(step, octave, accidentals);
 
-        pNR->set_staff(staff);
-        pNR->set_voice( m_pAnalyser->get_current_voice() );
+        pNote->set_notated_accidentals(accidentals);
+        pNote->force_to_display_accidentals();
+        pNote->set_staff(staff);
+        pNote->set_voice( m_pAnalyser->get_current_voice() );
 
-        //TODO: Beam level must be set as I did with old g+ method
-        //pNR->set_beam_type(m_pAnalyser->get_beam_level(), 0);
+        analyse_and_set_xml_id(pNote);
 
-        set_result(pNR);
+
+            // optional content
+
+        //tied?
+        if (get_optional("tied"))
+            m_pAnalyser->save_tied_element(&m_childToAnalyse, pNote);
+
+        set_result(pNote);
         return true;    //success
     }
 
 protected:
-//    void start_g_beam(ImoNoteRest* pNR)
-//    {
-//        int nNoteType = pNR->get_note_type();
-//        if (get_beaming_level(nNoteType) == -1)
-//            error_note_longer_than_eighth();
-//        else if (m_pAnalyser->get_beam_level() > 0)
+
+    //----------------------------------------------------------------------------------
+    EAccidentals get_notated_accidentals(const string& acc)
+    {
+        //no accidentals specified
+        if (acc.empty())    return k_no_accidentals;
+
+        //standard accidentals
+        if (acc == "sharp")                     return k_sharp;
+        else if (acc == "natural")              return k_natural;
+        else if (acc == "flat")                 return k_flat;
+        else if (acc == "double-sharp")         return k_double_sharp;
+        else if (acc == "sharp-sharp")          return k_sharp_sharp;
+        else if (acc == "flat-flat")            return k_flat_flat;
+        //else if (acc == "double-flat")
+            //AWARE: double-flat is not in the specification. Lilypond test suite
+            //       uses it and MuseScore imports it correctly. But Michael Good
+            //       is clear about this. See:
+            //http://forums.makemusic.com/viewtopic.php?f=12&t=2253&p=5965#p5964
+            //http://forums.makemusic.com/viewtopic.php?f=12&t=2408&p=6558#p6556
+
+        else if (acc == "natural-sharp")        return k_natural_sharp;
+        else if (acc == "natural-flat")         return k_natural_flat;
+        else if (acc == "triple-sharp")         return k_acc_triple_sharp;
+        else if (acc == "triple-flat")          return k_acc_triple_flat;
+
+        //microtonal: Tartini-style quarter-tone accidentals
+        else if (acc == "quarter-flat")         return k_acc_quarter_flat;
+        else if (acc == "quarter-sharp")        return k_acc_quarter_sharp;
+        else if (acc == "three-quarters-flat")  return k_acc_three_quarters_flat;
+        else if (acc == "three-quarters-sharp") return k_acc_three_quarters_sharp;
+
+        //microtonal: quarter-tone accidentals that include arrows pointing down or up
+        else if (acc == "sharp-down")           return k_acc_sharp_down;
+        else if (acc == "sharp-up")             return k_acc_sharp_up;
+        else if (acc == "natural-down")         return k_acc_natural_down;
+        else if (acc == "natural-up")           return k_acc_natural_up;
+        else if (acc == "flat-down")            return k_acc_flat_down;
+        else if (acc == "flat-up")              return k_acc_flat_up;
+        else if (acc == "double-sharp-down")    return k_acc_double_sharp_down;
+        else if (acc == "double-sharp-up")      return k_acc_double_sharp_up;
+        else if (acc == "flat-flat-down")       return k_acc_flat_flat_down;
+        else if (acc == "flat-flat-up")         return k_acc_flat_flat_up;
+        else if (acc == "arrow-down")           return k_acc_arrow_down;
+        else if (acc == "arrow-up")             return k_acc_arrow_up;
+
+    	//accidentals used in Turkish classical music
+        else if (acc == "slash-quarter-sharp")  return k_acc_slash_quarter_sharp;
+        else if (acc == "slash-sharp")          return k_acc_slash_sharp;
+        else if (acc == "slash-flat")           return k_acc_slash_flat;
+        else if (acc == "double-slash-flat")    return k_acc_double_slash_flat;
+
+        //superscripted versions of the accidental signs, used in Turkish folk music
+        else if (acc == "sharp-1")              return k_acc_sharp_1;
+        else if (acc == "sharp-2")              return k_acc_sharp_2;
+        else if (acc == "sharp-3")              return k_acc_sharp_3;
+        else if (acc == "sharp-5")              return k_acc_sharp_5;
+        else if (acc == "flat-1")               return k_acc_flat_1;
+        else if (acc == "flat-2")               return k_acc_flat_2;
+        else if (acc == "flat-3")               return k_acc_flat_3;
+        else if (acc == "flat-4")               return k_acc_flat_4;
+
+        //microtonal sharp and flat accidentals used in Iranian and Persian music
+        else if (acc == "sori")                 return k_acc_sori;
+        else if (acc == "koron")                return k_acc_koron;
+
+        //other; unspecified. MusicXML file should specify SMuFl glyph to use
+        else if (acc == "other")                return k_acc_other;
+
+        else
+        {
+            error_msg2(
+                "Invalid or not supported 'accidentals' value: '" + acc + "'.");
+            return k_no_accidentals;
+        }
+    }
+
+};
+//@--------------------------------------------------------------------------------------
+//@ <octave-shift>
+//@ Parent element: <directions> (sequence)
+//@ Context: Always empty.
+//@ Attributes:
+//@     type - mandatory, the type of octave shift: 8, -8, 15, -15, 22, -22.
+//@     end - mandatory, the measure location of the last note that is affected by this octave shift.
+//@     orient - optional, inherited from any sequence ancestor that specified it. If no ancestor, app dependent.
+//@     staff - optional, inherited from any sequence ancestor that specified it. If no ancestor, app dependent.
+//@
+//@
+class OctaveShiftMnxAnalyser : public MnxElementAnalyser
+{
+protected:
+    ImoOctaveShiftDto* m_pInfo = nullptr;
+
+public:
+    OctaveShiftMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                           LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+    {
+    }
+
+    bool do_analysis() override
+    {
+        ImoDirection* pDirection = get_anchor_as_direction();
+        if (!pDirection)
+            return false;
+
+//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//        m_pInfo = static_cast<ImoOctaveShiftDto*>(
+//                                ImFactory::inject(k_imo_octave_shift_dto, pDoc));
+//        m_pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+
+        //attrib: end
+        const string& endLoc = get_optional_string_attribute("end", "");
+        if (endLoc.empty())
+        {
+            error_msg("<octave-shift>: Missing 'end' attribute. <octave-shift> ignored.");
+            return false;   //failure
+        }
+        //TODO: search for get_measure_location_value and decide how to convert
+
+        //attrib: type
+        int type = get_mandatory_integer_attribute("type", 8, "octave-shift");
+        if (!(type == 8 || type == -8 || type == 15 || type == -15 || type == 22 || type == -22))
+        {
+            const string& value = get_optional_string_attribute("type", "");
+            error_msg("Invalid octave-shift type '" + value + "'. Changed to 8.");
+            type = 8;
+        }
+
+        //attrib: orient
+        const string& orient = get_optional_string_attribute("orient", "");
+
+        //attrib: staff
+        //TODO
+
+        static int num = 0;
+
+        set_mandatory_data(orient, ++num, type);
+
+//        int iStaff = pDirection->get_staff();
+
+//        m_pInfo1->set_staffobj(nullptr);
+//        m_pInfo1->set_staff(iStaff);
+//        m_pAnalyser->add_relation_info(m_pInfo);    //AWARE: this deletes m_pInfo
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+protected:
+
+    void set_mandatory_data(const string& UNUSED(value), int UNUSED(num), int UNUSED(size))
+    {
+//        if (value == "up" || value == "down")
 //        {
-//            error_beam_already_open();
-//            add_to_old_beam(pNR);
+//            m_pInfo1->set_start(true);
+//            int id =  m_pAnalyser->new_octave_shift_id(num);
+//            m_pInfo1->set_octave_shift_number(id);
+//            --size;
+//            if (value == "down")
+//                size = -size;
+//            m_pInfo1->set_shift_steps(size);
+//        }
+//        else if (value == "stop")
+//        {
+//            m_pInfo1->set_start(false);
+//            int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
+//            m_pInfo1->set_octave_shift_number(id);
 //        }
 //        else
-//            add_to_old_beam(pNR);
-//    }
-//
-//    void add_to_old_beam(ImoNoteRest* pNR)
-//    {
-//        ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
-//        pInfo->set_note_rest(pNR);
-//        pInfo->set_line_number( m_analysedNode.get_line_number() );
-//        m_pAnalyser->add_old_beam(pInfo);
-//    }
-//
-//    void error_note_longer_than_eighth()
-//    {
-//        report_msg(m_paramToAnalyse.get_line_number(),
-//            "Requesting beaming a note longer than eighth. Beam ignored.");
-//    }
-//
-//    void error_beam_already_open()
-//    {
-//        report_msg(m_paramToAnalyse.get_line_number(),
-//            "Requesting to start a beam (g+) but there is already an open beam. Beam ignored.");
-//    }
-//
-//    void error_no_beam_open()
-//    {
-//        report_msg(m_pParamToAnalyse->get_line_number(),
-//            "Requesting to end a beam (g-) but there is no matching g+. Beam ignored.");
-//    }
-//
-//    void end_g_beam(ImoNoteRest* pNR)
-//    {
-//        if (!m_pAnalyser->is_old_beam_open())
 //        {
-//            error_no_beam_open();
+//            error_msg("Missing or invalid octave-shift type '" + value
+//                      + "'. Octave-shift ignored.");
+//            delete m_pInfo1;
+//            m_pInfo1 = nullptr;
 //        }
-//        else
-//        {
-//            ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
-//            pInfo->set_note_rest(pNR);
-//            pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
-//            m_pAnalyser->close_old_beam(pInfo);
-//        }
-//    }
-//
-//    int get_beaming_level(int nNoteType)
-//    {
-//        switch(nNoteType) {
-//            case k_eighth:
-//                return 0;
-//            case k_16th:
-//                return 1;
-//            case k_32nd:
-//                return 2;
-//            case k_64th:
-//                return 3;
-//            case k_128th:
-//                return 4;
-//            case k_256th:
-//                return 5;
-//            default:
-//                return -1; //Error: Requesting beaming a note longer than eight
-//        }
-//    }
+    }
 };
 
 //@--------------------------------------------------------------------------------------
-//@Contexts:
+//@ Contexts:
 //@    mnx-common
-//@Content Model:
+//@ Context Model:
 //@    Part description content =
 //@         part-name?, part-abbreviation?, instrument-sound?
 //@    Measure content =
@@ -2699,11 +3559,16 @@ public:
 
     bool do_analysis() override
     {
+        m_pAnalyser->set_parent_for_directions("measure-part");
+
         ImoInstrument* pInstrument = create_instrument();
 
-        // attrib: id  e.g.: id="p1"
+        //attrib: id  e.g.: id="p1"
         string id = get_optional_string_attribute("id", "*$SINGLE-PART$*");
         m_pAnalyser->save_current_part_id(id);
+
+
+            // content
 
         // part-name
         analyse_optional("part-name", pInstrument);
@@ -2757,6 +3622,9 @@ public:
 //        error_if_more_elements();
 
         add_to_model(pMD);
+
+        m_pAnalyser->process_beams();
+        m_pAnalyser->process_ties();
 
         set_result(pInstrument);
         return true;    //success
@@ -2847,12 +3715,59 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <repeat>
+//@ Parent element: <directions> (global)
+//@ Content: Always empty
+//@ Attributes:
+//@     type 	- mandatory, repeat type
+//@     times 	- optional, repeat times
+//@
+class RepeatMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    RepeatMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                      LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        //attrib: type
+        string type = get_optional_string_attribute("type", "");
+        if (!is_valid_type(type))
+            return false;    //failure
+
+        //attrib: times
+        int times = get_optional_int_attribute("times", 1);
+
+        m_pAnalyser->save_repeat_info(type, times);
+
+        set_result(nullptr);
+        return true;    //success
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    bool is_valid_type(const string& type)
+    {
+        if (type.empty() || !(type=="start" || type=="end"))
+        {
+            error_msg2("Missing or invalid attribute. type='" + type
+                       + "'. <repeat> ignored.");
+            return false;
+        }
+        return true;
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <rest>
-//@Contexts:
+//@ Contexts:
 //@    event
-//@Content Model:
+//@ Context Model:
 //@    Metadata content
-//@Attributes:
+//@ Attributes:
 //@    pitch - the musical pitch to which this rest should be visually registered
 //
 class RestMnxAnalyser : public MnxElementAnalyser
@@ -2864,15 +3779,14 @@ public:
 
     bool do_analysis() override
     {
-        // attrib: pitch
+        //attrib: pitch
         string pitch = get_optional_string_attribute("pitch", "");
         if (!pitch.empty())
         {
             int step = k_step_C;
             int octave = 4;
-            EAccidentals accidentals = k_no_accidentals;
             float alter = 0.0f;
-            if (MnxAnalyser::pitch_to_components(pitch, &step, &octave,&accidentals, &alter))
+            if (MnxAnalyser::pitch_to_components(pitch, &step, &octave, &alter))
             {
                 error_msg("Unknown rest pitch '" + pitch + "'. Replaced by 'C4'.");
                 step = k_step_C;
@@ -2900,18 +3814,6 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <score>
-//@<!ELEMENT score (mnx-common) )>
-//@<!ATTLIST score
-//@    src
-//@>
-//
-//@Contexts:
-//@    <mnx>, <collection>
-//@Content Model:
-//@    Metadata content
-//@    Zero or one musical body elements.
-//@Attributes:
-//@    src - optional relative path to an external source file
 //
 class ScoreMnxAnalyser : public MnxElementAnalyser
 {
@@ -2922,62 +3824,47 @@ public:
 
     bool do_analysis() override
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoContent* pContent = static_cast<ImoContent*>(
-                        ImFactory::inject(k_imo_content, pDoc) );
-        add_to_model(pContent);
-
-        // attrb: src
-        //TODO
-
-        ImoScore* pScore = create_score();
-
-        // mnx-common
-        analyse_mandatory("mnx-common", pScore);
-
-        m_pAnalyser->add_all_instruments(pScore);
-
-        set_options(pScore);
-        set_result(pScore);
-        return true;    //success
+        return false;   //failure
     }
 
 protected:
+};
 
-    ImoScore* create_score()
+//@--------------------------------------------------------------------------------------
+//@ <segno>
+//@ Parent element: <directions> (global)
+//@ Context: Always empty.
+//@ Attributes:
+//@    glyph - optional, SMuFL glyph name
+//@
+class SegnoMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    SegnoMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
     {
-        //add an empty score
+        //attrib: glyph
+		//TODO
+
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
-        pScore->set_accidentals_model( ImoScore::k_pitch_and_notation_provided );
-        m_pAnalyser->score_analysis_begin(pScore);
-        add_to_model(pScore);
-        m_pAnchor = pScore;
+        ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, pDoc) );
 
-        pScore->set_version(200);   //2.0
-        pScore->add_required_text_styles();
+        pDirection->set_display_repeat(k_repeat_segno);
 
-        return pScore;
+        ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(
+            ImFactory::inject(k_imo_symbol_repetition_mark, pDoc) );
+        pImo->set_symbol(ImoSymbolRepetitionMark::k_segno);
+
+        pDirection->add_attachment(pDoc, pImo);
+        add_to_model(pDirection);
+
+        set_result(pDirection);
+        return true;    //success
     }
-
-    void set_options(ImoScore* pScore)
-    {
-        //justify last system except for very short scores (less than 5 measures)
-        ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
-        if (m_pAnalyser->get_measures_counter() < 5)
-        {
-            pOpt->set_long_value(k_justify_never);
-            pOpt = pScore->get_option("StaffLines.Truncate");
-            pOpt->set_long_value(k_truncate_always);
-        }
-        else
-            pOpt->set_long_value(k_justify_always);
-
-        //spacing options
-        pOpt = pScore->get_option("Render.SpacingOptions");
-        pOpt->set_long_value(k_render_opt_breaker_optimal);
-    }
-
 };
 
 //@--------------------------------------------------------------------------------------
@@ -2989,14 +3876,14 @@ protected:
 //@     name
 //@ >
 //
-//@Contexts:
+//@ Contexts:
 //@    measure
-//@Content Model:
+//@ Context Model:
 //@    Metadata content
 //@    Zero or one directions elements
 //@    Sequence content
 //@    Interpretation content
-//@Attributes:
+//@ Attributes:
 //@    orient - default orientation of direction and sequence content
 //@    staff - default staff index of direction or sequence content
 //@    voice - optional cross-measure voice identifier
@@ -3010,16 +3897,21 @@ public:
 
     bool do_analysis() override
     {
-        // attrib: orient
+        //attrib: orient
         //TODO
 
-        // attrib: staff
+        //attrib: staff
         int staff = get_optional_int_attribute("staff", 1) - 1;
         m_pAnalyser->set_current_staff(staff);
 
-        // attrib: voice
+        //attrib: voice
             //TODO
         m_pAnalyser->set_current_voice( m_pAnalyser->get_current_voice() + 1 );
+
+
+            // content
+
+        m_pAnalyser->set_parent_for_directions("sequence");
 
         // Metadata content
         //TODO: analyse_metadata_content(m_pAnchor);
@@ -3033,6 +3925,8 @@ public:
         // Interpretation content
         //TODO: analyse_interpretation_content(m_pAnchor);
 
+        m_pAnalyser->set_parent_for_directions("measure-part");
+
         set_result(nullptr);
         return true;    //success
     }
@@ -3042,9 +3936,17 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-//@ [Sequence content]
-// (beamed | event | forward | grace | directions | tuplet)*
-//
+//@ Context Model:
+//@    Metadata content
+//@    Zero or one <directions> elements
+//@    Zero or one <beams> elements
+//@    Sequence content = (event? | forward? | tuplet? | grace?)*
+//@    Interpretation content
+//@ Attributes:
+//@    orient - default orientation of direction and sequence content
+//@    staff - default staff index of direction or sequence content
+//@    voice - optional cross-measure voice identifier
+//@//
 // Not in specification but they exist in example:
 //      expression | wedge
 //
@@ -3065,22 +3967,31 @@ public:
 
     bool do_analysis() override
     {
+        //attrib: orient
+        //TODO
+
         //attrib: staff
         int staff = get_optional_int_attribute("staff", 1) - 1;
         m_pAnalyser->set_current_staff(staff);
+
+        //attrib: voice
+        //TODO
 
             // content
 
         m_cursor = 0.0f;    //for sequence_content() method
 
+        // directions*
+        //TODO
+
+        // beams?
+        if (get_optional("beams"))
+            m_pAnalyser->save_beams_element(&m_childToAnalyse);
+
+        // sequence_content
         while (more_children_to_analyse())
         {
-            if (get_optional("beamed"))
-            {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
-            }
-            else if (get_optional("dynamics"))
+            if (get_optional("dynamics"))
             {
                 if (analyse_child(m_pAnchor))
                     sequence_content();
@@ -3141,7 +4052,8 @@ public:
 protected:
     void sequence_content()
     {
-        //TODO: finish algorithm for "Sequence content"
+        //TODO: finish algorithm for "Sequence content" (is this needed?)
+        return;
 
         //2. If next is a beamed element:
         if (m_childToAnalyse.name() == "beamed")
@@ -3225,12 +4137,87 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <tied>
+//@ Parent element: <note>
+//@ Context: Always empty.
+//@ Attributes:
+//@    location
+//@    target
+//@
+class TiedMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    TiedMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                    LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    bool do_analysis() override
+    {
+        ImoNote* pNote = get_anchor_as_note();
+        if (!pNote)
+            return false;
+
+        //attrib: location
+        //TODO
+
+        //attrib: target
+        string target = get_optional_string_attribute("target", "");
+
+        if (!target.empty())
+        {
+            ImoNoteRest* pNR = get_noterest(target, "tied");
+            if (pNR && pNR->is_note())
+            {
+                set_result( create_tie(pNote, static_cast<ImoNote*>(pNR)) );
+                return true;    //success
+            }
+            else
+            {
+                //TODO: error no target note
+            }
+        }
+
+        set_result(nullptr);
+        return false;    //failure
+    }
+
+protected:
+    ImoTie* create_tie(ImoNote* pStartNote, ImoNote* pEndNote)
+    {
+        //TODO: Finish this
+        static int tieNumber = 0;
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+        ImoTie* pTie = static_cast<ImoTie*>(
+                            ImFactory::inject(k_imo_tie, pDoc));
+        pTie->set_tie_number( ++tieNumber );
+        //pTie->set_color( pStartDto->get_color() );
+        //pTie->set_orientation( pStartDto->get_orientation() );
+
+        ImoTieData* pStartData = static_cast<ImoTieData*>(
+                                    ImFactory::inject(k_imo_tie_data, pDoc) );
+        pStartNote->include_in_relation(pDoc, pTie, pStartData);
+
+        ImoTieData* pEndData = static_cast<ImoTieData*>(
+                                    ImFactory::inject(k_imo_tie_data, pDoc) );
+        pEndNote->include_in_relation(pDoc, pTie, pEndData);
+
+        pStartNote->set_tie_next(pTie);
+        pEndNote->set_tie_prev(pTie);
+
+        return pTie;
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <time>
-//@Contexts:
+//@ Contexts:
 //@    Direction content
-//@Content Model:
+//@ Context Model:
 //@    None
-//@Attributes:
+//@ Attributes:
 //@    signature - the displayed time signature
 //@    measure - a time signature which describes the content of the current measure
 //@              only, and which is not displayed
@@ -3373,15 +4360,27 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <tuplet>
-//@Contexts:
-//@    x
-//@Content Model:
-//@    y
-//@Attributes:
-//@    z
-//
+//@ Parent elements: <sequence>, <tuplet>
+//@ Context, in any order:
+//@    <event> (Zero or more times)
+//@    <tuplet> (Zero or more times)
+//@    <grace> (Zero or more times)
+//@    <forward> (Zero or more times)
+//@
+//@ Attributes
+//@    inner - mandatory, the duration of the enclosed content, as notated.
+//@    outer - mandatory, the duration of this tuplet with respect to its containing element.
+//@    bracket - optional, controls the display of a bracket
+//@    orient - optional
+//@    show-number - optional
+//@    show-value - optional
+//@    staff - optional
+//@
 class TupletMnxAnalyser : public MnxElementAnalyser
 {
+protected:
+    ImoTuplet* m_pTuplet = nullptr;
+
 public:
     TupletMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
                       LibraryScope& libraryScope, ImoObj* pAnchor)
@@ -3389,19 +4388,182 @@ public:
 
     bool do_analysis() override
     {
-        //TODO: implement Analyser
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pTuplet = static_cast<ImoTuplet*>( ImFactory::inject(k_imo_tuplet, pDoc) );
+
+        //attrib: inner & outer - mandatory
+        const string& inner = get_mandatory_string_attribute("inner", "", "tuplet");
+        const string& outer = get_mandatory_string_attribute("outer", "", "tuplet");
+        if (inner.empty() || outer.empty())
+            return false;
+
+        set_multipliers(inner, outer);
+
+
+        //attrib: bracket - optional
+        string value = get_optional_string_attribute("bracket", "");
+        set_bracket(value);
+
+        //attrib: orient - optional
+        //attrib: show-number - optional
+//        // attrib: show-number (actual | both | none) #IMPLIED
+//        value = get_optional_string_attribute("show-number", "");
+//        set_show_number(value);
+//
+        //attrib: show-value - optional
+        //attrib: staff - optional
+
+
+            //content
+
+        while (more_children_to_analyse())
+        {
+            if (get_optional("event"))
+            {
+                if (analyse_child(m_pAnchor))
+                    add_event_to_tuplet();
+            }
+            else if (get_optional("tuplet"))
+            {
+//                if (analyse_child(m_pAnchor))
+//                    add_tuplet_to_tuplet();
+            }
+            else if (get_optional("grace"))
+            {
+//                if (analyse_child(m_pAnchor))
+//                    add_grace_to_tuplet();
+            }
+            else if (get_optional("forward"))
+            {
+//                if (analyse_child(m_pAnchor))
+                    //?????????????????
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
+        }
+
+        create_tuplet();
+
         set_result(nullptr);
         return true;    //success
     }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_multipliers(const string& inner, const string& outer)
+    {
+        int innerType;
+        int innerDots;
+        int innerMultiplier;
+
+        if (!MnxAnalyser::get_note_value_quantity(inner, &innerType, &innerDots, &innerMultiplier))
+            return;
+
+        int outerType;
+        int outerDots;
+        int outerMultiplier;
+
+        if (!MnxAnalyser::get_note_value_quantity(outer, &outerType, &outerDots, &outerMultiplier))
+            return;
+
+        if (innerType == outerType && innerDots == outerDots)
+        {
+            m_pTuplet->set_actual_number(innerMultiplier);
+            m_pTuplet->set_normal_number(outerMultiplier);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_bracket(const string& value)
+    {
+        if (value.empty())
+            m_pTuplet->set_show_bracket(k_yesno_default);
+        else if (value == "yes")
+            m_pTuplet->set_show_bracket(k_yesno_yes);
+        else if (value == "no")
+            m_pTuplet->set_show_bracket(k_yesno_no);
+        else
+        {
+            error_msg("Invalid value '" + value +
+                      "' for yes-no bracket attribute. 'no' assumed.");
+            m_pTuplet->set_show_bracket(k_yesno_no);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_event_to_tuplet()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoNoteRest* pNR = static_cast<EventData*>(get_result())->pNR;
+        pNR->include_in_relation(pDoc, m_pTuplet, nullptr);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void create_tuplet()
+    {
+//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//
+//        ImoTupletDto* pStartDto = m_matches.front();
+//        ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
+//
+//        std::list<ImoTupletDto*>::iterator it;
+//        for (it = m_matches.begin(); it != m_matches.end(); ++it)
+//        {
+//            ImoNoteRest* pNR = (*it)->get_note_rest();
+//            pNR->include_in_relation(pDoc, pTuplet, nullptr);
+//        }
+//    }
+//
+//    //-----------------------------------------------------------------------------------
+//    void MnxTupletsBuilder::add_to_open_tuplets(ImoNoteRest* pNR)
+//    {
+//        if (m_pendingItems.size() > 0)
+//        {
+//            ListIterator it;
+//            for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+//            {
+//                if ((*it)->is_start_of_relation() )
+//                {
+//                    ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+//                    pInfo->set_tuplet_number( (*it)->get_item_number() );
+//                    pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+//                    pInfo->set_note_rest(pNR);
+//                    save_item_info(pInfo);
+//                }
+//            }
+//        }
+    }
+//
+//    //-----------------------------------------------------------------------------------
+//    void MnxTupletsBuilder::get_factors_from_nested_tuplets(int* pTop, int* pBottom)
+//    {
+//        *pTop = 1;
+//        *pBottom = 1;
+//        ListIterator it;
+//        for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+//        {
+//            if ((*it)->is_start_of_relation() )
+//            {
+//                ImoTupletDto* pInfo = static_cast<ImoTupletDto*>(*it);
+//                *pTop *= pInfo->get_normal_number();
+//                *pBottom *= pInfo->get_actual_number();
+//            }
+//        }
+//    }
+
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <wedge>
-//@Contexts:
+//@ Contexts:
 //@    x
-//@Content Model:
+//@ Context Model:
 //@    y
-//@Attributes:
+//@ Attributes:
 //@    z
 //
 class WedgeMnxAnalyser : public MnxElementAnalyser
@@ -3421,11 +4583,11 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <template_for_analyser>
-//@Contexts:
+//@ Contexts:
 //@    x
-//@Content Model:
+//@ Context Model:
 //@    y
-//@Attributes:
+//@ Attributes:
 //@    z
 //
 class TemplateMnxAnalyser : public MnxElementAnalyser
@@ -3458,9 +4620,8 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_libraryScope(libraryScope)
     , m_pDoc(pDoc)
     , m_pParser(parser)
-    , m_pTiesBuilder(nullptr)
-    , m_pBeamsBuilder(nullptr)
-    , m_pOldBeamsBuilder(nullptr)
+//    , m_pTiesBuilder(nullptr)
+//    , m_pBeamsBuilder(nullptr)
     , m_pTupletsBuilder(nullptr)
     , m_pSlursBuilder(nullptr)
     , m_pVoltasBuilder(nullptr)
@@ -3487,13 +4648,16 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_curStaff(0)
     , m_curVoice(0)
     , m_beamLevel(0)
+    , m_noteClass(k_imo_note_regular)
 {
     //populate the name to enum conversion map
 //    m_NameToEnum["accordion-registration"] = k_mnx_tag_accordion_registration;
 //    m_NameToEnum["articulations"] = k_mnx_tag_articulations;
 //    m_NameToEnum["backup"] = k_mnx_tag_backup;
 //    m_NameToEnum["barline"] = k_mnx_tag_barline;
-    m_NameToEnum["beamed"] = k_mnx_tag_beamed;
+    m_NameToEnum["beam"] = k_mnx_tag_beam;
+    m_NameToEnum["beam-hook"] = k_mnx_tag_beam_hook;
+    m_NameToEnum["beams"] = k_mnx_tag_beams;
 //    m_NameToEnum["bracket"] = k_mnx_tag_bracket;
     m_NameToEnum["clef"] = k_mnx_tag_clef;
 //    m_NameToEnum["coda"] = k_mnx_tag_coda;
@@ -3510,11 +4674,14 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["eyeglasses"] = k_mnx_tag_eyeglasses;
 //    m_NameToEnum["fermata"] = k_mnx_tag_fermata;
 //    m_NameToEnum["forward"] = k_mnx_tag_forward;
+    m_NameToEnum["fine"] = k_mnx_tag_fine;
     m_NameToEnum["global"] = k_mnx_tag_global;
+    m_NameToEnum["grace"] = k_mnx_tag_grace;
 //    m_NameToEnum["harp-pedals"] = k_mnx_tag_harp_pedals;
     m_NameToEnum["head"] = k_mnx_tag_head;
 //    m_NameToEnum["image"] = k_mnx_tag_image;
     m_NameToEnum["instrument-sound"] = k_mnx_tag_instrument_sound;
+    m_NameToEnum["jump"] = k_mnx_tag_jump;
     m_NameToEnum["key"] = k_mnx_tag_key;
 //    m_NameToEnum["lyric"] = k_mnx_tag_lyric;
     m_NameToEnum["measure"] = k_mnx_tag_measure;
@@ -3522,10 +4689,9 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["midi-device"] = k_mnx_tag_midi_device;
 //    m_NameToEnum["midi-instrument"] = k_mnx_tag_midi_instrument;
     m_NameToEnum["mnx"] = k_mnx_tag_mnx;
-    m_NameToEnum["mnx-common"] = k_mnx_tag_mnx_common;
 //    m_NameToEnum["notations"] = k_mnx_tag_notations;
     m_NameToEnum["note"] = k_mnx_tag_note;
-//    m_NameToEnum["octave-shift"] = k_mnx_tag_octave_shift;
+    m_NameToEnum["octave-shift"] = k_mnx_tag_octave_shift;
 //    m_NameToEnum["ornaments"] = k_mnx_tag_ornaments;
     m_NameToEnum["part"] = k_mnx_tag_part;
 //    m_NameToEnum["part-group"] = k_mnx_tag_part_group;
@@ -3537,13 +4703,14 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["principal-voice"] = k_mnx_tag_principal_voice;
 //    m_NameToEnum["print"] = k_mnx_tag_print;
 //    m_NameToEnum["rehearsal"] = k_mnx_tag_rehearsal;
+    m_NameToEnum["repeat"] = k_mnx_tag_repeat;
     m_NameToEnum["rest"] = k_mnx_tag_rest;
 //    m_NameToEnum["scordatura"] = k_mnx_tag_scordatura;
     m_NameToEnum["score"] = k_mnx_tag_score;
 //    m_NameToEnum["score-instrument"] = k_mnx_tag_score_instrument;
 //    m_NameToEnum["score-part"] = k_mnx_tag_score_part;
 //    m_NameToEnum["score-partwise"] = k_mnx_tag_score_partwise;
-//    m_NameToEnum["segno"] = k_mnx_tag_segno;
+    m_NameToEnum["segno"] = k_mnx_tag_segno;
     m_NameToEnum["sequence"] = k_mnx_tag_sequence;
     m_NameToEnum["sequence_content"] = k_mnx_tag_sequence_content;
 //    m_NameToEnum["slur"] = k_mnx_tag_slur;
@@ -3552,7 +4719,7 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["string-mute"] = k_mnx_tag_string_mute;
 //    m_NameToEnum["technical"] = k_mnx_tag_technical;
 //    m_NameToEnum["text"] = k_mnx_tag_text;
-//    m_NameToEnum["tied"] = k_mnx_tag_tied;
+    m_NameToEnum["tied"] = k_mnx_tag_tied;
     m_NameToEnum["time"] = k_mnx_tag_time;
 //    m_NameToEnum["time-modification"] = k_mnx_tag_time_modification;
     m_NameToEnum["tuplet"] = k_mnx_tag_tuplet;
@@ -3589,9 +4756,8 @@ void MnxAnalyser::delete_globals()
 //---------------------------------------------------------------------------------------
 void MnxAnalyser::delete_relation_builders()
 {
-    delete m_pTiesBuilder;
-    delete m_pBeamsBuilder;
-    delete m_pOldBeamsBuilder;
+//    delete m_pTiesBuilder;
+//    delete m_pBeamsBuilder;
     delete m_pTupletsBuilder;
     delete m_pSlursBuilder;
     delete m_pVoltasBuilder;
@@ -3601,9 +4767,6 @@ void MnxAnalyser::delete_relation_builders()
 ImoObj* MnxAnalyser::analyse_tree_and_get_object(XmlNode* root)
 {
     delete_relation_builders();
-    m_pTiesBuilder = LOMSE_NEW MnxTiesBuilder(m_reporter, this);
-    m_pBeamsBuilder = LOMSE_NEW MnxBeamsBuilder(m_reporter, this);
-    m_pOldBeamsBuilder = LOMSE_NEW MnxBeamsBuilder2(m_reporter, this);
     m_pTupletsBuilder = LOMSE_NEW MnxTupletsBuilder(m_reporter, this);
     m_pSlursBuilder = LOMSE_NEW MnxSlursBuilder(m_reporter, this);
     m_pVoltasBuilder = LOMSE_NEW MnxVoltasBuilder(m_reporter, this);
@@ -3635,17 +4798,6 @@ bool MnxAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 }
 
 //---------------------------------------------------------------------------------------
-bool MnxAnalyser::analyse_global_measure(XmlNode* pNode, ImoObj* pAnchor)
-{
-    //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
-    MnxElementAnalyser* a = LOMSE_NEW MeasureMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor, true);
-    m_pResult = nullptr;
-    bool res = a->analyse_node(pNode);
-    delete a;
-    return res;
-}
-
-//---------------------------------------------------------------------------------------
 int MnxAnalyser::get_line_number(XmlNode* node)
 {
     return m_pParser->get_line_number(node);
@@ -3659,6 +4811,7 @@ void MnxAnalyser::prepare_for_new_instrument_content()
     m_maxTime = 0.0;
     save_last_barline(nullptr);
     m_measuresCounter = 0;
+    m_noteClass = k_imo_note_regular;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3666,11 +4819,11 @@ void MnxAnalyser::add_relation_info(ImoObj* pDto)
 {
     // factory method to deal with all relations
 
-    if (pDto->is_beam_dto())
-        m_pBeamsBuilder->add_item_info(static_cast<ImoBeamDto*>(pDto));
-    else if (pDto->is_tie_dto())
-        m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
-    else if (pDto->is_slur_dto())
+//    if (pDto->is_beam_dto())
+//        m_pBeamsBuilder->add_item_info(static_cast<ImoBeamDto*>(pDto));
+//    else if (pDto->is_tie_dto())
+//        m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
+    if (pDto->is_slur_dto())
         m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
     else if (pDto->is_tuplet_dto())
         m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
@@ -3681,15 +4834,53 @@ void MnxAnalyser::add_relation_info(ImoObj* pDto)
 //---------------------------------------------------------------------------------------
 void MnxAnalyser::clear_pending_relations()
 {
-    m_pTiesBuilder->clear_pending_items();
+    m_beams.clear();
+    m_ties.clear();
+//    m_pTiesBuilder->clear_pending_items();
     m_pSlursBuilder->clear_pending_items();
-    m_pBeamsBuilder->clear_pending_items();
-    m_pOldBeamsBuilder->clear_pending_old_beams();
+//    m_pBeamsBuilder->clear_pending_items();
     m_pTupletsBuilder->clear_pending_items();
     m_pVoltasBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::process_beams()
+{
+    vector<XmlNode>::const_iterator it;
+    for (it=m_beams.begin(); it != m_beams.end(); ++it)
+    {
+        XmlNode node = *it;
+        m_beamLevel = 0;
+        analyse_node(&node, nullptr);
+    }
+    m_beams.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::save_beams_element(XmlNode node)
+{
+    m_beams.push_back(node);
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::process_ties()
+{
+    vector< pair<XmlNode, ImoNote*> >::const_iterator it;
+    for (it=m_ties.begin(); it != m_ties.end(); ++it)
+    {
+        XmlNode node = it->first;
+        analyse_node(&node, it->second);
+    }
+    m_ties.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::save_tied_element(XmlNode node, ImoNote* pNote)
+{
+    m_ties.push_back( std::make_pair(node, pNote) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -3928,27 +5119,35 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
 
     switch ( name_to_enum(name) )
     {
-        case k_mnx_tag_beamed:              return LOMSE_NEW BeamedMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_beam:                return LOMSE_NEW BeamMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_beam_hook:           return LOMSE_NEW BeamHookMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_beams:               return LOMSE_NEW BeamsMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_clef:                return LOMSE_NEW ClefMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_directions:          return LOMSE_NEW DirectionsMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_dynamics:            return LOMSE_NEW DynamicsMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_event:               return LOMSE_NEW EventMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_expression:          return LOMSE_NEW ExpressionMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_fine:                return LOMSE_NEW FineMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_global:              return LOMSE_NEW GlobalMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_grace:               return LOMSE_NEW GraceMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_head:                return LOMSE_NEW HeadMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_instrument_sound:    return LOMSE_NEW InstrumentSoundMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_jump:                return LOMSE_NEW JumpMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_key:                 return LOMSE_NEW KeyMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_measure:             return LOMSE_NEW MeasureMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_mnx:                 return LOMSE_NEW MnxMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_mnx_tag_mnx_common:          return LOMSE_NEW MnxCommonMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_note:                return LOMSE_NEW NoteMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_octave_shift:        return LOMSE_NEW OctaveShiftMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_part:                return LOMSE_NEW PartMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_part_name:           return LOMSE_NEW PartNameMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_repeat:              return LOMSE_NEW RepeatMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_rest:                return LOMSE_NEW RestMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_score:               return LOMSE_NEW ScoreMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_segno:               return LOMSE_NEW SegnoMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_sequence:            return LOMSE_NEW SequenceMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_sequence_content:    return LOMSE_NEW SequenceContentMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_staff:               return LOMSE_NEW StaffMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_tied:                return LOMSE_NEW TiedMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_time:                return LOMSE_NEW TimeMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_tuplet:              return LOMSE_NEW TupletMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_wedge:               return LOMSE_NEW WedgeMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -3977,16 +5176,11 @@ int MnxAnalyser::get_voice_for_name(const string& name) const
         return -1;
 }
 
-
-//---------------------------------------------------------------------------------------
-// static public methods
-//---------------------------------------------------------------------------------------
-
 bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octave,
-                                      EAccidentals* accidentals, float* alterations)
+                                      float* alter)
 {
-    // Analyzes string pitch (MNX format), extracts its parts (step, octave, accidentals
-    // and alterations) and stores them in the corresponding parameters.
+    // Analyzes string pitch (MNX format), extracts its parts (step, octave and
+    // and alteration) and stores them in the corresponding parameters.
     // Returns true if error (pitch is not a valid pitch string)
     //
     // In MNX pitch is represented as a combination of the step of the diatonic
@@ -4017,11 +5211,12 @@ bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octav
     while(pitch[i] == '#' || pitch[i] == 'b')
         ++i;
     if (i == 1)
-        *accidentals = k_no_accidentals;
+        *alter = 0.0f;
     else
     {
-        *accidentals = to_accidentals(pitch.substr(1, i-1));
-        if (*accidentals == k_invalid_accidentals)
+        *alter = 0.0f;
+        *alter = to_alteration(pitch.substr(1, i-1));
+        if (*alter == -999.0f)
             return true;   //error
     }
 
@@ -4031,16 +5226,14 @@ bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octav
         return true;   //error
 
     //optional: non-integer alteration
-    if (++i == iMax)
-        *alterations = 0.0f;
-    else
+    if (++i != iMax)
     {
         if (pitch[i] == '+' || pitch[i] == '-')
         {
             try
             {
                 size_t sz;
-                *alterations = std::stof(pitch.substr(i), &sz);
+                *alter += std::stof(pitch.substr(i), &sz);
                 if (i+sz != iMax)
                     return true;   //error
             }
@@ -4092,34 +5285,43 @@ int MnxAnalyser::to_octave(const char& letter)
 }
 
 //---------------------------------------------------------------------------------------
-EAccidentals MnxAnalyser::to_accidentals(const std::string& accidentals)
+float MnxAnalyser::to_alteration(const std::string& accidentals)
 {
     switch (accidentals.length())
     {
         case 0:
-            return k_no_accidentals;
+            return 0.0f;
             break;
 
         case 1:
             if (accidentals[0] == '#')
-                return k_sharp;
+                return 1.0f;
             else if (accidentals[0] == 'b')
-                return k_flat;
+                return -1.0f;
             else
-                return k_invalid_accidentals;
+            {
+                //error_msg();    //k_invalid_accidentals
+                return -999.0f;     //error: invalid alteration
+            }
             break;
 
         case 2:
             if (accidentals.compare(0, 2, "##") == 0)
-                return k_sharp_sharp;
+                return 2.0f;
             else if (accidentals.compare(0, 2, "bb") == 0)
-                return k_flat_flat;
+                return -2.0;
             else
-                return k_invalid_accidentals;
+            {
+                //error_msg();    //k_invalid_accidentals
+                return -999.0f;     //error: invalid alteration
+            }
             break;
 
         default:
-            return k_invalid_accidentals;
+            {
+                //error_msg();    //k_invalid_accidentals
+                return -999.0f;     //error: invalid alteration
+            }
     }
 }
 
@@ -4139,7 +5341,7 @@ MeasuresVector* MnxAnalyser::new_global(const string& partList)
 }
 
 //---------------------------------------------------------------------------------------
-void MnxAnalyser::add_data_from_global_measure(ImoMusicData* pMD)
+void MnxAnalyser::add_left_data_from_global_measure(ImoMusicData* pMD)
 {
     map<string, MeasuresVector*>::iterator it = m_globals.find(m_curPartId);
     if (it == m_globals.end())
@@ -4147,14 +5349,116 @@ void MnxAnalyser::add_data_from_global_measure(ImoMusicData* pMD)
 
     MeasuresVector* pMeasures = it->second;
 
+    string curParent = get_parent_for_directions();
     int idx = m_measuresCounter - 1;
+    ImoMusicData* pGlobal = nullptr;
     if (idx < int(pMeasures->size()))
     {
         XmlNode node = pMeasures->at(idx);
         XmlParser parser;
         MnxAnalyser a(m_reporter, m_libraryScope, m_pDoc, &parser);
-        a.analyse_global_measure(&node, pMD);
+        a.set_parent_for_directions("measure-global");
+        pGlobal = a.analyse_global_measure(&node);
+        split_global_content(pGlobal, pMD);
+        transfer_data_from_temporal_analyser(a);
     }
+    set_parent_for_directions(curParent);
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::add_right_data_from_global_measure(ImoMusicData* pMD)
+{
+    for (auto pSO : m_rightGlobals)
+        pMD->append_child_imo(pSO);
+
+    m_rightGlobals.clear();
+}
+
+//---------------------------------------------------------------------------------------
+ImoMusicData* MnxAnalyser::analyse_global_measure(XmlNode* pNode)
+{
+    //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
+    m_pResult = nullptr;
+    MeasureMnxAnalyser a(this, m_reporter, m_libraryScope, nullptr, true);
+    a.analyse_node(pNode);
+    return static_cast<ImoMusicData*>(m_pResult);
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::split_global_content(ImoMusicData* pGlobal, ImoMusicData* pMD)
+{
+    //content in pGlobal ImoMusicData is re-assigned: left located objects are
+    //added to pMD and right located objects are saved in m_leftGlobals
+
+    ImoObj::children_iterator it = pGlobal->begin();
+    while (it != pGlobal->end())
+    {
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
+        pGlobal->remove_child(pSO);
+        if (goes_at_right(pSO))
+            m_rightGlobals.push_back(pSO);
+        else
+            pMD->append_child_imo(pSO);
+
+        it = pGlobal->begin();
+    }
+    delete pGlobal;
+}
+
+//---------------------------------------------------------------------------------------
+bool MnxAnalyser::goes_at_right(ImoStaffObj* pSO)
+{
+    if (pSO->is_direction() || pSO->is_sound_change())
+    {
+        ImoAttr* pA = pSO->get_attribute_node(k_attr_right_located);
+        if (pA)
+        {
+            pSO->remove_attribute(k_attr_right_located);
+            return true;
+        }
+        return false;
+    }
+    else if (pSO->is_time_signature())
+    {
+        return false;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::transfer_data_from_temporal_analyser(MnxAnalyser& a)
+{
+    m_startRepeat = a.get_start_repeat_info();
+    m_endRepeat = a.get_end_repeat_info();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::save_repeat_info(const std::string& type, int times)
+{
+    if (type == "start")
+        m_startRepeat = 1;
+    else
+        m_endRepeat = times;
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::clear_repeat_info()
+{
+    m_startRepeat = 0;
+    m_endRepeat = 0;
+}
+
+//---------------------------------------------------------------------------------------
+int MnxAnalyser::get_start_repeat_info()
+{
+    return m_startRepeat;
+}
+
+//---------------------------------------------------------------------------------------
+int MnxAnalyser::get_end_repeat_info()
+{
+    return m_endRepeat;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4173,61 +5477,220 @@ vector<string> MnxAnalyser::tokenize_spaces(const string& input)
     return result;
 }
 
-//=======================================================================================
-// MnxTiesBuilder implementation
-//=======================================================================================
-void MnxTiesBuilder::add_relation_to_staffobjs(ImoTieDto* pEndDto)
+
+//-----------------------------------------------------------------------------------
+// Analysers for notational syntaxes
+//-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
+//Note value
+bool MnxAnalyser::get_note_value(const string& value, int* noteType, int* dots)
 {
-    ImoTieDto* pStartDto = m_matches.front();
-    ImoNote* pStartNote = pStartDto->get_note();
-    ImoNote* pEndNote = pEndDto->get_note();
-    if (notes_can_be_tied(pStartNote, pEndNote))
-        tie_notes(pStartDto, pEndDto);
+    *dots = 0;
+    bool fFractional = false;
+    string::const_iterator it = value.begin();
+
+    //get initial '*' or '/'
+    if (it != value.end())
+    {
+        if (*it == '*')
+            fFractional = false;
+        else if (*it == '/')
+            fFractional = true;
+        else
+            return false;   //error_invalid_start();
+        ++it;
+    }
+
+    if (it == value.end())
+        return false;   //error_missing_number();
+
+    //get number
+    string::const_iterator start = it;
+    ++it;
+    while(it != value.end() && isdigit(*it))
+    {
+        ++it;
+    }
+    string number(start, it);
+
+    //get dots: count and remove trailing 'd'
+    while(it != value.end() && *it == 'd')
+    {
+        *dots += 1;
+        ++it;
+    }
+
+    if (it != value.end())
+        return false;   //error_invalid_chars_at_end();
+
+    //determine note type
+    if (number == "2" && !fFractional)
+        *noteType = k_longa;
+    else if (number == "1")
+        *noteType = k_whole;
+    else if (number == "2" && fFractional)
+        *noteType = k_half;
+    else if (number == "4")
+        *noteType = k_quarter;
+    else if (number == "8")
+        *noteType = k_eighth;
+    else if (number == "16")
+        *noteType = k_16th;
+    else if (number == "32")
+        *noteType = k_32nd;
+    else if (number == "64")
+        *noteType = k_64th;
+    else if (number == "128")
+        *noteType = k_128th;
     else
-        error_notes_can_not_be_tied(pEndDto);
+        *noteType = k_256th;
+
+//            s << ". Value=" << value << ", noteType=" << *noteType
+//              << ", dots=" << *dots;
+//            LOMSE_LOG_DEBUG(Logger::k_all, s.str());
+
+    return true;
 }
 
-//---------------------------------------------------------------------------------------
-bool MnxTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
+//-----------------------------------------------------------------------------------
+//Note value quantity
+bool MnxAnalyser::get_note_value_quantity(const string& value, int* noteType,
+                                          int* dots, int* multiplier)
 {
-    return (pStartNote->get_voice() == pEndNote->get_voice())
-            && (pStartNote->get_staff() == pEndNote->get_staff())
-            && (pStartNote->get_actual_accidentals() == pEndNote->get_actual_accidentals())
-            && (pStartNote->get_step() == pEndNote->get_step())
-            && (pStartNote->get_octave() == pEndNote->get_octave()) ;
+    *dots = 0;
+    *multiplier = 1;
+    string::const_iterator it = value.begin();
+
+    //get initial digits until '/' found
+    string::const_iterator start = it;
+    while(it != value.end() && isdigit(*it))
+    {
+        ++it;
+    }
+    if (it == value.end() || (*it != '/'))
+        return false;   //error_missing_note_value();
+
+    string number(start, it);
+    if (!number.empty())
+    {
+        long mult;
+        std::istringstream iss(number);
+        if ((iss >> std::dec >> mult).fail())
+            return false;   //error_invalid_multiplier();
+
+        *multiplier = int(mult);
+    }
+
+
+    //get note value
+    string noteValue(it, value.end());
+
+    return MnxAnalyser::get_note_value(noteValue, noteType, dots);
 }
 
-//---------------------------------------------------------------------------------------
-void MnxTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
+//-----------------------------------------------------------------------------------
+//Note value quantity
+bool MnxAnalyser::note_value_quantity_to_duration(const string& value, TimeUnits* duration)
 {
-    ImoNote* pStartNote = pStartDto->get_note();
-    ImoNote* pEndNote = pEndDto->get_note();
-    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+    *duration = 0.0;
 
-    ImoTie* pTie = static_cast<ImoTie*>(
-                    ImFactory::inject(k_imo_tie, pDoc));
-    pTie->set_tie_number( pStartDto->get_tie_number() );
-    pTie->set_color( pStartDto->get_color() );
-    pTie->set_orientation( pStartDto->get_orientation() );
+    int noteType;
+    int dots;
+    int multiplier;
 
-    ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, pStartDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
-
-    ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, pEndDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
-
-    pStartNote->set_tie_next(pTie);
-    pEndNote->set_tie_prev(pTie);
+    if (MnxAnalyser::get_note_value_quantity(value, &noteType, &dots, &multiplier))
+    {
+        *duration = to_duration(noteType, dots) * TimeUnits(multiplier);
+        return true;
+    }
+    return false;   //error_invalid_value();
 }
 
-//---------------------------------------------------------------------------------------
-void MnxTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
-{
-    m_reporter << "Line " << pEndInfo->get_line_number()
-               << ". Requesting to tie notes of different voice or pitch. Tie number "
-               << pEndInfo->get_tie_number()
-               << " will be ignored." << endl;
-}
+////-----------------------------------------------------------------------------------
+////Time signature value
+//bool MnxAnalyser::get_time_signature_value(const string& value, )
+//{
+//
+//}
+//
+////-----------------------------------------------------------------------------------
+////Chromatic pitch
+//bool MnxAnalyser::get_chromatic_pitch_value(const string& value, )
+//{
+//
+//}
+//
+////-----------------------------------------------------------------------------------
+////Measure location
+//bool MnxAnalyser::get_measure_location_value(const string& value, )
+//{
+//
+//}
+//
+////-----------------------------------------------------------------------------------
+////SMuFL glyph name
+//bool MnxAnalyser::get_smufl_glyph_name(const string& value, )
+//{
+//
+//}
+
+
+////=======================================================================================
+//// MnxTiesBuilder implementation
+////=======================================================================================
+//void MnxTiesBuilder::add_relation_to_staffobjs(ImoTieDto* pEndDto)
+//{
+//    ImoTieDto* pStartDto = m_matches.front();
+//    ImoNote* pStartNote = pStartDto->get_note();
+//    ImoNote* pEndNote = pEndDto->get_note();
+//    if (notes_can_be_tied(pStartNote, pEndNote))
+//        tie_notes(pStartDto, pEndDto);
+//    else
+//        error_notes_can_not_be_tied(pEndDto);
+//}
+//
+////---------------------------------------------------------------------------------------
+//bool MnxTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
+//{
+//    return (pStartNote->get_voice() == pEndNote->get_voice())
+//            && (pStartNote->get_staff() == pEndNote->get_staff())
+//            && (pStartNote->get_actual_accidentals() == pEndNote->get_actual_accidentals())
+//            && (pStartNote->get_step() == pEndNote->get_step())
+//            && (pStartNote->get_octave() == pEndNote->get_octave()) ;
+//}
+//
+////---------------------------------------------------------------------------------------
+//void MnxTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
+//{
+//    ImoNote* pStartNote = pStartDto->get_note();
+//    ImoNote* pEndNote = pEndDto->get_note();
+//    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//
+//    ImoTie* pTie = static_cast<ImoTie*>(
+//                    ImFactory::inject(k_imo_tie, pDoc));
+//    pTie->set_tie_number( pStartDto->get_tie_number() );
+//    pTie->set_color( pStartDto->get_color() );
+//    pTie->set_orientation( pStartDto->get_orientation() );
+//
+//    ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, pStartDto);
+//    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+//
+//    ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, pEndDto);
+//    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+//
+//    pStartNote->set_tie_next(pTie);
+//    pEndNote->set_tie_prev(pTie);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void MnxTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
+//{
+//    m_reporter << "Line " << pEndInfo->get_line_number()
+//               << ". Requesting to tie notes of different voice or pitch. Tie number "
+//               << pEndInfo->get_tie_number()
+//               << " will be ignored." << endl;
+//}
 
 
 //=======================================================================================
@@ -4249,130 +5712,6 @@ void MnxSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
         pNote->include_in_relation(pDoc, pSlur, pData);
     }
 }
-
-
-//=======================================================================================
-// MnxBeamsBuilder implementation
-//=======================================================================================
-void MnxBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
-{
-    m_matches.push_back(pEndInfo);
-    Document* pDoc = m_pAnalyser->get_document_being_analysed();
-
-    ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
-
-    bool fErrors = false;
-    std::list<ImoBeamDto*>::iterator it;
-    for (it = m_matches.begin(); it != m_matches.end(); ++it)
-    {
-        ImoNoteRest* pNR = (*it)->get_note_rest();
-        ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
-
-        //check if beam is congruent with note type
-        int level = 0;
-        for (int i=0; i < 6; ++i)
-        {
-            if ((*it)->get_beam_type(i) == ImoBeam::k_none)
-                break;
-            ++level;
-        }
-        int type = pNR->get_note_type();
-        switch(level)
-        {
-            case 0: fErrors = true;                 break;
-            case 1: fErrors |= (type != k_eighth);  break;
-            case 2: fErrors |= (type != k_16th);    break;
-            case 3: fErrors |= (type != k_32nd);    break;
-            case 4: fErrors |= (type != k_64th);    break;
-            case 5: fErrors |= (type != k_128th);   break;
-            case 6: fErrors |= (type != k_256th);   break;
-        }
-    }
-
-//    //AWARE: MusicXML requires full item description. Autobeamer is only needed
-//    //       when the file is malformed and the option 'fix_beams' is enabled
-//    if (fErrors && m_pAnalyser->fix_beams())
-//    {
-//        AutoBeamer autobeamer(pBeam);
-//        autobeamer.do_autobeam();
-//    }
-}
-
-
-
-//=======================================================================================
-// MnxBeamsBuilder2 implementation
-//=======================================================================================
-MnxBeamsBuilder2::MnxBeamsBuilder2(ostream& reporter, MnxAnalyser* pAnalyser)
-    : m_reporter(reporter)
-    , m_pAnalyser(pAnalyser)
-{
-}
-
-//---------------------------------------------------------------------------------------
-MnxBeamsBuilder2::~MnxBeamsBuilder2()
-{
-    clear_pending_old_beams();
-}
-
-//---------------------------------------------------------------------------------------
-void MnxBeamsBuilder2::add_old_beam(ImoBeamDto* pInfo)
-{
-    m_pendingBeams.push_back(pInfo);
-}
-
-//---------------------------------------------------------------------------------------
-void MnxBeamsBuilder2::clear_pending_old_beams()
-{
-    std::list<ImoBeamDto*>::iterator it;
-    for (it = m_pendingBeams.begin(); it != m_pendingBeams.end(); ++it)
-    {
-        error_no_end_old_beam(*it);
-        delete *it;
-    }
-    m_pendingBeams.clear();
-}
-
-//---------------------------------------------------------------------------------------
-bool MnxBeamsBuilder2::is_old_beam_open()
-{
-    return m_pendingBeams.size() > 0;
-}
-
-//---------------------------------------------------------------------------------------
-void MnxBeamsBuilder2::error_no_end_old_beam(ImoBeamDto* pInfo)
-{
-    m_reporter << "Line " << pInfo->get_line_number()
-               << ". No matching 'g-' element for 'g+'. Beam ignored." << endl;
-}
-
-//---------------------------------------------------------------------------------------
-void MnxBeamsBuilder2::close_old_beam(ImoBeamDto* pInfo)
-{
-    add_old_beam(pInfo);
-    do_create_old_beam();
-}
-
-//---------------------------------------------------------------------------------------
-void MnxBeamsBuilder2::do_create_old_beam()
-{
-    Document* pDoc = m_pAnalyser->get_document_being_analysed();
-    ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
-    std::list<ImoBeamDto*>::iterator it;
-    for (it = m_pendingBeams.begin(); it != m_pendingBeams.end(); ++it)
-    {
-        ImoNoteRest* pNR = (*it)->get_note_rest();
-        ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
-        delete *it;
-    }
-    m_pendingBeams.clear();
-
-    AutoBeamer autobeamer(pBeam);
-    autobeamer.do_autobeam();
-}
-
 
 
 //=======================================================================================

@@ -15,43 +15,33 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
-               <note pitch="C4"/>
-            </event>
-            <event value="/2">
-               <note pitch="G3"/>
-            </event>
-         </sequence>
-         <sequence>
             <event value="/4">
-               <note pitch="E5"/>
+               <note pitch="C5"/>
             </event>
             <event value="/4">
-               <note pitch="F5"/>
+               <note pitch="E5">
+                  <tied target="note3"/>
+               </note>
             </event>
             <event value="/4">
-               <note pitch="G5"/>
+               <note pitch="E5" id="note3"/>
             </event>
             <event value="/4">
-               <note pitch="B4"/>
+               <note pitch="C5">
+                  <tied target="note5"/>
+               </note>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
-            <event value="/1">
-               <note pitch="C4"/>
-            </event>
-         </sequence>
-         <sequence>
-            <event value="/4">
-               <note pitch="D5"/>
-            </event>
-            <event value="/4">
-               <note pitch="C5"/>
+            <event value="/2">
+               <note pitch="C5" id="note5">
+                  <tied target="note6"/>
+               </note>
             </event>
             <event value="/2">
-               <note pitch="C6"/>
+               <note pitch="C5" id="note6"/>
             </event>
          </sequence>
       </measure>

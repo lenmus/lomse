@@ -2534,7 +2534,7 @@ public:
     ImoObj* do_analysis() override
     {
         //How the importer works: If location==left, the barline must be combined with
-        //previous right one. Otherwise (middle or roght barlines) the barline is
+        //previous right one. Otherwise (middle or right barlines) the barline is
         //created. This is done as follows:
         //
         //1. for right and middle barlines the ImoBarline is created, but left barlines
@@ -4749,11 +4749,12 @@ class NoteRestMxlAnalyser : public MxlElementAnalyser
 protected:
     ImoBeamDto* m_pBeamInfo;
     ImoBeamDto* m_pBeamGraceInfo;
+
     //data for grace notes
-    int m_type;
-    float m_percentage;
-    TimeUnits m_makeTime;
-    bool m_fSlash;
+    int m_type = ImoGraceRelObj::k_grace_steal_previous;
+    bool m_fSlash = false;
+    float m_percentage = LOMSE_STEAL_TIME_LONG;
+    TimeUnits m_makeTime = 0.0;
 
 public:
     NoteRestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
@@ -5371,15 +5372,12 @@ public:
 class OctaveShiftMxlAnalyser : public MxlElementAnalyser
 {
 protected:
-    ImoOctaveShiftDto* m_pInfo1;
-    ImoOctaveShiftDto* m_pInfo2;
+    ImoOctaveShiftDto* m_pInfo = nullptr;
 
 public:
     OctaveShiftMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pInfo1(nullptr)
-        , m_pInfo2(nullptr)
     {
     }
 
@@ -5396,9 +5394,9 @@ public:
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        m_pInfo1 = static_cast<ImoOctaveShiftDto*>(
+        m_pInfo = static_cast<ImoOctaveShiftDto*>(
                                 ImFactory::inject(k_imo_octave_shift_dto, pDoc));
-        m_pInfo1->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+        m_pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // attrib: type (up | down | stop | continue) #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "octave-shift");
@@ -5422,23 +5420,13 @@ public:
         // attrib: %print-style;
         // attrib: %optional-unique-id;
 
-        if (m_pInfo1)
-        {
-            int iStaff = pDirection->get_staff();
+        int iStaff = pDirection->get_staff();
 
-            m_pInfo1->set_staffobj(nullptr);
-            m_pInfo1->set_staff(iStaff);
-            m_pAnalyser->add_relation_info(m_pInfo1);
+        m_pInfo->set_staffobj(nullptr);
+        m_pInfo->set_staff(iStaff);
+        m_pAnalyser->add_relation_info(m_pInfo);    //AWARE: this deletes m_pInfo
 
-            if (m_pInfo2)
-            {
-                m_pInfo2->set_staffobj(nullptr);
-                m_pInfo2->set_staff(iStaff);
-                m_pAnalyser->add_relation_info(m_pInfo2);
-            }
-        }
-
-        return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
+        return nullptr;
     }
 
 protected:
@@ -5447,40 +5435,26 @@ protected:
     {
         if (value == "up" || value == "down")
         {
-            m_pInfo1->set_start(true);
+            m_pInfo->set_start(true);
             int id =  m_pAnalyser->new_octave_shift_id(num);
-            m_pInfo1->set_octave_shift_number(id);
+            m_pInfo->set_octave_shift_number(id);
             --size;
             if (value == "down")
                 size = -size;
-            m_pInfo1->set_shift_steps(size);
+            m_pInfo->set_shift_steps(size);
         }
         else if (value == "stop")
         {
-            m_pInfo1->set_start(false);
+            m_pInfo->set_start(false);
             int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
-            m_pInfo1->set_octave_shift_number(id);
+            m_pInfo->set_octave_shift_number(id);
         }
-//        else if (value == "continue")
-//        {
-//            m_pInfo1->set_start(false);
-//            int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
-//            m_pInfo1->set_octave_shift_number(id);
-//
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            m_pInfo2 = static_cast<ImoWedgeDto*>(
-//                                ImFactory::inject(k_imo_octave_shift_dto, pDoc));
-//            m_pInfo2->set_start(true);
-//            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
-//            id =  m_pAnalyser->new_octave_shift_id(num);
-//            m_pInfo2->set_octave_shift_number(wedgeId);
-//        }
         else
         {
             error_msg("Missing or invalid octave-shift type '" + value
                       + "'. Octave-shift ignored.");
-            delete m_pInfo1;
-            m_pInfo1 = nullptr;
+            delete m_pInfo;
+            m_pInfo = nullptr;
         }
     }
 };

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -124,6 +124,9 @@ SUITE(IdAssignerTest)
 class DocumentTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    string m_scores_path;
+    Document* m_pDoc;
 
     DocumentTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
@@ -161,18 +164,17 @@ public:
             "))" );
     }
 
-    LibraryScope m_libraryScope;
-    string m_scores_path;
-    Document* m_pDoc;
 };
 
 //---------------------------------------------------------------------------------------
 SUITE(DocumentTest)
 {
 
+    //@ document creation ---------------------------------------------------------------
+
     TEST_FIXTURE(DocumentTestFixture, creation_000)
     {
-        //000. create_empty does create a valid empty document
+        //@000. create_empty does create a valid empty document
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoDocument* pImoDoc = doc.get_im_root();
@@ -184,7 +186,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_001)
     {
-        //001. from_file. valid file, ldp format
+        //@001. from_file. valid file, ldp format
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoDocument* pImoDoc = doc.get_im_root();
@@ -197,7 +199,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_002)
     {
-        //002. from_file. valid file, lmd format
+        //@002. from_file. valid file, lmd format
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "08011-paragraph.lmd", Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_im_root();
@@ -208,9 +210,9 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_003)
     {
-        //003. from string, ldp format
+        //@003. from string, ldp format
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (n c4 q))))))");
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
@@ -224,7 +226,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_004)
     {
-        //004. from string, lmd format
+        //@004. from string, lmd format
         Document doc(m_libraryScope);
         string src =
             "<lenmusdoc vers='0.0'>"
@@ -255,7 +257,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_005)
     {
-        //005. from_input, ldp format
+        //@005. from_input, ldp format
         Document doc(m_libraryScope);
         LdpFileReader reader(m_scores_path + "00011-empty-fill-page.lms");
         doc.from_input(reader);
@@ -269,7 +271,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_006)
     {
-        //006. error when trying to create already created document
+        //@006. error when trying to create already created document
         bool fOk = false;
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -288,13 +290,13 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_007)
     {
-        //007. error when trying to load from string already created document
+        //@007. error when trying to load from string already created document
         bool fOk = false;
         Document doc(m_libraryScope);
         doc.create_empty();
         try
         {
-            doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
                 "(instrument (musicData (n c4 q))))))");
         }
         catch(std::exception& e)
@@ -308,7 +310,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_008)
     {
-        //008. error when trying to load from ldp file already created document
+        //@008. error when trying to load from ldp file already created document
         bool fOk = false;
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -327,7 +329,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_009)
     {
-        //009. error when trying to create with empty score already created document
+        //@009. error when trying to create with empty score already created document
         bool fOk = false;
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -346,7 +348,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_010)
     {
-        //010. MusicXML without clef is fixed
+        //@010. MusicXML without clef is fixed
         Document doc(m_libraryScope);
         doc.from_string("<?xml version='1.0' encoding='utf-8'?>"
             "<!DOCTYPE score-partwise PUBLIC '-//Recordare//DTD MusicXML 3.0 Partwise//EN' "
@@ -387,7 +389,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, creation_011)
     {
-        //Opening compressed file (LMB)
+        //011. Opening compressed file (LMB)
 
         stringstream errormsg;
         Document doc(m_libraryScope, errormsg);
@@ -411,9 +413,12 @@ SUITE(DocumentTest)
 #endif
     }
 
+
+    //@ properties and getters ----------------------------------------------------------
+
     TEST_FIXTURE(DocumentTestFixture, get_score_100)
     {
-        //100. in empty doc returns nullptr
+        //@100. get_score(). in empty doc returns nullptr
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -422,7 +427,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, get_score_101)
     {
-        //101. return the score if not empty. Valid score from file
+        //@101. return the score if not empty. Valid score from file
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -432,7 +437,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, get_score_102)
     {
-        //102. return the score if not empty. Empty score
+        //@102. return the score if not empty. Empty score
         Document doc(m_libraryScope);
         doc.create_with_empty_score();
         ImoDocument* pImoDoc = doc.get_im_root();
@@ -445,9 +450,9 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, id_assigner_110)
     {
-        //110. get_pointer_to_imo() locates the imo
+        //@110. get_pointer_to_imo() locates the imo
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content#100 (score (vers 1.6) "
+        doc.from_string("(lenmusdoc (vers 0.0) (content#100 (score (vers 2.0) "
             "(instrument (musicData (n c4 q))))))");
 //        cout << doc.to_string(k_save_ids) << endl;
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -462,18 +467,35 @@ SUITE(DocumentTest)
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (n c4 q))))))");
 //        //cout << doc.to_string(k_save_ids) << endl;
-//        imoDocument* pImoDoc = doc.get_im_root();
+//        ImoDocument* pImoDoc = doc.get_im_root();
 //        pImoDoc->add_
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        CHECK( pScore != nullptr );
 //        CHECK( doc.get_pointer_to_imo(4L) == pScore );
 //    }
 
+    TEST_FIXTURE(DocumentTestFixture, id_assigner_112)
+    {
+        //112. set and get @xml:id string
+
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0)"
+            "(instrument (musicData (n c4 q))))))");
+        //cout << doc.to_string(k_save_ids) << endl;
+        ImoDocument* pImoDoc = doc.get_im_root();
+        ImoScore* pScore = static_cast<ImoScore*>( pImoDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        pScore->set_xml_id("score1");
+
+        CHECK( pScore->get_xml_id() == "score1" );
+        CHECK( pImoDoc->get_xml_id() == "" );
+    }
+
     TEST_FIXTURE(DocumentTestFixture, dirty_bit_120)
     {
         //120. dirty bit can be cleared
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0)"
             "(instrument (musicData (n c4 q))))))");
         CHECK( doc.is_dirty() == true );
 
@@ -482,12 +504,11 @@ SUITE(DocumentTest)
         CHECK( doc.is_dirty() == false );
     }
 
-
     TEST_FIXTURE(DocumentTestFixture, other_130)
     {
-        //130. access to weak pointer
+        //@130. access to weak pointer
         SpDocument spDoc( LOMSE_NEW Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0)"
             "(instrument (musicData (n c4 q))))))");
 
         CHECK( spDoc.use_count() == 1 );
@@ -496,9 +517,12 @@ SUITE(DocumentTest)
         CHECK( wpDoc.expired() == false );
     }
 
+
+    //@ checkpoints ---------------------------------------------------------------------
+
 //    TEST_FIXTURE(DocumentTestFixture, checkpoints_210)
 //    {
-//        //210. get checkpoint data for score
+//        //@210. get checkpoint data for score
 //        SpDocument spDoc( LOMSE_NEW Document(m_libraryScope) );
 //        spDoc->from_file(m_scores_path + "09007-score-in-exercise.lmd",
 //                         Document::k_format_lmd );
@@ -508,7 +532,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, checkpoints_211)
     {
-        //211. replace object from checkpoint data
+        //@211. replace object from checkpoint data
         create_document_1();
         ImoObj* pImo = m_pDoc->get_pointer_to_imo(121L);
         CHECK( pImo->is_clef() );
