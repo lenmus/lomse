@@ -4,6 +4,8 @@
       <measure>
          <directions>
             <time signature="4/4"/>
+            <repeat type="start"/>
+            <repeat type="end"/>
          </directions>
       </measure>
    </global>
@@ -14,12 +16,8 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
+            <event value="/1">
                <note pitch="C5"/>
-            </event>
-            <event value="/2">
-               <note pitch="D5"/>
-               <slur side="up" location="outgoing"/>
             </event>
          </sequence>
       </measure>

@@ -4,6 +4,13 @@
       <measure>
          <directions>
             <time signature="4/4"/>
+            <key fifths="4"/>
+         </directions>
+      </measure>
+      <measure/>
+      <measure>
+         <directions>
+            <key fifths="-4"/>
          </directions>
       </measure>
       <measure/>
@@ -15,43 +22,47 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
-               <note pitch="C4"/>
-            </event>
-            <event value="/2">
-               <note pitch="G3"/>
-            </event>
-         </sequence>
-         <sequence>
             <event value="/4">
                <note pitch="E5"/>
             </event>
             <event value="/4">
-               <note pitch="F5"/>
+               <note pitch="F#5"/>
             </event>
             <event value="/4">
-               <note pitch="G5"/>
+               <note pitch="G#5"/>
             </event>
             <event value="/4">
-               <note pitch="B4"/>
+               <note pitch="E5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
             <event value="/1">
-               <note pitch="C4"/>
+               <note pitch="G#5"/>
             </event>
          </sequence>
+      </measure>
+      <measure>
          <sequence>
             <event value="/4">
-               <note pitch="D5"/>
+               <note pitch="Ab4"/>
+            </event>
+            <event value="/4">
+               <note pitch="Bb4"/>
             </event>
             <event value="/4">
                <note pitch="C5"/>
             </event>
-            <event value="/2">
-               <note pitch="C6"/>
+            <event value="/4">
+               <note pitch="Ab4"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/1">
+               <note pitch="C5"/>
             </event>
          </sequence>
       </measure>

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <mnx>
    <global>
       <measure>
@@ -14,15 +13,15 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
+            <grace>
+               <event value="/8">
+                  <note pitch="B4"/>
+               </event>
+            </grace>
+            <event value="/1">
                <note pitch="C5"/>
-            </event>
-            <event value="/2">
-               <note pitch="D5"/>
-               <slur side="up" location="outgoing"/>
             </event>
          </sequence>
       </measure>
    </part>
 </mnx>
-

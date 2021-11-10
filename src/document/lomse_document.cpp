@@ -671,6 +671,18 @@ void Document::assign_id(Control* pControl)
 }
 
 //---------------------------------------------------------------------------------------
+string Document::get_xml_id_for(ImoId id)
+{
+    return m_pIdAssigner->get_xml_id_for(id);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::set_xml_id_for(ImoId id, const string& value)
+{
+    m_pIdAssigner->set_xml_id_for(id, value);
+}
+
+//---------------------------------------------------------------------------------------
 void Document::on_removed_from_model(ImoObj* pImo)
 {
     m_pIdAssigner->remove(pImo);
@@ -680,6 +692,12 @@ void Document::on_removed_from_model(ImoObj* pImo)
 ImoObj* Document::get_pointer_to_imo(ImoId id) const
 {
     return m_pIdAssigner->get_pointer_to_imo(id);
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Document::get_pointer_to_imo(const std::string& xmlId) const
+{
+    return m_pIdAssigner->get_pointer_to_imo(xmlId);
 }
 
 //---------------------------------------------------------------------------------------

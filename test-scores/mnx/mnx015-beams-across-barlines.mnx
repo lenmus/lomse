@@ -12,46 +12,39 @@
       <part-name>Music</part-name>
       <measure>
          <directions>
-            <clef sign="G" line="2"/>
+            <clef line="2" sign="G"/>
          </directions>
          <sequence>
+            <beams>
+               <beam events="ev3 ev4 ev5 ev6"/>
+            </beams>
             <event value="/2">
-               <note pitch="C4"/>
-            </event>
-            <event value="/2">
-               <note pitch="G3"/>
-            </event>
-         </sequence>
-         <sequence>
-            <event value="/4">
-               <note pitch="E5"/>
+               <rest/>
             </event>
             <event value="/4">
-               <note pitch="F5"/>
+               <rest/>
             </event>
-            <event value="/4">
-               <note pitch="G5"/>
+            <event id="ev3" value="/8">
+               <note pitch="C5"/>
             </event>
-            <event value="/4">
-               <note pitch="B4"/>
+            <event id="ev4" value="/8">
+               <note pitch="D5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
-            <event value="/1">
-               <note pitch="C4"/>
+            <event id="ev5" value="/8">
+               <note pitch="E5"/>
             </event>
-         </sequence>
-         <sequence>
-            <event value="/4">
-               <note pitch="D5"/>
+            <event id="ev6" value="/8">
+               <note pitch="F5"/>
             </event>
             <event value="/4">
-               <note pitch="C5"/>
+               <rest/>
             </event>
             <event value="/2">
-               <note pitch="C6"/>
+               <rest/>
             </event>
          </sequence>
       </measure>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <mnx>
    <global>
       <measure>
@@ -11,25 +12,31 @@
       <part-name>Music</part-name>
       <measure>
          <directions>
-            <clef sign="G" line="2"/>
+            <clef line="2" sign="G"/>
          </directions>
          <sequence>
-            <event value="/4" id="event1">
-               <slur side="up" target="event4"/>
+            <beams>
+               <beam events="ev1 ev3 ev4 ev5"/>
+            </beams>
+            <event id="ev1" value="/8">
                <note pitch="C5"/>
-               <note pitch="E5"/>
             </event>
-            <event value="/4" id="event2">
+            <grace>
+               <event value="/8">
+                  <note pitch="B4"/>
+               </event>
+            </grace>
+            <event id="ev3" value="/8">
                <note pitch="D5"/>
-               <note pitch="F5"/>
             </event>
-            <event value="/4" id="event3">
+            <event id="ev4" value="/8">
                <note pitch="E5"/>
-               <note pitch="G5"/>
             </event>
-            <event value="/4" id="event4">
+            <event id="ev5" value="/8">
                <note pitch="F5"/>
-               <note pitch="A5"/>
+            </event>
+            <event value="/2">
+               <rest/>
             </event>
          </sequence>
       </measure>

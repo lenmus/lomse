@@ -3,7 +3,8 @@
    <global>
       <measure>
          <directions>
-            <time signature="4/4"/>
+            <time signature="3/4"/>
+            <key fifths="1"/>
          </directions>
       </measure>
    </global>
@@ -14,12 +15,14 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
-               <note pitch="C5"/>
+            <event value="/4">
+               <note pitch="F#5"/>
             </event>
-            <event value="/2">
-               <note pitch="D5"/>
-               <slur side="up" location="outgoing"/>
+            <event value="/4">
+               <note pitch="G5"/>
+            </event>
+            <event value="/4">
+               <note pitch="G#5"/>
             </event>
          </sequence>
       </measure>

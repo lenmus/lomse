@@ -420,6 +420,19 @@ void ImoObj::remove_id()
 }
 
 //---------------------------------------------------------------------------------------
+std::string ImoObj::get_xml_id()
+{
+    return (m_pDoc ? m_pDoc->get_xml_id_for(m_id) : "");
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_xml_id(const std::string& value)
+{
+    if (m_pDoc)
+        m_pDoc->set_xml_id_for(m_id, value);
+}
+
+//---------------------------------------------------------------------------------------
 void ImoObj::delete_attributes()
 {
     ImoAttr* pAttr = get_first_attribute();
@@ -983,10 +996,15 @@ void ImoObj::remove_attribute(TIntAttribute idx)
         {
             ImoAttr* pNext = pAttr->get_next_attrib();
             pPrev->set_next_attrib(pNext);
+            if (pNext)
+                pNext->set_next_attrib(pPrev);
         }
-    }
 
-    delete pAttr;
+        if (pAttr == get_first_attribute())
+            m_pAttribs = nullptr;
+
+        delete pAttr;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1296,12 +1314,22 @@ list<TIntAttribute> ImoStaffObj::get_supported_attributes()
 //=======================================================================================
 ImoBeamData::ImoBeamData(ImoBeamDto* pDto)
     : ImoRelDataObj(k_imo_beam_data)
-    , m_beamNum( pDto->get_beam_number() )
 {
     for (int i=0; i < 6; ++i)
     {
         m_beamType[i] = pDto->get_beam_type(i);
         m_repeat[i] = pDto->get_repeat(i);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+ImoBeamData::ImoBeamData()
+    : ImoRelDataObj(k_imo_beam_data)
+{
+    for (int level=0; level < 6; level++)
+    {
+        m_beamType[level] = ImoBeam::k_none;
+        m_repeat[level] = false;
     }
 }
 
@@ -5772,6 +5800,16 @@ ImoTieData::ImoTieData(ImoTieDto* pDto)
 {
     if (pDto->get_bezier())
         m_pBezier = LOMSE_NEW ImoBezierInfo( pDto->get_bezier() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoTieData::ImoTieData()
+    : ImoRelDataObj(k_imo_tie_data)
+    , m_fStart(false)
+    , m_tieNum(0)
+    , m_orientation(k_orientation_default)
+    , m_pBezier(nullptr)
+{
 }
 
 //---------------------------------------------------------------------------------------

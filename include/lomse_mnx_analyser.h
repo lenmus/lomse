@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,10 +35,8 @@
 #include "lomse_analyser.h"
 //#include "lomse_ldp_elements.h"
 #include "lomse_relation_builder.h"
-#include "lomse_internal_model.h"       //required to define MnxBeamsBuilder, MnxSlursBuilder
+#include "lomse_internal_model.h"       //required to define MnxSlursBuilder
 #include "lomse_im_note.h"              //required for enum EAccidentals
-
-using namespace std;
 
 namespace lomse
 {
@@ -52,65 +50,24 @@ class ImoObj;
 class ImoNote;
 class ImoRest;
 
-typedef vector<XmlNode> MeasuresVector;    //global measures for a part
+typedef std::vector<XmlNode> MeasuresVector;    //global measures for a part
 
-//---------------------------------------------------------------------------------------
-// helper class to save start of tie info, match them and build the tie
-class MnxTiesBuilder : public RelationBuilder<ImoTieDto, MnxAnalyser>
-{
-public:
-    MnxTiesBuilder(ostream& reporter, MnxAnalyser* pAnalyser)
-        : RelationBuilder<ImoTieDto, MnxAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
-    virtual ~MnxTiesBuilder() {}
-
-    void add_relation_to_staffobjs(ImoTieDto* pEndDto) override;
-
-protected:
-    bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
-    void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
-    void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
-};
-
-
-//---------------------------------------------------------------------------------------
-// helper class to save beam info items, match them and build the beams
-class MnxBeamsBuilder : public RelationBuilder<ImoBeamDto, MnxAnalyser>
-{
-public:
-    MnxBeamsBuilder(ostream& reporter, MnxAnalyser* pAnalyser)
-        : RelationBuilder<ImoBeamDto, MnxAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
-    virtual ~MnxBeamsBuilder() {}
-
-    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo) override;
-};
-
-
-//---------------------------------------------------------------------------------------
-// helper class to save beam info items, match them and build the beams
-// For old g+/g- syntax
-class MnxBeamsBuilder2
-{
-protected:
-    ostream& m_reporter;
-    MnxAnalyser* m_pAnalyser;
-    list<ImoBeamDto*> m_pendingBeams;
-
-public:
-    MnxBeamsBuilder2(ostream& reporter, MnxAnalyser* pAnalyser);
-    ~MnxBeamsBuilder2();
-
-    void add_old_beam(ImoBeamDto* pInfo);
-    bool is_old_beam_open();
-    void close_old_beam(ImoBeamDto* pInfo);
-    void clear_pending_old_beams();
-
-protected:
-    void do_create_old_beam();
-
-    //errors
-    void error_no_end_old_beam(ImoBeamDto* pInfo);
-
-};
+////---------------------------------------------------------------------------------------
+//// helper class to save start of tie info, match them and build the tie
+//class MnxTiesBuilder : public RelationBuilder<ImoTieDto, MnxAnalyser>
+//{
+//public:
+//    MnxTiesBuilder(ostream& reporter, MnxAnalyser* pAnalyser)
+//        : RelationBuilder<ImoTieDto, MnxAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
+//    virtual ~MnxTiesBuilder() {}
+//
+//    void add_relation_to_staffobjs(ImoTieDto* pEndDto) override;
+//
+//protected:
+//    bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
+//    void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
+//    void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
+//};
 
 
 //---------------------------------------------------------------------------------------
@@ -163,9 +120,9 @@ public:
 class MnxPartList
 {
 protected:
-    vector<ImoInstrument*> m_instruments;
-    vector<bool> m_partAdded;
-    map<string, int> m_locators;
+    std::vector<ImoInstrument*> m_instruments;
+    std::vector<bool> m_partAdded;
+    std::map<std::string, int> m_locators;
     int m_numInstrs;
     bool m_fInstrumentsAdded;
 
@@ -174,9 +131,9 @@ public:
     ~MnxPartList();
 
     int get_num_items() { return static_cast<int>(m_locators.size()); }
-    int add_score_part(const string& id, ImoInstrument* pInstrument);
-    ImoInstrument* get_instrument(const string& id);
-    bool mark_part_as_added(const string& id);
+    int add_score_part(const std::string& id, ImoInstrument* pInstrument);
+    ImoInstrument* get_instrument(const std::string& id);
+    bool mark_part_as_added(const std::string& id);
     void add_all_instruments(ImoScore* pScore);
     void check_if_missing_parts(ostream& reporter);
 
@@ -184,7 +141,7 @@ public:
     void do_not_delete_instruments_in_destructor() { m_fInstrumentsAdded = true; }
 
 protected:
-    int find_index_for(const string& id);
+    int find_index_for(const std::string& id);
 
 };
 
@@ -193,7 +150,7 @@ protected:
 class MnxPartGroups
 {
 protected:
-    map<int, ImoInstrGroup*> m_groups;
+    std::map<int, ImoInstrGroup*> m_groups;
 
 //    int m_number;
 //    int m_symbol;
@@ -203,10 +160,10 @@ public:
     MnxPartGroups();
     ~MnxPartGroups();
 
-//    void set_name(const string& name);
-//    void set_name_display(const string& name);
-//    void set_abbreviation(const string& abbrev);
-//    void set_abbreviation_display(const string& abbrev);
+//    void set_name(const std::string& name);
+//    void set_name_display(const std::string& name);
+//    void set_abbreviation(const std::string& abbrev);
+//    void set_abbreviation_display(const std::string& abbrev);
 //    void set_number(int num);
 //    void set_symbol(int symbol);
 //    void set_barline(bool value);
@@ -233,26 +190,25 @@ protected:
     LibraryScope&       m_libraryScope;
     Document*           m_pDoc;
     XmlParser*          m_pParser;
-    MnxTiesBuilder*     m_pTiesBuilder;
-    MnxBeamsBuilder*    m_pBeamsBuilder;
-    MnxBeamsBuilder2*   m_pOldBeamsBuilder;
     MnxTupletsBuilder*  m_pTupletsBuilder;
     MnxSlursBuilder*    m_pSlursBuilder;
     MnxVoltasBuilder*   m_pVoltasBuilder;
-    map<string, int>    m_lyricIndex;
-    vector<ImoLyric*>   m_lyrics;
+    std::map<std::string, int>    m_lyricIndex;
+    std::vector<ImoLyric*>   m_lyrics;
+    std::vector<XmlNode>     m_beams;    //pending to process: <beams> elements
+    std::vector< std::pair<XmlNode, ImoNote*> > m_ties;     //pending to process: <tied> elements
 
-    int             m_musicxmlVersion;
-    ImoObj*         m_pNodeImo;
-    map<int, ImoId> m_tieIds;
-    int             m_tieNum;
-    map<int, ImoId> m_slurIds;
-    int             m_slurNum;
-    int             m_voltaNum;
+    int         m_musicxmlVersion;
+    ImoObj*     m_pNodeImo;
+    std::map<int, ImoId> m_tieIds;
+    int         m_tieNum;
+    std::map<int, ImoId> m_slurIds;
+    int         m_slurNum;
+    int         m_voltaNum;
 
     //analysis input
     XmlNode* m_pTree;
-    string m_fileLocator;
+    std::string m_fileLocator;
 
     //analysis output
     void*           m_pResult;
@@ -268,23 +224,31 @@ protected:
     TimeUnits       m_time;             //time-position counter
     TimeUnits       m_maxTime;          //max time-position reached
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
-    string          m_curPartId;        //Part Id being analysed
-    string          m_curMeasureNum;    //Num of measure being analysed
+    std::string     m_curPartId;        //Part Id being analysed
+    std::string     m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
+    std::string     m_directionsParent; //parent type for <directions> element
 
     //for dealing with <global> elements
-	map<string, MeasuresVector*> m_globals;     //ptrs for each global element
+    std::map<std::string, MeasuresVector*> m_globals;   //map: part name -> ptr to its global element
+    std::vector<ImoStaffObj*> m_rightGlobals;           //global directions to be placed at right
+
+    //for dealing with <repeat> elements
+    int m_startRepeat = 0;
+    int m_endRepeat = 0;
 
     //current values
     int m_curStaff;
     int m_curVoice;
     int m_beamLevel;
-    map<string, int> m_nameToVoice;     //sequence name to voice conversion
+    int m_noteClass = k_imo_note_regular;    //current class: k_imo_note_regular, k_imo_note_grace, or  k_imo_note_cue
+
+    std::map<std::string, int> m_nameToVoice;     //sequence name to voice conversion
 //    int m_nShowTupletBracket;
 //    int m_nShowTupletNumber;
 
     //conversion from xml element name to int
-    map<string, int>	m_NameToEnum;
+    std::map<std::string, int>	m_NameToEnum;
 
 
 public:
@@ -293,23 +257,23 @@ public:
     virtual ~MnxAnalyser();
 
     //access to results
-    ImoObj* analyse_tree(XmlNode* tree, const string& locator);
+    ImoObj* analyse_tree(XmlNode* tree, const std::string& locator);
     ImoObj* analyse_tree_and_get_object(XmlNode* tree);
 
     //analysis
     bool analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
-    bool analyse_global_measure(XmlNode* pNode, ImoObj* pAnchor);
+    ImoMusicData* analyse_global_measure(XmlNode* pNode);
     void prepare_for_new_instrument_content();
     void* get_result() { return m_pResult; }
 
     //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
-    void add_score_part(const string& id, ImoInstrument* pInstrument) {
+    void add_score_part(const std::string& id, ImoInstrument* pInstrument) {
         int iInstr = m_partList.add_score_part(id, pInstrument);
         m_partGroups.add_instrument_to_groups(iInstr);
     }
     void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
-    bool mark_part_as_added(const string& id) {
+    bool mark_part_as_added(const std::string& id) {
         return m_partList.mark_part_as_added(id);
     }
     void check_if_missing_parts() { m_partList.check_if_missing_parts(m_reporter); }
@@ -321,15 +285,15 @@ public:
     void check_if_all_groups_are_closed();
 
     //global info: setters, getters and checkers
-    int set_musicxml_version(const string& version);
+    int set_musicxml_version(const std::string& version);
     inline int get_musicxml_version() { return m_musicxmlVersion; }
-    ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
+    ImoInstrument* get_instrument(const std::string& id) { return m_partList.get_instrument(id); }
     void set_current_divisions(float value) { m_divisions = value; }
     TimeUnits duration_to_timepos(int duration);
 
     //access to document being analysed
     inline Document* get_document_being_analysed() { return m_pDoc; }
-    inline const string& get_document_locator() { return m_fileLocator; }
+    inline const std::string& get_document_locator() { return m_fileLocator; }
 
     //access to score being analysed
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
@@ -363,7 +327,7 @@ public:
 
     inline void set_current_voice(int nVoice) { m_curVoice = nVoice; }  //nVoice=1..n
     inline int get_current_voice() { return m_curVoice; }   //return 1..n
-    int get_voice_for_name(const string& name) const;		//return 1..n
+    int get_voice_for_name(const std::string& name) const;		//return 1..n
 
 //
 //    inline void set_current_show_tuplet_bracket(int value) { m_nShowTupletBracket = value; }
@@ -374,10 +338,12 @@ public:
 
     inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
     inline ImoNote* get_last_note() { return m_pLastNote; }
+    inline void set_note_class(int value) { m_noteClass = value; }
+    inline int get_note_class() { return m_noteClass; }
 
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
-    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+    inline void save_current_measure_num(const std::string& num) { m_curMeasureNum = num; }
     inline int get_measures_counter() { return m_measuresCounter; }
 
     //last barline added to current instrument
@@ -385,8 +351,20 @@ public:
     inline ImoBarline* get_last_barline() { return m_pLastBarline; }
 
     //for dealing with <global> elements
-    MeasuresVector* new_global(const string& partList);
-    void add_data_from_global_measure(ImoMusicData* pMD);
+    MeasuresVector* new_global(const std::string& partList);
+    void add_left_data_from_global_measure(ImoMusicData* pMD);
+    void add_right_data_from_global_measure(ImoMusicData* pMD);
+
+    //for dealing with <directions> elements
+    inline const std::string& get_parent_for_directions() { return m_directionsParent; }
+    inline void set_parent_for_directions(const std::string& parent) { m_directionsParent = parent; }
+
+    //for dealing with <repeat> elements
+    void save_repeat_info(const std::string& type, int times);
+    void clear_repeat_info();
+    void transfer_data_from_temporal_analyser(MnxAnalyser& a);
+    int get_start_repeat_info();
+    int get_end_repeat_info();
 
 
     //interface for building relations
@@ -394,24 +372,19 @@ public:
     void clear_pending_relations();
 
     //interface for building beams
+    void process_beams();
+    void save_beams_element(XmlNode node);
+    inline void reset_beam_level() { m_beamLevel = 0; }
     inline void increment_beam_level() { ++m_beamLevel; }
-    inline int get_beam_level() { return m_beamLevel; }
     inline void decrement_beam_level() { --m_beamLevel; }
-    //inline bool fix_beams() { return m_libraryScope.get_musicxml_options()->fix_beams(); }
-
-    //interface for building beams: based on old 'g+/g-' syntax
-    inline void add_old_beam(ImoBeamDto* pInfo) {
-        m_pOldBeamsBuilder->add_old_beam(pInfo);
-    }
-    inline bool is_old_beam_open() { return m_pOldBeamsBuilder->is_old_beam_open(); }
-    inline void close_old_beam(ImoBeamDto* pInfo) {
-        m_pOldBeamsBuilder->close_old_beam(pInfo);
-    }
+    inline int get_beam_level() { return m_beamLevel; }
 
     //interface for building lyric lines
     void add_lyrics_data(ImoNote* pNote, ImoLyric* pData);
 
     //interface for building ties
+    void process_ties();
+    void save_tied_element(XmlNode node, ImoNote* pNote);
     int new_tie_id(int numTie, FPitch fp);
     int get_tie_id(int numTie, FPitch fp);
     int get_tie_id_and_close(int numTie, FPitch fp);
@@ -436,23 +409,33 @@ public:
     }
 
     //information for reporting errors
-    string get_element_info();
-    inline void save_current_part_id(const string& id) { m_curPartId = id; }
+    std::string get_element_info();
+    inline void save_current_part_id(const std::string& id) { m_curPartId = id; }
     int get_line_number(XmlNode* node);
 
 
-    int name_to_enum(const string& name) const;
-    bool to_integer(const string& text, int* pResult);
+    int name_to_enum(const std::string& name) const;
+    bool to_integer(const std::string& text, int* pResult);
 
     //public utilities
-    static bool pitch_to_components(const string& pitch, int *step, int* octave,
-                                    EAccidentals* accidentals, float* alterations);
-    static vector<string> tokenize_spaces(const string& input);
+    static bool pitch_to_components(const std::string& pitch, int *step, int* octave,
+                                    float* alter);
+    static std::vector<std::string> tokenize_spaces(const std::string& input);
+
+    // Analysers for notational syntaxes
+    static bool get_note_value(const string& value, int* noteType, int* dots);
+    static bool get_note_value_quantity(const string& value, int* noteType, int* dots,
+                                        int* multiplier);
+    static bool note_value_quantity_to_duration(const string& value, TimeUnits* duration);
+    //bool get_time_signature_value(const string& value, );
+    //bool get_chromatic_pitch_value(const string& value, );
+    //bool get_measure_location_value(const string& value, );
+    //bool get_smufl_glyph_name(const string& value, );
 
 
 protected:
     friend class MnxElementAnalyser;
-    MnxElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
+    MnxElementAnalyser* new_analyser(const std::string& name, ImoObj* pAnchor=nullptr);
     void set_result(void* pValue) { m_pResult = pValue; }
 
     void delete_relation_builders();
@@ -462,11 +445,16 @@ protected:
     //auxiliary. for pitch analysis
     static int to_step(const char& letter);
     static int to_octave(const char& letter);
-    static EAccidentals to_accidentals(const std::string& accidentals);
+    static float to_alteration(const std::string& accidentals);
+
+    //to deal with global directions
+    void split_global_content(ImoMusicData* pGlobal, ImoMusicData* pMD);
+    bool goes_at_right(ImoStaffObj* pSO);
+
 };
 
 ////defined out of WordsMnxAnalyser for unit tests
-//extern int mnx_type_of_repetion_mark(const string& value);
+//extern int mnx_type_of_repetion_mark(const std::string& value);
 
 
 }   //namespace lomse

@@ -6,7 +6,22 @@
             <time signature="4/4"/>
          </directions>
       </measure>
+      <measure>
+         <directions>
+            <segno/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <fine/>
+         </directions>
+      </measure>
       <measure/>
+      <measure>
+         <directions>
+            <jump type="dsalfine"/>
+         </directions>
+      </measure>
    </global>
    <part>
       <part-name>Music</part-name>
@@ -15,43 +30,36 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/2">
-               <note pitch="C4"/>
-            </event>
-            <event value="/2">
-               <note pitch="G3"/>
-            </event>
-         </sequence>
-         <sequence>
-            <event value="/4">
-               <note pitch="E5"/>
-            </event>
-            <event value="/4">
-               <note pitch="F5"/>
-            </event>
-            <event value="/4">
-               <note pitch="G5"/>
-            </event>
-            <event value="/4">
-               <note pitch="B4"/>
+            <event value="/1">
+               <note pitch="C5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
             <event value="/1">
-               <note pitch="C4"/>
+               <note pitch="E5"/>
             </event>
          </sequence>
+      </measure>
+      <measure>
          <sequence>
-            <event value="/4">
-               <note pitch="D5"/>
-            </event>
-            <event value="/4">
+            <event value="/1">
                <note pitch="C5"/>
             </event>
-            <event value="/2">
-               <note pitch="C6"/>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/1">
+               <note pitch="F5"/>
+            </event>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/1">
+               <note pitch="C5"/>
             </event>
          </sequence>
       </measure>

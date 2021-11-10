@@ -62,6 +62,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_attachments:         pObj = LOMSE_NEW ImoAttachments();        break;
         case k_imo_barline:             pObj = LOMSE_NEW ImoBarline();            break;
         case k_imo_beam:                pObj = LOMSE_NEW ImoBeam();               break;
+        case k_imo_beam_data:           pObj = LOMSE_NEW ImoBeamData();           break;
         case k_imo_beam_dto:            pObj = LOMSE_NEW ImoBeamDto();            break;
         case k_imo_bezier_info:         pObj = LOMSE_NEW ImoBezierInfo();         break;
         case k_imo_button:              pObj = LOMSE_NEW ImoButton();             break;
@@ -138,6 +139,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;
         case k_imo_text_repetition_mark:   pObj = LOMSE_NEW ImoTextRepetitionMark();   break;
         case k_imo_tie:                 pObj = LOMSE_NEW ImoTie();                break;
+        case k_imo_tie_data:            pObj = LOMSE_NEW ImoTieData();            break;
         case k_imo_tie_dto:             pObj = LOMSE_NEW ImoTieDto();             break;
         case k_imo_time_modification_dto:  pObj = LOMSE_NEW ImoTimeModificationDto();  break;
         case k_imo_time_signature:      pObj = LOMSE_NEW ImoTimeSignature();      break;

@@ -4,12 +4,27 @@
       <measure>
          <directions>
             <time signature="4/4"/>
+            <repeat type="start"/>
          </directions>
       </measure>
-      <measure/>
       <measure>
          <directions>
-            <time signature="2/4"/>
+            <repeat type="end"/>
+            <ending type="start" number="1"/>
+            <ending type="stop"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <repeat type="end"/>
+            <ending type="start" number="2"/>
+            <ending type="stop"/>
+         </directions>
+      </measure>
+      <measure>
+         <directions>
+            <ending type="start" number="3"/>
+            <ending type="discontinue"/>
          </directions>
       </measure>
    </global>
@@ -20,43 +35,29 @@
             <clef sign="G" line="2"/>
          </directions>
          <sequence>
-            <event value="/4">
+            <event value="/1">
                <note pitch="C5"/>
-            </event>
-            <event value="/4">
-               <note pitch="D5"/>
-            </event>
-            <event value="/4">
-               <note pitch="E5"/>
-            </event>
-            <event value="/4">
-               <note pitch="F5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
-            <event value="/4">
-               <note pitch="C5"/>
-            </event>
-            <event value="/4">
-               <note pitch="D5"/>
-            </event>
-            <event value="/4">
+            <event value="/1">
                <note pitch="E5"/>
-            </event>
-            <event value="/4">
-               <note pitch="F5"/>
             </event>
          </sequence>
       </measure>
       <measure>
          <sequence>
-            <event value="/4">
-               <note pitch="B4"/>
+            <event value="/1">
+               <note pitch="G4"/>
             </event>
-            <event value="/4">
-               <note pitch="D5"/>
+         </sequence>
+      </measure>
+      <measure>
+         <sequence>
+            <event value="/1">
+               <note pitch="C5"/>
             </event>
          </sequence>
       </measure>

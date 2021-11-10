@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mnx>
+   <global>
+      <measure>
+         <directions>
+            <time signature="4/4"/>
+         </directions>
+      </measure>
+   </global>
+   <part>
+      <part-name>Music</part-name>
+      <measure>
+         <directions>
+            <clef line="2" sign="G"/>
+         </directions>
+         <sequence>
+            <beams>
+               <beam events="ev1 ev2 ev3 ev4 ev5 ev6 ev7 ev8">
+                  <beam events="ev1 ev2 ev3 ev4">
+                     <beam events="ev1 ev2 ev3 ev4"/>
+                  </beam>
+                  <beam events="ev5 ev6 ev7 ev8">
+                     <beam events="ev5 ev6 ev7 ev8"/>
+                  </beam>
+               </beam>
+               <beam events="ev9 ev10 ev11 ev12 ev13 ev14 ev15 ev16">
+                  <beam events="ev9 ev10 ev11 ev12">
+                     <beam events="ev9 ev10"/>
+                     <beam events="ev11 ev12"/>
+                  </beam>
+                  <beam events="ev13 ev14 ev15 ev16">
+                     <beam events="ev13 ev14"/>
+                     <beam events="ev15 ev16"/>
+                  </beam>
+               </beam>
+            </beams>
+            <event id="ev1" value="/32">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev2" value="/32">
+               <note pitch="D5"/>
+            </event>
+            <event id="ev3" value="/32">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev4" value="/32">
+               <note pitch="F5"/>
+            </event>
+            <event id="ev5" value="/32">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev6" value="/32">
+               <note pitch="D5"/>
+            </event>
+            <event id="ev7" value="/32">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev8" value="/32">
+               <note pitch="F5"/>
+            </event>
+            <event id="ev9" value="/32">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev10" value="/32">
+               <note pitch="D5"/>
+            </event>
+            <event id="ev11" value="/32">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev12" value="/32">
+               <note pitch="F5"/>
+            </event>
+            <event id="ev13" value="/32">
+               <note pitch="C5"/>
+            </event>
+            <event id="ev14" value="/32">
+               <note pitch="D5"/>
+            </event>
+            <event id="ev15" value="/32">
+               <note pitch="E5"/>
+            </event>
+            <event id="ev16" value="/32">
+               <note pitch="F5"/>
+            </event>
+            <event value="/2">
+               <rest/>
+            </event>
+         </sequence>
+      </measure>
+   </part>
+</mnx>
+
