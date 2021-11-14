@@ -237,6 +237,11 @@ void ChordEngraver::find_reference_notes()
     if (m_pStartNoteData)
         pBaseNoteShape->set_start_note(m_pStartNoteData->pNoteShape);
 
+    //set pointers to the base note
+    for (ChordNoteData* pData : m_notes)
+    {
+        pData->pNoteShape->set_base_note_shape(pBaseNoteShape);
+    }
 }
 
 //---------------------------------------------------------------------------------------
