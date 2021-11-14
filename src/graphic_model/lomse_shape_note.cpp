@@ -391,7 +391,6 @@ void GmoShapeChordBaseNote::set_flag_note(GmoShapeNote* pNote)
 {
     m_pFlagNote = pNote;
     pNote->set_chord_note_type(k_chord_note_flag);
-    pNote->set_base_note_shape(this);
     //pNote->set_color( Color(255,0,0) );
 }
 
@@ -400,7 +399,6 @@ void GmoShapeChordBaseNote::set_link_note(GmoShapeNote* pNote)
 {
     m_pLinkNote = pNote;
     pNote->set_chord_note_type(k_chord_note_link);
-    pNote->set_base_note_shape(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -408,7 +406,6 @@ void GmoShapeChordBaseNote::set_start_note(GmoShapeNote* pNote)
 {
     m_pStartNote = pNote;
     pNote->set_chord_note_type(k_chord_note_start);
-    pNote->set_base_note_shape(this);
 }
 
 //---------------------------------------------------------------------------------------

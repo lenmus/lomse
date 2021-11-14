@@ -151,6 +151,7 @@ public:
 
     //for chords
     inline GmoShapeChordBaseNote* get_base_note_shape() { return m_pBaseNoteShape; }
+    inline void set_base_note_shape(GmoShapeChordBaseNote* pShape) { m_pBaseNoteShape = pShape; }
 
     //used for debug
     void set_notehead_color(Color color);
@@ -163,7 +164,6 @@ protected:
     //for chords
     friend class GmoShapeChordBaseNote;
     inline void set_chord_note_type(int type) { m_chordNoteType = type; }
-    inline void set_base_note_shape(GmoShapeChordBaseNote* pShape) { m_pBaseNoteShape = pShape; }
 
 };
 
