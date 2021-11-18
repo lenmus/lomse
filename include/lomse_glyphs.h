@@ -793,8 +793,12 @@ enum EGlyphIndex
 
     //Keyboard techniques (U+E650 - U+E67F)
     k_glyph_pedal_mark,         // Pedal mark
+    k_glyph_pedal_p,            // Pedal P
     k_glyph_pedal_up_mark,      // Pedal up mark
     k_glyph_half_pedal_mark,    // Half-pedal mark
+    k_glyph_pedal_up_notch,     // Pedal up notch
+    k_glyph_pedal_sostenuto,    // Sostenuto pedal mark
+    k_glyph_pedal_s,            // Pedal S
 
     //Handbells (U+E810 - U+E82F)
     k_glyph_bells_martellato,               // Martellato

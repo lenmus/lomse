@@ -775,8 +775,12 @@ const GlyphData m_glyphs_smufl[] =
 
 //Keyboard techniques (U+E650 - U+E67F)
     GlyphData(0xE650),  // Pedal mark
+    GlyphData(0xE651),  // Pedal P
     GlyphData(0xE655),  // Pedal up mark
     GlyphData(0xE656),  // Half-pedal mark
+    GlyphData(0xE657),  // Pedal up notch
+    GlyphData(0xE659),  // Sostenuto pedal mark
+    GlyphData(0xE65A),  // Pedal S
 
 //Handbells (U+E810 - U+E82F)
     GlyphData(0xE810),  // Martellato

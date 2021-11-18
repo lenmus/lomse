@@ -128,6 +128,8 @@ class ImoObj;
 class ImoOptionInfo;
 class ImoParagraph;
 class ImoParamInfo;
+class ImoPedalLine;
+class ImoPedalLineDto;
 class ImoRelations;
 class ImoRelDataObj;
 class ImoRelObj;
@@ -697,6 +699,21 @@ enum EOrnaments
 //-----------------------------------------------------------------------------
 /** @ingroup enumerations
 
+    This enum describes valid values for pedal marks.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EPedalMark
+{
+    k_pedal_mark_unknown = -1,          ///< Unknown pedal mark
+    k_pedal_mark_start,                 ///< Start of a damper pedal
+    k_pedal_mark_sostenuto_start,       ///< Start of a sostenuto pedal
+    k_pedal_mark_stop,                  ///< Pedal stop
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
     This enum describes valid values for technical marks.
 
     @#include <lomse_internal_model.h>
@@ -793,6 +810,7 @@ enum EImoObjType
     k_imo_border_dto,
     k_imo_color_dto,
     k_imo_font_style_dto,
+    k_imo_pedal_line_dto,
     k_imo_point_dto,
     k_imo_octave_shift_dto,
     k_imo_size_dto,
@@ -889,6 +907,7 @@ enum EImoObjType
     k_imo_fermata,          ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fermata
     k_imo_metronome_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Metronome mark
     k_imo_ornament,         ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ornament
+    k_imo_pedal_mark,       ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pedal mark
     k_imo_symbol_repetition_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Symbol for repetition mark
     k_imo_technical,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Technical mark
     k_imo_text_repetition_mark, ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Text for repetition mark
@@ -918,6 +937,7 @@ enum EImoObjType
     k_imo_chord,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chord
     k_imo_grace_relobj,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Grace notes relationship
     k_imo_octave_shift,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Octave-shift line
+    k_imo_pedal_line,       ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pedal line
     k_imo_slur,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Slur
     k_imo_tie,              ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tie
     k_imo_tuplet,           ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tuplet
@@ -1601,6 +1621,9 @@ public:
     inline bool is_page_info() { return m_objtype == k_imo_page_info; }
     inline bool is_paragraph() { return m_objtype == k_imo_para; }
     inline bool is_param_info() { return m_objtype == k_imo_param_info; }
+    inline bool is_pedal_mark() const { return m_objtype == k_imo_pedal_mark; }
+    inline bool is_pedal_line() const { return m_objtype == k_imo_pedal_line; }
+    inline bool is_pedal_dto() const { return m_objtype == k_imo_pedal_line_dto; }
     inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
     inline bool is_relations() { return m_objtype == k_imo_relations; }
@@ -4116,7 +4139,7 @@ class ImoDirection : public ImoStaffObj
 {
 protected:
     Tenths  m_space = 0.0f;
-    int     m_placement = k_placement_default;
+    EPlacement m_placement = k_placement_default;
     int     m_nVoice = 0;       //1..n. voice==0 means not defined
 
     // When the <direction> element contains a <sound> children related to repetition
@@ -4135,14 +4158,14 @@ public:
 
     //getters
     inline Tenths get_width() { return m_space; }
-    inline int get_placement() { return m_placement; }
+    inline EPlacement get_placement() const { return m_placement; }
     inline int get_display_repeat() { return m_displayRepeat; }
     inline int get_sound_repeat() { return m_soundRepeat; }
     inline int get_voice() { return m_nVoice; }
 
     //setters
     inline void set_width(Tenths space) { m_space = space; }
-    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_placement(EPlacement placement) { m_placement = placement; }
     inline void set_display_repeat(int repeat) { m_displayRepeat = repeat; }
     inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
     inline void set_voice(int voice) { m_nVoice = voice; }
@@ -7322,6 +7345,108 @@ public:
     bool is_start_of_relation() { return is_start(); }
     bool is_end_of_relation() { return !is_start(); }
     inline ImoNoteRest* get_staffobj() { return m_pNR; }
+};
+
+
+//---------------------------------------------------------------------------------------
+// Represents a pedal mark
+class ImoPedalMark : public ImoAuxObj
+{
+protected:
+    EPedalMark m_type = k_pedal_mark_start;
+    bool m_fAbbreviated = false;
+
+    friend class ImFactory;
+    ImoPedalMark() : ImoAuxObj(k_imo_pedal_mark) {}
+
+public:
+    //setters
+    void set_type(EPedalMark value) { m_type = value; }
+    void set_abbreviated(bool value) { m_fAbbreviated = value; }
+
+    //getters
+    EPedalMark get_type() const { return m_type; }
+    bool is_abbreviated() const { return m_fAbbreviated; }
+    EPlacement get_placement();
+
+    bool is_start_type() const { return m_type == k_pedal_mark_start || m_type == k_pedal_mark_sostenuto_start; }
+    bool is_end_type() const { return m_type == k_pedal_mark_stop; }
+};
+
+//---------------------------------------------------------------------------------------
+// Represents a pedal line
+class ImoPedalLine : public ImoRelObj
+{
+    bool m_fDrawStartCorner = true;
+    bool m_fDrawEndCorner = true;
+    bool m_fDrawContinuationText = false;
+    bool m_fSostenuto = false;
+
+protected:
+    friend class ImFactory;
+    ImoPedalLine() : ImoRelObj(k_imo_pedal_line) {}
+
+public:
+    //setters
+    void set_draw_start_corner(bool value) { m_fDrawStartCorner = value; }
+    void set_draw_end_corner(bool value) { m_fDrawEndCorner = value; }
+    void set_draw_continuation_text(bool value) { m_fDrawContinuationText = value; }
+    void set_sostenuto(bool value) { m_fSostenuto = value; }
+
+    //getters
+    bool get_draw_start_corner() const { return m_fDrawStartCorner; }
+    bool get_draw_end_corner() const { return m_fDrawEndCorner; }
+    bool get_draw_continuation_text() const { return m_fDrawContinuationText; }
+    bool is_sostenuto() const { return m_fSostenuto; }
+
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
+};
+
+//---------------------------------------------------------------------------------------
+// raw info about a pending pedal line
+class ImoPedalLineDto : public ImoSimpleObj
+{
+protected:
+    int m_pedalNum = 0;
+    ImoDirection* m_pDirection = nullptr;
+    Color m_color = Color(0,0,0);
+    int m_lineNum = 0;
+    bool m_fDrawCorner = true;
+    bool m_fDrawContinuationText = false;
+    bool m_fSostenuto = false;
+    bool m_fStart = true;
+    bool m_fEnd = false;
+
+public:
+    ImoPedalLineDto() : ImoSimpleObj(k_imo_pedal_line_dto) {}
+
+    //setters
+    void set_line_number(int value) { m_lineNum = value; }
+    void set_staffobj(ImoDirection* pDirection) { m_pDirection = pDirection; }
+    void set_pedal_number(int value) { m_pedalNum = value; }
+    void set_color(Color value) { m_color = value; }
+    void set_draw_corner(bool value) { m_fDrawCorner = value; }
+    void set_draw_continuation_text(bool value) { m_fDrawContinuationText = value; }
+    void set_sostenuto(bool value) { m_fSostenuto = value; }
+    void set_start(bool value) { m_fStart = value; }
+    void set_end(bool value) { m_fEnd = value; }
+
+    //getters
+    int get_line_number() const { return m_lineNum; }
+    int get_pedal_number() const { return m_pedalNum; }
+    Color get_color() const { return m_color; }
+    bool get_draw_corner() const { return m_fDrawCorner; }
+    bool get_draw_continuation_text() const { return m_fDrawContinuationText; }
+    bool is_sostenuto() const { return m_fSostenuto; }
+    bool is_start() const { return m_fStart; }
+    bool is_end() const { return m_fEnd; }
+
+    //required by RelationBuilder
+    int get_item_number() const { return m_pedalNum; }
+    bool is_start_of_relation() const { return m_fStart; }
+    bool is_end_of_relation() const { return m_fEnd; }
+    ImoDirection* get_staffobj() const { return m_pDirection; }
 };
 
 

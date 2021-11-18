@@ -121,6 +121,8 @@ static const std::initializer_list<EngravingOrderInfo> m_order
     { k_imo_line },
     { k_imo_score_line },
     { k_imo_text_box },
+    { k_imo_pedal_mark,             k_alignment_scope_begin,    LOMSE_INFINITE_LENGTH   },
+    { k_imo_pedal_line,             k_alignment_scope_continue                          },
 };
 
 

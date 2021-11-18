@@ -507,6 +507,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_octave_shift] = "octave-shift";
         m_TypeToName[k_imo_octave_shift_dto] = "octave-shift-dto";
+        m_TypeToName[k_imo_pedal_line] = "pedal-line";
+        m_TypeToName[k_imo_pedal_line_dto] = "pedal-line-dto";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";
         m_TypeToName[k_imo_param_info] = "param";
@@ -558,6 +560,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_line] = "line";
         m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
         m_TypeToName[k_imo_ornament] = "ornament";
+        m_TypeToName[k_imo_pedal_mark] = "pedal-mark";
         m_TypeToName[k_imo_score_text] = "score-text";
         m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
@@ -6004,6 +6007,27 @@ void ImoOctaveShift::reorganize_after_object_deletion()
 {
     //Nothing to do. As an octave-shift involves only two objects, the wedge is removed when
     //one of the ImoDirections is deleted.
+}
+
+
+//=======================================================================================
+// ImoPedalMark implementation
+//=======================================================================================
+EPlacement ImoPedalMark::get_placement()
+{
+    ImoObj* pParent = get_parent_imo();
+
+    if (pParent && pParent->is_direction())
+        return static_cast<ImoDirection*>(pParent)->get_placement();
+
+    return k_placement_default;
+}
+
+//=======================================================================================
+// ImoPedalLine implementation
+//=======================================================================================
+void ImoPedalLine::reorganize_after_object_deletion()
+{
 }
 
 

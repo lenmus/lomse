@@ -137,6 +137,13 @@ namespace lomse
 #define LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE   2.0f //space from numeral glyph to line start
 #define LOMSE_OCTAVE_SHIFT_LINE_SHIFT      3.0f //vertical line shift to compensate glyph baseline
 
+//pedals
+#define LOMSE_PEDAL_LINE_THICKNESS         1.0f //thickness for pedal lines
+#define LOMSE_PEDAL_SPACE_TO_LINE          2.0f //space from pedal sign to line start
+#define LOMSE_PEDAL_STAFF_DISTANCE        40.0f //default distance between pedals and staff lines
+#define LOMSE_PEDAL_CONTENT_DISTANCE       5.0f //minimal distance between pedals and the vertical profile
+#define LOMSE_PEDAL_CHANGE_GLYPH_OVERLAP   0.5f //overlap between a pedal line and a pedal change symbol, to avoid visual gaps between them
+
 //articulations
 #define LOMSE_SPACING_STACKED_ARTICULATIONS  2.0f //space between two stacked articulation marks
 #define LOMSE_SPACING_NOTEHEAD_ARTICULATION  5.0f //space between notehead and articulation marks

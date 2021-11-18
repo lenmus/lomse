@@ -5129,6 +5129,486 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    //@ pedal --------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, pedal_01)
+    {
+        //@01. pedal line with pedal marks
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<pedal type='start' line='yes' sign='yes'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<pedal type='stop' line='yes' sign='yes'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_children() == 4 );
+
+                ImoPedalLine* pActivePedalLine = nullptr;
+                ImoObj::children_iterator it;
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoPedalMark* pPedalMark = dynamic_cast<ImoPedalMark*>( pDir->get_attachment(0) );
+                    CHECK( pPedalMark != nullptr );
+                    if (pPedalMark)
+                    {
+                        CHECK( pPedalMark->get_type() == k_pedal_mark_start );
+                        CHECK( pPedalMark->is_abbreviated() == false );
+                    }
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine != nullptr );
+                    if (pPedalLine)
+                    {
+                        CHECK( pPedalLine->get_draw_start_corner() == true );
+                        CHECK( pPedalLine->get_draw_end_corner() == true );
+                        CHECK( pPedalLine->get_draw_continuation_text() == true );
+                        CHECK( pPedalLine->is_sostenuto() == false );
+                        pActivePedalLine = pPedalLine;
+                    }
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+
+                ++it;
+                pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoPedalMark* pPedalMark = dynamic_cast<ImoPedalMark*>( pDir->get_attachment(0) );
+                    CHECK( pPedalMark != nullptr );
+                    if (pPedalMark)
+                    {
+                        CHECK( pPedalMark->get_type() == k_pedal_mark_stop );
+                        CHECK( pPedalMark->is_abbreviated() == false );
+                    }
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == pActivePedalLine );
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, pedal_02)
+    {
+        //@02. standalone pedal mark
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<pedal type='start' line='no' sign='yes'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_children() == 3 );
+
+                ImoObj::children_iterator it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoPedalMark* pPedalMark = dynamic_cast<ImoPedalMark*>( pDir->get_attachment(0) );
+                    CHECK( pPedalMark != nullptr );
+                    if (pPedalMark)
+                    {
+                        CHECK( pPedalMark->get_type() == k_pedal_mark_start );
+                        CHECK( pPedalMark->is_abbreviated() == false );
+                    }
+
+                    //this is a standalone pedal mark, no pedal line should be created
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == nullptr );
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, pedal_03)
+    {
+        //@03. pedal line without pedal marks
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<pedal type='start' line='yes' sign='no'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<pedal type='stop' line='yes' sign='no'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_children() == 4 );
+
+                ImoPedalLine* pActivePedalLine = nullptr;
+                ImoObj::children_iterator it;
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    //no pedal marks should be created
+                    CHECK( pDir->get_num_attachments() == 0 );
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine != nullptr );
+                    if (pPedalLine)
+                    {
+                        CHECK( pPedalLine->get_draw_start_corner() == true );
+                        CHECK( pPedalLine->get_draw_end_corner() == true );
+                        CHECK( pPedalLine->get_draw_continuation_text() == false ); //disabled as pedal marks are not used here
+                        CHECK( pPedalLine->is_sostenuto() == false );
+                        pActivePedalLine = pPedalLine;
+                    }
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+
+                ++it;
+                pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    //no pedal marks should be created
+                    CHECK( pDir->get_num_attachments() == 0 );
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == pActivePedalLine );
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, pedal_04)
+    {
+        //@04. pedal line types: pedal changes, resume and discontinue pedal types
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<pedal type='resume' line='yes'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<pedal type='change' line='yes'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<pedal type='discontinue' line='yes'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_children() == 6 );
+
+                ImoPedalLine* pActivePedalLine = nullptr;
+                ImoObj::children_iterator it;
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine != nullptr );
+                    if (pPedalLine)
+                    {
+                        CHECK( pPedalLine->get_start_object() == pDir );
+                        //check pedal properties
+                        CHECK( pPedalLine->get_draw_start_corner() == false ); //pedal start type is 'resume'
+                        CHECK( pPedalLine->get_draw_end_corner() == false ); //pedal end type is 'discontinue'
+                        CHECK( pPedalLine->get_draw_continuation_text() == false ); //disabled as pedal marks are not used here
+                        CHECK( pPedalLine->is_sostenuto() == false );
+                        pActivePedalLine = pPedalLine;
+                    }
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+
+                ++it;
+                pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == pActivePedalLine );
+                    //this is a pedal change, this ImoDirection is a middle object for the relation
+                    CHECK( pPedalLine->get_start_object() != pDir );
+                    CHECK( pPedalLine->get_end_object() != pDir );
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+
+                ++it;
+                pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == pActivePedalLine );
+                    CHECK( pPedalLine->get_end_object() == pDir );
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, pedal_05)
+    {
+        //@05. other pedal types and properties: sostetuto, abbreviated pedal marks
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<pedal type='sostenuto' line='yes' sign='yes' abbreviated='yes'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<pedal type='stop' line='yes' sign='yes'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_children() == 4 );
+
+                ImoPedalLine* pActivePedalLine = nullptr;
+                ImoObj::children_iterator it;
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoPedalMark* pPedalMark = dynamic_cast<ImoPedalMark*>( pDir->get_attachment(0) );
+                    CHECK( pPedalMark != nullptr );
+                    if (pPedalMark)
+                    {
+                        CHECK( pPedalMark->get_type() == k_pedal_mark_sostenuto_start );
+                        CHECK( pPedalMark->is_abbreviated() == true );
+                    }
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine != nullptr );
+                    if (pPedalLine)
+                    {
+                        CHECK( pPedalLine->get_draw_start_corner() == true );
+                        CHECK( pPedalLine->get_draw_end_corner() == true );
+                        CHECK( pPedalLine->get_draw_continuation_text() == true );
+                        CHECK( pPedalLine->is_sostenuto() == true );
+                        pActivePedalLine = pPedalLine;
+                    }
+                }
+
+                ++it;
+                CHECK( (*it)->is_note() );
+
+                ++it;
+                pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoPedalMark* pPedalMark = dynamic_cast<ImoPedalMark*>( pDir->get_attachment(0) );
+                    CHECK( pPedalMark != nullptr );
+                    if (pPedalMark)
+                    {
+                        CHECK( pPedalMark->get_type() == k_pedal_mark_stop );
+                        CHECK( pPedalMark->is_abbreviated() == false );
+                    }
+
+                    ImoPedalLine* pPedalLine = dynamic_cast<ImoPedalLine*>( pDir->find_relation(k_imo_pedal_line) );
+                    CHECK( pPedalLine == pActivePedalLine );
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
 
     //@ rest --------------------------------------------------------------------
 
@@ -8351,7 +8831,7 @@ SUITE(MxlAnalyserTest)
             CHECK_MD_OBJECT(it, "(clef G p1)" );
             CHECK_MD_OBJECT(it, "(time 4 4)" );
             CHECK_MD_OBJECT(it, "(chord (n a4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark, type=79))" );
+            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark, type=81))" );
             CHECK_MD_OBJECT(it, "(n f4 q v1 p1)" );
             CHECK_MD_OBJECT(it, "(dir empty)" );
             CHECK_MD_OBJECT(it, "(n d4 q v1 p1 (dyn \"p\")))" );

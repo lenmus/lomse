@@ -109,6 +109,9 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_page_info:           pObj = LOMSE_NEW ImoPageInfo();           break;
         case k_imo_para:                pObj = LOMSE_NEW ImoParagraph();          break;
         case k_imo_param_info:          pObj = LOMSE_NEW ImoParamInfo();          break;
+        case k_imo_pedal_mark:          pObj = LOMSE_NEW ImoPedalMark();          break;
+        case k_imo_pedal_line:          pObj = LOMSE_NEW ImoPedalLine();          break;
+        case k_imo_pedal_line_dto:      pObj = LOMSE_NEW ImoPedalLineDto();       break;
         case k_imo_relations:           pObj = LOMSE_NEW ImoRelations();          break;
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;

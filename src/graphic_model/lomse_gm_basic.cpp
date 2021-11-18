@@ -192,6 +192,8 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_octave_shift]      = "octave-shift   ";
         m_typeToName[k_shape_octave_glyph]      = "octave-glyph   ";
         m_typeToName[k_shape_ornament]          = "ornament       ";
+        m_typeToName[k_shape_pedal_glyph]       = "pedal-glyph    ";
+        m_typeToName[k_shape_pedal_line]        = "pedal-line     ";
         m_typeToName[k_shape_rectangle]         = "rectangle      ";
         m_typeToName[k_shape_rest]              = "rest           ";
         m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
