@@ -291,7 +291,8 @@ void PedalLineEngraver::compute_shape_position(bool first)
         }
     }
 
-    m_lineY = determine_base_line_y();
+    m_lineY = determine_default_base_line_y();
+    adjust_vertical_position(m_xStart, m_xEnd, 0.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -357,30 +358,53 @@ LUnits PedalLineEngraver::determine_shape_position_right() const
 }
 
 //---------------------------------------------------------------------------------------
-LUnits PedalLineEngraver::determine_base_line_y() const
+LUnits PedalLineEngraver::determine_default_base_line_y() const
 {
-    LUnits yRef = m_uStaffTop;
-
     const LUnits yDistanceToStaff = tenths_to_logical(LOMSE_PEDAL_STAFF_DISTANCE);
-    const LUnits yDistanceToContent = tenths_to_logical(LOMSE_PEDAL_CONTENT_DISTANCE);
-    const LUnits staffHeight = tenths_to_logical(40.0f);
 
     if (m_fPedalAbove)
     {
-        yRef -= yDistanceToStaff;
-        LUnits yMin = m_pVProfile->get_min_for(m_xStart, m_xEnd, m_idxStaff).first
-                      - yDistanceToContent;
-        yRef = min(yRef, yMin);
+        return m_uStaffTop - yDistanceToStaff;
     }
     else
     {
-        yRef += staffHeight + yDistanceToStaff;
-        LUnits yMax = m_pVProfile->get_max_for(m_xStart, m_xEnd, m_idxStaff).first
-                      + yDistanceToContent;
-        yRef = max(yRef, yMax);
+        const LUnits staffHeight = tenths_to_logical(40.0f);
+        return m_uStaffTop + staffHeight + yDistanceToStaff;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PedalLineEngraver::adjust_vertical_position(LUnits xLeft, LUnits xRight, LUnits height, GmoShapePedalLine* pMainShape)
+{
+    const LUnits yDistanceToContent = tenths_to_logical(LOMSE_PEDAL_CONTENT_DISTANCE);
+    LUnits yShift = 0.0f;
+
+    if (m_fPedalAbove)
+    {
+        const LUnits yProfile = m_pVProfile->get_min_for(xLeft, xRight, m_idxStaff).first
+                                - yDistanceToContent;
+        if (yProfile < m_lineY)
+        {
+            yShift = yProfile - m_lineY;
+            m_lineY = yProfile;
+        }
+    }
+    else
+    {
+        const LUnits yTop = m_lineY - height;
+        const LUnits yProfile = m_pVProfile->get_max_for(xLeft, xRight, m_idxStaff).first
+                                + yDistanceToContent;
+        if (yProfile > yTop)
+        {
+            yShift = yProfile - yTop;
+            m_lineY += yShift;
+        }
     }
 
-    return yRef;
+    if (pMainShape && yShift)
+    {
+        pMainShape->shift_origin(USize(0.0f, yShift));
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -403,6 +427,7 @@ void PedalLineEngraver::add_pedal_changes(GmoShapePedalLine* pMainShape)
         pMainShape->add(pShape);
 
         pMainShape->add_line_gap(pShape->get_left() + overlap, pShape->get_right() - overlap);
+        adjust_vertical_position(pShape->get_left(), pShape->get_right(), pShape->get_height(), pMainShape);
     }
 }
 
@@ -444,17 +469,31 @@ void PedalLineEngraver::add_pedal_continuation_part_shape(GmoShapePedalLine* pMa
     pAddedShape->set_top(m_lineY - yShift);
     m_xStart = pAddedShape->get_right();
     pMainShape->add(pAddedShape);
+    adjust_vertical_position(pAddedShape->get_left(), pAddedShape->get_right(), pAddedShape->get_height(), pMainShape);
 }
 
 //---------------------------------------------------------------------------------------
 void PedalLineEngraver::add_line_info(GmoShapePedalLine* pMainShape, const GmoShape* pPedalStartShape, const GmoShape* pPedalEndShape, bool start)
 {
     const LUnits thickness = tenths_to_logical(LOMSE_PEDAL_LINE_THICKNESS);
-    const LUnits yStart = m_lineY - 0.5f * thickness;
-    const LUnits yEnd = yStart + (m_fPedalAbove ? 200.0f : -200.0f);
+    const LUnits cornerHeight = 200.0f;
 
     const bool fStartCorner = start && m_pPedal->get_draw_start_corner() && !pPedalStartShape;
     const bool fEndCorner = m_pEndDirectionShape && m_pPedal->get_draw_end_corner() && !pPedalEndShape;
+
+    if (fStartCorner || fEndCorner)
+    {
+        const LUnits edgeWidth = 3.0f * thickness; // can be anything larger than line thickness + some space
+
+        if (fStartCorner)
+            adjust_vertical_position(m_xStart, m_xStart + edgeWidth, cornerHeight, pMainShape);
+
+        if (fEndCorner)
+            adjust_vertical_position(m_xEnd, m_xEnd - edgeWidth, cornerHeight, pMainShape);
+    }
+
+    const LUnits yStart = m_lineY - 0.5f * thickness;
+    const LUnits yEnd = yStart + (m_fPedalAbove ? cornerHeight : -cornerHeight);
 
     pMainShape->set_layout_data(m_xStart, m_xEnd, yStart, yEnd, thickness, fStartCorner, fEndCorner);
 }

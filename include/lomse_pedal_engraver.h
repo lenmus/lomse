@@ -130,7 +130,8 @@ protected:
     void compute_shape_position(bool first);
     LUnits determine_shape_position_left(bool first) const;
     LUnits determine_shape_position_right() const;
-    LUnits determine_base_line_y() const;
+    LUnits determine_default_base_line_y() const;
+    void adjust_vertical_position(LUnits xLeft, LUnits xRight, LUnits height, GmoShapePedalLine* pMainShape = nullptr);
 
     void add_pedal_changes(GmoShapePedalLine* pMainShape);
     void add_pedal_continuation_text(GmoShapePedalLine* pMainShape);
