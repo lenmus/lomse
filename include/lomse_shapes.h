@@ -479,6 +479,20 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class GmoShapePedalGlyph : public GmoShapeGlyph
+{
+protected:
+    friend class PedalMarkEngraver;
+    friend class PedalLineEngraver;
+    GmoShapePedalGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
+                       Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_pedal_glyph, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class GmoShapeArpeggio : public GmoSimpleShape
 {
 protected:

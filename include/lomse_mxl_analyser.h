@@ -166,6 +166,22 @@ public:
 
 
 //---------------------------------------------------------------------------------------
+// helper class to save pedal dto items, match them and build pedals
+class MxlPedalBuilder : public RelationBuilder<ImoPedalLineDto, MxlAnalyser>
+{
+public:
+    MxlPedalBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoPedalLineDto, MxlAnalyser>(
+                reporter, pAnalyser, "pedal", "Pedal")
+    {
+    }
+    virtual ~MxlPedalBuilder() {}
+
+    void add_relation_to_staffobjs(ImoPedalLineDto* pEndInfo) override;
+};
+
+
+//---------------------------------------------------------------------------------------
 // helper class to save part-list info
 class PartList
 {
@@ -309,6 +325,7 @@ protected:
     MxlVoltasBuilder*   m_pVoltasBuilder;
     MxlWedgesBuilder*   m_pWedgesBuilder;
     MxlOctaveShiftBuilder*          m_pOctaveShiftBuilder;
+    MxlPedalBuilder*                m_pPedalBuilder;
     std::vector<ImoDynamicsMark*>   m_pendingDynamicsMarks;
     std::map<std::string, int>      m_lyricIndex;
     std::vector<ImoLyric*>          m_lyrics;
@@ -328,6 +345,8 @@ protected:
     int                  m_wedgeNum;
     std::map<int, ImoId> m_octaveShiftIds;
     int                  m_octaveShiftNum;
+    std::map<int, ImoId> m_pedalIds;
+    int                  m_pedalNum;
 
 
     //analysis input
@@ -544,6 +563,12 @@ public:
     bool octave_shift_id_exists(int num);
     int get_octave_shift_id(int num);
     int get_octave_shift_id_and_close(int num);
+
+    //interface for building pedals
+    int new_pedal_id(int num);
+    bool pedal_id_exists(int num);
+    int get_pedal_id(int num);
+    int get_pedal_id_and_close(int num);
 
     //interface for MxlTupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }

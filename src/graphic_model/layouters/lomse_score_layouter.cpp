@@ -64,6 +64,7 @@
 #include "lomse_note_engraver.h"
 #include "lomse_octave_shift_engraver.h"
 #include "lomse_ornament_engraver.h"
+#include "lomse_pedal_engraver.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_slur_engraver.h"
 #include "lomse_technical_engraver.h"
@@ -1270,6 +1271,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
+        case k_imo_pedal_mark:
+        {
+            ImoPedalMark* pImo = static_cast<ImoPedalMark*>(pAO);
+            PedalMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
+                                    idxStaff, pVProfile);
+            return engrv.create_shape(pImo, pos, pImo->get_color(), pParentShape);
+        }
         case k_imo_score_line:
         {
             ImoScoreLine* pImo = static_cast<ImoScoreLine*>(pAO);
@@ -1385,6 +1393,12 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
         case k_imo_octave_shift:
         {
             pEngrv = LOMSE_NEW OctaveShiftEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);   //xLeft, xRight);
+            break;
+        }
+
+        case k_imo_pedal_line:
+        {
+            pEngrv = LOMSE_NEW PedalLineEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
             break;
         }
 

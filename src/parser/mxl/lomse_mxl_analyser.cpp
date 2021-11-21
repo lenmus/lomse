@@ -840,7 +840,7 @@ protected:
     //@ above or below another element, such as a note or anotation.
     //@<!ENTITY % placement
     //@    "placement %above-below; #IMPLIED">
-    int get_attribute_placement()
+    EPlacement get_attribute_placement()
     {
         if (has_attribute(&m_analysedNode, "placement"))
         {
@@ -6083,8 +6083,23 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <pedal>
+//@<!ELEMENT pedal EMPTY>
+//@<!ATTLIST pedal
+//@    type (start | stop | sostenuto | change |
+//@          continue | discontinue | resume) #REQUIRED
+//@    number %number-level; #IMPLIED
+//@    line %yes-no; #IMPLIED
+//@    sign %yes-no; #IMPLIED
+//@    abbreviated %yes-no; #IMPLIED
+//@    %print-style-align;
+//@    %optional-unique-id;
+//@>
+//
 class PedalMxlAnalyser : public MxlElementAnalyser
 {
+protected:
+    ImoPedalLineDto* m_pInfo = nullptr;
+
 public:
     PedalMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                      LibraryScope& libraryScope, ImoObj* pAnchor)
@@ -6092,9 +6107,141 @@ public:
 
     ImoObj* do_analysis() override
     {
-		//TODO
+        ImoDirection* pDirection = nullptr;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
+            error_msg("<direction-type> <pedal> is not child of <direction>. Ignored.");
+            return nullptr;
+        }
+
+        // attrib: type (start | stop | sostenuto | change |
+        //               continue | discontinue | resume) #REQUIRED
+        const std::string type = get_mandatory_string_attribute("type", "", "pedal");
+
+        // attrib: line %yes-no; #IMPLIED
+        const bool useLine = get_optional_yes_no_attribute("line", true);
+        // attrib: sign %yes-no; #IMPLIED
+        // yes by default if "line" is no, no by default if "line" is yes.
+        const bool useSign = get_optional_yes_no_attribute("sign", !useLine);
+
+        if (useSign)
+            read_pedal_sign(pDirection, type);
+
+        if (useLine)
+            read_pedal_line(pDirection, type, useSign);
+
         return nullptr;
     }
+
+protected:
+    void read_pedal_sign(ImoDirection* pDirection, const string& typeName)
+    {
+        const EPedalMark type = get_pedal_mark_type(typeName);
+
+        if (type == k_pedal_mark_unknown)
+            return;
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoPedalMark* pPedalMark = static_cast<ImoPedalMark*>(ImFactory::inject(k_imo_pedal_mark, pDoc));
+
+        pPedalMark->set_type(type);
+        pPedalMark->set_color(get_attribute_color());
+
+        // attrib: abbreviated %yes-no; #IMPLIED
+        const bool fAbbreviated = get_optional_yes_no_attribute("abbreviated", false);
+        pPedalMark->set_abbreviated(fAbbreviated);
+
+        pDirection->add_attachment(pDoc, pPedalMark);
+    }
+
+    EPedalMark get_pedal_mark_type(const string& type)
+    {
+        if (type == "start")
+            return k_pedal_mark_start;
+        if (type == "sostenuto")
+            return k_pedal_mark_sostenuto_start;
+        if (type == "stop")
+            return k_pedal_mark_stop;
+
+        error_msg("Invalid pedal mark type: " + type);
+        return k_pedal_mark_unknown;
+    }
+
+    void read_pedal_line(ImoDirection* pDirection, const string& type, bool fHasSign)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo = static_cast<ImoPedalLineDto*>(ImFactory::inject(k_imo_pedal_line_dto, pDoc));
+        m_pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+
+        m_pInfo->set_draw_continuation_text(fHasSign);
+
+        // attrib: number %number-level; #IMPLIED
+        const int num = get_optional_int_attribute("number", 1);
+
+        // TODO
+        // attrib: %print-style-align;
+        // attrib: %optional-unique-id;
+
+        set_pedal_line_type_and_id(type, num);
+
+        if (m_pInfo)
+        {
+            m_pInfo->set_staffobj(pDirection);
+            m_pAnalyser->add_relation_info(m_pInfo);
+        }
+    }
+
+    void set_pedal_line_type_and_id(const string& value, int num)
+    {
+        if (value == "start" || value == "sostenuto")
+        {
+            m_pInfo->set_start(true);
+            m_pInfo->set_end(false);
+            m_pInfo->set_sostenuto(value == "sostenuto");
+            const int id = m_pAnalyser->new_pedal_id(num);
+            m_pInfo->set_pedal_number(id);
+        }
+        else if (value == "stop")
+        {
+            m_pInfo->set_start(false);
+            m_pInfo->set_end(true);
+            const int id = m_pAnalyser->get_pedal_id_and_close(num);
+            m_pInfo->set_pedal_number(id);
+        }
+        else if (value == "change")
+        {
+            m_pInfo->set_start(false);
+            m_pInfo->set_end(false);
+            const int id = m_pAnalyser->get_pedal_id(num);
+            m_pInfo->set_pedal_number(id);
+        }
+        else if (value == "discontinue")
+        {
+            m_pInfo->set_start(false);
+            m_pInfo->set_end(true);
+            m_pInfo->set_draw_corner(false);
+            const int id = m_pAnalyser->get_pedal_id_and_close(num);
+            m_pInfo->set_pedal_number(id);
+        }
+        else if (value == "resume")
+        {
+            m_pInfo->set_start(true);
+            m_pInfo->set_end(false);
+            m_pInfo->set_draw_corner(false);
+            const int id = m_pAnalyser->new_pedal_id(num);
+            m_pInfo->set_pedal_number(id);
+        }
+        else
+        {
+            error_msg("Missing or invalid pedal line type '" + value + "'.");
+            delete m_pInfo;
+            m_pInfo = nullptr;
+        }
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -8644,6 +8791,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pVoltasBuilder(nullptr)
     , m_pWedgesBuilder(nullptr)
     , m_pOctaveShiftBuilder(nullptr)
+    , m_pPedalBuilder(nullptr)
     , m_musicxmlVersion(0)
     , m_pNodeImo(nullptr)
     , m_tieNum(0)
@@ -8651,6 +8799,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_voltaNum(0)
     , m_wedgeNum(0)
     , m_octaveShiftNum(0)
+    , m_pedalNum(0)
     , m_pTree()
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
@@ -8768,6 +8917,7 @@ void MxlAnalyser::delete_relation_builders()
     delete m_pVoltasBuilder;
     delete m_pWedgesBuilder;
     delete m_pOctaveShiftBuilder;
+    delete m_pPedalBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -8781,6 +8931,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pVoltasBuilder = LOMSE_NEW MxlVoltasBuilder(m_reporter, this);
     m_pWedgesBuilder = LOMSE_NEW MxlWedgesBuilder(m_reporter, this);
     m_pOctaveShiftBuilder = LOMSE_NEW MxlOctaveShiftBuilder(m_reporter, this);
+    m_pPedalBuilder = LOMSE_NEW MxlPedalBuilder(m_reporter, this);
 
     m_pTree = root;
 //    m_curStaff = 0;
@@ -9218,6 +9369,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pWedgesBuilder->add_item_info_reversed_valid(static_cast<ImoWedgeDto*>(pDto));
     else if (pDto->is_octave_shift_dto())
         m_pOctaveShiftBuilder->add_item_info(static_cast<ImoOctaveShiftDto*>(pDto));
+    else if (pDto->is_pedal_dto())
+        m_pPedalBuilder->add_item_info_reversed_valid(static_cast<ImoPedalLineDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -9230,6 +9383,7 @@ void MxlAnalyser::clear_pending_relations()
     m_pVoltasBuilder->clear_pending_items();
     m_pWedgesBuilder->clear_pending_items();
     m_pOctaveShiftBuilder->clear_pending_items();
+    m_pPedalBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -9469,6 +9623,33 @@ int MxlAnalyser::get_octave_shift_id_and_close(int num)
 }
 
 //---------------------------------------------------------------------------------------
+int MxlAnalyser::new_pedal_id(int num)
+{
+    m_pedalIds[num] = ++m_pedalNum;
+    return m_pedalNum;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlAnalyser::pedal_id_exists(int num)
+{
+    return m_pedalIds[num] > 0;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_pedal_id(int num)
+{
+    return m_pedalIds[num];
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_pedal_id_and_close(int num)
+{
+    int id = m_pedalIds[num];
+    m_pedalIds[num] = -1;
+    return id;
+}
+
+//---------------------------------------------------------------------------------------
 int MxlAnalyser::set_musicxml_version(const string& version)
 {
     //version is a string "major.minor". Extract major and minor and compose
@@ -9571,7 +9752,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_part_group:           return LOMSE_NEW PartGroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_pedal:                return LOMSE_NEW PedalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_pedal:                return LOMSE_NEW PedalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_percussion:           return LOMSE_NEW PercussionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_pitch:                return LOMSE_NEW PitchMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_principal_voice:      return LOMSE_NEW PrincipalVoiceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -9974,5 +10155,49 @@ void MxlOctaveShiftBuilder::add_to_open_octave_shifts(ImoNoteRest* pNR)
     }
 }
 
+
+//=======================================================================================
+// MxlPedalBuilder implementation
+//=======================================================================================
+void MxlPedalBuilder::add_relation_to_staffobjs(ImoPedalLineDto* pLastDto)
+{
+    m_matches.push_back(pLastDto);
+
+    // Pedal may contain multiple points (middle points are pedal changes),
+    // so we have to check for both start and end point order.
+    if (!m_matches.front()->is_start())
+    {
+        auto it = std::find_if(m_matches.begin(), m_matches.end(), [](const ImoPedalLineDto* pDto) { return pDto->is_start(); });
+
+        if (it != m_matches.end())
+            std::swap(m_matches.front(), *it);
+    }
+
+    if (!m_matches.back()->is_end())
+    {
+        auto it = std::find_if(m_matches.begin(), m_matches.end(), [](const ImoPedalLineDto* pDto) { return pDto->is_end(); });
+
+        if (it != m_matches.end())
+            std::swap(m_matches.back(), *it);
+    }
+
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+    ImoPedalLine* pPedalLine = static_cast<ImoPedalLine*>(ImFactory::inject(k_imo_pedal_line, pDoc));
+
+    //set data taken from start and end dto objects
+    const ImoPedalLineDto* pStartDto = m_matches.front();
+    const ImoPedalLineDto* pEndDto = m_matches.back();
+    pPedalLine->set_color(pStartDto->get_color());
+    pPedalLine->set_draw_start_corner(pStartDto->get_draw_corner());
+    pPedalLine->set_draw_end_corner(pEndDto->get_draw_corner());
+    pPedalLine->set_draw_continuation_text(pStartDto->get_draw_continuation_text());
+    pPedalLine->set_sostenuto(pStartDto->is_sostenuto());
+
+    for (const ImoPedalLineDto* pDto : m_matches)
+    {
+        ImoDirection* pDirection = pDto->get_staffobj();
+        pDirection->include_in_relation(pDoc, pPedalLine, nullptr);
+    }
+}
 
 }   //namespace lomse
