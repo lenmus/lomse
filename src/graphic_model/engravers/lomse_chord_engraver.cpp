@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1016,9 +1016,10 @@ void BeamedChordHelper::find_applicable_clefs(ImoNote* pBaseNote, ImoNote* pLast
     //updated.
 
     ColStaffObjsEntry* pEntry = pLastNote->get_colstaffobjs_entry();
+    int iInstr = pEntry->num_instrument();
     while(pEntry && pEntry->imo_object() != pBaseNote)
     {
-        if (pEntry->imo_object()->is_clef())
+        if (pEntry->num_instrument() == iInstr && pEntry->imo_object()->is_clef())
         {
             ImoClef* clef = static_cast<ImoClef*>( pEntry->imo_object() );
             int staff = clef->get_staff();
