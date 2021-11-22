@@ -195,7 +195,20 @@ ImoStyle* ScoreMeter::get_style_info(const string& name)
 LUnits ScoreMeter::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;
-	return (value * m_lineSpace[idx]) / 10.0f;
+    return tenths_to_logical_for_staff(value, idx);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreMeter::tenths_to_logical_for_staff(Tenths value, int idxStaff)
+{
+    LUnits res = (value * m_lineSpace[idxStaff]) / 10.0f;
+    if (res >= 1.0e+15)
+    {
+        dbgLogger << endl << "***************** AQUI 7" << endl << endl;
+        dbgLogger << "tenths_to_logical_for_staff(). value=" << value << ", res=" << res
+            << ", idxStaff=" << idxStaff << endl;
+    }
+    return res;
 }
 
 //---------------------------------------------------------------------------------------

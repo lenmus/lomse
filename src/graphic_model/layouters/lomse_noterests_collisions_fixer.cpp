@@ -210,12 +210,12 @@ void NoterestsCollisionsFixer::fix_two_rests_overlap(size_t i, size_t j)
     //move the rests
     if (offset1 != 0)
     {
-        LUnits yShift = m_pMeter->tenths_to_logical(float(offset1)*5.0f, m_iInstr, m_idxStaff);
+        LUnits yShift = m_pMeter->tenths_to_logical_for_staff(float(offset1)*5.0f, m_idxStaff);
         move_rest(i, yShift);
     }
     if (offset2 != 0)
     {
-        LUnits yShift = m_pMeter->tenths_to_logical(float(offset2)*5.0f, m_iInstr, m_idxStaff);
+        LUnits yShift = m_pMeter->tenths_to_logical_for_staff(float(offset2)*5.0f, m_idxStaff);
         move_rest(j, yShift);
     }
 }
@@ -238,7 +238,7 @@ void NoterestsCollisionsFixer::fix_note_and_rest_overlap(size_t i, size_t j)
     if (overlap.height > 0.0f)
     {
         //overlap with notehead
-        LUnits space = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_idxStaff);
+        LUnits space = m_pMeter->tenths_to_logical_for_staff(10.0f, m_idxStaff);
         if (fMoveUp)
             yShift = pRest->get_bottom() - pNotehead->get_top() + space;
         else
@@ -256,7 +256,7 @@ void NoterestsCollisionsFixer::fix_note_and_rest_overlap(size_t i, size_t j)
         if (overlap.width > 0.0f)
         {
             //fix overlap with stem
-            xShift = overlap.width + m_pMeter->tenths_to_logical(2.0f, m_iInstr, m_idxStaff);
+            xShift = overlap.width + m_pMeter->tenths_to_logical_for_staff(2.0f, m_idxStaff);
             pRest->increment_anchor_offset(-xShift);
         }
     }
@@ -281,7 +281,7 @@ void NoterestsCollisionsFixer::fix_chord_and_rest_overlap(size_t i, size_t j)
     {
         yShift = dxEnd;
     }
-    LUnits space = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_idxStaff);
+    LUnits space = m_pMeter->tenths_to_logical_for_staff(10.0f, m_idxStaff);
     if (yShift > 0)
         yShift += space;
     else
@@ -302,7 +302,7 @@ void NoterestsCollisionsFixer::fix_chord_and_rest_overlap(size_t i, size_t j)
         if (overlap.width > 0.0f)
         {
             //fix overlap with stem
-            LUnits xShift = overlap.width + m_pMeter->tenths_to_logical(2.0f, m_iInstr, m_idxStaff);
+            LUnits xShift = overlap.width + m_pMeter->tenths_to_logical_for_staff(2.0f, m_idxStaff);
             pRest->increment_anchor_offset(-xShift);
         }
     }
@@ -400,8 +400,8 @@ void NoterestsCollisionsFixer::fix_two_notes_overlap(size_t i, size_t j)
     else if (fCrossedVoice)
     {
         //move up-stemmed note to the right
-        LUnits xShift = m_pMeter->tenths_to_logical(LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP,
-                                                    m_iInstr, m_idxStaff);
+        LUnits xShift = m_pMeter->tenths_to_logical_for_staff(LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP,
+                                                              m_idxStaff);
         if (fNoteheadsOverlap)
             xShift += pNoteShape2->get_notehead_width();  //TODO: shift when flag or dots
 
@@ -521,8 +521,8 @@ void NoterestsCollisionsFixer::fix_chord_and_note_overlap(size_t i, size_t j)
     //      xShift = hairline
 
     if (overlap.second == k_overlap_none || overlap.second == k_overlap_third)
-        xShift = m_pMeter->tenths_to_logical(LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP,
-                                             m_iInstr, m_idxStaff);
+        xShift = m_pMeter->tenths_to_logical_for_staff(LOMSE_SHIFT_WHEN_NOTEHEADS_OVERLAP,
+                                                       m_idxStaff);
     else if (overlap.second == k_overlap_second
              && (!fMoveNote && pShapeChord->is_up() && !fTheNoteIsOutsideChord) )
         xShift *= 0.65f;
@@ -663,7 +663,7 @@ void NoterestsCollisionsFixer::move_note_and_accidentals(size_t i, size_t j, LUn
             //now move the accidental before the other note accidental and keep anchor
             //line after the accidental
             xShift = pAccShape1->get_width()
-                     + m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS, m_iInstr, m_idxStaff);
+                     + m_pMeter->tenths_to_logical_for_staff(LOMSE_SPACE_BETWEEN_ACCIDENTALS, m_idxStaff);
             move_accidental_to_left(pShapeNote2, xShift);
         }
         else
@@ -722,8 +722,8 @@ void NoterestsCollisionsFixer::move_chord_and_note_accidentals(size_t iNote, siz
                         xShift = max(xShift, width);
                 }
             }
-            xShift += m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
-                                                  m_iInstr, m_idxStaff);
+            xShift += m_pMeter->tenths_to_logical_for_staff(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
+                                                            m_idxStaff);
 
             //shift the note accidental to the left
             move_accidental_to_left(pShapeNote, xShift);
@@ -781,7 +781,7 @@ void NoterestsCollisionsFixer::move_note_and_chord_accidentals(size_t iNote, siz
             //now move left any chord accidental colliding with note accidental.
             //TODO: check other chord accidentals
             xShift = pAccShapeNote->get_width()
-                     + m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS, m_iInstr, m_idxStaff);
+                     + m_pMeter->tenths_to_logical_for_staff(LOMSE_SPACE_BETWEEN_ACCIDENTALS, m_idxStaff);
             move_accidental_to_left(pShapeNoteChord, xShift);
         }
         else
@@ -864,8 +864,8 @@ void NoterestsCollisionsFixer::move_chord(size_t iStart1, size_t iEnd1,
             }
 
             //move accidentals before xLeft
-            LUnits space = m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
-                                                       m_iInstr, m_idxStaff);
+            LUnits space = m_pMeter->tenths_to_logical_for_staff(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
+                                                                 m_idxStaff);
             for (size_t i=iStart1; i <= iEnd1; ++i)
             {
                 GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(m_notes[i]->pShape);
@@ -1133,8 +1133,8 @@ void NoterestsCollisionsFixer::shift_acc_if_confict_with_shape(GmoShapeNote* pSh
     LUnits xOverlap = check_if_overlap(pShape, pCurAcc);
     if (xOverlap > 0.0f)
     {
-        LUnits space = m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
-                                                   m_iInstr, m_idxStaff);
+        LUnits space = m_pMeter->tenths_to_logical_for_staff(LOMSE_SPACE_BETWEEN_ACCIDENTALS,
+                                                             m_idxStaff);
         LUnits shift = pCurAcc->get_right() - pShape->get_left();
         move_accidental_to_left(pShapeNote, shift + space);
     }
