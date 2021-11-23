@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -195,7 +195,13 @@ ImoStyle* ScoreMeter::get_style_info(const string& name)
 LUnits ScoreMeter::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;
-	return (value * m_lineSpace[idx]) / 10.0f;
+    return tenths_to_logical_for_staff(value, idx);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreMeter::tenths_to_logical_for_staff(Tenths value, int idxStaff)
+{
+    return (value * m_lineSpace[idxStaff]) / 10.0f;
 }
 
 //---------------------------------------------------------------------------------------

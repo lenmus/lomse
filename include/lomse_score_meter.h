@@ -114,6 +114,7 @@ public:
 
     //spacing
     LUnits tenths_to_logical(Tenths value, int iInstr=0, int iStaff=0);
+    LUnits tenths_to_logical_for_staff(Tenths value, int idxStaff);
     Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
     LUnits line_thickness_for_instr_staff(int iInstr, int iStaff);
