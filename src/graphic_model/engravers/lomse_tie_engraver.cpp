@@ -60,44 +60,33 @@ TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
 }
 
 //---------------------------------------------------------------------------------------
-void TieEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                     int UNUSED(iSystem), int UNUSED(iCol), LUnits xStaffLeft,
-                                     LUnits xStaffRight, LUnits yStaffTop,
-                                     int idxStaff, VerticalProfile* pVProfile)
+void TieEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pTie = dynamic_cast<ImoTie*>( pRO );
 
-    m_pStartNote = dynamic_cast<ImoNote*>(pSO);
-    m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pStartNote = dynamic_cast<ImoNote*>(aoc.pSO);
+    m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void TieEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                   GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                   int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
-                                   LUnits xStaffLeft, LUnits xStaffRight,
-                                   LUnits yStaffTop, int idxStaff,
-                                   VerticalProfile* pVProfile)
+void TieEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pEndNote = dynamic_cast<ImoNote*>(pSO);
-    m_pEndNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
+    m_pEndNote = dynamic_cast<ImoNote*>(aoc.pSO);
+    m_pEndNoteShape = dynamic_cast<GmoShapeNote*>(aoc.pStaffObjShape);
+}
 
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+//---------------------------------------------------------------------------------------
+void TieEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
+{
+    m_color = ctx.color;
+    m_uStaffLeft = ctx.xStaffLeft + ctx.prologWidth;
+    m_uStaffRight = ctx.xStaffRight;
+    m_uStaffTop = ctx.yStaffTop;
+    m_pVProfile = ctx.pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
@@ -117,12 +106,10 @@ void TieEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TieEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                    LUnits UNUSED(prologWidth),
-                                    VerticalProfile* UNUSED(pVProfile), Color color)
+GmoShape* TieEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -133,9 +120,10 @@ GmoShape* TieEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLe
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TieEngraver::create_last_shape(Color color)
+GmoShape* TieEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
     {
         decide_placement();

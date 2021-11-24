@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,11 +37,13 @@ namespace lomse
 {
 
 //forward declarations
-class ScoreMeter;
+class AuxShapesAlignersSystem;
 class GmoShape;
 class ImoRelObj;
 class ImoStaffObj;
 class ImoAuxRelObj;
+class ImoInstrument;
+class ScoreMeter;
 class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
@@ -77,20 +79,79 @@ protected:
 // helper struct to save a shape and its box info (instrument, system, column)
 struct ShapeBoxInfo
 {
-    GmoShape* pShape;
-    int iSystem;
-    int iCol;
-    int iInstr;
+    GmoShape* pShape = nullptr;
+    int iCol = -1;
+    int iInstr = -1;
+    int iStaff = -1;
+    int idxStaff = -1;
 
-    ShapeBoxInfo(GmoShape* shape, int system, int col, int instr)
-        : pShape(shape), iSystem(system), iCol(col), iInstr(instr)
+    ShapeBoxInfo(GmoShape* shape, int col, int instr, int staff, int idx)
+        : pShape(shape), iCol(col), iInstr(instr), iStaff(staff), idxStaff(idx)
     {
     }
-    ShapeBoxInfo() : pShape(nullptr), iSystem(-1), iCol(-1), iInstr(-1) {}
+    ShapeBoxInfo() {}
 };
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// Helper struct to collect store information required to engrave an AuxObj/RelObj.
+// Using this struct simplifies the list of parameters to pass to methods related
+// to engraving a RelObj, as well as simplifies code maintenance
+//
+struct AuxObjContext
+{
+    //info related to the AuxObj/Rel/Obj
+    ImoStaffObj* pSO;
+    GmoShape* pStaffObjShape;
+    ImoInstrument* pInstr;
+    int iInstr;
+    int iStaff;
+    int iCol;
+    int iLine;
+    int idxStaff;
+
+    AuxObjContext(ImoStaffObj* so, GmoShape* shape, int instr, int staff,
+                  int col, int line, ImoInstrument* instrPtr, int idx)
+        : pSO(so)
+        , pStaffObjShape(shape)
+        , pInstr(instrPtr)
+        , iInstr(instr)
+        , iStaff(staff)
+        , iCol(col)
+        , iLine(line)
+        , idxStaff(idx)
+    {
+    }
+};
+
+
+//=======================================================================================
+// Helper struct to collect store context information required to create a shape.
+// Using this struct simplifies the list of parameters to pass to methods related
+// to engraving a RelObj, as well as simplifies code maintenance
+//
+struct RelObjEngravingContext
+{
+    VerticalProfile* pVProfile = nullptr;
+    AuxShapesAlignersSystem* pAuxShapesAligner = nullptr;
+    int iSystem = 0;
+    LUnits xStaffLeft = 0.0f;
+    LUnits xStaffRight = 0.0f;
+    LUnits yStaffTop = 0.0f;
+    LUnits prologWidth = 0.0f;
+    Color color = Color(0,0,0);
+
+    RelObjEngravingContext() {}
+
+//    const AuxShapesAligner* aux_shapes_aligner(int idxStaff, bool fAbove)
+//    {
+//        return pSystemScope->get_current_aux_shapes_aligner(idxStaff, fAbove);
+//    }
+
+};
+
+
+//=======================================================================================
 // base class for all relation objects' engravers
 class RelObjEngraver : public Engraver
 {
@@ -116,32 +177,12 @@ public:
     }
     virtual ~RelObjEngraver() {}
 
-    virtual void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                    int iSystem, int iCol,
-                                    LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                                    int idxStaff, VerticalProfile* pVProfile) = 0;
-    virtual void set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* UNUSED(pSO),
-                                     GmoShape* UNUSED(pStaffObjShape),
-                                     int UNUSED(iInstr), int UNUSED(iStaff),
-                                     int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                     LUnits UNUSED(yTop), int UNUSED(idxStaff),
-                                     VerticalProfile* UNUSED(pVProfile)) {}
-    virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                  int iSystem, int iCol,
-                                  LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                                  int idxStaff, VerticalProfile* pVProfile) = 0;
+    virtual void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) = 0;
+    virtual void set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& UNUSED(aoc)) {}
+    virtual void set_end_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) = 0;
 
-    virtual void set_prolog_width(LUnits UNUSED(width)) {}
-    virtual GmoShape* create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                            LUnits UNUSED(xStaffRight),
-                                            LUnits UNUSED(yStaffTop),
-                                            LUnits UNUSED(prologWidth),
-                                            VerticalProfile* UNUSED(pVProfile),
-                                            Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
-    virtual GmoShape* create_last_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
+    virtual GmoShape* create_first_or_intermediate_shape(const RelObjEngravingContext& UNUSED(ctx)) { return nullptr; }
+    virtual GmoShape* create_last_shape(const RelObjEngravingContext& UNUSED(ctx)) { return nullptr; }
 
 protected:
     void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff);
@@ -168,27 +209,13 @@ public:
     }
     virtual ~AuxRelObjEngraver() {}
 
-    virtual void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                    int iSystem, int iCol,
-                                    LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                                    int idxStaff, VerticalProfile* pVProfile) = 0;
-    virtual void set_middle_staffobj(ImoAuxRelObj* UNUSED(pARO), ImoStaffObj* UNUSED(pSO),
-                                     GmoShape* UNUSED(pStaffObjShape),
-                                     int UNUSED(iInstr), int UNUSED(iStaff),
-                                     int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                     LUnits UNUSED(yStaffTop), int UNUSED(idxStaff),
-                                     VerticalProfile* UNUSED(pVProfile)) {}
-    virtual void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
-                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                  int iSystem, int iCol,
-                                  LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                                  int idxStaff, VerticalProfile* pVProfile) = 0;
-    virtual int create_shapes(Color color=Color(0,0,0)) = 0;
+    virtual void set_start_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc) = 0;
+    virtual void set_middle_staffobj(ImoAuxRelObj* UNUSED(pARO), const AuxObjContext& UNUSED(aoc)) {}
+    virtual void set_end_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc) = 0;
+
+    virtual int create_shapes(const RelObjEngravingContext& ctx) = 0;
     virtual int get_num_shapes() = 0;
     virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
-    virtual void set_prolog_width(LUnits UNUSED(width)) {}
 
     virtual GmoShape* get_shape() { return m_pShape; }
 };

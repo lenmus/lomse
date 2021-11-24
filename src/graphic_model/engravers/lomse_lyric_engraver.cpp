@@ -74,79 +74,52 @@ LyricEngraver::~LyricEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void LyricEngraver::set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
-                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int iSystem, int iCol, LUnits xStaffLeft,
-                                       LUnits xStaffRight, LUnits yStaffTop,
-                                       int idxStaff, VerticalProfile* pVProfile)
+void LyricEngraver::set_start_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
-    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
+    m_lyrics.push_back( make_pair(pLyric, aoc.pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo =
+            LOMSE_NEW ShapeBoxInfo(nullptr, aoc.iCol, aoc.iInstr, aoc.iStaff, aoc.idxStaff);
     m_shapesInfo.push_back(pInfo);
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-void LyricEngraver::set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
-                                        GmoShape* pStaffObjShape, int iInstr,
-                                        int UNUSED(iStaff), int iSystem, int iCol,
-                                        LUnits xStaffLeft, LUnits xStaffRight,
-                                        LUnits yStaffTop, int idxStaff,
-                                        VerticalProfile* pVProfile)
-
+void LyricEngraver::set_middle_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc)
 {
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
-    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
+    m_lyrics.push_back( make_pair(pLyric, aoc.pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo =
+            LOMSE_NEW ShapeBoxInfo(nullptr, aoc.iCol, aoc.iInstr, aoc.iStaff, aoc.idxStaff);
     m_shapesInfo.push_back(pInfo);
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
-                                     GmoShape* pStaffObjShape, int iInstr,
-                                     int UNUSED(iStaff), int iSystem, int iCol,
-                                     LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                                     int idxStaff, VerticalProfile* pVProfile)
-
+void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc)
 {
     ImoLyric* pLyric = static_cast<ImoLyric*>(pARO);
-    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
+    m_lyrics.push_back( make_pair(pLyric, aoc.pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo =
+            LOMSE_NEW ShapeBoxInfo(nullptr, aoc.iCol, aoc.iInstr, aoc.iStaff, aoc.idxStaff);
     m_shapesInfo.push_back(pInfo);
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-int LyricEngraver::create_shapes(Color color)
+int LyricEngraver::create_shapes(const RelObjEngravingContext& ctx)
 {
     //Create the shapes for one system
 
-    m_color = color;
+    m_color = ctx.color;
+    m_uStaffLeft = ctx.xStaffLeft;
+    m_uStaffRight = ctx.xStaffRight;
+    m_uStaffTop = ctx.yStaffTop;
+    m_pVProfile = ctx.pVProfile;
 
     //get xLeft and xRight for first and last notes
     LUnits xLeft = m_uStaffLeft;

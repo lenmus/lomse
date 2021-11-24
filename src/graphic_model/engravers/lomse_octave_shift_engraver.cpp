@@ -66,53 +66,40 @@ OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter*
 }
 
 //---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int UNUSED(iSystem), int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                       LUnits UNUSED(xStaffRight), LUnits yTop,
-                                       int idxStaff, VerticalProfile* pVProfile)
+void OctaveShiftEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pOctaveShift = static_cast<ImoOctaveShift*>(pRO);
 
-    m_pStartNote = static_cast<ImoNote*>(pSO);
-    m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pStartNote = static_cast<ImoNote*>(aoc.pSO);
+    m_pStartNoteShape = static_cast<GmoShapeNote*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                     int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                     LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
+void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pEndNote = static_cast<ImoNote*>(pSO);
-    m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pEndNote = static_cast<ImoNote*>(aoc.pSO);
+    m_pEndNoteShape = static_cast<GmoShapeNote*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(LUnits xStaffLeft,
-                                    LUnits xStaffRight, LUnits yStaffTop,
-                                    LUnits prologWidth, VerticalProfile* pVProfile,
-                                    Color color)
+void OctaveShiftEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-    m_pVProfile = pVProfile;
-    m_uPrologWidth = prologWidth;
+    m_color = ctx.color;
+    m_uStaffLeft = ctx.xStaffLeft;
+    m_uStaffRight = ctx.xStaffRight;
+    m_uStaffTop = ctx.yStaffTop;
+    m_pVProfile = ctx.pVProfile;
+    m_uPrologWidth = ctx.prologWidth;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
+{
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
     {
@@ -124,9 +111,10 @@ GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(LUnits xStaffL
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* OctaveShiftEngraver::create_last_shape(Color color)
+GmoShape* OctaveShiftEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -346,12 +334,6 @@ void OctaveShiftEngraver::decide_placement()
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::set_prolog_width(LUnits width)
-{
-    m_uPrologWidth = width;
-}
 
 
 }  //namespace lomse

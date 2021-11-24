@@ -506,7 +506,7 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
     if (!pAuxObjs && !pRelObjs)
         return;
 
-    PendingAuxObj* data = LOMSE_NEW PendingAuxObj(pSO, pMainShape, iInstr, iStaff,
+    AuxObjContext* data = LOMSE_NEW AuxObjContext(pSO, pMainShape, iInstr, iStaff,
                            iCol, iLine, pInstr, idxStaff);
     m_pScoreLyt->m_pendingAuxObjs.push_back(data);
 }

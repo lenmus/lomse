@@ -63,32 +63,21 @@ protected:
     GmoShapeBarline* m_pStartBarlineShape;
     GmoShapeBarline* m_pStopBarlineShape;
 
-    LUnits m_uPrologWidth = 0.0f;
+//    LUnits m_uPrologWidth = 0.0f;
 
 public:
     VoltaBracketEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~VoltaBracketEngraver() {}
 
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol,
-                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                            int idxStaff, VerticalProfile* pVProfile) override;
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol,
-                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                          int idxStaff, VerticalProfile* pVProfile) override;
+    void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_end_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
 
     //RelObjEngraver mandatory overrides
-    void set_prolog_width(LUnits width) override { m_uStaffLeft += width; }
-    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
-                                                 LUnits yStaffTop, LUnits prologWidth,
-                                                 VerticalProfile* pVProfile,
-                                                 Color color=Color(0,0,0)) override;
-    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(const RelObjEngravingContext& ctx) override;
+    GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
+    void save_context_parameters(const RelObjEngravingContext& ctx);
     inline bool is_end_point_set() { return m_pStopBarline != nullptr; }
     GmoShape* create_single_shape();
     GmoShape* create_first_shape();

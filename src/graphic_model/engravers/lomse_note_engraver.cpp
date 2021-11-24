@@ -685,8 +685,8 @@ void NoteEngraver::create_chord()
         LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes, m_fontSize, m_symbolSize);
     m_pEngravers->save_engraver(pEngrv, pChord);
 
-    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
-                               0, 0, 0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
+    AuxObjContext aoc(m_pNote, m_pNoteShape, m_iInstr, m_iStaff, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_start_staffobj(pChord, aoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -696,8 +696,8 @@ void NoteEngraver::add_to_chord()
     ChordEngraver* pEngrv
         = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
 
-    pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
-                                0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
+    AuxObjContext aoc(m_pNote, m_pNoteShape, 0, 0, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_middle_staffobj(pChord, aoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -706,9 +706,8 @@ void NoteEngraver::layout_chord()
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
         = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
-    pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
-                             0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
-
+    AuxObjContext aoc(m_pNote, m_pNoteShape, 0, 0, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_end_staffobj(pChord, aoc);
     pEngrv->save_applicable_clefs(m_pCursor, m_iInstr);
     pEngrv->create_shapes(pChord->get_color());
 
