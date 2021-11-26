@@ -46,12 +46,6 @@ LUnits Engraver::tenths_to_logical(Tenths value) const
     return m_pMeter->tenths_to_logical(value);
 }
 
-////---------------------------------------------------------------------------------------
-//double Engraver::determine_font_size()
-//{
-//    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
-//}
-
 //---------------------------------------------------------------------------------------
 void Engraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
 {
@@ -73,13 +67,6 @@ double StaffSymbolEngraver::determine_font_size()
 {
     return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
-
-////---------------------------------------------------------------------------------------
-//void StaffSymbolEngraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
-//{
-//    (*pos).x += tenths_to_logical(pImo->get_user_location_x());
-//    (*pos).y += tenths_to_logical(pImo->get_user_location_y());
-//}
 
 //=======================================================================================
 // AuxObjEngraver implementation

@@ -69,7 +69,6 @@ struct EngraverContext
     int iStaff = 0;
     int idxStaff = 0;
 
-//    EngraverContext(LibraryScope& scope) : libraryScope(scope) {}
     EngraverContext(LibraryScope& scope, ScoreMeter* meter, int instr, int staff,
                     int idx, VerticalProfile* vprofile, AuxShapesAlignersSystem* aligner)
         : libraryScope(scope)
