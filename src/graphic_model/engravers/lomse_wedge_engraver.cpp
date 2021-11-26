@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -89,6 +89,7 @@ void WedgeEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
     m_uStaffTop = ctx.yStaffTop;
     m_pVProfile = ctx.pVProfile;
     m_uPrologWidth = ctx.prologWidth;
+    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------
@@ -309,7 +310,7 @@ LUnits WedgeEngraver::determine_shape_position_left(bool first) const
 {
     LUnits xLeft = determine_default_shape_position_left(first);
 
-    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+    const AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
 
     if (!pAligner)
         return xLeft;
@@ -364,7 +365,7 @@ LUnits WedgeEngraver::determine_shape_position_right() const
 {
     LUnits xRight = determine_default_shape_position_right();
 
-    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+    const AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
 
     if (!pAligner)
         return xRight;

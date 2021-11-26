@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,34 +46,35 @@ namespace lomse
 {
 
 //forward declarations
+class ColumnBreaker;
+class ColumnsBuilder;
+class ColumnStorage;
 class FontStorage;
-class GraphicModel;
-class ImoClef;
-class ImoContentObj;
-class ImoScore;
-class ImoStaffObj;
-class ImoAuxObj;
-class ImoInstrument;
-class ImoRelObj;
-class ImoAuxRelObj;
-class ImoTimeSignature;
 class GmoBoxScorePage;
 class GmoBoxSlice;
-class GmoBoxSystem;
 class GmoBoxSliceInstr;
-class InstrumentEngraver;
-class SystemLayouter;
-class StaffObjsCursor;
+class GmoBoxSystem;
 class GmoShape;
-class ScoreMeter;
-class ColumnStorage;
-class ColumnsBuilder;
-class ShapesCreator;
-class ScoreStub;
-class ColumnBreaker;
-class PartsEngraver;
-class LyricEngraver;
 class GmoShapeNote;
+class GraphicModel;
+class ImoAuxObj;
+class ImoAuxRelObj;
+class ImoClef;
+class ImoContentObj;
+class ImoInstrument;
+class ImoRelObj;
+class ImoScore;
+class ImoStaffObj;
+class ImoTimeSignature;
+class InstrumentEngraver;
+class LyricEngraver;
+class PartsEngraver;
+class ScoreMeter;
+class ScoreStub;
+class ShapesCreator;
+class StaffObjsCursor;
+class SystemLayouter;
+class SystemLayoutScope;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about lyric shapes pending to be completed with details
@@ -387,9 +388,8 @@ public:
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                     UPoint pos, ImoClef* pClef=nullptr, int octaveShift=0,
                                     unsigned flags=0, StaffObjsCursor* pCursor=nullptr);
-    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                  int idxStaff, VerticalProfile* pVProfile,
-                                  GmoShape* pParentShape);
+    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext& aoc,
+                                  const SystemLayoutScope& systemScope);
     GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
                                      UPoint uPos, LUnits width);
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ class GmoShape;
 class ScoreMeter;
 
 //---------------------------------------------------------------------------------------
-class ClefEngraver : public Engraver
+class ClefEngraver : public StaffObjEngraver
 {
 protected:
     int m_nClefType;

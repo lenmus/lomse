@@ -91,7 +91,7 @@ void VoltaBracketEngraver::save_context_parameters(const RelObjEngravingContext&
     m_uStaffRight = ctx.xStaffRight;
     m_uStaffTop = ctx.yStaffTop;
     m_pVProfile = ctx.pVProfile;
-//    m_uPrologWidth = ctx.prologWidth;
+    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------

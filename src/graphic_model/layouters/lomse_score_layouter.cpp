@@ -1257,14 +1257,22 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                             int idxStaff, VerticalProfile* pVProfile,
-                                             GmoShape* pParentShape)
+GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext& aoc,
+                                             const SystemLayoutScope& systemScope)
 {
     //factory method to create shapes for auxobjs
 
+    int iInstr = aoc.iInstr;
+    int iStaff = aoc.iStaff;
+    int idxStaff = aoc.idxStaff;
+    GmoShape* pParentShape = aoc.pStaffObjShape;
+    VerticalProfile* pVProfile = systemScope.get_vertical_profile();
+    AuxShapesAlignersSystem* pAligner = systemScope.get_aux_shapes_aligner();
+
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
+
+    EngraverContext ctx(m_libraryScope, m_pScoreMeter, iInstr, iStaff, idxStaff, pVProfile, pAligner);
 
     UPoint pos((pParentShape->get_left() + pParentShape->get_width() / 2.0f), yTop);
     switch (pAO->get_obj_type())
@@ -1273,45 +1281,42 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         case k_imo_articulation_symbol:
         {
             ImoArticulation* pImo = static_cast<ImoArticulation*>(pAO);
-            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
-                                       idxStaff, pVProfile);
+            ArticulationEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_dynamics_mark:
         {
             ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(pAO);
-            DynamicsMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
-                                       idxStaff, pVProfile);
+            DynamicsMarkEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_fermata:
         {
             ImoFermata* pImo = static_cast<ImoFermata*>(pAO);
-            FermataEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            FermataEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_metronome_mark:
         {
             ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pAO);
-            MetronomeMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            MetronomeMarkEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color);
         }
         case k_imo_ornament:
         {
             ImoOrnament* pImo = static_cast<ImoOrnament*>(pAO);
-            OrnamentEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            OrnamentEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_pedal_mark:
         {
             ImoPedalMark* pImo = static_cast<ImoPedalMark*>(pAO);
-            PedalMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
-                                    idxStaff, pVProfile);
+            PedalMarkEngraver engrv(ctx);
             return engrv.create_shape(pImo, pos, pImo->get_color(), pParentShape);
         }
         case k_imo_score_line:
@@ -1338,14 +1343,14 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         case k_imo_technical:
         {
             ImoTechnical* pImo = static_cast<ImoTechnical*>(pAO);
-            TechnicalEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            TechnicalEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_symbol_repetition_mark:
         {
             ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(pAO);
-            CodaSegnoEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            CodaSegnoEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }

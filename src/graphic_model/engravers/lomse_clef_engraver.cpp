@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            int iInstr, int iStaff)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    : StaffObjEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_nClefType(0)
     , m_symbolSize(0)
     , m_iGlyph(0)
@@ -56,7 +56,7 @@ ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 
 //---------------------------------------------------------------------------------------
 ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
-    : Engraver(libraryScope, nullptr)
+    : StaffObjEngraver(libraryScope, nullptr, 0, 0)
     , m_nClefType(0)
     , m_symbolSize(0)
     , m_iGlyph(0)
@@ -153,7 +153,7 @@ int ClefEngraver::find_glyph(int clefType)
 //---------------------------------------------------------------------------------------
 double ClefEngraver::determine_font_size()
 {
-    double fontSize = Engraver::determine_font_size();
+    double fontSize = StaffSymbolEngraver::determine_font_size();
 
     switch (m_symbolSize)
     {

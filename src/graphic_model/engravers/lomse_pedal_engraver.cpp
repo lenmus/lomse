@@ -52,12 +52,8 @@ namespace lomse
 // PedalMarkEngraver implementation
 //---------------------------------------------------------------------------------------
 
-PedalMarkEngraver::PedalMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                     int iInstr, int iStaff,
-                                     int idxStaff, VerticalProfile* pVProfile)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
+PedalMarkEngraver::PedalMarkEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
 {
 }
 
@@ -84,8 +80,7 @@ GmoShapePedalGlyph* PedalMarkEngraver::create_shape(ImoPedalMark* pPedalMark, UP
     const LUnits y = determine_y_pos(pShape->get_left(), pShape->get_right(), pos.y, pShape->get_relative_baseline_y(), fAbove);
     pShape->set_top(y);
 
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAbove))
-        aligner->add_shape(pShape);
+    add_to_aux_shapes_aligner(pShape, fAbove);
 
     return pShape;
 }
@@ -181,6 +176,7 @@ void PedalLineEngraver::save_context_parameters(const RelObjEngravingContext& ct
     m_uStaffTop = ctx.yStaffTop;
     m_pVProfile = ctx.pVProfile;
     m_uPrologWidth = ctx.prologWidth;
+    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------
@@ -232,9 +228,7 @@ GmoShape* PedalLineEngraver::create_shape()
     m_pedalChangeDirectionShapes.clear();
 
     add_line_info(pShape, m_pPedalStartShape, m_pPedalEndShape, first);
-
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
-        aligner->add_shape(pShape);
+    add_to_aux_shapes_aligner(pShape, m_fPedalAbove);
 
     return pShape;
 }
@@ -245,7 +239,7 @@ void PedalLineEngraver::compute_shape_position(bool first)
     m_xStart = determine_shape_position_left(first);
     m_xEnd = determine_shape_position_right();
 
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
+    if (AuxShapesAligner* aligner = get_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
     {
         GmoShape* pStartShape = aligner->find_shape(m_xStart);
 

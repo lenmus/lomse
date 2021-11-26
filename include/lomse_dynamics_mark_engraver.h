@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ class GmoShapeDynamicsMark;
 class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
-class DynamicsMarkEngraver : public Engraver
+class DynamicsMarkEngraver : public AuxObjEngraver
 {
 protected:
     ImoDynamicsMark* m_pDynamicsMark;
@@ -53,12 +53,9 @@ protected:
     bool m_fAbove;
     GmoShape* m_pParentShape;
     GmoShapeDynamicsMark* m_pDynamicsMarkShape;
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
 
 public:
-    DynamicsMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                    int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
+    DynamicsMarkEngraver(const EngraverContext& ctx);
     ~DynamicsMarkEngraver() {}
 
     GmoShapeDynamicsMark* create_shape(ImoDynamicsMark* pDynamicsMark, UPoint pos,

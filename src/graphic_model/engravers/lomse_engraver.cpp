@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,33 +38,81 @@
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // Engraver implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 LUnits Engraver::tenths_to_logical(Tenths value) const
 {
-    return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
+    return m_pMeter->tenths_to_logical(value);
 }
 
-double Engraver::determine_font_size()
-{
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
-}
+////---------------------------------------------------------------------------------------
+//double Engraver::determine_font_size()
+//{
+//    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
+//}
 
+//---------------------------------------------------------------------------------------
 void Engraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
 {
     (*pos).x += tenths_to_logical(pImo->get_user_location_x());
     (*pos).y += tenths_to_logical(pImo->get_user_location_y());
 }
 
-//---------------------------------------------------------------------------------------
-// RelObjEngraver implementation
-//---------------------------------------------------------------------------------------
-void RelObjEngraver::add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff)
+
+//=======================================================================================
+// StaffSymbolEngraver implementation
+//=======================================================================================
+LUnits StaffSymbolEngraver::tenths_to_logical(Tenths value) const
 {
-    AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAboveStaff);
+    return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
+}
+
+//---------------------------------------------------------------------------------------
+double StaffSymbolEngraver::determine_font_size()
+{
+    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
+}
+
+////---------------------------------------------------------------------------------------
+//void StaffSymbolEngraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
+//{
+//    (*pos).x += tenths_to_logical(pImo->get_user_location_x());
+//    (*pos).y += tenths_to_logical(pImo->get_user_location_y());
+//}
+
+//=======================================================================================
+// AuxObjEngraver implementation
+//=======================================================================================
+void AuxObjEngraver::add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const
+{
+    AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, fAboveStaff);
     if (pAligner)
         pAligner->add_shape(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+AuxShapesAligner* AuxObjEngraver::get_aux_shapes_aligner(int idxStaff, bool fAbove) const
+{
+    return m_pAuxShapesAligner ? &m_pAuxShapesAligner->get_aligner(idxStaff, fAbove) : nullptr;
+}
+
+
+//=======================================================================================
+// RelObjEngraver implementation
+//=======================================================================================
+void RelObjEngraver::add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const
+{
+    //AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAboveStaff);
+    AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, fAboveStaff);
+    if (pAligner)
+        pAligner->add_shape(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+AuxShapesAligner* RelObjEngraver::get_aux_shapes_aligner(int idxStaff, bool fAbove) const
+{
+    return m_pAuxShapesAligner ? &m_pAuxShapesAligner->get_aligner(idxStaff, fAbove) : nullptr;
 }
 
 

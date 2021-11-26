@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -92,9 +92,9 @@ protected:
 public:
     explicit SystemLayoutScope(SystemLayouter* pParent);
 
-    inline SystemLayouter* get_system_layouter() { return m_pSystemLayouter; }
-    inline VerticalProfile* get_vertical_profile() { return m_pVProfile; }
-    inline AuxShapesAlignersSystem* get_aux_shapes_aligner() { return m_pCurrentAuxShapesAligner; }
+    inline SystemLayouter* get_system_layouter() const { return m_pSystemLayouter; }
+    inline VerticalProfile* get_vertical_profile() const { return m_pVProfile; }
+    inline AuxShapesAlignersSystem* get_aux_shapes_aligner() const { return m_pCurrentAuxShapesAligner; }
 
 
 protected:

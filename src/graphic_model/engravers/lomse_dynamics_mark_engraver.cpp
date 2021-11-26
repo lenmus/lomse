@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,18 +45,13 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // DynamicsMarkEngraver implementation
 //---------------------------------------------------------------------------------------
-DynamicsMarkEngraver::DynamicsMarkEngraver(LibraryScope& libraryScope,
-                                           ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff),
-                                           int idxStaff, VerticalProfile* pVProfile)
-    : Engraver(libraryScope, pScoreMeter)
+DynamicsMarkEngraver::DynamicsMarkEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
     , m_pDynamicsMark(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)
     , m_pParentShape(nullptr)
     , m_pDynamicsMarkShape(nullptr)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
 {
 }
 
@@ -85,9 +80,7 @@ GmoShapeDynamicsMark* DynamicsMarkEngraver::create_shape(ImoDynamicsMark* pDynam
     }
 
     shift_shape_if_collision();
-
-    if (AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fAbove))
-        pAligner->add_shape(m_pDynamicsMarkShape);
+    add_to_aux_shapes_aligner(m_pDynamicsMarkShape, m_fAbove);
 
     return m_pDynamicsMarkShape;
 }

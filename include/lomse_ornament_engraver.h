@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021 All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@ class ScoreMeter;
 class GmoShapeOrnament;
 
 //---------------------------------------------------------------------------------------
-class OrnamentEngraver : public Engraver
+class OrnamentEngraver : public AuxObjEngraver
 {
 protected:
     ImoOrnament* m_pOrnament;
@@ -54,8 +54,7 @@ protected:
     GmoShapeOrnament* m_pOrnamentShape;
 
 public:
-    OrnamentEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                     int iInstr, int iStaff);
+    OrnamentEngraver(const EngraverContext& ctx);
     ~OrnamentEngraver() {}
 
     GmoShapeOrnament* create_shape(ImoOrnament* pOrnament, UPoint pos,

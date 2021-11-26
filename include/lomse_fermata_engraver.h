@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@ class ScoreMeter;
 class GmoShapeFermata;
 
 //---------------------------------------------------------------------------------------
-class FermataEngraver : public Engraver
+class FermataEngraver : public AuxObjEngraver
 {
 protected:
     ImoFermata* m_pFermata;
@@ -54,8 +54,7 @@ protected:
     GmoShapeFermata* m_pFermataShape;
 
 public:
-    FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                    int iInstr, int iStaff);
+    FermataEngraver(const EngraverContext& ctx);
     ~FermataEngraver() {}
 
     GmoShapeFermata* create_shape(ImoFermata* pFermata, UPoint pos,

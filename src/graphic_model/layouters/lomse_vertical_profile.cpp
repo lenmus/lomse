@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -481,10 +481,10 @@ vector<UPoint> VerticalProfile::get_max_profile_points(LUnits xStart, LUnits xEn
     return dataPoints;
 }
 
-//---------------------------------------------------------------------------------------
-AuxShapesAligner* VerticalProfile::get_current_aux_shapes_aligner(int staff, bool fAbove)
-{
-    return m_pCurrentAuxShapesAligner ? &m_pCurrentAuxShapesAligner->get_aligner(staff, fAbove) : nullptr;
-}
+////---------------------------------------------------------------------------------------
+//AuxShapesAligner* VerticalProfile::get_current_aux_shapes_aligner(int staff, bool fAbove)
+//{
+//    return m_pCurrentAuxShapesAligner ? &m_pCurrentAuxShapesAligner->get_aligner(staff, fAbove) : nullptr;
+//}
 
 }  //namespace lomse

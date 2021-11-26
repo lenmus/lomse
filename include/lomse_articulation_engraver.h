@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ class GmoShapeArticulation;
 class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
-class ArticulationEngraver : public Engraver
+class ArticulationEngraver : public AuxObjEngraver
 {
 protected:
     ImoArticulation* m_pArticulation;
@@ -54,12 +54,9 @@ protected:
     bool m_fEnableShiftWhenCollision;
     GmoShape* m_pParentShape;
     GmoShapeArticulation* m_pArticulationShape;
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
 
 public:
-    ArticulationEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                    int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
+    ArticulationEngraver(const EngraverContext& ctx);
     ~ArticulationEngraver() {}
 
     GmoShapeArticulation* create_shape(ImoArticulation* pArticulation, UPoint pos,

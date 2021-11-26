@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,10 +43,8 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // TechnicalEngraver implementation
 //---------------------------------------------------------------------------------------
-TechnicalEngraver::TechnicalEngraver(LibraryScope& libraryScope,
-                                           ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff))
-    : Engraver(libraryScope, pScoreMeter)
+TechnicalEngraver::TechnicalEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
     , m_pTechnical(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@ class ScoreMeter;
 class GmoShapeTechnical;
 
 //---------------------------------------------------------------------------------------
-class TechnicalEngraver : public Engraver
+class TechnicalEngraver : public AuxObjEngraver
 {
 protected:
     ImoTechnical* m_pTechnical;
@@ -54,9 +54,7 @@ protected:
     GmoShapeTechnical* m_pTechnicalShape;
 
 public:
-    TechnicalEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                      int iInstr, int iStaff);
-    ~TechnicalEngraver() {}
+    TechnicalEngraver(const EngraverContext& ctx);
 
     GmoShapeTechnical* create_shape(ImoTechnical* pTechnical, UPoint pos,
                                     Color color=Color(0,0,0),

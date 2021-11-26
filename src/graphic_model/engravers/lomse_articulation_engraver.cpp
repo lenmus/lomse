@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,19 +44,19 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // ArticulationEngraver implementation
 //---------------------------------------------------------------------------------------
-ArticulationEngraver::ArticulationEngraver(LibraryScope& libraryScope,
-                                           ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff),
-                                           int idxStaff, VerticalProfile* pVProfile)
-    : Engraver(libraryScope, pScoreMeter)
+//ArticulationEngraver::ArticulationEngraver(LibraryScope& libraryScope,
+//                                           ScoreMeter* pScoreMeter,
+//                                           int iInstr, int iStaff,
+//                                           int idxStaff, VerticalProfile* pVProfile)
+ArticulationEngraver::ArticulationEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
+//    : AuxObjEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pArticulation(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)
     , m_fEnableShiftWhenCollision(false)
     , m_pParentShape(nullptr)
     , m_pArticulationShape(nullptr)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
 {
 }
 

@@ -37,6 +37,7 @@ namespace lomse
 {
 
 //forward declarations
+class AuxShapesAligner;
 class AuxShapesAlignersSystem;
 class GmoShape;
 class ImoRelObj;
@@ -46,37 +47,144 @@ class ImoInstrument;
 class ScoreMeter;
 class VerticalProfile;
 
-//---------------------------------------------------------------------------------------
-// base class for all engravers
+//=======================================================================================
+// Helper struct to store context information valid for the engraver lifetime, for
+// engravers that create the symbols in a single call (e.g. AuxObjs, StaffObjs).
+// For RelObj engravers, most of the information will be valid for the engraver lifetime,
+// with the exception of that information that changes from system to system (VProfile)
+// Using this struct simplifies the list of parameters to pass to engravers constructor,
+// as well as simplifies code maintenance
+//
+struct EngraverContext
+{
+    LibraryScope& libraryScope;
+    ScoreMeter* pScoreMeter = nullptr;
+    VerticalProfile* pVProfile = nullptr;
+    AuxShapesAlignersSystem* pAuxShapesAligner = nullptr;
+    int iInstr = 0;
+    int iStaff = 0;
+    int idxStaff = 0;
+
+//    EngraverContext(LibraryScope& scope) : libraryScope(scope) {}
+    EngraverContext(LibraryScope& scope, ScoreMeter* meter, int instr, int staff,
+                    int idx, VerticalProfile* vprofile, AuxShapesAlignersSystem* aligner)
+        : libraryScope(scope)
+        , pScoreMeter(meter)
+        , pVProfile(vprofile)
+        , pAuxShapesAligner(aligner)
+        , iInstr(instr)
+        , iStaff(staff)
+        , idxStaff(idx)
+    {
+    }
+
+    EngraverContext(LibraryScope& scope, ScoreMeter* meter, int instr, int staff, int idx)
+        : libraryScope(scope)
+        , pScoreMeter(meter)
+        , pVProfile(nullptr)
+        , pAuxShapesAligner(nullptr)
+        , iInstr(instr)
+        , iStaff(staff)
+        , idxStaff(idx)
+    {
+    }
+};
+
+
+//=======================================================================================
+// Base class for all engravers
 class Engraver
 {
 protected:
     LibraryScope& m_libraryScope;
     ScoreMeter* m_pMeter;
-    int m_iInstr;
-    int m_iStaff;
 
 public:
-    Engraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr=0,
-             int iStaff=0)
+    Engraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : m_libraryScope(libraryScope)
         , m_pMeter(pScoreMeter)
-        , m_iInstr(iInstr)
-        , m_iStaff(iStaff)
     {
     }
 
     virtual ~Engraver() {}
 
 protected:
-    LUnits tenths_to_logical(Tenths value) const;
-    virtual double determine_font_size();
-    virtual void add_user_shift(ImoContentObj* pImo, UPoint* pos);
+    virtual LUnits tenths_to_logical(Tenths value) const;
+    void add_user_shift(ImoContentObj* pImo, UPoint* pos);
 };
 
 
-//---------------------------------------------------------------------------------------
-// helper struct to save a shape and its box info (instrument, system, column)
+//=======================================================================================
+// Base class for all engravers related to symbols on the staff
+class StaffSymbolEngraver : public Engraver
+{
+protected:
+    int m_iInstr;
+    int m_iStaff;
+
+public:
+    StaffSymbolEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
+                        int iStaff)
+        : Engraver(libraryScope, pScoreMeter)
+        , m_iInstr(iInstr)
+        , m_iStaff(iStaff)
+    {
+    }
+
+    virtual ~StaffSymbolEngraver() {}
+
+protected:
+    LUnits tenths_to_logical(Tenths value) const override;
+    virtual double determine_font_size();
+};
+
+
+//=======================================================================================
+// Base class for all StaffObj engravers
+class StaffObjEngraver : public StaffSymbolEngraver
+{
+protected:
+
+public:
+    StaffObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
+                     int iStaff)
+        : StaffSymbolEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    {
+    }
+
+    virtual ~StaffObjEngraver() {}
+};
+
+
+//=======================================================================================
+// Base class for all AuxObj engravers
+class AuxObjEngraver : public StaffSymbolEngraver
+{
+protected:
+    int m_idxStaff = 0;
+    VerticalProfile* m_pVProfile = nullptr;
+    AuxShapesAlignersSystem* m_pAuxShapesAligner = nullptr;
+
+public:
+    AuxObjEngraver(const EngraverContext& ctx)
+        : StaffSymbolEngraver(ctx.libraryScope, ctx.pScoreMeter, ctx.iInstr, ctx.iStaff)
+        , m_idxStaff(ctx.idxStaff)
+        , m_pVProfile(ctx.pVProfile)
+        , m_pAuxShapesAligner(ctx.pAuxShapesAligner)
+    {
+    }
+
+    virtual ~AuxObjEngraver() {}
+
+protected:
+    void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const;
+    AuxShapesAligner* get_aux_shapes_aligner(int idxStaff, bool fAbove) const;
+
+};
+
+
+//=======================================================================================
+// Helper struct to save a shape and its box info (instrument, system, column)
 struct ShapeBoxInfo
 {
     GmoShape* pShape = nullptr;
@@ -94,7 +202,7 @@ struct ShapeBoxInfo
 
 
 //=======================================================================================
-// Helper struct to collect store information required to engrave an AuxObj/RelObj.
+// Helper struct to store the information required to engrave an AuxObj/RelObj.
 // Using this struct simplifies the list of parameters to pass to methods related
 // to engraving a RelObj, as well as simplifies code maintenance
 //
@@ -126,7 +234,7 @@ struct AuxObjContext
 
 
 //=======================================================================================
-// Helper struct to collect store context information required to create a shape.
+// Helper struct to store context information required to create a shape.
 // Using this struct simplifies the list of parameters to pass to methods related
 // to engraving a RelObj, as well as simplifies code maintenance
 //
@@ -142,23 +250,18 @@ struct RelObjEngravingContext
     Color color = Color(0,0,0);
 
     RelObjEngravingContext() {}
-
-//    const AuxShapesAligner* aux_shapes_aligner(int idxStaff, bool fAbove)
-//    {
-//        return pSystemScope->get_current_aux_shapes_aligner(idxStaff, fAbove);
-//    }
-
 };
 
 
 //=======================================================================================
-// base class for all relation objects' engravers
-class RelObjEngraver : public Engraver
+// Base class for all relation objects' engravers
+class RelObjEngraver : public StaffSymbolEngraver
 {
 protected:
-    Color m_color;
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
+    Color m_color = Color(0,0,0);
+    int m_idxStaff = -1;
+    VerticalProfile* m_pVProfile = nullptr;
+    AuxShapesAlignersSystem* m_pAuxShapesAligner = nullptr;
 
     enum EShapeType {
         k_single_shape = 0,
@@ -169,7 +272,7 @@ protected:
 
 public:
     RelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-        : Engraver(libraryScope, pScoreMeter)
+        : StaffSymbolEngraver(libraryScope, pScoreMeter, 0, 0)
         , m_color( Color(0,0,0) )
         , m_idxStaff(-1)
         , m_pVProfile(nullptr)
@@ -185,12 +288,13 @@ public:
     virtual GmoShape* create_last_shape(const RelObjEngravingContext& UNUSED(ctx)) { return nullptr; }
 
 protected:
-    void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff);
+    void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const;
+    AuxShapesAligner* get_aux_shapes_aligner(int idxStaff, bool fAbove) const;
 };
 
 //---------------------------------------------------------------------------------------
 // base class for all auxiliary relation objects' engravers
-class AuxRelObjEngraver : public Engraver
+class AuxRelObjEngraver : public StaffSymbolEngraver
 {
 protected:
     GmoShape* m_pShape;
@@ -200,7 +304,7 @@ protected:
 
 public:
     AuxRelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-        : Engraver(libraryScope, pScoreMeter)
+        : StaffSymbolEngraver(libraryScope, pScoreMeter, 0, 0)
         , m_pShape(nullptr)
         , m_color( Color(0,0,0) )
         , m_idxStaff(-1)

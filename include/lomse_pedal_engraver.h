@@ -48,14 +48,10 @@ class InstrumentEngraver;
 class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
-class PedalMarkEngraver : public Engraver
+class PedalMarkEngraver : public AuxObjEngraver
 {
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
-
 public:
-    PedalMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                      int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
+    PedalMarkEngraver(const EngraverContext& ctx);
 
     GmoShapePedalGlyph* create_shape(ImoPedalMark* pPedalMark, UPoint pos,
                                      const Color& color,

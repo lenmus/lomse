@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ class GmoShape;
 class ScoreMeter;
 
 //---------------------------------------------------------------------------------------
-class AccidentalsEngraver : public Engraver
+class AccidentalsEngraver : public StaffSymbolEngraver
 {
 protected:
     EAccidentals m_accidentals;
@@ -57,17 +57,17 @@ protected:
 
 public:
     AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                        int iInstr, int iStaff, double fontSize);
+                        int iInstr, int iStaff);
     ~AccidentalsEngraver() {}
 
     GmoShapeAccidentals* create_shape(ImoNote* pNote, UPoint uPos,
-                                      EAccidentals accidentals,
-                                      bool fCautionary=false,
-                                      Color color=Color(0,0,0));
+                                      EAccidentals accidentals, double fontSize,
+                                      bool fCautionary=false, Color color=Color(0,0,0));
 
     //helper, for KeyEngraver or other
     GmoShapeAccidental* create_shape_for_glyph(int iGlyph, UPoint pos, Color color,
-                                               ImoObj* pCreatorImo, ShapeId idx);
+                                               double fontSize, ImoObj* pCreatorImo,
+                                               ShapeId idx);
     static int get_glyph_for(int accidental);
 
 

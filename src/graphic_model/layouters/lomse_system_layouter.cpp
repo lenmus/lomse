@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -935,7 +935,6 @@ void SystemLayouter::setup_aux_shapes_aligner(EAuxShapesAlignmentScope scope, Te
                                                                    maxAlignDistance));
     }
 
-    m_pVProfile->set_current_aux_shapes_aligner(m_curAuxShapesAligner.get());
     m_systemLayoutScope.set_current_aux_shapes_aligner(m_curAuxShapesAligner.get());
 }
 
@@ -944,7 +943,6 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, const AuxObjContext& a
                                              int iSystem)
 {
     ImoStaffObj* pSO = aoc.pSO;
-    GmoShape* pMainShape = aoc.pStaffObjShape;      //parent staffObj shape
     int iInstr = aoc.iInstr;
     int iStaff = aoc.iStaff;
     int iCol = aoc.iCol;
@@ -955,6 +953,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, const AuxObjContext& a
     RelObjEngravingContext ctx;
     ctx.iSystem = iSystem;
     ctx.pVProfile = m_pVProfile.get();
+    ctx.pAuxShapesAligner = m_curAuxShapesAligner.get();
     ctx.xStaffRight = pInstrEngrv->get_staves_right();
     ctx.xStaffLeft = pInstrEngrv->get_staves_left();
     ctx.yStaffTop = pInstrEngrv->get_top_line_of_staff(iStaff);
@@ -1080,10 +1079,8 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, const AuxObjContext& a
         else
         {
             GmoShape* pAuxShape =
-                        m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
-                                                              idxStaff, m_pVProfile.get(),
-                                                              pMainShape);
-//            pMainShape->accept_link_from(pAuxShape);
+                m_pShapesCreator->create_auxobj_shape(pAO, aoc, m_systemLayoutScope);
+
             add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
                                    iCol, iInstr, iStaff, idxStaff);
         }
