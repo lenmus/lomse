@@ -101,6 +101,19 @@ AuxShapesAligner* AuxObjEngraver::get_aux_shapes_aligner(int idxStaff, bool fAbo
 //=======================================================================================
 // RelObjEngraver implementation
 //=======================================================================================
+void RelObjEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
+{
+    m_color = ctx.color;
+    m_uStaffLeft = ctx.xStaffLeft;
+    m_uStaffRight = ctx.xStaffRight;
+    m_uStaffTop = ctx.yStaffTop;
+    m_pVProfile = ctx.pVProfile;
+    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
+    m_pInstrEngrv = ctx.pInstrEngrv;
+    m_uPrologWidth = ctx.prologWidth;
+}
+
+//---------------------------------------------------------------------------------------
 void RelObjEngraver::add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const
 {
     //AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAboveStaff);

@@ -44,6 +44,7 @@ class ImoRelObj;
 class ImoStaffObj;
 class ImoAuxRelObj;
 class ImoInstrument;
+class InstrumentEngraver;
 class ScoreMeter;
 class VerticalProfile;
 
@@ -51,7 +52,10 @@ class VerticalProfile;
 // Helper struct to store context information valid for the engraver lifetime, for
 // engravers that create the symbols in a single call (e.g. AuxObjs, StaffObjs).
 // For RelObj engravers, most of the information will be valid for the engraver lifetime,
-// with the exception of that information that changes from system to system (VProfile)
+// with the exception of the information that refers to the system (VProfile,
+// AuxShapesAligner) that is valid wehn the engraver is created but it is then updated
+// in the parameters list of methods to create shapes.
+//
 // Using this struct simplifies the list of parameters to pass to engravers constructor,
 // as well as simplifies code maintenance
 //
@@ -242,6 +246,7 @@ struct RelObjEngravingContext
 {
     VerticalProfile* pVProfile = nullptr;
     AuxShapesAlignersSystem* pAuxShapesAligner = nullptr;
+    InstrumentEngraver* pInstrEngrv = nullptr;
     int iSystem = 0;
     LUnits xStaffLeft = 0.0f;
     LUnits xStaffRight = 0.0f;
@@ -259,9 +264,15 @@ class RelObjEngraver : public StaffSymbolEngraver
 {
 protected:
     Color m_color = Color(0,0,0);
-    int m_idxStaff = -1;
+    LUnits m_uStaffTop = 0.0f;  //top line of current system
+    LUnits m_uStaffLeft = 0.0f;  //left border of current system
+    LUnits m_uStaffRight = 0.0f;  //right border of current system
     VerticalProfile* m_pVProfile = nullptr;
     AuxShapesAlignersSystem* m_pAuxShapesAligner = nullptr;
+    InstrumentEngraver* m_pInstrEngrv = nullptr;
+    LUnits m_uPrologWidth = 0.0f;
+
+    int m_idxStaff = -1;
 
     enum EShapeType {
         k_single_shape = 0,
@@ -273,9 +284,6 @@ protected:
 public:
     RelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : StaffSymbolEngraver(libraryScope, pScoreMeter, 0, 0)
-        , m_color( Color(0,0,0) )
-        , m_idxStaff(-1)
-        , m_pVProfile(nullptr)
     {
     }
     virtual ~RelObjEngraver() {}
@@ -288,12 +296,14 @@ public:
     virtual GmoShape* create_last_shape(const RelObjEngravingContext& UNUSED(ctx)) { return nullptr; }
 
 protected:
+    void save_context_parameters(const RelObjEngravingContext& ctx);
     void add_to_aux_shapes_aligner(GmoShape* pShape, bool fAboveStaff) const;
     AuxShapesAligner* get_aux_shapes_aligner(int idxStaff, bool fAbove) const;
 };
 
-//---------------------------------------------------------------------------------------
-// base class for all auxiliary relation objects' engravers
+
+//=======================================================================================
+// Base class for all auxiliary relation objects' engravers
 class AuxRelObjEngraver : public StaffSymbolEngraver
 {
 protected:

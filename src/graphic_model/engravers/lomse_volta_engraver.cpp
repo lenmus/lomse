@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,16 +49,6 @@ namespace lomse
 VoltaBracketEngraver::VoltaBracketEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_numShapes(0)
-    , m_pVolta(nullptr)
-    , m_uStaffTop(0.0f)
-    , m_uStaffLeft(0.0f)
-    , m_uStaffRight(0.0f)
-    , m_pStyle(nullptr)
-    , m_pStartBarline(nullptr)
-    , m_pStopBarline(nullptr)
-    , m_pStartBarlineShape(nullptr)
-    , m_pStopBarlineShape(nullptr)
 {
     m_pStyle = m_pMeter->get_style_info("Volta brackets");
 }
@@ -81,17 +71,6 @@ void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObj
 {
     m_pStopBarline = dynamic_cast<ImoBarline*>(aoc.pSO);
     m_pStopBarlineShape = dynamic_cast<GmoShapeBarline*>(aoc.pStaffObjShape);
-}
-
-//---------------------------------------------------------------------------------------
-void VoltaBracketEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
-{
-    m_color = ctx.color;
-    m_uStaffLeft = ctx.xStaffLeft + ctx.prologWidth;
-    m_uStaffRight = ctx.xStaffRight;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------
@@ -214,7 +193,7 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
     LUnits uJogLength = tenths_to_logical(LOMSE_VOLTA_JOG_LENGHT);
 
     //determine xStart and xEnd
-    LUnits xStart = m_uStaffLeft;
+    LUnits xStart = m_uStaffLeft + m_uPrologWidth;
     LUnits xEnd = m_uStaffRight;
 
     if (!m_fFirstShapeAtSystemStart && (shapeType == k_single_shape || shapeType == k_first_shape))
@@ -245,7 +224,8 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
 
     //transfer data to shape
     pShape->set_layout_data(xStart, xEnd, yPos, uDistance, uJogLength, uLineThick,
-                            uLeftSpaceToText, uTopSpaceToText, m_uStaffLeft, m_uStaffRight);
+                            uLeftSpaceToText, uTopSpaceToText,
+                            m_uStaffLeft + m_uPrologWidth, m_uStaffRight);
 }
 
 

@@ -50,16 +50,10 @@ class InstrumentEngraver;
 class OctaveShiftEngraver : public RelObjEngraver
 {
 protected:
-    InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTop;         //top line of current system
-    LUnits m_uStaffLeft;
-    LUnits m_uStaffRight;
-
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
     GmoShape* m_pShapeNumeral;
     GmoShapeOctaveShift* m_pMainShape;
-    LUnits m_uPrologWidth;
 
     ImoNote* m_pStartNote;
     ImoNote* m_pEndNote;
@@ -70,8 +64,7 @@ protected:
     UPoint m_points[2];  //points for a shape (top-left, bottom-left).
 
 public:
-    OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~OctaveShiftEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
@@ -82,7 +75,6 @@ public:
     GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
-    void save_context_parameters(const RelObjEngravingContext& ctx);
     void decide_placement();
     inline bool is_end_point_set() { return m_pEndNote != nullptr; }
     GmoShape* create_single_shape();

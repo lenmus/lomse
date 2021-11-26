@@ -50,14 +50,10 @@ class InstrumentEngraver;
 class SlurEngraver : public RelObjEngraver
 {
 protected:
-    InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTop = 0.0f;         //top line of current system
-
     int m_numShapes = 0;
     ImoSlur* m_pSlur = nullptr;
     bool m_fSlurBelow = false;
     bool m_fSlurForGraces = false;
-    LUnits m_uPrologWidth = 0.0f;
 
     ImoNote* m_pStartNote = nullptr;
     ImoNote* m_pEndNote = nullptr;
@@ -76,8 +72,7 @@ protected:
     UPoint m_dbgPeak;                   //debug: bezier point at peak point
 
 public:
-    SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~SlurEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;

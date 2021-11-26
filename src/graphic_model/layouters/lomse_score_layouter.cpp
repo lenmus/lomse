@@ -1382,8 +1382,6 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& 
 {
     //factory method to create the engraver for relation auxobjs
 
-    InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(aoc.iInstr);
-
     RelObjEngraver* pEngrv = nullptr;
     switch (pRO->get_obj_type())
     {
@@ -1395,7 +1393,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& 
 
         case k_imo_slur:
         {
-            pEngrv = LOMSE_NEW SlurEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
+            pEngrv = LOMSE_NEW SlurEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
@@ -1419,19 +1417,19 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& 
 
         case k_imo_wedge:
         {
-            pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
+            pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
         case k_imo_octave_shift:
         {
-            pEngrv = LOMSE_NEW OctaveShiftEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
+            pEngrv = LOMSE_NEW OctaveShiftEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
         case k_imo_pedal_line:
         {
-            pEngrv = LOMSE_NEW PedalLineEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
+            pEngrv = LOMSE_NEW PedalLineEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 

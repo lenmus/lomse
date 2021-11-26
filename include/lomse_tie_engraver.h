@@ -49,9 +49,6 @@ class VoiceRelatedShape;
 class TieEngraver : public RelObjEngraver
 {
 protected:
-    LUnits m_uStaffTop;             //top line of current staff
-    LUnits m_uStaffLeft;
-    LUnits m_uStaffRight;
     ImoTie* m_pTie;
     int m_numShapes;
     ImoNote* m_pStartNote;
@@ -75,7 +72,6 @@ public:
 
 
 protected:
-    void save_context_parameters(const RelObjEngravingContext& ctx);
     void decide_placement();
     inline bool is_end_point_set() { return m_pEndNoteShape != nullptr; }
     GmoShape* create_single_shape();

@@ -45,9 +45,6 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_uStaffTop(0.0f)
-    , m_uStaffLeft(0.0f)
-    , m_uStaffRight(0.0f)
     , m_pTie(nullptr)
     , m_numShapes(0)
     , m_pStartNote(nullptr)
@@ -77,16 +74,6 @@ void TieEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& 
 {
     m_pEndNote = dynamic_cast<ImoNote*>(aoc.pSO);
     m_pEndNoteShape = dynamic_cast<GmoShapeNote*>(aoc.pStaffObjShape);
-}
-
-//---------------------------------------------------------------------------------------
-void TieEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
-{
-    m_color = ctx.color;
-    m_uStaffLeft = ctx.xStaffLeft + ctx.prologWidth;
-    m_uStaffRight = ctx.xStaffRight;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
@@ -247,7 +234,7 @@ void TieEngraver::compute_end_point(UPoint* point)
 //---------------------------------------------------------------------------------------
 void TieEngraver::compute_start_of_staff_point()
 {
-    m_points[ImoBezierInfo::k_start].x = m_uStaffLeft;
+    m_points[ImoBezierInfo::k_start].x = m_uStaffLeft + m_uPrologWidth;
     m_points[ImoBezierInfo::k_start].y = m_points[ImoBezierInfo::k_end].y;
 }
 

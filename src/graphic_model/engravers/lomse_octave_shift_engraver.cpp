@@ -47,16 +47,12 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // OctaveShiftEngraver implementation
 //---------------------------------------------------------------------------------------
-OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                         InstrumentEngraver* pInstrEngrv)
+OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTop(0.0f)
     , m_numShapes(0)
     , m_pOctaveShift(nullptr)
     , m_pShapeNumeral(nullptr)
     , m_pMainShape(nullptr)
-    , m_uPrologWidth(0.0f)
     , m_pStartNote(nullptr)
     , m_pEndNote(nullptr)
     , m_pStartNoteShape(nullptr)
@@ -83,17 +79,6 @@ void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjC
 {
     m_pEndNote = static_cast<ImoNote*>(aoc.pSO);
     m_pEndNoteShape = static_cast<GmoShapeNote*>(aoc.pStaffObjShape);
-}
-
-//---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
-{
-    m_color = ctx.color;
-    m_uStaffLeft = ctx.xStaffLeft;
-    m_uStaffRight = ctx.xStaffRight;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_uPrologWidth = ctx.prologWidth;
 }
 
 //---------------------------------------------------------------------------------------

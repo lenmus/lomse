@@ -51,26 +51,21 @@ class VerticalProfile;
 class WedgeEngraver : public RelObjEngraver
 {
 protected:
-    InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTop;         //top line of current system
-
-    int m_numShapes;
-    ImoWedge* m_pWedge;
-    bool m_fWedgeAbove;
+    int m_numShapes = 0;
+    ImoWedge* m_pWedge = nullptr;
+    bool m_fWedgeAbove = false;
     bool m_fFirstShapeAtSystemStart = false;
-    LUnits m_uPrologWidth;
 
-    ImoDirection* m_pStartDirection;
-    ImoDirection* m_pEndDirection;
-    GmoShapeInvisible* m_pStartDirectionShape;
-    GmoShapeInvisible* m_pEndDirectionShape;
+    ImoDirection* m_pStartDirection = nullptr;
+    ImoDirection* m_pEndDirection = nullptr;
+    GmoShapeInvisible* m_pStartDirectionShape = nullptr;
+    GmoShapeInvisible* m_pEndDirectionShape = nullptr;
 
     UPoint m_points[4];    //points for wedge
-    LUnits m_yAlignBaseline; //baseline coordinate for aligning with dynamic marks
+    LUnits m_yAlignBaseline = 0.0f; //baseline coordinate for aligning with dynamic marks
 
 public:
-    WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~WedgeEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
@@ -81,7 +76,6 @@ public:
     GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
-    void save_context_parameters(const RelObjEngravingContext& ctx);
     void decide_placement();
     GmoShape* create_first_shape();
     GmoShape* create_intermediate_shape();

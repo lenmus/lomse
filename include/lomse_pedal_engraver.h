@@ -67,15 +67,9 @@ protected:
 class PedalLineEngraver : public RelObjEngraver
 {
 protected:
-
-    InstrumentEngraver* m_pInstrEngrv = nullptr;
-    LUnits m_uStaffTop = 0.0f;  //top line of current system
-    LUnits m_uStaffLeft = 0.0f;
-
     int m_numShapes = 0;
     ImoPedalLine* m_pPedal = nullptr;
     bool m_fPedalAbove = false;
-    LUnits m_uPrologWidth = 0.0f;
 
     ImoDirection* m_pStartDirection = nullptr;
     GmoShapeInvisible* m_pStartDirectionShape = nullptr;
@@ -90,8 +84,7 @@ protected:
     LUnits m_lineY = 0;
 
 public:
-    PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
 
     void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
     void set_middle_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
@@ -102,7 +95,6 @@ public:
     GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
-    void save_context_parameters(const RelObjEngravingContext& ctx);
     double determine_font_size() override;
 
     void decide_placement();

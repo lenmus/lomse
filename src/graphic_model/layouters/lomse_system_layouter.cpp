@@ -954,6 +954,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, const AuxObjContext& a
     ctx.iSystem = iSystem;
     ctx.pVProfile = m_pVProfile.get();
     ctx.pAuxShapesAligner = m_curAuxShapesAligner.get();
+    ctx.pInstrEngrv = pInstrEngrv;
     ctx.xStaffRight = pInstrEngrv->get_staves_right();
     ctx.xStaffLeft = pInstrEngrv->get_staves_left();
     ctx.yStaffTop = pInstrEngrv->get_top_line_of_staff(iStaff);
@@ -1097,6 +1098,7 @@ void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, const AuxObjCon
     ctx.iSystem = m_iSystem;
     ctx.pVProfile = m_pVProfile.get();
     ctx.pAuxShapesAligner = m_curAuxShapesAligner.get();
+    ctx.pInstrEngrv = pInstrEngrv;
     ctx.xStaffRight = pInstrEngrv->get_staves_right();
     ctx.xStaffLeft = pInstrEngrv->get_staves_left();
     ctx.yStaffTop = pInstrEngrv->get_top_line_of_staff(aoc.iStaff);

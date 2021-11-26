@@ -49,10 +49,8 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // SlurEngraver implementation
 //---------------------------------------------------------------------------------------
-SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           InstrumentEngraver* pInstrEngrv)
+SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
@@ -116,10 +114,7 @@ void SlurEngraver::decide_placement()
 //---------------------------------------------------------------------------------------
 GmoShape* SlurEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = ctx.color;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_uPrologWidth = ctx.prologWidth;
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
     {
@@ -133,10 +128,7 @@ GmoShape* SlurEngraver::create_first_or_intermediate_shape(const RelObjEngraving
 //---------------------------------------------------------------------------------------
 GmoShape* SlurEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = ctx.color;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_uPrologWidth = ctx.prologWidth;
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
     {

@@ -136,10 +136,8 @@ LUnits PedalMarkEngraver::determine_y_pos(LUnits xLeft, LUnits xRight, LUnits yR
 //---------------------------------------------------------------------------------------
 // PedalLineEngraver implementation
 //---------------------------------------------------------------------------------------
-PedalLineEngraver::PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                     InstrumentEngraver* pInstrEngrv)
+PedalLineEngraver::PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
@@ -167,16 +165,6 @@ void PedalLineEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObj
 void PedalLineEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
     m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
-}
-
-//---------------------------------------------------------------------------------------
-void PedalLineEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
-{
-    m_color = ctx.color;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_uPrologWidth = ctx.prologWidth;
-    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------

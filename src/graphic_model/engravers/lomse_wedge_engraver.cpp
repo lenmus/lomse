@@ -46,19 +46,8 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // WedgeEngraver implementation
 //---------------------------------------------------------------------------------------
-WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                             InstrumentEngraver* pInstrEngrv)
+WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTop(0.0f)
-    , m_numShapes(0)
-    , m_pWedge(nullptr)
-    , m_fWedgeAbove(false)
-    , m_uPrologWidth(0.0f)
-    , m_pStartDirection(nullptr)
-    , m_pEndDirection(nullptr)
-    , m_pStartDirectionShape(nullptr)
-    , m_pEndDirectionShape(nullptr)
 {
 }
 
@@ -80,16 +69,6 @@ void WedgeEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext
 {
     m_pEndDirection = static_cast<ImoDirection*>(aoc.pSO);
     m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
-}
-
-//---------------------------------------------------------------------------------------
-void WedgeEngraver::save_context_parameters(const RelObjEngravingContext& ctx)
-{
-    m_color = ctx.color;
-    m_uStaffTop = ctx.yStaffTop;
-    m_pVProfile = ctx.pVProfile;
-    m_uPrologWidth = ctx.prologWidth;
-    m_pAuxShapesAligner = ctx.pAuxShapesAligner;
 }
 
 //---------------------------------------------------------------------------------------
