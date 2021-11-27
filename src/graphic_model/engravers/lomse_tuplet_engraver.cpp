@@ -69,75 +69,53 @@ TupletEngraver::~TupletEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                        int UNUSED(iSystem), int UNUSED(iCol),
-                                        LUnits UNUSED(xStaffLeft),
-                                        LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                        int idxStaff, VerticalProfile* pVProfile)
+void TupletEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pTuplet = dynamic_cast<ImoTuplet*>( pRO );
 
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(aoc.pSO);
+    m_noteRests.push_back( make_pair(pNR, aoc.pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                         GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                         int UNUSED(iStaff), int UNUSED(iSystem),
-                                         int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                         LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                         int idxStaff, VerticalProfile* pVProfile)
+void TupletEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(aoc.pSO);
+    m_noteRests.push_back( make_pair(pNR, aoc.pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                      int UNUSED(iStaff), int UNUSED(iSystem),
-                                      int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                      LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                      int idxStaff, VerticalProfile* pVProfile)
+void TupletEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(aoc.pSO);
+    m_noteRests.push_back( make_pair(pNR, aoc.pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TupletEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                    LUnits UNUSED(prologWidth),
-                                    VerticalProfile* UNUSED(pVProfile), Color color)
+GmoShape* TupletEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
     //TODO: It has been assumed that a tuplet cannot be split. This has to be revised
-    m_color = color;
+    m_color = ctx.color;
+    m_pVProfile = ctx.pVProfile;
+
     return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TupletEngraver::create_last_shape(Color color)
+GmoShape* TupletEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
     GmoShapeNote* pStart = get_first_note();
     GmoShapeNote* pEnd = get_last_note();
-
     if (!pStart || !pEnd)
         return nullptr;     //all group are rests or notes longer than quarter note!
 
-    m_color = color;
+    m_color = ctx.color;
+    m_pVProfile = ctx.pVProfile;
+
     decide_tuplet_placement();
     decide_if_show_bracket();
     determine_tuplet_text();

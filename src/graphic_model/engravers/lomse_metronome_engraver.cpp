@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,10 +45,8 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // MetronomeMarkEngraver implementation
 //---------------------------------------------------------------------------------------
-MetronomeMarkEngraver::MetronomeMarkEngraver(LibraryScope& libraryScope,
-                                             ScoreMeter* pScoreMeter, int iInstr,
-                                             int iStaff)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+MetronomeMarkEngraver::MetronomeMarkEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
     , m_pMainShape(nullptr)
     , m_fontSize(0.0)
     , m_pCreatorImo(nullptr)

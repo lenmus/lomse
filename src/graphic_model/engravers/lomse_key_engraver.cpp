@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          int iInstr, int iStaff)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    : StaffObjEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pKeyShape(nullptr)
     , m_nKeyType(k_clef_undefined)
     , m_fontSize(0.0)
@@ -199,9 +199,9 @@ UPoint KeyEngraver::add_accidental(int acc, UPoint uPos, Tenths yShift)
     int iGlyph = AccidentalsEngraver::get_glyph_for(acc);
     LUnits y = uPos.y + tenths_to_logical(yShift);
 
-    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff, m_fontSize);
-    GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(uPos.x, y),
-                                                 m_color, m_pCreatorImo, 0);
+    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
+    GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(uPos.x, y), m_color,
+                                                 m_fontSize, m_pCreatorImo, 0);
     m_pKeyShape->add(pSA);
     uPos.x += pSA->get_width();
 
@@ -232,7 +232,7 @@ UPoint KeyEngraver::add_accidentals(int iStart, int iEnd, UPoint uPos, int iGlyp
     const int flats[7] = { k_step_B, k_step_E, k_step_A, k_step_D, k_step_G, k_step_C, k_step_F };
 
     LUnits x = uPos.x;
-    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff, m_fontSize);
+    AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
 
     for (int i=iStart-1; i < iEnd; i++)
     {
@@ -243,8 +243,8 @@ UPoint KeyEngraver::add_accidentals(int iStart, int iEnd, UPoint uPos, int iGlyp
         Tenths shift = compute_accidental_shift(step, accOctave, pClef, fAtSharpPosition);
         LUnits y = uPos.y + tenths_to_logical(shift);
 
-        GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(x, y),
-                                                     m_color, m_pCreatorImo, 0);
+        GmoShape* pSA = engrv.create_shape_for_glyph(iGlyph, UPoint(x, y), m_color,
+                                                     m_fontSize, m_pCreatorImo, 0);
         m_pKeyShape->add(pSA);
         x += pSA->get_width() + space;
     }

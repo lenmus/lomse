@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,73 +49,34 @@ namespace lomse
 VoltaBracketEngraver::VoltaBracketEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_numShapes(0)
-    , m_pVolta(nullptr)
-    , m_uStaffTop(0.0f)
-    , m_uStaffLeft(0.0f)
-    , m_uStaffRight(0.0f)
-    , m_pStyle(nullptr)
-    , m_pStartBarline(nullptr)
-    , m_pStopBarline(nullptr)
-    , m_pStartBarlineShape(nullptr)
-    , m_pStopBarlineShape(nullptr)
 {
     m_pStyle = m_pMeter->get_style_info("Volta brackets");
 }
 
 //---------------------------------------------------------------------------------------
-void VoltaBracketEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int UNUSED(iSystem), int UNUSED(iCol),
-                                      LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                                      int idxStaff, VerticalProfile* pVProfile)
+void VoltaBracketEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pVolta = dynamic_cast<ImoVoltaBracket*>(pRO);
 
-    m_pStartBarline = dynamic_cast<ImoBarline*>(pSO);
-    m_pStartBarlineShape = dynamic_cast<GmoShapeBarline*>(pStaffObjShape);
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pStartBarline = dynamic_cast<ImoBarline*>(aoc.pSO);
+    m_pStartBarlineShape = dynamic_cast<GmoShapeBarline*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                    int UNUSED(iStaff), int UNUSED(iSystem),
-                                    int UNUSED(iCol), LUnits xStaffLeft,
-                                    LUnits xStaffRight, LUnits yStaffTop,
-                                    int idxStaff, VerticalProfile* pVProfile)
+void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pStopBarline = dynamic_cast<ImoBarline*>(pSO);
-    m_pStopBarlineShape = dynamic_cast<GmoShapeBarline*>(pStaffObjShape);
-
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pStopBarline = dynamic_cast<ImoBarline*>(aoc.pSO);
+    m_pStopBarlineShape = dynamic_cast<GmoShapeBarline*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* VoltaBracketEngraver::create_first_or_intermediate_shape(LUnits xStaffLeft,
-                                    LUnits xStaffRight, LUnits yStaffTop,
-                                    LUnits prologWidth, VerticalProfile* pVProfile,
-                                    Color color)
+GmoShape* VoltaBracketEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
-    m_uStaffLeft = xStaffLeft;
-    m_uStaffRight = xStaffRight;
-    m_uStaffTop = yStaffTop;
-    m_pVProfile = pVProfile;
-    m_uPrologWidth = prologWidth;
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
         return create_first_shape();
@@ -124,9 +85,10 @@ GmoShape* VoltaBracketEngraver::create_first_or_intermediate_shape(LUnits xStaff
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* VoltaBracketEngraver::create_last_shape(Color color)
+GmoShape* VoltaBracketEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
         return create_single_shape();
     return create_final_shape();
@@ -231,7 +193,7 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
     LUnits uJogLength = tenths_to_logical(LOMSE_VOLTA_JOG_LENGHT);
 
     //determine xStart and xEnd
-    LUnits xStart = m_uStaffLeft;
+    LUnits xStart = m_uStaffLeft + m_uPrologWidth;
     LUnits xEnd = m_uStaffRight;
 
     if (!m_fFirstShapeAtSystemStart && (shapeType == k_single_shape || shapeType == k_first_shape))
@@ -248,11 +210,11 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
             xEnd -= 30.0f;
     }
 
-    if (shapeType == k_intermediate_shape
-        || (m_fFirstShapeAtSystemStart && (shapeType == k_first_shape )) )
-    {
-        xStart += m_uPrologWidth;
-    }
+//    if (shapeType == k_intermediate_shape
+//        || (m_fFirstShapeAtSystemStart && (shapeType == k_first_shape )) )
+//    {
+//        xStart += m_uPrologWidth;
+//    }
 
     //determine yPos
     LUnits uDistance = tenths_to_logical(LOMSE_VOLTA_BRACKET_DISTANCE);
@@ -262,7 +224,8 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
 
     //transfer data to shape
     pShape->set_layout_data(xStart, xEnd, yPos, uDistance, uJogLength, uLineThick,
-                            uLeftSpaceToText, uTopSpaceToText, m_uStaffLeft, m_uStaffRight);
+                            uLeftSpaceToText, uTopSpaceToText,
+                            m_uStaffLeft + m_uPrologWidth, m_uStaffRight);
 }
 
 

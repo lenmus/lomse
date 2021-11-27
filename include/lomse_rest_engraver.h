@@ -47,7 +47,7 @@ class GmoShapeBeam;
 class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
-class RestEngraver : public Engraver
+class RestEngraver : public StaffObjEngraver
 {
 protected:
     int m_restType;

@@ -79,45 +79,30 @@ ChordEngraver::~ChordEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int UNUSED(iSystem), int UNUSED(iCol),
-                                       LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                       LUnits UNUSED(yTop),
-                                       int idxStaff, VerticalProfile* UNUSED(pVProfile))
+void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
-    m_idxStaff = idxStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pChord = dynamic_cast<ImoChord*>(pRO);
 
-    add_note(pSO, pStaffObjShape, idxStaff);
+    add_note(aoc.pSO, aoc.pStaffObjShape, aoc.idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                        GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                        int UNUSED(iStaff), int UNUSED(iSystem),
-                                        int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                        LUnits UNUSED(xStaffRight), LUnits UNUSED(yTop),
-                                        int idxStaff, VerticalProfile* UNUSED(pVProfile))
+void ChordEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    add_note(pSO, pStaffObjShape, idxStaff);
+    add_note(aoc.pSO, aoc.pStaffObjShape, aoc.idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                     int UNUSED(iStaff), int UNUSED(iSystem),
-                                     int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                     LUnits UNUSED(xStaffRight), LUnits UNUSED(yTop),
-                                     int idxStaff, VerticalProfile* UNUSED(pVProfile))
+void ChordEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    add_note(pSO, pStaffObjShape, idxStaff);
+    add_note(aoc.pSO, aoc.pStaffObjShape, aoc.idxStaff);
     if (m_numNotesMissing != 0)
     {
-        LOMSE_LOG_ERROR("[ChordEngraver::set_end_staffobj] Num added notes doesn't match expected notes in chord");
-        throw runtime_error("[ChordEngraver::set_end_staffobj] Num added notes doesn't match expected notes in chord");
+        LOMSE_LOG_ERROR("Num added notes doesn't match expected notes in chord");
     }
 }
 

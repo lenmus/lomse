@@ -50,16 +50,10 @@ class InstrumentEngraver;
 class OctaveShiftEngraver : public RelObjEngraver
 {
 protected:
-    InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTop;         //top line of current system
-    LUnits m_uStaffLeft;
-    LUnits m_uStaffRight;
-
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
     GmoShape* m_pShapeNumeral;
     GmoShapeOctaveShift* m_pMainShape;
-    LUnits m_uPrologWidth;
 
     ImoNote* m_pStartNote;
     ImoNote* m_pEndNote;
@@ -70,28 +64,15 @@ protected:
     UPoint m_points[2];  //points for a shape (top-left, bottom-left).
 
 public:
-    OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~OctaveShiftEngraver() {}
 
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol,
-                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                            int idxStaff, VerticalProfile* pVProfile) override;
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol,
-                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                          int idxStaff, VerticalProfile* pVProfile) override;
+    void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_end_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
 
     //RelObjEngraver mandatory overrides
-    void set_prolog_width(LUnits width) override;
-    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
-                                                 LUnits yStaffTop, LUnits prologWidth,
-                                                 VerticalProfile* pVProfile,
-                                                 Color color=Color(0,0,0)) override;
-    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(const RelObjEngravingContext& ctx) override;
+    GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
     void decide_placement();

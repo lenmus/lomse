@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,7 +52,7 @@ class StaffObjsCursor;
 class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
-class NoteEngraver : public Engraver
+class NoteEngraver : public StaffObjEngraver
 {
 protected:
     ImoNote* m_pNote;
@@ -133,11 +133,9 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class StemFlagEngraver : public Engraver
+class StemFlagEngraver : public StaffSymbolEngraver
 {
 protected:
-    int m_iInstr;
-    int m_iStaff;
     int m_noteType;
     bool m_fStemDown;
     bool m_fWithFlag;

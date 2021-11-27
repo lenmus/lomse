@@ -52,19 +52,15 @@ namespace lomse
 // PedalMarkEngraver implementation
 //---------------------------------------------------------------------------------------
 
-PedalMarkEngraver::PedalMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                     int iInstr, int iStaff,
-                                     int idxStaff, VerticalProfile* pVProfile)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
+PedalMarkEngraver::PedalMarkEngraver(const EngraverContext& ctx)
+    : AuxObjEngraver(ctx)
 {
 }
 
 //---------------------------------------------------------------------------------------
 GmoShapePedalGlyph* PedalMarkEngraver::create_shape(ImoPedalMark* pPedalMark, UPoint pos,
                                                     const Color& color,
-                                                    GmoShape* pParentShape)
+                                                    GmoShape* UNUSED(pParentShape))
 {
     const int iGlyph = find_glyph(pPedalMark);
 
@@ -84,8 +80,7 @@ GmoShapePedalGlyph* PedalMarkEngraver::create_shape(ImoPedalMark* pPedalMark, UP
     const LUnits y = determine_y_pos(pShape->get_left(), pShape->get_right(), pos.y, pShape->get_relative_baseline_y(), fAbove);
     pShape->set_top(y);
 
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, fAbove))
-        aligner->add_shape(pShape);
+    add_to_aux_shapes_aligner(pShape, fAbove);
 
     return pShape;
 }
@@ -141,59 +136,35 @@ LUnits PedalMarkEngraver::determine_y_pos(LUnits xLeft, LUnits xRight, LUnits yR
 //---------------------------------------------------------------------------------------
 // PedalLineEngraver implementation
 //---------------------------------------------------------------------------------------
-PedalLineEngraver::PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                                     InstrumentEngraver* pInstrEngrv)
+PedalLineEngraver::PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void PedalLineEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                           int UNUSED(iSystem), int UNUSED(iCol),
-                                           LUnits UNUSED(xStaffLeft),
-                                           LUnits UNUSED(xStaffRight), LUnits yTop,
-                                           int idxStaff, VerticalProfile* pVProfile)
+void PedalLineEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pPedal = static_cast<ImoPedalLine*>(pRO);
 
-    m_pStartDirection = static_cast<ImoDirection*>(pSO);
-    m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
-
+    m_pStartDirection = static_cast<ImoDirection*>(aoc.pSO);
+    m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void PedalLineEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* UNUSED(pSO),
-                                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                            int iSystem, int iCol,
-                                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                                            int idxStaff, VerticalProfile* pVProfile)
+void PedalLineEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    GmoShapeInvisible* pDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
+    GmoShapeInvisible* pDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
     m_pedalChangeDirectionShapes.push_back(pDirectionShape);
 }
 
 //---------------------------------------------------------------------------------------
-void PedalLineEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* UNUSED(pSO),
-                                         GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                         int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
-                                         LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                         LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
+void PedalLineEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -209,22 +180,16 @@ void PedalLineEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* PedalLineEngraver::create_first_or_intermediate_shape(LUnits xStaffLeft,
-                                    LUnits xStaffRight, LUnits yStaffTop,
-                                    LUnits prologWidth, VerticalProfile* pVProfile,
-                                    Color color)
+GmoShape* PedalLineEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_uStaffTop = yStaffTop;
-    m_uPrologWidth = prologWidth;
-    m_pVProfile = pVProfile;
-    m_color = color;
+    save_context_parameters(ctx);
     return create_shape();
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* PedalLineEngraver::create_last_shape(Color color)
+GmoShape* PedalLineEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
     return create_shape();
 }
 
@@ -251,9 +216,7 @@ GmoShape* PedalLineEngraver::create_shape()
     m_pedalChangeDirectionShapes.clear();
 
     add_line_info(pShape, m_pPedalStartShape, m_pPedalEndShape, first);
-
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
-        aligner->add_shape(pShape);
+    add_to_aux_shapes_aligner(pShape, m_fPedalAbove);
 
     return pShape;
 }
@@ -264,7 +227,7 @@ void PedalLineEngraver::compute_shape_position(bool first)
     m_xStart = determine_shape_position_left(first);
     m_xEnd = determine_shape_position_right();
 
-    if (AuxShapesAligner* aligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
+    if (AuxShapesAligner* aligner = get_aux_shapes_aligner(m_idxStaff, m_fPedalAbove))
     {
         GmoShape* pStartShape = aligner->find_shape(m_xStart);
 
@@ -496,12 +459,6 @@ void PedalLineEngraver::add_line_info(GmoShapePedalLine* pMainShape, const GmoSh
     const LUnits yEnd = yStart + (m_fPedalAbove ? cornerHeight : -cornerHeight);
 
     pMainShape->set_layout_data(m_xStart, m_xEnd, yStart, yEnd, thickness, fStartCorner, fEndCorner);
-}
-
-//---------------------------------------------------------------------------------------
-void PedalLineEngraver::set_prolog_width(LUnits width)
-{
-    m_uPrologWidth = width;
 }
 
 

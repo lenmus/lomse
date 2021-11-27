@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -72,45 +72,27 @@ BeamEngraver::~BeamEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int UNUSED(iSystem), int UNUSED(iCol),
-                                      LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                      LUnits UNUSED(yStaffTop),
-                                      int idxStaff, VerticalProfile* pVProfile)
+void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pBeam = dynamic_cast<ImoBeam*>(pRO);
 
-    add_note_rest(pSO, pStaffObjShape);
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    add_note_rest(aoc.pSO, aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                       GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                       int UNUSED(iStaff), int UNUSED(iSystem),
-                                       int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                       LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                       int UNUSED(idxStaff),
-                                       VerticalProfile* UNUSED(pVProfile))
+void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    add_note_rest(pSO, pStaffObjShape);
+    add_note_rest(aoc.pSO, aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                    int UNUSED(iStaff), int UNUSED(iSystem),
-                                    int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                    int UNUSED(idxStaff),
-                                    VerticalProfile* UNUSED(pVProfile))
+void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    add_note_rest(pSO, pStaffObjShape);
+    add_note_rest(aoc.pSO, aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -140,18 +122,17 @@ void BeamEngraver::add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* BeamEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                LUnits UNUSED(prologWidth),
-                                VerticalProfile* UNUSED(pVProfile), Color color)
+GmoShape* BeamEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
     //TODO: It has been assumed that a beam cannot be split. This has to be revised
-    m_color = color;
+    m_color = ctx.color;
+    m_pVProfile = ctx.pVProfile;
+
     return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* BeamEngraver::create_last_shape(Color color)
+GmoShape* BeamEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
     if (!m_numNotes)
     {
@@ -159,7 +140,9 @@ GmoShape* BeamEngraver::create_last_shape(Color color)
         return nullptr;
     }
 
-    m_color = color;
+    m_color = ctx.color;
+    m_pVProfile = ctx.pVProfile;
+
     decide_stems_direction();
     determine_number_of_beam_levels();
 

@@ -44,13 +44,12 @@ namespace lomse
 // AccidentalsEngraver implementation
 //---------------------------------------------------------------------------------------
 AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
-                                         ScoreMeter* pScoreMeter, int iInstr, int iStaff,
-                                         double fontSize)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+                                         ScoreMeter* pScoreMeter, int iInstr, int iStaff)
+    : StaffSymbolEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_accidentals(k_no_accidentals)
     , m_fCautionary(false)
     , m_pContainer(nullptr)
-    , m_fontSize(fontSize)
+    , m_fontSize(12.0)
     , m_pNote(nullptr)
     , m_numGlyphs(0)
 {
@@ -60,6 +59,7 @@ AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
 GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoNote* pNote,
                                                        UPoint uPos,
                                                        EAccidentals accidentals,
+                                                       double fontSize,
                                                        bool fCautionary,
                                                        Color color)
 {
@@ -67,6 +67,7 @@ GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoNote* pNote,
     m_fCautionary = fCautionary;
     m_pNote = pNote;
     m_color = color;
+    m_fontSize = fontSize;
 
     find_glyphs();
     create_container_shape(uPos);
@@ -183,7 +184,7 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
     for (int i=0; i < m_numGlyphs; ++i)
     {
         GmoShapeAccidental* pShape =
-                create_shape_for_glyph(m_glyphs[i], pos, m_color, m_pNote, 0);
+                create_shape_for_glyph(m_glyphs[i], pos, m_color, m_fontSize, m_pNote, 0);
 
         add_voice(pShape);
         m_pContainer->add(pShape);
@@ -195,13 +196,14 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
 //---------------------------------------------------------------------------------------
 GmoShapeAccidental* AccidentalsEngraver::create_shape_for_glyph(int iGlyph, UPoint pos,
                                                                 Color color,
+                                                                double fontSize,
                                                                 ImoObj* pCreatorImo,
                                                                 ShapeId idx)
 {
     pos.y += glyph_offset(iGlyph);
 
     return LOMSE_NEW GmoShapeAccidental(pCreatorImo, idx, iGlyph, pos, color,
-                                        m_libraryScope, m_fontSize);
+                                        m_libraryScope, fontSize);
 }
 
 //---------------------------------------------------------------------------------------

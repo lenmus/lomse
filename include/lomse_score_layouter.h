@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,6 +35,7 @@
 #include "lomse_injectors.h"
 #include "lomse_score_enums.h"
 #include "lomse_logger.h"
+#include "lomse_engraver.h"
 #include "lomse_engravers_map.h"
 #include "lomse_spacing_algorithm.h"
 
@@ -45,62 +46,35 @@ namespace lomse
 {
 
 //forward declarations
+class ColumnBreaker;
+class ColumnsBuilder;
+class ColumnStorage;
 class FontStorage;
-class GraphicModel;
-class ImoClef;
-class ImoContentObj;
-class ImoScore;
-class ImoStaffObj;
-class ImoAuxObj;
-class ImoInstrument;
-class ImoRelObj;
-class ImoAuxRelObj;
-class ImoTimeSignature;
 class GmoBoxScorePage;
 class GmoBoxSlice;
-class GmoBoxSystem;
 class GmoBoxSliceInstr;
-class InstrumentEngraver;
-class SystemLayouter;
-class StaffObjsCursor;
+class GmoBoxSystem;
 class GmoShape;
-class ScoreMeter;
-class ColumnStorage;
-class ColumnsBuilder;
-class ShapesCreator;
-class ScoreStub;
-class ColumnBreaker;
-class PartsEngraver;
-class LyricEngraver;
 class GmoShapeNote;
-
-//---------------------------------------------------------------------------------------
-// helper struct to store data about aux objs to be engraved when the system is ready
-struct PendingAuxObj
-{
-    ImoStaffObj* m_pSO;
-    GmoShape* m_pMainShape;
-    ImoInstrument* m_pInstr;
-    int m_iInstr;
-    int m_iStaff;
-    int m_iCol;
-    int m_iLine;
-    int m_idxStaff;
-
-    PendingAuxObj(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
-                   int iCol, int iLine, ImoInstrument* pInstr, int idxStaff)
-        : m_pSO(pSO)
-        , m_pMainShape(pMainShape)
-        , m_pInstr(pInstr)
-        , m_iInstr(iInstr)
-        , m_iStaff(iStaff)
-        , m_iCol(iCol)
-        , m_iLine(iLine)
-        , m_idxStaff(idxStaff)
-    {
-    }
-
-};
+class GraphicModel;
+class ImoAuxObj;
+class ImoAuxRelObj;
+class ImoClef;
+class ImoContentObj;
+class ImoInstrument;
+class ImoRelObj;
+class ImoScore;
+class ImoStaffObj;
+class ImoTimeSignature;
+class InstrumentEngraver;
+class LyricEngraver;
+class PartsEngraver;
+class ScoreMeter;
+class ScoreStub;
+class ShapesCreator;
+class StaffObjsCursor;
+class SystemLayouter;
+class SystemLayoutScope;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about lyric shapes pending to be completed with details
@@ -129,23 +103,71 @@ struct PendingLyrics
 };
 
 // some helper typedefs
-typedef std::pair<ImoRelObj*, PendingAuxObj*> PendingRelObj;
-typedef std::pair<std::string, PendingAuxObj*> PendingLyricsObj;
+typedef std::pair<ImoRelObj*, AuxObjContext*> PendingRelObj;
+typedef std::pair<std::string, AuxObjContext*> PendingLyricsObj;
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// Helper class to store global information whose scope is the score layout process.
+// It facilitates access to this global information and simplifies the list of parameters
+// to pass to all classes and methods related to layout
+//
+class ScoreLayoutScope
+{
+protected:
+    ScoreLayouter*  m_pScoreLyt = nullptr;
+    LibraryScope&   m_libraryScope;
+    GraphicModel*   m_pGModel = nullptr;
+    ImoScore*       m_pScore = nullptr;
+    ScoreMeter*     m_pScoreMeter = nullptr;
+    SpacingAlgorithm* m_pSpAlgorithm = nullptr;
+    EngraversMap*   m_pEngraversMap = nullptr;
+    ShapesCreator*  m_pShapesCreator = nullptr;
+    PartsEngraver*  m_pPartsEngraver = nullptr;
+//    ScoreLayoutOptions* m_pOptions = nullptr;
+
+public:
+    explicit ScoreLayoutScope(ScoreLayouter* pParent, LibraryScope& libraryScope,
+                              GraphicModel* pGModel);
+    ~ScoreLayoutScope();
+
+
+    inline ScoreLayouter* get_score_layouter() { return m_pScoreLyt; }
+    inline LibraryScope& get_library_scope() { return m_libraryScope; }
+    inline GraphicModel* get_graphic_model() { return m_pGModel; }
+    inline ImoScore* get_score() { return m_pScore; }
+    inline ScoreMeter* get_score_meter() { return m_pScoreMeter; }
+    inline SpacingAlgorithm* get_spacing_algorithm() { return m_pSpAlgorithm; }
+    inline EngraversMap& get_engravers_map() { return *m_pEngraversMap; }
+    inline ShapesCreator* get_shapes_creator() { return m_pShapesCreator; }
+    inline PartsEngraver* get_parts_engraver() { return m_pPartsEngraver; }
+
+
+protected:
+    //instantiation
+    friend class ScoreLayouter;
+    void initialice(ImoScore* pScore, EngraversMap* pEngraversMap);
+
+};
+
+//=======================================================================================
 // Algorithm to layout an score
 //
 class ScoreLayouter : public Layouter
 {
 protected:
-    LibraryScope&   m_libraryScope;
-    ImoScore*       m_pScore;
-    ScoreMeter*     m_pScoreMeter;
-    SpacingAlgorithm* m_pSpAlgorithm;
-    EngraversMap    m_engravers;
-    ShapesCreator*  m_pShapesCreator;
-    PartsEngraver*  m_pPartsEngraver;
+    ScoreLayoutScope  m_scoreLayoutScope;
+    ImoScore*         m_pScore;
+
+    //variables stored in ScoreLayoutScope
+    ScoreMeter*       m_pScoreMeter = nullptr;
+    SpacingAlgorithm* m_pSpAlgorithm = nullptr;
+    EngraversMap      m_engravers;
+    ShapesCreator*    m_pShapesCreator = nullptr;
+    PartsEngraver*    m_pPartsEngraver = nullptr;
+
+        //member variables
+
     UPoint          m_cursor;
     LUnits          m_startTop;
 
@@ -283,7 +305,7 @@ protected:
     LUnits distance_to_top_of_system(int iSystem, bool fFirstInPage);
 
     //AuxObjs and RelObjs pending to be engraved
-    std::list<PendingAuxObj*> m_pendingAuxObjs;
+    std::list<AuxObjContext*> m_pendingAuxObjs;
 
     //RelObjs that continue in next system
     std::list<PendingRelObj> m_notFinishedRelObj;
@@ -366,47 +388,23 @@ public:
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                     UPoint pos, ImoClef* pClef=nullptr, int octaveShift=0,
                                     unsigned flags=0, StaffObjsCursor* pCursor=nullptr);
-    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                  int idxStaff, VerticalProfile* pVProfile,
-                                  GmoShape* pParentShape);
+    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext& aoc,
+                                  const SystemLayoutScope& systemScope);
     GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
                                      UPoint uPos, LUnits width);
 
     //RelObj shapes
-    void start_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
-                                int idxStaff, VerticalProfile* pVProfile);
-    void continue_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                   int iSystem, int iCol, int iLine,
-                                   ImoInstrument* pInstr, int idxStaff,
-                                   VerticalProfile* pVProfile);
-    void finish_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                 GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                 int iSystem, int iCol, int iLine, LUnits prologWidth,
-                                 ImoInstrument* pInstr, int idxStaff,
-                                 VerticalProfile* pVProfile);
-    GmoShape* create_first_or_intermediate_shape(ImoRelObj* pRO, int iInstr, int iStaff,
-                                                 LUnits prologWidth,
-                                                 VerticalProfile* pVProfile);
-    GmoShape* create_last_shape(ImoRelObj* pRO);
+    void start_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& aoc);
+    void continue_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& aoc);
+    void finish_engraving_relobj(ImoRelObj* pRO, const AuxObjContext& aoc);
+
+    GmoShape* create_first_or_intermediate_shape(ImoRelObj* pRO, RelObjEngravingContext& ctx);
+    GmoShape* create_last_shape(ImoRelObj* pRO, RelObjEngravingContext& ctx);
 
     //AuxRelObj shapes
-    void start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
-                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                   int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
-                                   int idxStaff, VerticalProfile* pVProfile);
-    void continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
-                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                   int iSystem, int iCol, int iLine,
-                                   ImoInstrument* pInstr, int idxStaff,
-                                   VerticalProfile* pVProfile);
-    void finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
-                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                    int iSystem, int iCol, int iLine, LUnits prologWidth,
-                                    ImoInstrument* pInstr, int idxStaff,
-                                    VerticalProfile* pVProfile);
+    void start_engraving_auxrelobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc, const string& tag);
+    void continue_engraving_auxrelobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc, const string& tag);
+    void finish_engraving_auxrelobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc, const string& tag);
 
     //other shapes
     GmoShape* create_measure_number_shape(ImoObj* pCreator, const string& number,

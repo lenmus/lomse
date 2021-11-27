@@ -49,53 +49,34 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // SlurEngraver implementation
 //---------------------------------------------------------------------------------------
-SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           InstrumentEngraver* pInstrEngrv)
+SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int UNUSED(iSystem), int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
-                                      LUnits UNUSED(xStaffRight), LUnits yTop,
-                                      int idxStaff, VerticalProfile* pVProfile)
+void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    //data stored in base class
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
-    m_idxStaff = idxStaff;
-    m_idxStaffStart = idxStaff;
-    m_pVProfile = pVProfile;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+    m_idxStaffStart = aoc.idxStaff;
 
-    //data specific for this class
     m_pSlur = static_cast<ImoSlur*>(pRO);
 
-    m_pStartNote = static_cast<ImoNote*>(pSO);
-    m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
+    m_pStartNote = static_cast<ImoNote*>(aoc.pSO);
+    m_pStartNoteShape = static_cast<GmoShapeNote*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                    int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
-                                    LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                    LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
+void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pEndNote = static_cast<ImoNote*>(pSO);
-    m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
+    m_idxStaffEnd = aoc.idxStaff;
 
-    m_uStaffTop = yTop;
+    m_pEndNote = static_cast<ImoNote*>(aoc.pSO);
+    m_pEndNoteShape = static_cast<GmoShapeNote*>(aoc.pStaffObjShape);
 
     m_fSlurForGraces = m_pStartNote->is_grace_note() || m_pEndNote->is_grace_note();
-
-    m_idxStaff = idxStaff;
-    m_idxStaffEnd = idxStaff;
-    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
@@ -131,15 +112,9 @@ void SlurEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* SlurEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits yStaffTop,
-                                    LUnits prologWidth, VerticalProfile* pVProfile,
-                                    Color color)
+GmoShape* SlurEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
-    m_uStaffTop = yStaffTop;
-    m_pVProfile = pVProfile;
-    m_uPrologWidth = prologWidth;
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
     {
@@ -151,9 +126,10 @@ GmoShape* SlurEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffL
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* SlurEngraver::create_last_shape(Color color)
+GmoShape* SlurEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -208,7 +184,7 @@ void SlurEngraver::compute_start_end_points(int type)
             break;
 
         case k_system_end:
-            //slur end at systme right. It is the first shape when the slur does not
+            //slur end at system right. It is the first shape when the slur does not
             //finish in current system
             compute_start_point();
             compute_end_of_staff_point();
@@ -954,12 +930,6 @@ void SlurEngraver::find_contour_reference_points()
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-void SlurEngraver::set_prolog_width(LUnits width)
-{
-    m_uPrologWidth = width;
-}
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::method_for_two_points()

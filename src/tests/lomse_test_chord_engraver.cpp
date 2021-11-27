@@ -216,32 +216,30 @@ public:
     {
         int iInstr = 0;
         int iStaff = 0;
-        int iSystem = 0;
         int iCol = 0;
 
         int numNotes = (m_pShape3 ? 3 : 2);
 
         //first note
         m_pChordEngrv = LOMSE_NEW MyChordEngraver(m_libraryScope, m_pMeter, numNotes);
-        m_pChordEngrv->set_start_staffobj(m_pChord, m_pNote1, m_pShape1, iInstr, iStaff,
-                                          iSystem, iCol, 0.0f, 0.0f, 0.0f, -1, nullptr);
+        AuxObjContext aoc1(m_pNote1, m_pShape1, iInstr, iStaff, iCol, 0, nullptr, -1);
+        m_pChordEngrv->set_start_staffobj(m_pChord, aoc1);
         m_pStorage->save_engraver(m_pChordEngrv, m_pChord);
 
         if (numNotes == 3)
         {
             //second note
-            m_pChordEngrv->set_middle_staffobj(m_pChord, m_pNote2, m_pShape2, iInstr,
-                                        iStaff, iSystem, iCol,
-                                        0.0f, 0.0f, 0.0f, -1, nullptr);
+            AuxObjContext aoc2(m_pNote2, m_pShape2, iInstr, iStaff, iCol, 0, nullptr, -1);
+            m_pChordEngrv->set_middle_staffobj(m_pChord, aoc2);
             //last note
-            m_pChordEngrv->set_end_staffobj(m_pChord, m_pNote3, m_pShape3, iInstr,
-                                     iStaff, iSystem, iCol,
-                                     0.0f, 0.0f, 0.0f, -1, nullptr);
+            AuxObjContext aoc3(m_pNote3, m_pShape3, iInstr, iStaff, iCol, 0, nullptr, -1);
+            m_pChordEngrv->set_end_staffobj(m_pChord, aoc3);
         }
         else
-            m_pChordEngrv->set_end_staffobj(m_pChord, m_pNote2, m_pShape2, iInstr,
-                                     iStaff, iSystem, iCol,
-                                     0.0f, 0.0f, 0.0f, -1, nullptr);
+        {
+            AuxObjContext aoc2(m_pNote2, m_pShape2, iInstr, iStaff, iCol, 0, nullptr, -1);
+            m_pChordEngrv->set_end_staffobj(m_pChord, aoc2);
+        }
     }
 
     //-----------------------------------------------------------------------------------

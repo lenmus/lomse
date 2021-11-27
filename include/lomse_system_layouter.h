@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 #include "lomse_logger.h"
 #include "lomse_injectors.h"
 #include "lomse_spacing_algorithm.h"
+#include "lomse_aux_shapes_aligner.h"
 
 #include <list>
 #include <memory>
@@ -46,13 +47,13 @@ namespace lomse
 
 //forward declarations
 class ColumnStorage;
+class EngraversMap;
 class GmoBoxSlice;
 class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBoxSystem;
 class GmoShapeBeam;
 class GmoShapeNote;
-class AuxShapesAlignersSystem;
 class ImoAuxObj;
 class ImoRelObj;
 class ImoAuxRelObj;
@@ -63,22 +64,58 @@ class ImoStaffObj;
 class InstrumentEngraver;
 class PartsEngraver;
 class ScoreLayouter;
+class ScoreLayoutScope;
 class ScoreMeter;
 class ShapesCreator;
-class EngraversMap;
 class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
 class VerticalProfile;
-struct PendingAuxObj;
+
+struct AuxObjContext;
 enum EAuxShapesAlignmentScope : int;
 
-//---------------------------------------------------------------------------------------
+
+//=======================================================================================
+// Helper class to store global information whose scope is the layout of one system.
+// It facilitates access to this global information and simplifies the list of parameters
+// to pass to all classes and methods related to layout
+//
+class SystemLayoutScope
+{
+protected:
+    SystemLayouter*     m_pSystemLayouter = nullptr;
+    VerticalProfile*    m_pVProfile = nullptr;
+    AuxShapesAlignersSystem* m_pCurrentAuxShapesAligner = nullptr;
+//    SystemLayoutOptions* m_pOptions = nullptr;
+
+public:
+    explicit SystemLayoutScope(SystemLayouter* pParent);
+
+    inline SystemLayouter* get_system_layouter() const { return m_pSystemLayouter; }
+    inline VerticalProfile* get_vertical_profile() const { return m_pVProfile; }
+    inline AuxShapesAlignersSystem* get_aux_shapes_aligner() const { return m_pCurrentAuxShapesAligner; }
+
+
+protected:
+    //instantiation
+    friend class SystemLayouter;
+    void set_current_aux_shapes_aligner(AuxShapesAlignersSystem* p) { m_pCurrentAuxShapesAligner = p; }
+    void set_vertical_profile(VerticalProfile* p) { m_pVProfile = p; }
+
+};
+
+
+//=======================================================================================
 // SystemLayouter: algorithm to layout a system
-//---------------------------------------------------------------------------------------
+//
 class SystemLayouter
 {
 protected:
+    ScoreLayoutScope& m_scoreLayoutScope;
+    SystemLayoutScope m_systemLayoutScope;
+
+    //variables stored in ScoreLayoutScope
     ScoreLayouter*  m_pScoreLyt;
     LibraryScope&   m_libraryScope;
     ScoreMeter*     m_pScoreMeter;
@@ -86,37 +123,34 @@ protected:
     EngraversMap&   m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
-    VerticalProfile* m_pVProfile;
+    SpacingAlgorithm* m_pSpAlgorithm;
 
-    LUnits m_uPrologWidth;
-    GmoBoxSystem* m_pBoxSystem;
-    LUnits m_yMin;
-    LUnits m_yMax;
+    //variables used in SystemLayoutScope but owned by this SystemLayouter
+    std::unique_ptr<VerticalProfile> m_pVProfile;
+    std::unique_ptr<AuxShapesAlignersSystem> m_curAuxShapesAligner;
 
-    int m_iSystem;
-    int m_iFirstCol;
-    int m_iLastCol;
-    LUnits m_uFreeSpace;    //free space available on current system
+
+    GmoBoxSystem* m_pBoxSystem = nullptr;
+
+    LUnits m_uPrologWidth = 0.0f;
+    LUnits m_yMin = 0.0f;
+    LUnits m_yMax = 0.0f;
+    LUnits m_uFreeSpace = 0.0f;    //free space available on current system
+
+    int m_iSystem = 0;
+    int m_iFirstCol = 0;
+    int m_iLastCol = 0;
+    int m_barlinesInfo = 0;     //info about barlines at end of this system
+    int m_constrains = 0;
     UPoint m_pagePos;
-    bool m_fFirstColumnInSystem;
-    int m_barlinesInfo;     //info about barlines at end of this system
+    bool m_fFirstColumnInSystem = true;
 
     //prolog shapes waiting to be added to slice staff box
     std::list< std::tuple<GmoShape*, int, int> > m_prologShapes;
 
-    SpacingAlgorithm* m_pSpAlgorithm;
-    int m_constrains;
-
-    std::unique_ptr<AuxShapesAlignersSystem> m_curAuxShapesAligner;
 
 public:
-    SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& libraryScope,
-                   ScoreMeter* pScoreMeter, ImoScore* pScore,
-                   EngraversMap& engravers,
-                   ShapesCreator* pShapesCreator,
-                   PartsEngraver* pPartsEngraver,
-                   SpacingAlgorithm* pSpAlgorithm);
-    ~SystemLayouter();
+    explicit SystemLayouter(ScoreLayoutScope& scoreLayoutScope);
 
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
     void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos,
@@ -176,15 +210,15 @@ protected:
     bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
                                           bool fFirstNumberInSystem);
 
-    void engrave_attached_object(ImoObj* pAR, PendingAuxObj* pPAO, int iSystem);
-    void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObj* pPAO, int iSystem);
-    void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObj* pPAO, int iSystem);
+    void engrave_attached_object(ImoObj* pAR, const AuxObjContext& aoc, int iSystem);
+    void engrave_not_finished_relobj(ImoRelObj* pRO, const AuxObjContext& aoc);
+    void engrave_not_finished_lyrics(const std::string& tag, const AuxObjContext& aoc);
 
     void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
                                      int iCol, int iInstr, int iStaff, int idxStaff);
     void delete_rel_obj_engraver(ImoRelObj* pRO);
     void add_lyrics_shapes_to_model(const std::string& tag, int layer, bool fLast,
-                                    int iStaff, int idxStaff);
+                                    int iInstr, int iStaff);
     void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
                                 int iStaff, int idxStaff);
 

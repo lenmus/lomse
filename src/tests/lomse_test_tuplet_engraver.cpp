@@ -101,7 +101,6 @@ public:
     {
         int iInstr = 0;
         int iStaff = 0;
-        int iSystem = 0;
         int iCol = 0;
 
         list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pTuplet->get_related_objects();
@@ -139,28 +138,23 @@ public:
         for (it = notes.begin(); it != notes.end(); ++it, ++i)
         {
             ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );
+            AuxObjContext aoc(pNR, m_shapes[i], iInstr, iStaff, iCol, 0, nullptr, -1);
             if (i == 0)
             {
                 //first note
                 m_pTupletEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pMeter);
-                m_pTupletEngrv->set_start_staffobj(pTuplet, pNR, m_shapes[i],
-                                                 iInstr, iStaff, iSystem, iCol,
-                                                 0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pTupletEngrv->set_start_staffobj(pTuplet, aoc);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);
             }
             else if (i == numNotes-1)
             {
                 //last note
-                m_pTupletEngrv->set_end_staffobj(pTuplet, pNR, m_shapes[i],
-                                               iInstr, iStaff, iSystem, iCol,
-                                               0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pTupletEngrv->set_end_staffobj(pTuplet, aoc);
             }
             else
             {
                 //intermediate note
-                m_pTupletEngrv->set_middle_staffobj(pTuplet, pNR, m_shapes[i],
-                                                  iInstr, iStaff, iSystem, iCol,
-                                                  0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pTupletEngrv->set_middle_staffobj(pTuplet, aoc);
             }
         }
     }
@@ -223,7 +217,8 @@ SUITE(TupletEngraverTest)
         ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         prepare_to_engrave_tuplet(pTuplet);
 
-        m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->create_last_shape() );
+        RelObjEngravingContext ctx;
+        m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->create_last_shape(ctx) );
         CHECK( m_pTupletShape != nullptr );
 
         delete_test_data();

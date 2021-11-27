@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                                  int iInstr, InstrumentEngraver* pInstrEngrv)
-    : Engraver(libraryScope, pScoreMeter, iInstr)
+    : StaffObjEngraver(libraryScope, pScoreMeter, iInstr, 0)
     , m_pBarlineShape(nullptr)
     , m_pInstrEngrv(pInstrEngrv)
 {
@@ -54,7 +54,7 @@ BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreM
 
 //---------------------------------------------------------------------------------------
 BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
-    : Engraver(libraryScope, nullptr)
+    : StaffObjEngraver(libraryScope, nullptr, 0, 0)
     , m_pBarlineShape(nullptr)
     , m_pInstrEngrv(nullptr)
 {

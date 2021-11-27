@@ -47,7 +47,7 @@ class ScoreMeter;
 class StaffObjsCursor;
 
 //---------------------------------------------------------------------------------------
-class KeyEngraver : public Engraver
+class KeyEngraver : public StaffObjEngraver
 {
 protected:
     GmoShapeKeySignature* m_pKeyShape;

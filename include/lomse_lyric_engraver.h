@@ -36,7 +36,6 @@
 
 #include <list>
 #include <vector>
-using namespace std;
 
 namespace lomse
 {
@@ -58,8 +57,8 @@ class LyricEngraver : public AuxRelObjEngraver
 protected:
     GmoShapeLyrics* m_pLyricsShape;
     InstrumentEngraver* m_pInstrEngrv;
-    list< pair<ImoLyric*, GmoShape*> > m_lyrics;
-    vector<ShapeBoxInfo*> m_shapesInfo;
+    std::list< std::pair<ImoLyric*, GmoShape*> > m_lyrics;
+    std::vector<ShapeBoxInfo*> m_shapesInfo;
     UPoint m_origin;
     USize m_size;
     bool m_fLyricAbove;
@@ -79,23 +78,11 @@ public:
     ~LyricEngraver();
 
     //implementation of virtual methods from AuxRelObjEngraver
-    void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
-                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol,
-                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                            int idxStaff, VerticalProfile* pVProfile) override;
-    void set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
-                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                             int iSystem, int iCol,
-                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                             int idxStaff, VerticalProfile* pVProfile) override;
-    void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
-                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol,
-                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
-                          int idxStaff, VerticalProfile* pVProfile) override;
+    void set_start_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc) override;
+    void set_middle_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc) override;
+    void set_end_staffobj(ImoAuxRelObj* pARO, const AuxObjContext& aoc) override;
 
-    int create_shapes(Color color=Color(0,0,0)) override;
+    int create_shapes(const RelObjEngravingContext& ctx) override;
     int get_num_shapes() override { return m_numShapes; }
     ShapeBoxInfo* get_shape_box_info(int i) override { return m_shapesInfo[i]; }
 

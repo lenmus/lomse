@@ -48,14 +48,10 @@ class InstrumentEngraver;
 class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
-class PedalMarkEngraver : public Engraver
+class PedalMarkEngraver : public AuxObjEngraver
 {
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
-
 public:
-    PedalMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                      int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
+    PedalMarkEngraver(const EngraverContext& ctx);
 
     GmoShapePedalGlyph* create_shape(ImoPedalMark* pPedalMark, UPoint pos,
                                      const Color& color,
@@ -71,15 +67,9 @@ protected:
 class PedalLineEngraver : public RelObjEngraver
 {
 protected:
-
-    InstrumentEngraver* m_pInstrEngrv = nullptr;
-    LUnits m_uStaffTop = 0.0f;  //top line of current system
-    LUnits m_uStaffLeft = 0.0f;
-
     int m_numShapes = 0;
     ImoPedalLine* m_pPedal = nullptr;
     bool m_fPedalAbove = false;
-    LUnits m_uPrologWidth = 0.0f;
 
     ImoDirection* m_pStartDirection = nullptr;
     GmoShapeInvisible* m_pStartDirectionShape = nullptr;
@@ -94,32 +84,15 @@ protected:
     LUnits m_lineY = 0;
 
 public:
-    PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 InstrumentEngraver* pInstrEngrv);
+    PedalLineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
 
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol,
-                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                            int idxStaff, VerticalProfile* pVProfile) override;
-    void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                             int iSystem, int iCol,
-                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                             int idxStaff, VerticalProfile* pVProfile) override;
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol,
-                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                          int idxStaff, VerticalProfile* pVProfile) override;
+    void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_middle_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_end_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
 
     //RelObjEngraver mandatory overrides
-    void set_prolog_width(LUnits width) override;
-    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
-                                                 LUnits yStaffTop, LUnits prologWidth,
-                                                 VerticalProfile* pVProfile,
-                                                 Color color=Color(0,0,0)) override;
-    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(const RelObjEngravingContext& ctx) override;
+    GmoShape* create_last_shape(const RelObjEngravingContext& ctx) override;
 
 protected:
     double determine_font_size() override;

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -106,21 +106,9 @@ public:
     virtual ~ChordEngraver();
 
     //implementation of virtual methods from RelObjEngraver
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol,
-                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                            int idxStaff, VerticalProfile* pVProfile) override;
-    void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                             int iSystem, int iCol,
-                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                             int idxStaff, VerticalProfile* pVProfile) override;
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol,
-                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
-                          int idxStaff, VerticalProfile* pVProfile) override;
+    void set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_middle_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
+    void set_end_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc) override;
     int create_shapes(Color color=Color(0,0,0));
 
     void save_applicable_clefs(StaffObjsCursor* pCursor, int iInstr);

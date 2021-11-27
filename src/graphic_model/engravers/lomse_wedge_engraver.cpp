@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,58 +46,29 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // WedgeEngraver implementation
 //---------------------------------------------------------------------------------------
-WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                             InstrumentEngraver* pInstrEngrv)
+WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTop(0.0f)
-    , m_numShapes(0)
-    , m_pWedge(nullptr)
-    , m_fWedgeAbove(false)
-    , m_uPrologWidth(0.0f)
-    , m_pStartDirection(nullptr)
-    , m_pEndDirection(nullptr)
-    , m_pStartDirectionShape(nullptr)
-    , m_pEndDirectionShape(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int UNUSED(iSystem), int UNUSED(iCol),
-                                       LUnits UNUSED(xStaffLeft),
-                                       LUnits UNUSED(xStaffRight), LUnits yTop,
-                                       int idxStaff, VerticalProfile* pVProfile)
+void WedgeEngraver::set_start_staffobj(ImoRelObj* pRO, const AuxObjContext& aoc)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    m_iInstr = aoc.iInstr;
+    m_iStaff = aoc.iStaff;
+    m_idxStaff = aoc.idxStaff;
+
     m_pWedge = static_cast<ImoWedge*>(pRO);
 
-    m_pStartDirection = static_cast<ImoDirection*>(pSO);
-    m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
-
+    m_pStartDirection = static_cast<ImoDirection*>(aoc.pSO);
+    m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                     int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
-                                     LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
+void WedgeEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), const AuxObjContext& aoc)
 {
-    m_pEndDirection = static_cast<ImoDirection*>(pSO);
-    m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
-
-    m_uStaffTop = yTop;
-
-    m_idxStaff = idxStaff;
-    m_pVProfile = pVProfile;
+    m_pEndDirection = static_cast<ImoDirection*>(aoc.pSO);
+    m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(aoc.pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -108,15 +79,9 @@ void WedgeEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* WedgeEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits yStaffTop,
-                                    LUnits prologWidth, VerticalProfile* pVProfile,
-                                    Color color)
+GmoShape* WedgeEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
-    m_uStaffTop = yStaffTop;
-    m_pVProfile = pVProfile;
-    m_uPrologWidth = prologWidth;
+    save_context_parameters(ctx);
 
     if (m_numShapes == 0)
     {
@@ -128,9 +93,10 @@ GmoShape* WedgeEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaff
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* WedgeEngraver::create_last_shape(Color color)
+GmoShape* WedgeEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 {
-    m_color = color;
+    save_context_parameters(ctx);
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -323,7 +289,7 @@ LUnits WedgeEngraver::determine_shape_position_left(bool first) const
 {
     LUnits xLeft = determine_default_shape_position_left(first);
 
-    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+    const AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
 
     if (!pAligner)
         return xLeft;
@@ -378,7 +344,7 @@ LUnits WedgeEngraver::determine_shape_position_right() const
 {
     LUnits xRight = determine_default_shape_position_right();
 
-    const AuxShapesAligner* pAligner = m_pVProfile->get_current_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
+    const AuxShapesAligner* pAligner = get_aux_shapes_aligner(m_idxStaff, m_fWedgeAbove);
 
     if (!pAligner)
         return xRight;
@@ -440,12 +406,6 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-void WedgeEngraver::set_prolog_width(LUnits width)
-{
-    m_uPrologWidth = width;
-}
 
 
 }  //namespace lomse

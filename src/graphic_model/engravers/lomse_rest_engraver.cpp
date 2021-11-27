@@ -49,7 +49,7 @@ namespace lomse
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            EngraversMap* UNUSED(pEngravers), int iInstr, int iStaff,
                            int clefType, int octaveShift)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    : StaffObjEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_restType(k_quarter)
     , m_numDots(0)
     , m_clefType(clefType)

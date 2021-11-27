@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@ class ScoreMeter;
 class GmoShapeCodaSegno;
 
 //---------------------------------------------------------------------------------------
-class CodaSegnoEngraver : public Engraver
+class CodaSegnoEngraver : public AuxObjEngraver
 {
 protected:
     ImoSymbolRepetitionMark* m_pRepetitionMark;
@@ -52,9 +52,7 @@ protected:
     GmoShapeCodaSegno* m_pCodaSegnoShape;
 
 public:
-    CodaSegnoEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                      int iInstr, int iStaff);
-    ~CodaSegnoEngraver() {}
+    CodaSegnoEngraver(const EngraverContext& ctx);
 
     GmoShapeCodaSegno* create_shape(ImoSymbolRepetitionMark* pRepetitionMark, UPoint pos,
                                     Color color=Color(0,0,0),

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -57,7 +57,7 @@ namespace lomse
 //=======================================================================================
 NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            EngraversMap* pEngravers, int iInstr, int iStaff)
-    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    : StaffObjEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pNote(nullptr)
     , m_clefType(k_clef_undefined)
     , m_octaveShift(0)
@@ -116,7 +116,7 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, int octaveShi
 //---------------------------------------------------------------------------------------
 double NoteEngraver::determine_font_size()
 {
-    double fontSize = Engraver::determine_font_size();
+    double fontSize = StaffSymbolEngraver::determine_font_size();
 
     switch (m_symbolSize)
     {
@@ -348,9 +348,9 @@ void NoteEngraver::add_shapes_for_accidentals_if_required()
 {
     if (m_acc != k_no_accidentals)
     {
-        AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff, m_fontSize);
+        AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
         m_pAccidentalsShape = engrv.create_shape(m_pNote, UPoint(m_uxLeft, m_uyTop),
-                                                 m_acc, false /*cautionary accidentals*/,
+                                                 m_acc, m_fontSize, false /*cautionary accidentals*/,
                                                  m_color);
         m_pNoteShape->add_accidentals(m_pAccidentalsShape);
         m_uxLeft += m_pAccidentalsShape->get_width();
@@ -685,8 +685,8 @@ void NoteEngraver::create_chord()
         LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes, m_fontSize, m_symbolSize);
     m_pEngravers->save_engraver(pEngrv, pChord);
 
-    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
-                               0, 0, 0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
+    AuxObjContext aoc(m_pNote, m_pNoteShape, m_iInstr, m_iStaff, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_start_staffobj(pChord, aoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -696,8 +696,8 @@ void NoteEngraver::add_to_chord()
     ChordEngraver* pEngrv
         = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
 
-    pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
-                                0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
+    AuxObjContext aoc(m_pNote, m_pNoteShape, 0, 0, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_middle_staffobj(pChord, aoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -706,9 +706,8 @@ void NoteEngraver::layout_chord()
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
         = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
-    pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
-                             0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
-
+    AuxObjContext aoc(m_pNote, m_pNoteShape, 0, 0, 0, 0, nullptr, m_idxStaff);
+    pEngrv->set_end_staffobj(pChord, aoc);
     pEngrv->save_applicable_clefs(m_pCursor, m_iInstr);
     pEngrv->create_shapes(pChord->get_color());
 
@@ -724,9 +723,7 @@ void NoteEngraver::layout_chord()
 StemFlagEngraver::StemFlagEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                                    ImoObj* pCreatorImo, int iInstr, int iStaff,
                                    double fontSize)
-    : Engraver(libraryScope, pScoreMeter)
-    , m_iInstr(iInstr)
-    , m_iStaff(iStaff)
+    : StaffSymbolEngraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_noteType(0)
     , m_fStemDown(false)
     , m_fWithFlag(false)

@@ -190,7 +190,6 @@ public:
     {
         int iInstr = 0;
         int iStaff = 0;
-        int iSystem = 0;
         int iCol = 0;
 
         list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pBeam->get_related_objects();
@@ -218,28 +217,23 @@ public:
         for (it = notes.begin(); it != notes.end(); ++it, ++i)
         {
             ImoNote* pNote = static_cast<ImoNote*>( (*it).first );
+            AuxObjContext aoc(pNote, m_shapes[i], iInstr, iStaff, iCol, 0, nullptr, -1);
             if (i == 0)
             {
                 //first note
                 m_pBeamEngrv = LOMSE_NEW MyBeamEngraver(m_libraryScope, m_pMeter);
-                m_pBeamEngrv->set_start_staffobj(pBeam, pNote, m_shapes[i],
-                                                 iInstr, iStaff, iSystem, iCol,
-                                                 0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pBeamEngrv->set_start_staffobj(pBeam, aoc);
                 m_pStorage->save_engraver(m_pBeamEngrv, pBeam);
             }
             else if (i == numNotes-1)
             {
                 //last note
-                m_pBeamEngrv->set_end_staffobj(pBeam, pNote, m_shapes[i],
-                                               iInstr, iStaff, iSystem, iCol,
-                                               0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pBeamEngrv->set_end_staffobj(pBeam, aoc);
             }
             else
             {
                 //intermediate note
-                m_pBeamEngrv->set_middle_staffobj(pBeam, pNote, m_shapes[i],
-                                                  iInstr, iStaff, iSystem, iCol,
-                                                  0.0f, 0.0f, 0.0f, -1, nullptr);
+                m_pBeamEngrv->set_middle_staffobj(pBeam, aoc);
             }
         }
     }
@@ -506,7 +500,8 @@ SUITE(BeamEngraverTest)
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape() );
+        RelObjEngravingContext ctx;
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape(ctx) );
         CHECK( m_pBeamShape != nullptr );
 
         delete_test_data();
@@ -519,7 +514,8 @@ SUITE(BeamEngraverTest)
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape() );
+        RelObjEngravingContext ctx;
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape(ctx) );
 
         std::vector<GmoShapeNote*>::iterator it;
         for (it = m_shapes.begin(); it != m_shapes.end(); ++it)
