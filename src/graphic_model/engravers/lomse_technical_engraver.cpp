@@ -55,8 +55,8 @@ TechnicalEngraver::TechnicalEngraver(const EngraverContext& ctx)
 
 //---------------------------------------------------------------------------------------
 GmoShapeTechnical* TechnicalEngraver::create_shape(ImoTechnical* pTechnical,
-                                                         UPoint pos, Color color,
-                                                         GmoShape* pParentShape)
+                                                   UPoint pos, Color color,
+                                                   GmoShape* pParentShape)
 {
     m_pTechnical = pTechnical;
     m_placement = pTechnical->get_placement();
@@ -235,8 +235,6 @@ int TechnicalEngraver::find_glyph()
             return k_glyph_string_down_bow;
         case k_technical_harmonic:
             return k_glyph_string_harmonic;
-//        case k_technical_fingering:
-//            return
         case k_technical_double_tongue:
             return (m_fAbove ? k_glyph_double_tongue_above : k_glyph_double_tongue_below);
         case k_technical_triple_tongue:

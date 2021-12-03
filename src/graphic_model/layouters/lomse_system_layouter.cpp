@@ -109,6 +109,7 @@ static const std::initializer_list<EngravingOrderInfo> m_order
     { k_imo_ornament },
     { k_imo_symbol_repetition_mark },
     { k_imo_technical },
+    { k_imo_fingering },
     { k_imo_articulation_line },
     { k_imo_text_repetition_mark },
     { k_imo_octave_shift },

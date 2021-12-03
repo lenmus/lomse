@@ -177,6 +177,8 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_dot]               = "dot            ";
         m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark  ";
         m_typeToName[k_shape_fermata]           = "fermata        ";
+        m_typeToName[k_shape_fingering_box]     = "fingering-box  ";
+        m_typeToName[k_shape_fingering]         = "fingering      ";
         m_typeToName[k_shape_flag]              = "flag           ";
         m_typeToName[k_shape_grace_stroke]      = "grace-stroke   ";
         m_typeToName[k_shape_image]             = "image          ";

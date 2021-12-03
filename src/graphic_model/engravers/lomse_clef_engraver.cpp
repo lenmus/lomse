@@ -252,55 +252,5 @@ Tenths ClefEngraver::get_glyph_offset()
     }
 }
 
-////---------------------------------------------------------------------------------------
-//UPoint ClefEngraver::ComputeBestLocation(UPoint& uOrg, lmPaper* pPaper)
-//{
-//	// if no location is specified in LDP source file, this method is invoked from
-//	// base class to ask derived object to compute a suitable position to
-//	// place itself.
-//	// uOrg is the assigned paper position for this object.
-//
-//	UPoint uPos = uOrg;
-//
-//	// get the shift to the staff on which the clef must be drawn
-//	uPos.y += m_pVStaff->GetStaffOffset(m_nStaffNum);
-//
-//	return uPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits ClefEngraver::LayoutObject(GmoBox* pBox, lmPaper* pPaper, UPoint uPos, Color colorC)
-//{
-//    // This method is invoked by the base class (lmStaffObj). It is responsible for
-//    // creating the shape object and adding it to the graphical model.
-//    // Paper cursor must be used as the base for positioning.
-//
-//    if (lmPRESERVE_SHAPES && !IsDirty())
-//    {
-//        //Not dirty: just add existing shape (main shape) to the Box
-//        GmoShape* pOldShape = this->GetShape(1);
-//        pBox->AddShape(pOldShape, GetLayer());
-//        pOldShape->SetColour(*wxCYAN);//colorC);       //change its colour to new desired colour
-//
-//        //set shapes index counter so that first prolog shape will have index 1
-//        SetShapesIndexCounter(1);
-//    }
-//    else
-//    {
-//        //Dirty: create new shapes for this object
-//
-//        //if not prolog clef its size must be smaller. We know that it is a prolog clef because
-//        //there is no previous context
-//        bool fSmallClef = (m_pContext->GetPrev() != (lmContext*)nullptr);
-//
-//        //create the shape object
-//        GmoShape* pShape = CreateShape(pBox, pPaper, uPos, colorC, fSmallClef);
-//        pShape->SetShapeLevel(lm_eMainShape);
-//    }
-//
-//    //return total width
-//	return GetShape()->GetWidth();
-//}
-
 
 }  //namespace lomse

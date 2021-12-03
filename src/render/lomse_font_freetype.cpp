@@ -902,6 +902,8 @@ void font_engine_freetype_base::update_char_size()
 bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
 {
     m_glyph_index = FT_Get_Char_Index(m_cur_face, glyph_code);
+    if (m_glyph_index == 0)
+        return false;   //missing glyph
     m_last_error = FT_Load_Glyph(m_cur_face,
                                     m_glyph_index,
                                     m_hinting ? FT_LOAD_DEFAULT : FT_LOAD_NO_HINTING);

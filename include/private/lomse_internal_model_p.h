@@ -910,6 +910,7 @@ enum EImoObjType
     k_imo_pedal_mark,       ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pedal mark
     k_imo_symbol_repetition_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Symbol for repetition mark
     k_imo_technical,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Technical mark
+    k_imo_fingering,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Technical mark: Fingering
     k_imo_text_repetition_mark, ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Text for repetition mark
 
     // ImoArticulation (A)
@@ -1255,92 +1256,71 @@ private:
     }
 };
 
-class ImoAttr
+
+//=======================================================================================
+/** Some attributes are rarely present in an element and defining member variables in
+    the element for these attributes is a memory overhead, specially for very common
+    elements.
+
+    Thus, class %ImoObj implements a standard default solution for adding attributes
+    to any element without using member variables. It is based on maintaining a list
+    of %AttrObj objects. And each %AttrObj object in the list represents an additional
+    existing attribute with its value.
+
+    As the IM is not a generic DOM and all possible attributes names are known in
+    advance, an enummerated type is used for attributes name instead of a string,
+    to save memory.
+
+    Also the values for attributes are not strings but can be different types:
+    string, int, float, bool, color, etc.
+
+    IMPORTANT:
+    When modifying Lomse to create a new attribute, appart from adding a new element
+    to the enum EImoAttribute, it is necessary to add the new attribute information
+    to method AttributesTable::get_data_for(), to describe it.
+
+*/
+class AttrObj
 {
 protected:
-    int m_attrbIdx;
-    AttribValue m_value;
-    ImoAttr* m_next;
+    int m_attrbIdx;         //attribute name, from enum EImoAttribute
+    AttribValue m_value;    //attrib. value
+    AttrObj* m_next = nullptr;      //ptr to next attribute for the element, if any
 
 public:
-    ImoAttr(int idx) : m_attrbIdx(idx), m_next(nullptr) {}
-    ImoAttr(int idx, const std::string& value);
-    ImoAttr(int idx, int value);
-    ImoAttr(int idx, float value);
-    ImoAttr(int idx, double value);
-    ImoAttr(int idx, bool value);
-    ImoAttr(int idx, Color value);
-    ~ImoAttr() {}
+    AttrObj(int idx) : m_attrbIdx(idx), m_next(nullptr) {}
+    AttrObj(int idx, const std::string& value);
+    AttrObj(int idx, int value);
+    AttrObj(int idx, float value);
+    AttrObj(int idx, double value);
+    AttrObj(int idx, bool value);
+    AttrObj(int idx, Color value);
+    virtual ~AttrObj();
 
     const std::string get_name();
 
-    inline int get_int_value()
-    {
-        return static_cast<int>(m_value);
-    }
-    inline double get_double_value()
-    {
-        return static_cast<double>(m_value);
-    }
-    inline std::string get_string_value()
-    {
-        return static_cast<string>(m_value);
-    }
-    inline bool get_bool_value()
-    {
-        return static_cast<bool>(m_value);
-    }
-    inline float get_float_value()
-    {
-        return static_cast<float>(m_value);
-    }
-    inline Color get_color_value()
-    {
-        return static_cast<Color>(m_value);
-    }
+    inline int get_int_value() { return static_cast<int>(m_value); }
+    inline double get_double_value() { return static_cast<double>(m_value); }
+    inline std::string get_string_value() { return static_cast<string>(m_value); }
+    inline bool get_bool_value() { return static_cast<bool>(m_value); }
+    inline float get_float_value() { return static_cast<float>(m_value); }
+    inline Color get_color_value() { return static_cast<Color>(m_value); }
 
-    inline void set_string_value(const std::string& value)
-    {
-        m_value = value;
-    }
-    inline void set_int_value(int value)
-    {
-        m_value = value;
-    }
-    inline void set_double_value(double value)
-    {
-        m_value = value;
-    }
-    inline void set_float_value(float value)
-    {
-        m_value = value;
-    }
-    inline void set_bool_value(bool value)
-    {
-        m_value = value;
-    }
-    inline void set_color_value(Color value)
-    {
-        m_value = value;
-    }
+    inline void set_string_value(const std::string& value) { m_value = value; }
+    inline void set_int_value(int value) { m_value = value; }
+    inline void set_double_value(double value) { m_value = value; }
+    inline void set_float_value(float value) { m_value = value; }
+    inline void set_bool_value(bool value) { m_value = value; }
+    inline void set_color_value(Color value) { m_value = value; }
 
-    inline int get_attrib_idx()
-    {
-        return m_attrbIdx;
-    }
-    inline ImoAttr* get_next_attrib()
-    {
-        return m_next;
-    }
+    inline int get_attrib_idx() { return m_attrbIdx; }
+    inline AttrObj* get_next_attrib() { return m_next; }
 
     static const std::string get_name(int idx);
 
 protected:
     friend class ImoObj;
-    inline void set_next_attrib(ImoAttr* pAttr)
-    {
-        m_next = pAttr;
-    }
+    inline void set_next_attrib(AttrObj* pAttr) { m_next = pAttr; }
 
 };
 
@@ -1422,7 +1402,7 @@ protected:
     ImoId m_id;
     int m_objtype;
     unsigned int m_flags;
-    ImoAttr* m_pAttribs;
+    AttrObj* m_pAttribs;
 
 protected:
     ImoObj(int objtype, ImoId id=k_no_imoid);
@@ -1511,11 +1491,11 @@ public:
     virtual bool get_bool_attribute(TIntAttribute idx);
     virtual string get_string_attribute(TIntAttribute idx);
     //attribute nodes
-    ImoAttr* get_attribute_node(TIntAttribute idx);
+    AttrObj* get_attribute_node(TIntAttribute idx);
     void remove_attribute(TIntAttribute idx);
     //miscellaneous
     virtual int get_num_attributes();
-    inline ImoAttr* get_first_attribute() { return m_pAttribs; }
+    inline AttrObj* get_first_attribute() { return m_pAttribs; }
     virtual list<TIntAttribute> get_supported_attributes()
     {
         list<TIntAttribute> supported;
@@ -1588,6 +1568,7 @@ public:
     inline bool is_fermata() { return m_objtype == k_imo_fermata; }
     inline bool is_figured_bass() { return m_objtype == k_imo_figured_bass; }
     inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
+    inline bool is_fingering() { return m_objtype == k_imo_fingering; }
     inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
     inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
     bool is_gap();      ///a rest representing a goFwd element
@@ -1652,7 +1633,7 @@ public:
     inline bool is_table_body() { return m_objtype == k_imo_table_body; }
     inline bool is_table_head() { return m_objtype == k_imo_table_head; }
     inline bool is_table_row() { return m_objtype == k_imo_table_row; }
-    inline bool is_technical() { return m_objtype == k_imo_technical; }
+    inline bool is_technical() { return m_objtype == k_imo_technical || m_objtype == k_imo_fingering; }
     inline bool is_text_info() { return m_objtype == k_imo_text_info; }
     inline bool is_text_item() { return m_objtype == k_imo_text_item; }
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
@@ -1681,11 +1662,10 @@ protected:
     void visit_children(BaseVisitor& v);
     void propagate_dirty();
     void remove_id();
-    void delete_attributes();
 
     //attributes
-    ImoAttr* set_attribute_node(ImoAttr* newAttr);
-    ImoAttr* get_last_attribute();
+    AttrObj* set_attribute_node(AttrObj* newAttr);
+    AttrObj* get_last_attribute();
 
 };
 
@@ -4674,6 +4654,13 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** %ImoTechnical represents technical indications attached to a note/rest to give
+    performance information. Most technical indications just only require the type of
+    technical indication and, thus, they are represented by an ImoTechnical object.
+
+    For technical indications requiring additional info, specific derived classes
+    are created.
+*/
 class ImoTechnical : public ImoAuxObj
 {
 protected:
@@ -4687,29 +4674,89 @@ protected:
         , m_placement(k_placement_default)
     {
     }
+    ImoTechnical(int type)
+        : ImoAuxObj(type)
+        , m_technicalType(k_technical_unknown)
+        , m_placement(k_placement_default)
+    {
+    }
 
 public:
     virtual ~ImoTechnical() {}
 
-    //getters
-    inline int get_placement()
+    //getters and setters
+    inline int get_placement() { return m_placement; }
+    inline int get_technical_type() { return m_technicalType; }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_technical_type(int technicalType) { m_technicalType = technicalType; }
+
+};
+
+//---------------------------------------------------------------------------------------
+/** Helper class for ImoFingering, with all the information for one fingering element.
+
+    - 'value' is the fingering symbols, normally numbers 1 to 5 (e.g "2") but other
+       values are possible.
+
+    - 'attribs' is the list of optional attributes (position, color, font and placement)
+      that each fingering element could have. If not present, the information from
+      owner ImoFingering element is used.
+
+    - 'flags' are boolean marks to indicate different type of fingering data:
+        - bit 0: the fingering is a substitution for previous fingering data.
+        - bit 1: it is an alternative fingering for previous fingering data.
+*/
+class FingerData
+{
+public:
+    std::string value;              //fingering symbols
+    AttrObj* attribs = nullptr;     //position, font, color, placement
+    unsigned flags = 0;
+
+    enum EFingeringFlags
     {
-        return m_placement;
-    }
-    inline int get_technical_type()
+        k_fingering_substitution    = 0x0001,   //it is a substitution
+        k_fingering_alternative     = 0x0002,   //it is an alternative
+    };
+
+    FingerData(const std::string& val) : value(val) {}
+    ~FingerData() { delete attribs; }
+
+
+    //helper for flags
+    inline bool is_substitution() const { return (flags & k_fingering_substitution) != 0; }
+    inline void set_substitution(bool value) { value ? flags |= k_fingering_substitution
+                                                     : flags &= ~k_fingering_substitution; }
+    inline bool is_alternative() const { return (flags & k_fingering_alternative) != 0; }
+    inline void set_alternative(bool value) { value ? flags |= k_fingering_alternative
+                                                    : flags &= ~k_fingering_alternative; }
+
+};
+
+//---------------------------------------------------------------------------------------
+/** %ImoFingering represents fingering information. As multiple fingerings may be given,
+    fingering information is stored in a list of fingerings.
+*/
+class ImoFingering : public ImoTechnical
+{
+protected:
+    std::list<FingerData> m_fingerings;
+
+    friend class ImFactory;
+    ImoFingering()
+        : ImoTechnical(k_imo_fingering)
     {
-        return m_technicalType;
+        m_technicalType = k_technical_fingering;
     }
 
-    //setters
-    inline void set_placement(int placement)
-    {
-        m_placement = placement;
-    }
-    inline void set_technical_type(int technicalType)
-    {
-        m_technicalType = technicalType;
-    }
+public:
+
+    //building
+    FingerData& add_fingering(const std::string& value);
+
+    //getters
+    inline size_t num_fingerings() { return m_fingerings.size(); }
+    inline const std::list<FingerData>& get_fingerings() { return m_fingerings; }
 
 };
 

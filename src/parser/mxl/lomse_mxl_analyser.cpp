@@ -449,6 +449,7 @@ enum EMxlTag
     k_mxl_tag_ending,
     k_mxl_tag_eyeglasses,
     k_mxl_tag_fermata,
+    k_mxl_tag_fingering,
     k_mxl_tag_forward,
     k_mxl_tag_harp_pedals,
     k_mxl_tag_image,
@@ -1518,6 +1519,16 @@ protected:
             return static_cast<ImoNote*>(m_pAnchor);
 
         LOMSE_LOG_ERROR("pAnchor is nullptr or it is not note");
+        return nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoNoteRest* get_anchor_as_note_rest()
+    {
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            return static_cast<ImoNoteRest*>(m_pAnchor);
+
+        LOMSE_LOG_ERROR("pAnchor is nullptr or it is not note/rest");
         return nullptr;
     }
 
@@ -3771,6 +3782,127 @@ protected:
 
 };
 
+
+//@--------------------------------------------------------------------------------------
+//@ <fingering>
+//@ <!ELEMENT fingering (#PCDATA)>
+//@ <!ATTLIST fingering
+//@     substitution %yes-no; #IMPLIED
+//@     alternate %yes-no; #IMPLIED
+//@     %print-style;
+//@     %placement;
+//@ >
+//@
+class FingeringMxlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoFingering* m_pFingering = nullptr;
+    bool m_fSubstitution = false;
+    bool m_fAlternate = false;
+    EPlacement m_placement = k_placement_default;
+
+public:
+    FingeringMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoNoteRest* pNR = get_anchor_as_note_rest();
+        if (pNR == nullptr)
+            return nullptr;
+
+        bool fHasFingeringInfo = get_fingering(pNR);
+
+
+        // attrib: substitution
+        m_fSubstitution = get_optional_yes_no_attribute("substitution", false);
+
+        // attrib: alternate
+        m_fAlternate = get_optional_yes_no_attribute("alternate", false);
+
+        // attrib: %print-style
+//        get_attributes_for_print_style(m_pFingering);
+        //TODO: This places the print-style attributes in the m_Fingering object , not in
+        //      the FingerData element
+
+        // attrib: %placement
+        if (has_attribute("placement"))
+            set_placement();
+
+        //get value
+        set_fingering(m_analysedNode.value());
+
+
+        if (m_pFingering->num_fingerings() == 0)
+        {
+            delete m_pFingering;
+            return nullptr;
+        }
+
+        if (!fHasFingeringInfo)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            pNR->add_attachment(pDoc, m_pFingering);
+        }
+
+        return nullptr;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    bool get_fingering(ImoNoteRest* pNR)
+    {
+        //returns true if the note already has fingering information
+
+        ImoAuxObj* pAO = pNR->find_attachment(k_imo_fingering);
+        if (pAO)
+        {
+            m_pFingering = static_cast<ImoFingering*>(pAO);
+            return true;
+        }
+        else
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            m_pFingering = static_cast<ImoFingering*>(
+                                        ImFactory::inject(k_imo_fingering, pDoc) );
+            return false;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_placement()
+    {
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            m_placement = k_placement_above;
+        else if (value == "below")
+            m_placement = k_placement_below;
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_fingering(const string& fingering)
+    {
+        if (fingering.empty())
+            return;     // <fingering> is empty. Ignored
+
+        FingerData& data = m_pFingering->add_fingering(fingering);
+        data.set_substitution(m_fSubstitution);
+        data.set_alternative(m_fAlternate);
+        if (m_placement != k_placement_default)
+        {
+            //TODO
+        }
+    }
+
+};
+
 //@--------------------------------------------------------------------------------------
 //@ <!ELEMENT backup (duration, %editorial;)>
 //@ <!ELEMENT forward
@@ -4691,20 +4823,28 @@ public:
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
         {
-            analyse_optional("tied", m_pAnchor)
-            || analyse_optional("slur", m_pAnchor)
-            || analyse_optional("tuplet", m_pAnchor)
-            || analyse_optional("glissando", m_pAnchor)
-            || analyse_optional("slide", m_pAnchor)
-            || analyse_optional("ornaments", m_pAnchor)
-            || analyse_optional("technical", m_pAnchor)
-            || analyse_optional("articulations", m_pAnchor)
-            || analyse_optional("dynamics", m_pAnchor)
-            || analyse_optional("fermata", m_pAnchor)
-            || analyse_optional("arpeggiate", m_pAnchor)
-            || analyse_optional("non-arpeggiate", m_pAnchor)
-            || analyse_optional("accidental-mark", m_pAnchor)
-            || analyse_optional("other-notation", m_pAnchor);
+            if (analyse_optional("tied", m_pAnchor)
+                || analyse_optional("slur", m_pAnchor)
+                || analyse_optional("tuplet", m_pAnchor)
+                || analyse_optional("glissando", m_pAnchor)
+                || analyse_optional("slide", m_pAnchor)
+                || analyse_optional("ornaments", m_pAnchor)
+                || analyse_optional("technical", m_pAnchor)
+                || analyse_optional("articulations", m_pAnchor)
+                || analyse_optional("dynamics", m_pAnchor)
+                || analyse_optional("fermata", m_pAnchor)
+                || analyse_optional("arpeggiate", m_pAnchor)
+                || analyse_optional("non-arpeggiate", m_pAnchor)
+                || analyse_optional("accidental-mark", m_pAnchor)
+                || analyse_optional("other-notation", m_pAnchor)
+               )
+            {
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
         }
 
         return nullptr;
@@ -7264,8 +7404,10 @@ protected:
 //@                 string | hammer-on | pull-off | bend | tap | heel |
 //@                 toe | fingernails | hole | arrow | handbell |
 //@                 other-technical ]
+//@<!ATTLIST technical
+//@    %optional-unique-id;
+//@>
 //@
-
 class TecnicalMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -7275,14 +7417,12 @@ public:
 
     ImoObj* do_analysis() override
     {
-        ImoNoteRest* pNR = nullptr;
-        if (m_pAnchor && m_pAnchor->is_note_rest())
-            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
-        else
-        {
-            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNoteRest");
+        ImoNoteRest* pNR = get_anchor_as_note_rest();
+        if (pNR == nullptr)
             return nullptr;
-        }
+
+        // attrib: %optional-unique-id
+        //TODO
 
         while (more_children_to_analyse())
         {
@@ -7290,42 +7430,53 @@ public:
             if (m_childToAnalyse.name() == "up-bow")
             {
                 get_technical_symbol(pNR, k_technical_up_bow);
+                move_to_next_child();
             }
             else if (m_childToAnalyse.name() == "down-bow")
             {
                 get_technical_symbol(pNR, k_technical_down_bow);
+                move_to_next_child();
             }
             else if (m_childToAnalyse.name() == "double-tongue")
             {
                 get_technical_symbol(pNR, k_technical_double_tongue);
+                move_to_next_child();
             }
             else if (m_childToAnalyse.name() == "triple-tongue")
             {
                 get_technical_symbol(pNR, k_technical_triple_tongue);
+                move_to_next_child();
             }
 
-        //not properly supported:
+            //technical indications requiring additional info
+            else if (analyse_optional("fingering", m_pAnchor)
+//                     || analyse_optional("harmonic", m_pAnchor)
+//                     || analyse_optional("hole", m_pAnchor)
+//                     || analyse_optional("handbell", m_pAnchor)
+                    )
+            {
+            }
+            //TODO: review all the following to parse the additional info
             else if (m_childToAnalyse.name() == "harmonic")
             {
                 get_technical_symbol(pNR, k_technical_harmonic);
+                move_to_next_child();
             }
-//            else if (m_childToAnalyse.name() == "fingering")
-//            {
-//                get_technical_symbol(pNR, k_technical_fingering);
-//            }
             else if (m_childToAnalyse.name() == "hole")
             {
                 get_technical_symbol(pNR, k_technical_hole);
+                move_to_next_child();
             }
             else if (m_childToAnalyse.name() == "handbell")
             {
                 get_technical_symbol(pNR, k_technical_handbell);
+                move_to_next_child();
             }
-            else        //other-technical
+            else
             {
                 error_invalid_child();
+                move_to_next_child();
             }
-            move_to_next_child();
         }
 
         error_if_more_elements();
@@ -7336,7 +7487,7 @@ public:
 protected:
 
     //-----------------------------------------------------------------------------------
-    ImoTechnical* get_technical_symbol(ImoNoteRest* pNR, int type)
+    void get_technical_symbol(ImoNoteRest* pNR, int type)
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTechnical* pImo = static_cast<ImoTechnical*>(
@@ -7348,7 +7499,6 @@ protected:
             set_placement(pImo);
 
         pNR->add_attachment(pDoc, pImo);
-        return pImo;
     }
 
     //-----------------------------------------------------------------------------------
@@ -7364,6 +7514,21 @@ protected:
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Unknown placement attrib. '" + value + "'. Ignored.");
         }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_fingering(ImoNoteRest* pNR)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTechnical* pImo = static_cast<ImoTechnical*>(
+                                ImFactory::inject(k_imo_technical, pDoc) );
+        pImo->set_technical_type(k_technical_fingering);
+
+        // [attrib]: placement (above | below)
+        if (has_attribute(&m_childToAnalyse, "placement"))
+            set_placement(pImo);
+
+        pNR->add_attachment(pDoc, pImo);
     }
 
 };
@@ -8835,6 +9000,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["ending"] = k_mxl_tag_ending;
     m_NameToEnum["eyeglasses"] = k_mxl_tag_eyeglasses;
     m_NameToEnum["fermata"] = k_mxl_tag_fermata;
+    m_NameToEnum["fingering"] = k_mxl_tag_fingering;
     m_NameToEnum["forward"] = k_mxl_tag_forward;
     m_NameToEnum["harp-pedals"] = k_mxl_tag_harp_pedals;
     m_NameToEnum["image"] = k_mxl_tag_image;
@@ -9733,6 +9899,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_ending:               return LOMSE_NEW EndingMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_eyeglasses:           return LOMSE_NEW EyeglassesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_fermata:              return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_fingering:            return LOMSE_NEW FingeringMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_harp_pedals:          return LOMSE_NEW HarpPedalsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_image:                return LOMSE_NEW ImageMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
