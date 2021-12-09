@@ -115,9 +115,15 @@ static string m_unknown = "unknown";
 #define k_default_width         0.0f
 
 //=======================================================================================
-// ImoAttr implementation
+// AttrObj implementation
 //=======================================================================================
-ImoAttr::ImoAttr(int idx, const string& value)
+AttrObj::~AttrObj()
+{
+    delete m_next;
+}
+
+//---------------------------------------------------------------------------------------
+AttrObj::AttrObj(int idx, const string& value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -125,7 +131,7 @@ ImoAttr::ImoAttr(int idx, const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr::ImoAttr(int idx, int value)
+AttrObj::AttrObj(int idx, int value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -133,7 +139,7 @@ ImoAttr::ImoAttr(int idx, int value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr::ImoAttr(int idx, double value)
+AttrObj::AttrObj(int idx, double value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -141,7 +147,7 @@ ImoAttr::ImoAttr(int idx, double value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr::ImoAttr(int idx, bool value)
+AttrObj::AttrObj(int idx, bool value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -149,7 +155,7 @@ ImoAttr::ImoAttr(int idx, bool value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr::ImoAttr(int idx, float value)
+AttrObj::AttrObj(int idx, float value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -157,7 +163,7 @@ ImoAttr::ImoAttr(int idx, float value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr::ImoAttr(int idx, Color value)
+AttrObj::AttrObj(int idx, Color value)
     : m_attrbIdx(idx)
     , m_next(nullptr)
 {
@@ -165,13 +171,13 @@ ImoAttr::ImoAttr(int idx, Color value)
 }
 
 //---------------------------------------------------------------------------------------
-const string ImoAttr::get_name()
+const string AttrObj::get_name()
 {
     return get_name(m_attrbIdx);
 }
 
 //---------------------------------------------------------------------------------------
-const string ImoAttr::get_name(int idx)
+const string AttrObj::get_name(int idx)
 {
     AttributesData data = AttributesTable::get_data_for(idx);
     return data.label;
@@ -399,7 +405,7 @@ ImoObj::~ImoObj()
     }
 
     remove_id();
-    delete_attributes();
+    delete m_pAttribs;
 }
 
 //---------------------------------------------------------------------------------------
@@ -430,18 +436,6 @@ void ImoObj::set_xml_id(const std::string& value)
 {
     if (m_pDoc)
         m_pDoc->set_xml_id_for(m_id, value);
-}
-
-//---------------------------------------------------------------------------------------
-void ImoObj::delete_attributes()
-{
-    ImoAttr* pAttr = get_first_attribute();
-    while (pAttr)
-    {
-        ImoAttr* pNext = pAttr->get_next_attrib();
-        delete pAttr;
-        pAttr = pNext;
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -557,6 +551,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
         m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
         m_TypeToName[k_imo_fermata] = "fermata";
+        m_TypeToName[k_imo_fingering] = "fingering";
         m_TypeToName[k_imo_line] = "line";
         m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
         m_TypeToName[k_imo_ornament] = "ornament";
@@ -841,67 +836,67 @@ string ImoObj::to_string(bool fWithIds)
 //---------------------------------------------------------------------------------------
 void ImoObj::set_int_attribute(TIntAttribute idx, int value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_int_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_color_attribute(TIntAttribute idx, Color value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_color_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_bool_attribute(TIntAttribute idx, bool value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_bool_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_double_attribute(TIntAttribute idx, double value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_double_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_float_attribute(TIntAttribute idx, float value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_float_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_string_attribute(TIntAttribute idx, const string& value)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         pAttr->set_string_value(value);
     else
-        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
 }
 
 //---------------------------------------------------------------------------------------
 int ImoObj::get_int_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_int_value();
     else
@@ -911,7 +906,7 @@ int ImoObj::get_int_attribute(TIntAttribute idx)
 //---------------------------------------------------------------------------------------
 Color ImoObj::get_color_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_color_value();
     else
@@ -921,7 +916,7 @@ Color ImoObj::get_color_attribute(TIntAttribute idx)
 //---------------------------------------------------------------------------------------
 bool ImoObj::get_bool_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_bool_value();
     else
@@ -931,7 +926,7 @@ bool ImoObj::get_bool_attribute(TIntAttribute idx)
 //---------------------------------------------------------------------------------------
 double ImoObj::get_double_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_double_value();
     else
@@ -942,7 +937,7 @@ double ImoObj::get_double_attribute(TIntAttribute idx)
 //---------------------------------------------------------------------------------------
 float ImoObj::get_float_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_float_value();
     else
@@ -952,7 +947,7 @@ float ImoObj::get_float_attribute(TIntAttribute idx)
 //---------------------------------------------------------------------------------------
 string ImoObj::get_string_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute_node(idx);
     if (pAttr)
         return pAttr->get_string_value();
     else
@@ -960,9 +955,9 @@ string ImoObj::get_string_attribute(TIntAttribute idx)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr* ImoObj::get_attribute_node(TIntAttribute idx)
+AttrObj* ImoObj::get_attribute_node(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_first_attribute();
+    AttrObj* pAttr = get_first_attribute();
     while (pAttr && pAttr->get_attrib_idx() != idx)
         pAttr = pAttr->get_next_attrib();
 
@@ -970,10 +965,10 @@ ImoAttr* ImoObj::get_attribute_node(TIntAttribute idx)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr* ImoObj::set_attribute_node(ImoAttr* newAttr)
+AttrObj* ImoObj::set_attribute_node(AttrObj* newAttr)
 {
     newAttr->set_next_attrib(nullptr);
-    ImoAttr* pLast = get_last_attribute();
+    AttrObj* pLast = get_last_attribute();
     if (pLast)
         pLast->set_next_attrib(newAttr);
     else
@@ -985,8 +980,8 @@ ImoAttr* ImoObj::set_attribute_node(ImoAttr* newAttr)
 //---------------------------------------------------------------------------------------
 void ImoObj::remove_attribute(TIntAttribute idx)
 {
-    ImoAttr* pAttr = get_first_attribute();
-    ImoAttr* pPrev = nullptr;
+    AttrObj* pAttr = get_first_attribute();
+    AttrObj* pPrev = nullptr;
     while (pAttr && pAttr->get_attrib_idx() != idx)
     {
         pPrev = pAttr;
@@ -997,7 +992,7 @@ void ImoObj::remove_attribute(TIntAttribute idx)
     {
         if (pPrev)
         {
-            ImoAttr* pNext = pAttr->get_next_attrib();
+            AttrObj* pNext = pAttr->get_next_attrib();
             pPrev->set_next_attrib(pNext);
             if (pNext)
                 pNext->set_next_attrib(pPrev);
@@ -1011,10 +1006,10 @@ void ImoObj::remove_attribute(TIntAttribute idx)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttr* ImoObj::get_last_attribute()
+AttrObj* ImoObj::get_last_attribute()
 {
-    ImoAttr* pAttr = get_first_attribute();
-    ImoAttr* pLast = pAttr;
+    AttrObj* pAttr = get_first_attribute();
+    AttrObj* pLast = pAttr;
     while (pAttr)
     {
         pLast = pAttr;
@@ -1027,7 +1022,7 @@ ImoAttr* ImoObj::get_last_attribute()
 //---------------------------------------------------------------------------------------
 int ImoObj::get_num_attributes()
 {
-    ImoAttr* pAttr = get_first_attribute();
+    AttrObj* pAttr = get_first_attribute();
     int i = 0;
     while (pAttr)
     {
@@ -2759,6 +2754,16 @@ ImoDynamic::~ImoDynamic()
     for (it = m_params.begin(); it != m_params.end(); ++it)
         delete *it;
     m_params.clear();
+}
+
+
+//=======================================================================================
+// ImoFingering implementation
+//=======================================================================================
+FingerData& ImoFingering::add_fingering(const string& value)
+{
+    m_fingerings.emplace_back(value);
+    return m_fingerings.back();
 }
 
 

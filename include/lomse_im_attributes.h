@@ -49,7 +49,7 @@ namespace lomse
 /** @ingroup enumerations
 
     This enum describes values for valid attributes for CmdChangeAttribute
-    commands, as well as valid attribute indexes for ImoAttr.
+    commands, as well as valid attribute indexes for AttrObj.
 
     @#include <lomse_im_attributes.h>
 */
@@ -79,11 +79,11 @@ enum EImoAttribute
     k_attr_fine,                //bool
     k_attr_forward_repeat,      //bool
     k_attr_pizzicato,           //bool
+    k_attr_right_located,       //bool. Only used by MNX importer to deal with <global>
     k_attr_segno,               //string
     k_attr_tempo,               //float
     k_attr_time_only,           //string
     k_attr_tocoda,              //string
-    k_attr_right_located,       //bool. Only used by MNX importer to deal with <global>
 };
 
 //data types

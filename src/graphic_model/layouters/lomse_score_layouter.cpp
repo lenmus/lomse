@@ -77,6 +77,7 @@
 #include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_gm_measures_table.h"
 #include "lomse_vertical_profile.h"
+#include "lomse_fingering_engraver.h"
 
 namespace lomse
 {
@@ -1344,6 +1345,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext
         {
             ImoTechnical* pImo = static_cast<ImoTechnical*>(pAO);
             TechnicalEngraver engrv(ctx);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color, pParentShape);
+        }
+        case k_imo_fingering:
+        {
+            ImoFingering* pImo = static_cast<ImoFingering*>(pAO);
+            FingeringEngraver engrv(ctx);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }

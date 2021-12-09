@@ -5410,7 +5410,7 @@ bool MnxAnalyser::goes_at_right(ImoStaffObj* pSO)
 {
     if (pSO->is_direction() || pSO->is_sound_change())
     {
-        ImoAttr* pA = pSO->get_attribute_node(k_attr_right_located);
+        AttrObj* pA = pSO->get_attribute_node(k_attr_right_located);
         if (pA)
         {
             pSO->remove_attribute(k_attr_right_located);

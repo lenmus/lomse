@@ -185,6 +185,31 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class GmoShapeFingeringContainer : public GmoCompositeShape, public VoiceRelatedShape
+{
+protected:
+    friend class FingeringEngraver;
+    GmoShapeFingeringContainer(ImoObj* pCreatorImo, ShapeId idx)
+        : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_fingering_box, idx, Color(0,0,0))
+        , VoiceRelatedShape()
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeFingering : public GmoShapeGlyph
+{
+protected:
+    friend class FingeringEngraver;
+    GmoShapeFingering(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
+                      LibraryScope& libraryScope, Color color, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fingering, idx, nGlyph, pos, color,
+                        libraryScope, fontSize )
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class GmoShapeImage : public GmoSimpleShape
 {
 protected:

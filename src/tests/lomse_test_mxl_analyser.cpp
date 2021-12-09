@@ -2795,6 +2795,211 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ fingering -----------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_fingering_01)
+    {
+        //@01. minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<technical><fingering>3</fingering></technical>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            CHECK( pNote->get_num_attachments() == 1 );
+            ImoFingering* pFing = dynamic_cast<ImoFingering*>( pNote->get_attachment(0) );
+            CHECK( pFing != nullptr );
+            if (pFing)
+            {
+                CHECK( pFing->num_fingerings() == 1 );
+                const list<FingerData>& fingerings = pFing->get_fingerings();
+                const FingerData& data = fingerings.front();
+                CHECK( data.value == "3" );
+                CHECK( data.attribs == nullptr );
+                CHECK( data.flags == 0 );
+                CHECK( data.is_substitution() == false );
+                CHECK( data.is_alternative() == false );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_fingering_02)
+    {
+        //@02. empty fingering is ignored
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<technical><fingering/></technical>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_num_attachments() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_fingering_03)
+    {
+        //@03. substitution fingering
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations><technical>"
+                    "<fingering>5</fingering>"
+                    "<fingering substitution='yes'>3</fingering>"
+                "</technical></notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            CHECK( pNote->get_num_attachments() == 1 );
+            ImoFingering* pFing = dynamic_cast<ImoFingering*>( pNote->get_attachment(0) );
+            CHECK( pFing != nullptr );
+            if (pFing)
+            {
+                CHECK( pFing->num_fingerings() == 2 );
+                list<FingerData>::const_iterator it = (pFing->get_fingerings()).begin();
+                const FingerData& data1 = *it;
+                CHECK( data1.value == "5" );
+                CHECK( data1.attribs == nullptr );
+                CHECK( data1.flags == 0 );
+                ++it;
+                const FingerData& data2 = *it;
+                CHECK( data2.value == "3" );
+                CHECK( data2.attribs == nullptr );
+                CHECK( data2.is_substitution() == true );
+                CHECK( data2.is_alternative() == false );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_fingering_04)
+    {
+        //@04. alternative fingering
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations><technical>"
+                    "<fingering>4</fingering>"
+                    "<fingering alternate='yes'>5</fingering>"
+                "</technical></notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            CHECK( pNote->get_num_attachments() == 1 );
+            ImoFingering* pFing = dynamic_cast<ImoFingering*>( pNote->get_attachment(0) );
+            CHECK( pFing != nullptr );
+            if (pFing)
+            {
+                CHECK( pFing->num_fingerings() == 2 );
+                list<FingerData>::const_iterator it = (pFing->get_fingerings()).begin();
+                const FingerData& data1 = *it;
+                CHECK( data1.value == "4" );
+                CHECK( data1.attribs == nullptr );
+                CHECK( data1.flags == 0 );
+                ++it;
+                const FingerData& data2 = *it;
+                CHECK( data2.value == "5" );
+                CHECK( data2.attribs == nullptr );
+                CHECK( data2.is_substitution() == false );
+                CHECK( data2.is_alternative() == true );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+
     //@ key ------------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_01)
@@ -8831,7 +9036,7 @@ SUITE(MxlAnalyserTest)
             CHECK_MD_OBJECT(it, "(clef G p1)" );
             CHECK_MD_OBJECT(it, "(time 4 4)" );
             CHECK_MD_OBJECT(it, "(chord (n a4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark, type=81))" );
+            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark))" );
             CHECK_MD_OBJECT(it, "(n f4 q v1 p1)" );
             CHECK_MD_OBJECT(it, "(dir empty)" );
             CHECK_MD_OBJECT(it, "(n d4 q v1 p1 (dyn \"p\")))" );

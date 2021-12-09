@@ -232,7 +232,7 @@ void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
                                             int UNUSED(channel),
                                             int UNUSED(iInstr), int measure)
 {
-    ImoAttr* pAttr = pSound->get_first_attribute();
+    AttrObj* pAttr = pSound->get_first_attribute();
     while (pAttr)
     {
         JumpEntry* pJump = nullptr;

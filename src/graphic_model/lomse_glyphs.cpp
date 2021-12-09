@@ -844,8 +844,41 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xECAF),  // small 128th note up
     GlyphData(0xECB1),  // small 256th note up
     GlyphData(0xECB7),  // augmentation dot
-};
 
+// Fingering (U+ED10–U+ED2F)
+	GlyphData(0xED10, "fingering0"),		    //Fingering 0 (open string)
+	GlyphData(0xED11, "fingering1"),		    //Fingering 1 (thumb)
+	GlyphData(0xED12, "fingering2"),		    //Fingering 2 (index finger)
+	GlyphData(0xED13, "fingering3"),		    //Fingering 3 (middle finger)
+	GlyphData(0xED14, "fingering4"),		    //Fingering 4 (ring finger)
+	GlyphData(0xED15, "fingering5"),		    //Fingering 5 (little finger)
+	GlyphData(0xED16, "fingeringTUpper"),    //Fingering T (left-hand thumb for guitar)
+	GlyphData(0xED17, "fingeringPLower"),    //Fingering p (pulgar; right-hand thumb for guitar)
+	GlyphData(0xED18, "fingeringTLower"),    //Fingering t (right-hand thumb for guitar)
+	GlyphData(0xED19, "fingeringILower"),    //Fingering i (indicio; right-hand index finger for guitar)
+	GlyphData(0xED1A, "fingeringMLower"),    //Fingering m (medio; right-hand middle finger for guitar)
+	GlyphData(0xED1B, "fingeringALower"),    //Fingering a (anular; right-hand ring finger for guitar)
+	GlyphData(0xED1C, "fingeringCLower"),    //Fingering c (right-hand little finger for guitar)
+	GlyphData(0xED1D, "fingeringXLower"),    //Fingering x (right-hand little finger for guitar)
+	GlyphData(0xED1E, "fingeringELower"),    //Fingering e (right-hand little finger for guitar)
+	GlyphData(0xED1F, "fingeringOLower"),    //Fingering o (right-hand little finger for guitar)
+	GlyphData(0xED20, "fingeringSubstitutionAbove"),		//Finger substitution above
+	GlyphData(0xED21, "fingeringSubstitutionBelow"),		//Finger substitution below
+	GlyphData(0xED22, "fingeringSubstitutionDash"),		//Finger substitution dash
+	GlyphData(0xED23, "fingeringMultipleNotes"),		    //Multiple notes played by thumb or single finger
+	GlyphData(0xED24, "fingering6"),		                //Fingering 6
+	GlyphData(0xED25, "fingering7"),		                //Fingering 7
+	GlyphData(0xED26, "fingering8"),		                //Fingering 8
+	GlyphData(0xED27, "fingering9"),		                //Fingering 9
+	GlyphData(0xED28, "fingeringLeftParenthesis"),		//Fingering left parenthesis
+	GlyphData(0xED29, "fingeringRightParenthesis"),		//Fingering right parenthesis
+	GlyphData(0xED2A, "fingeringLeftBracket"),		    //Fingering left bracket
+	GlyphData(0xED2B, "fingeringRightBracket"),		    //Fingering right bracket
+	GlyphData(0xED2C, "fingeringSeparatorMiddleDot"),    //Fingering middle dot separator
+	GlyphData(0xED2D, "fingeringSeparatorMiddleDotWhite"),   //Fingering white middle dot separator
+	GlyphData(0xED2E, "fingeringSeparatorSlash"),		//Fingering forward slash separator 	  	};
+
+};
 
 //=======================================================================================
 // MusicGlyphs implementation

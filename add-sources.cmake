@@ -90,6 +90,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engrouters.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_fermata_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_fingering_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp

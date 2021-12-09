@@ -160,6 +160,11 @@ namespace lomse
 #define LOMSE_STEAL_TIME_SHORT          20.0f //"Playback/Percentage of time to steal for acciaccatura grace notes"
 #define LOMSE_STEAL_TIME_LONG           50.0f //"Playback/Percentage of time to steal for appoggiatura grace notes"
 
+//fingering
+#define LOMSE_FINGERING_DISTANCE                10.0f   //space above/below staff or other objects and fingering symbols
+#define LOMSE_FINGERING_AFTER_SPACE              2.0f   //space after fingering symbol and next fingering symbol
+#define LOMSE_FINGERING_VERTICAL_SPACING         2.0f   //vertical spacing when stacking fingering symbols (chords)
+#define LOMSE_FINGERING_SPACING_STACKED_ARTICULATIONS  6.0f     //separation to other articulation/technical
 
 }   //namespace lomse
 

@@ -1785,17 +1785,17 @@ SUITE(InternalModelTest)
     }
 
 
-    //@ ImoAttr -----------------------------------------------------------------------
+    //@ AttrObj -----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, attr_01)
     {
         //@01. constructor
-        ImoAttr a(0, 2);
-        ImoAttr b(1, std::string("string"));
-        ImoAttr c(2, 2.7);
-        ImoAttr d(3, 2.5f);
-        ImoAttr e(4, true);
-        ImoAttr f(5, Color(80,70,55));
+        AttrObj a(0, 2);
+        AttrObj b(1, std::string("string"));
+        AttrObj c(2, 2.7);
+        AttrObj d(3, 2.5f);
+        AttrObj e(4, true);
+        AttrObj f(5, Color(80,70,55));
 
         CHECK( a.get_int_value() == 2 );
         CHECK( b.get_string_value() == "string" );
@@ -1808,7 +1808,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, attr_02)
     {
         //@02. set and get value
-        ImoAttr a(0);
+        AttrObj a(0);
         a.set_string_value(std::string("string"));
         CHECK( a.get_string_value() == "string" );
 

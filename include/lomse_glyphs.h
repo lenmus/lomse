@@ -863,6 +863,39 @@ enum EGlyphIndex
     k_glyph_small_256th_note,
     k_glyph_metronome_augmentation_dot,
 
+    // Fingering (U+ED10–U+ED2F)
+	k_glyph_fingering_0,		    //Fingering 0 (open string)
+	k_glyph_fingering_1,		    //Fingering 1 (thumb)
+	k_glyph_fingering_2,		    //Fingering 2 (index finger)
+	k_glyph_fingering_3,		    //Fingering 3 (middle finger)
+	k_glyph_fingering_4,		    //Fingering 4 (ring finger)
+	k_glyph_fingering_5,		    //Fingering 5 (little finger)
+	k_glyph_fingering_T_upper,		//Fingering T (left-hand thumb for guitar)
+	k_glyph_fingering_P_lower,		//Fingering p (pulgar; right-hand thumb for guitar)
+	k_glyph_fingering_T_lower,		//Fingering t (right-hand thumb for guitar)
+	k_glyph_fingering_I_lower,		//Fingering i (indicio; right-hand index finger for guitar)
+	k_glyph_fingering_M_lower,		//Fingering m (medio; right-hand middle finger for guitar)
+	k_glyph_fingering_A_lower,		//Fingering a (anular; right-hand ring finger for guitar)
+	k_glyph_fingering_C_lower,		//Fingering c (right-hand little finger for guitar)
+	k_glyph_fingering_X_lower,		//Fingering x (right-hand little finger for guitar)
+	k_glyph_fingering_E_lower,		//Fingering e (right-hand little finger for guitar)
+	k_glyph_fingering_O_lower,		//Fingering o (right-hand little finger for guitar)
+	k_glyph_fingering_substitution_above,   //Finger substitution above
+	k_glyph_fingering_substitution_below,   //Finger substitution below
+	k_glyph_fingering_substitution_dash,    //Finger substitution dash
+	k_glyph_fingering_multiple_notes,		//Multiple notes played by thumb or single finger
+	k_glyph_fingering_6,		            //Fingering 6
+	k_glyph_fingering_7,		            //Fingering 7
+	k_glyph_fingering_8,		            //Fingering 8
+	k_glyph_fingering_9,		            //Fingering 9
+	k_glyph_fingering_left_parenthesis,		//Fingering left parenthesis
+	k_glyph_fingering_right_parenthesis,    //Fingering right parenthesis
+	k_glyph_fingering_left_bracket,		    //Fingering left bracket
+	k_glyph_fingering_Right_bracket,		//Fingering right bracket
+	k_glyph_fingering_separator_middle_dot, //Fingering middle dot separator
+	k_glyph_fingering_separator_middle_dot_white,   //Fingering white middle dot separator
+	k_glyph_fingering_separator_slash,		//Fingering forward slash separator
+
     k_glyph_error,          // stop play button
 
 };
