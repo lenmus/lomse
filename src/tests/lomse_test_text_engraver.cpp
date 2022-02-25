@@ -84,10 +84,10 @@ SUITE(TextEngraverTest)
             "(instrument (name ''Violin'')(musicData (n c4 q))))))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoScoreText& text = pInstr->get_name();
+        TypeTextInfo& text = pInstr->get_name();
         ImoStyle* pStyle = pScore->get_default_style();
         ScoreMeter meter(pScore, 1, 1, LOMSE_STAFF_LINE_SPACING);
-        TextEngraver engraver(m_libraryScope, &meter, text.get_text(), "", pStyle);
+        TextEngraver engraver(m_libraryScope, &meter, text.text, "", pStyle);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );

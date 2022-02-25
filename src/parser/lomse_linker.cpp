@@ -281,8 +281,11 @@ ImoObj* Linker::add_sound_change(ImoSoundChange* pInfo)
     }
     else
     {
-       LOMSE_LOG_ERROR("Parent of ImoSoundChange is neither <music-data> nor <direction>.");
-       return pInfo;
+        stringstream ss;
+        ss << "Parent of ImoSoundChange is neither <music-data> nor <direction>. Parent=";
+        ss << (m_pParent != nullptr ? m_pParent->get_name() : "nullptr");
+        LOMSE_LOG_ERROR(ss.str());
+        return pInfo;
     }
 
 //        //TODO: Move this to linker
@@ -373,9 +376,16 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
             ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pParent);
             //could be 'name' or 'abbrev'
             if (m_ldpChildType == k_name)
-                pInstr->set_name(pText);
+            {
+                pInstr->set_name(pText->get_text_info());
+                pInstr->set_name_style(pText->get_style());
+            }
             else
-                pInstr->set_abbrev(pText);
+            {
+                pInstr->set_abbrev(pText->get_text_info());
+                pInstr->set_abbrev_style(pText->get_style());
+            }
+            delete pText;
             return nullptr;
         }
 
@@ -384,9 +394,16 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
             ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(m_pParent);
             //could be 'name' or 'abbrev'
             if (m_ldpChildType == k_name)
-                pGrp->set_name(pText);
+            {
+                pGrp->set_name(pText->get_text_info());
+                pGrp->set_name_style(pText->get_style());
+            }
             else
-                pGrp->set_abbrev(pText);
+            {
+                pGrp->set_abbrev(pText->get_text_info());
+                pGrp->set_abbrev_style(pText->get_style());
+            }
+            delete pText;
             return nullptr;
         }
 

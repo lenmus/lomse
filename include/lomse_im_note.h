@@ -90,6 +90,10 @@ protected:
 public:
     ImoNoteRest(int objtype) : ImoStaffObj(objtype) {}
     virtual ~ImoNoteRest() {}
+    ImoNoteRest(const ImoNoteRest&) = delete;
+    ImoNoteRest& operator= (const ImoNoteRest&) = delete;
+    ImoNoteRest(ImoNoteRest&&) = delete;
+    ImoNoteRest& operator= (ImoNoteRest&&) = delete;
 
     //overrides to ImoStaffObj
     TimeUnits get_duration() override { return m_duration; }
@@ -155,6 +159,7 @@ public:
     ImoTuplet* get_first_tuplet();
 
     //IM attributes interface
+//    void set_attribute(TIntAttribute attrib, int value) override;
     void set_int_attribute(TIntAttribute attrib, int value) override;
     int get_int_attribute(TIntAttribute attrib) override;
     list<TIntAttribute> get_supported_attributes() override;
@@ -194,6 +199,10 @@ protected:
 
 public:
     virtual ~ImoRest() {}
+    ImoRest(const ImoRest&) = delete;
+    ImoRest& operator= (const ImoRest&) = delete;
+    ImoRest(ImoRest&&) = delete;
+    ImoRest& operator= (ImoRest&&) = delete;
 
     inline bool is_go_fwd() { return m_fGoFwd; }
     inline bool is_full_measure() { return m_fFullMeasureRest; }
@@ -235,6 +244,10 @@ protected:
 
 public:
     virtual ~ImoNote();
+    ImoNote(const ImoNote&) = delete;
+    ImoNote& operator= (const ImoNote&) = delete;
+    ImoNote(ImoNote&&) = delete;
+    ImoNote& operator= (ImoNote&&) = delete;
 
     //options for notated accidentals
     enum ENotatedAcc
@@ -383,6 +396,10 @@ protected:
 
 public:
     virtual ~ImoGraceNote() {}
+    ImoGraceNote(const ImoGraceNote&) = delete;
+    ImoGraceNote& operator= (const ImoGraceNote&) = delete;
+    ImoGraceNote(ImoGraceNote&&) = delete;
+    ImoGraceNote& operator= (ImoGraceNote&&) = delete;
 
     inline void set_align_timepos(TimeUnits value) { m_alignTime = value; }
     inline TimeUnits get_align_timepos() { return m_alignTime; }

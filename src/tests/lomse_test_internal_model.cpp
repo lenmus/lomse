@@ -1790,12 +1790,12 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, attr_01)
     {
         //@01. constructor
-        AttrObj a(0, 2);
-        AttrObj b(1, std::string("string"));
-        AttrObj c(2, 2.7);
-        AttrObj d(3, 2.5f);
-        AttrObj e(4, true);
-        AttrObj f(5, Color(80,70,55));
+        AttrInt a(0, 2);
+        AttrString b(1, std::string("string"));
+        AttrDouble c(2, 2.7);
+        AttrFloat d(3, 2.5f);
+        AttrBool e(4, true);
+        AttrColor f(5, Color(80,70,55));
 
         CHECK( a.get_int_value() == 2 );
         CHECK( b.get_string_value() == "string" );
@@ -1808,7 +1808,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, attr_02)
     {
         //@02. set and get value
-        AttrObj a(0);
+        AttrVariant a(0);
         a.set_string_value(std::string("string"));
         CHECK( a.get_string_value() == "string" );
 
@@ -1863,7 +1863,7 @@ SUITE(InternalModelTest)
         //@03. attributes are chained
 
         Document doc(m_libraryScope);
-        ImoObj* pImo = static_cast<ImoObj*>(ImFactory::inject(k_imo_barline, &doc));
+        ImoBarline* pImo = static_cast<ImoBarline*>(ImFactory::inject(k_imo_barline, &doc));
 
         pImo->set_int_attribute(5000, 2);
         CHECK( pImo->get_num_attributes() == 1 );

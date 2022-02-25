@@ -1157,19 +1157,19 @@ protected:
         if (m_pObj->has_name())
         {
             start_element("name", k_no_imoid);
-            ImoScoreText& txt = m_pObj->get_name();
-            m_source << " \"" << txt.get_text() << "\"";
+            TypeTextInfo& txt = m_pObj->get_name();
+            m_source << " \"" << txt.text << "\"";
             space_needed();
-            add_style( txt.get_style() );
+            add_style( m_pObj->get_name_style() );
             end_element(k_in_same_line);
         }
         if (m_pObj->has_abbrev())
         {
             start_element("abbrev", k_no_imoid);
-            ImoScoreText& txt = m_pObj->get_abbrev();
-            m_source << " \"" << txt.get_text() << "\"";
+            TypeTextInfo& txt = m_pObj->get_abbrev();
+            m_source << " \"" << txt.text << "\"";
             space_needed();
-            add_style( txt.get_style() );
+            add_style( m_pObj->get_abbrev_style() );
             end_element(k_in_same_line);
         }
     }

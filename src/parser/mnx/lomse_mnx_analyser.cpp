@@ -69,26 +69,136 @@ namespace lomse
 {
 
 //=======================================================================================
-// Helper classes to return intermediate values during analysis
+// Helper classes to store values returned by analysers
 //=======================================================================================
 //---------------------------------------------------------------------------------------
-//for <events> analysis
-struct EventData
+//base class
+class AnalysisData
 {
+protected:
+    int m_type = 0;
+
+    AnalysisData(int type) : m_type(type) {}
+
+public:
+
+    int get_type() { return m_type; }
+
+    enum {
+        k_data_undefined = 0,
+        k_data_imo,
+        k_data_event,
+        k_data_jump,
+    };
+
+};
+
+//---------------------------------------------------------------------------------------
+//for ImoObj analysis
+class ImoData : public AnalysisData
+{
+public:
+    ImoObj* pImo;
+
+    ImoData(ImoObj* pObj) : AnalysisData(AnalysisData::k_data_imo), pImo(pObj) {}
+};
+
+//---------------------------------------------------------------------------------------
+//for <events> analysis
+class EventData : public AnalysisData
+{
+public:
     bool fMeasure;      //it is a full measure event
     ImoNoteRest* pNR;   //single, note, rest or chord base note
 
-    EventData(bool value, ImoNoteRest* nr) : fMeasure(value), pNR(nr) {}
+    EventData(bool value, ImoNoteRest* nr)
+        : AnalysisData(AnalysisData::k_data_event)
+        , fMeasure(value)
+        , pNR(nr)
+    {
+    }
 };
 
 //---------------------------------------------------------------------------------------
 //for <jump> analysis
-struct JumpData
+class JumpData : public AnalysisData
 {
+public:
     ImoDirection* pDirection;
     ImoSoundChange* pSC;
 
-    JumpData(ImoDirection* dir, ImoSoundChange* sc) : pDirection(dir), pSC(sc) {}
+    JumpData(ImoDirection* dir, ImoSoundChange* sc)
+        : AnalysisData(AnalysisData::k_data_jump)
+        , pDirection(dir)
+        , pSC(sc)
+    {
+    }
+};
+
+//=======================================================================================
+// Helper class to manage analysers's results.
+class AnalysisResult
+{
+protected:
+    AnalysisData* m_pResult = nullptr;
+
+public:
+    AnalysisResult() { set_result(nullptr); }
+
+    //-----------------------------------------------------------------------------------
+    void set_result(AnalysisData* pResult)
+    {
+        delete m_pResult;
+        m_pResult = pResult;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void delete_result()
+    {
+        delete m_pResult;
+        m_pResult = nullptr;
+    }
+
+    //-----------------------------------------------------------------------------------
+    std::unique_ptr<AnalysisData> get_result()
+    {
+        AnalysisData* data = m_pResult;
+        m_pResult = nullptr;
+        return std::unique_ptr<AnalysisData>(data);
+    }
+
+    //-----------------------------------------------------------------------------------
+    std::unique_ptr<ImoData> get_imo_result()
+    {
+        AnalysisData* data = m_pResult;
+        m_pResult = nullptr;
+        if (data && data->get_type() == AnalysisData::k_data_imo)
+            return std::unique_ptr<ImoData>( static_cast<ImoData*>(data) );
+
+        return std::unique_ptr<ImoData>(nullptr);
+    }
+
+    //-----------------------------------------------------------------------------------
+    std::unique_ptr<JumpData> get_jump_result()
+    {
+        AnalysisData* data = m_pResult;
+        m_pResult = nullptr;
+        if (data && data->get_type() == AnalysisData::k_data_jump)
+            return std::unique_ptr<JumpData>( static_cast<JumpData*>(data) );
+
+        return std::unique_ptr<JumpData>(nullptr);
+    }
+
+    //-----------------------------------------------------------------------------------
+    std::unique_ptr<EventData> get_event_result()
+    {
+        AnalysisData* data = m_pResult;
+        m_pResult = nullptr;
+        if (data && data->get_type() == AnalysisData::k_data_event)
+            return std::unique_ptr<EventData>( static_cast<EventData*>(data) );
+
+        return std::unique_ptr<EventData>(nullptr);
+    }
 };
 
 
@@ -406,8 +516,13 @@ protected:
                                               float rMin, float rMax, float rDefault);
 
     //results
-    void set_result(void* pResult) { m_pAnalyser->set_result(pResult); }
-    void* get_result() { return m_pAnalyser->get_result(); }
+    void set_result(AnalysisData* pData) { m_pAnalyser->set_result(pData); }
+    void delete_result() { m_pAnalyser->delete_result(); }
+
+    std::unique_ptr<AnalysisData> get_result() { return m_pAnalyser->get_result(); }
+    std::unique_ptr<ImoData> get_imo_result() { return m_pAnalyser->get_imo_result(); }
+    std::unique_ptr<JumpData> get_jump_result() { return m_pAnalyser->get_jump_result(); }
+    std::unique_ptr<EventData> get_event_result() { return m_pAnalyser->get_event_result(); }
 
     //very common operations
     void analyse_and_set_xml_id(ImoObj* pObj);
@@ -1639,7 +1754,7 @@ public:
 
         add_to_model(pClef);
 
-        set_result(pClef);
+        set_result( LOMSE_NEW ImoData(pClef) );
         return true;    //success
     }
 
@@ -1853,20 +1968,17 @@ protected:
 
         while (more_children_to_analyse())
         {
-            if (get_optional("clef"))
+            if (analyse_optional("clef"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    clefs.push_back( static_cast<ImoClef*>(get_result()) );
+                clefs.push_back( static_cast<ImoClef*>(get_imo_result()->pImo) );
             }
-            else if (get_optional("key"))
+            else if (analyse_optional("key"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    keys.push_back( static_cast<ImoKeySignature*>(get_result()) );
+                keys.push_back( static_cast<ImoKeySignature*>(get_imo_result()->pImo) );
             }
-            else if (get_optional("time"))
+            else if (analyse_optional("time"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    times.push_back( static_cast<ImoTimeSignature*>(get_result()) );
+                times.push_back( static_cast<ImoTimeSignature*>(get_imo_result()->pImo) );
             }
             else if (analyse_optional("repeat"))
             {
@@ -1876,7 +1988,7 @@ protected:
                 // type='end' creates the two dots in right barline
                 // Thus, <repeat> (0 to 2 times)
             }
-            else if (analyse_optional("ending"))
+            else if (get_optional("ending"))
             {
                 //TODO
 //                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
@@ -1885,27 +1997,20 @@ protected:
             else if (analyse_optional("segno"))
             {
                 //Defines a 'segno' symbol and a point for playback jumps
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    other.push_back( static_cast<ImoObj*>(get_result()) );
+                other.push_back( static_cast<ImoObj*>(get_imo_result()->pImo) );
             }
             else if (analyse_optional("jump"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                {
-                    JumpData* result = static_cast<JumpData*>(get_result());
-                    if (result->pDirection)
-                        other.push_back(result->pDirection);
-                    if (result->pSC)
-                        other.push_back(result->pSC);
-                    set_result(nullptr);
-                    delete result;
-                }
+                std::unique_ptr<JumpData> result = get_jump_result();
+                if (result->pDirection)
+                    other.push_back(result->pDirection);
+                if (result->pSC)
+                    other.push_back(result->pSC);
             }
             else if (analyse_optional("fine"))
             {
                 //Defines a 'Fine' symbol and a point for playback jumps
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    other.push_back( static_cast<ImoObj*>(get_result()) );
+                other.push_back( static_cast<ImoObj*>(get_imo_result()->pImo) );
             }
             else
             {
@@ -1972,15 +2077,15 @@ protected:
                     //TODO: report error
                 }
             }
-            else if (get_optional("clef"))
+            else if (analyse_optional("clef"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    add_to_model( static_cast<ImoObj*>(get_result()) );
+                std::unique_ptr<ImoData> result = get_imo_result();
+                add_to_model( static_cast<ImoClef*>(result->pImo) );
             }
-            else if (get_optional("key"))
+            else if (analyse_optional("key"))
             {
-                if (m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr))
-                    add_to_model( static_cast<ImoObj*>(get_result()) );
+                std::unique_ptr<ImoData> result = get_imo_result();
+                add_to_model( static_cast<ImoKeySignature*>(result->pImo) );
             }
             else
             {
@@ -2021,9 +2126,9 @@ protected:
 
         while (more_children_to_analyse())
         {
-            if (get_optional("octave-shift"))
+            if (analyse_optional("octave-shift", pDirection))
             {
-                m_pAnalyser->analyse_node(&m_childToAnalyse, pDirection);
+                //TODO
             }
             else if (analyse_optional("dynamics"))
             {
@@ -2189,7 +2294,8 @@ public:
             {
                 if (analyse_child())
                 {
-                    ImoNote* pNote = static_cast<ImoNote*>(get_result());
+                    std::unique_ptr<ImoData> result = get_imo_result();
+                    ImoNote* pNote = static_cast<ImoNote*>(result->pImo);
                     m_notes.push_back(pNote);
                     if (pFirstNR == nullptr)
                         pFirstNR = pNote;
@@ -2199,7 +2305,8 @@ public:
             {
                 if (analyse_child())
                 {
-                    ImoRest* pRest = static_cast<ImoRest*>(get_result());
+                    std::unique_ptr<ImoData> result = get_imo_result();
+                    ImoRest* pRest = static_cast<ImoRest*>(result->pImo);
                     m_rests.push_back(pRest);
                     if (pFirstNR == nullptr)
                         pFirstNR = pRest;
@@ -2352,7 +2459,7 @@ public:
 
         pDirection->add_attachment(pDoc, pRM);
 
-        set_result(pDirection);
+        set_result( LOMSE_NEW ImoData(pDirection) );
         return true;    //success
     }
 };
@@ -2477,10 +2584,12 @@ public:
         m_pAnalyser->set_note_class(k_imo_note_grace);
         if (analyse_mandatory("event", pMD))
         {
+            delete_result();
             ImoGraceRelObj* pGraceRO = create_grace_notes_relationship();
 
             while (analyse_optional("event", pMD))
             {
+                delete_result();
                 add_to_grace_notes_relationship(pGraceRO);
             }
         }
@@ -2773,7 +2882,7 @@ public:
         //set key
         pKey->set_key_type( fifths_to_key_signature(fifths, fMajor) );
 
-        set_result(pKey);
+        set_result( LOMSE_NEW ImoData(pKey) );
         return true;    //success
     }
 
@@ -2939,7 +3048,7 @@ protected:
         //TODO
         //error_if_more_elements();
 
-        set_result(pMD);
+        set_result( LOMSE_NEW ImoData(pMD) );
         return true;    //success
     }
 
@@ -3207,7 +3316,7 @@ public:
         m_pAnalyser->add_all_instruments(pScore);
 
         set_options(pScore);
-        set_result(pImoDoc);
+        set_result( LOMSE_NEW ImoData(pImoDoc) );
         return true;    //success
     }
 
@@ -3356,7 +3465,7 @@ public:
         if (get_optional("tied"))
             m_pAnalyser->save_tied_element(&m_childToAnalyse, pNote);
 
-        set_result(pNote);
+        set_result( LOMSE_NEW ImoData(pNote) );
         return true;    //success
     }
 
@@ -3626,7 +3735,7 @@ public:
         m_pAnalyser->process_beams();
         m_pAnalyser->process_ties();
 
-        set_result(pInstrument);
+        set_result( LOMSE_NEW ImoData(pInstrument) );
         return true;    //success
     }
 
@@ -3807,7 +3916,7 @@ public:
         pRest->set_staff( m_pAnalyser->get_current_staff() );
         pRest->set_voice( m_pAnalyser->get_current_voice() );
 
-        set_result(pRest);
+        set_result( LOMSE_NEW ImoData(pRest) );
         return true;    //success
     }
 };
@@ -3862,7 +3971,7 @@ public:
         pDirection->add_attachment(pDoc, pImo);
         add_to_model(pDirection);
 
-        set_result(pDirection);
+        set_result( LOMSE_NEW ImoData(pDirection) );
         return true;    //success
     }
 };
@@ -3991,50 +4100,41 @@ public:
         // sequence_content
         while (more_children_to_analyse())
         {
-            if (get_optional("dynamics"))
+            if (analyse_optional("dynamics", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("event"))
+            else if (analyse_optional("event", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("forward"))
+            else if (analyse_optional("forward", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("grace"))
+            else if (analyse_optional("grace", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("directions"))
+            else if (analyse_optional("directions", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("tuplet"))
+            else if (analyse_optional("tuplet", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("expression"))
+            else if (analyse_optional("expression", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("wedge"))
+            else if (analyse_optional("wedge", m_pAnchor))
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
             }
-            else if (get_optional("clef"))  //in example hot-cross-buns
+            else if (analyse_optional("clef", m_pAnchor))  //in example hot-cross-buns
             {
-                if (analyse_child(m_pAnchor))
-                    sequence_content();
+                sequence_content();
                 //TODO: clef is added at the end of the measure (hot-cross-buns)
             }
             else
@@ -4053,7 +4153,6 @@ protected:
     void sequence_content()
     {
         //TODO: finish algorithm for "Sequence content" (is this needed?)
-        return;
 
         //2. If next is a beamed element:
         if (m_childToAnalyse.name() == "beamed")
@@ -4067,7 +4166,7 @@ protected:
         //If next is an event element:
         else if (m_childToAnalyse.name() == "event")
         {
-            EventData* data = static_cast<EventData*>( get_result() );
+            std::unique_ptr<EventData> data = get_event_result();
             //If next has a measure value of yes,
 //            if (data->fMeasure)
 //            {
@@ -4083,7 +4182,6 @@ protected:
 //                //Add the duration of next, multiplied by the time modification ratio, to sequence cursor.
 //            }
             //If beamed group is a list, append next to beamed group.
-            delete data;
         }
         //If next is a forward element:
         else if (m_childToAnalyse.name() == "forward")
@@ -4168,7 +4266,7 @@ public:
             ImoNoteRest* pNR = get_noterest(target, "tied");
             if (pNR && pNR->is_note())
             {
-                set_result( create_tie(pNote, static_cast<ImoNote*>(pNR)) );
+                set_result(  LOMSE_NEW ImoData( create_tie(pNote, static_cast<ImoNote*>(pNR)) ));
                 return true;    //success
             }
             else
@@ -4238,7 +4336,7 @@ public:
         //attrib: measure
         //TODO
 
-        set_result(pTime);
+        set_result( LOMSE_NEW ImoData(pTime) );
         return true;    //success
     }
 
@@ -4498,7 +4596,8 @@ protected:
     void add_event_to_tuplet()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoNoteRest* pNR = static_cast<EventData*>(get_result())->pNR;
+        std::unique_ptr<EventData> data = get_event_result();
+        ImoNoteRest* pNR = data->pNR;
         pNR->include_in_relation(pDoc, m_pTuplet, nullptr);
     }
 
@@ -4634,7 +4733,7 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
 //    , m_nShowTupletNumber(k_yesno_default)
-    , m_pResult(nullptr)
+    , m_result( LOMSE_NEW AnalysisResult() )
     , m_pCurScore(nullptr)
     , m_pCurInstrument(nullptr)
     , m_pLastNote(nullptr)
@@ -4738,6 +4837,7 @@ MnxAnalyser::~MnxAnalyser()
     m_NameToEnum.clear();
     m_lyrics.clear();
     m_lyricIndex.clear();
+    set_result(nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -4776,7 +4876,7 @@ ImoObj* MnxAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_curVoice = 1;
     m_beamLevel = 0;
     analyse_node(root);
-    return static_cast<ImoObj*>(m_pResult);
+    return get_imo_result()->pImo;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4791,7 +4891,7 @@ bool MnxAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 {
     //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
     MnxElementAnalyser* a = new_analyser( pNode->name(), pAnchor );
-    m_pResult = nullptr;
+    set_result(nullptr);
     bool res = a->analyse_node(pNode);
     delete a;
     return res;
@@ -4812,6 +4912,43 @@ void MnxAnalyser::prepare_for_new_instrument_content()
     save_last_barline(nullptr);
     m_measuresCounter = 0;
     m_noteClass = k_imo_note_regular;
+    set_result(nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<AnalysisData> MnxAnalyser::get_result()
+{
+    return m_result->get_result();
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<ImoData> MnxAnalyser::get_imo_result()
+{
+    return m_result->get_imo_result();
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<JumpData> MnxAnalyser::get_jump_result()
+{
+    return m_result->get_jump_result();
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<EventData> MnxAnalyser::get_event_result()
+{
+    return m_result->get_event_result();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::set_result(AnalysisData* pData)
+{
+    m_result->set_result(pData);
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::delete_result()
+{
+    m_result->delete_result();
 }
 
 //---------------------------------------------------------------------------------------
@@ -5378,10 +5515,10 @@ void MnxAnalyser::add_right_data_from_global_measure(ImoMusicData* pMD)
 ImoMusicData* MnxAnalyser::analyse_global_measure(XmlNode* pNode)
 {
     //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
-    m_pResult = nullptr;
+    set_result(nullptr);
     MeasureMnxAnalyser a(this, m_reporter, m_libraryScope, nullptr, true);
     a.analyse_node(pNode);
-    return static_cast<ImoMusicData*>(m_pResult);
+    return static_cast<ImoMusicData*>(get_imo_result()->pImo);
 }
 
 //---------------------------------------------------------------------------------------
@@ -5410,7 +5547,7 @@ bool MnxAnalyser::goes_at_right(ImoStaffObj* pSO)
 {
     if (pSO->is_direction() || pSO->is_sound_change())
     {
-        AttrObj* pA = pSO->get_attribute_node(k_attr_right_located);
+        AttrObj* pA = pSO->get_attribute(k_attr_right_located);
         if (pA)
         {
             pSO->remove_attribute(k_attr_right_located);

@@ -834,6 +834,13 @@ BeamedChordHelper::BeamedChordHelper(ImoBeam* pBeam, std::vector<int>* pClefs)
 }
 
 //---------------------------------------------------------------------------------------
+BeamedChordHelper::~BeamedChordHelper()
+{
+    if (!m_fTransferred)
+        delete m_pStemsDir;
+}
+
+//---------------------------------------------------------------------------------------
 bool BeamedChordHelper::compute_stems_directions()
 {
     //returns first chord/single note stem direction
@@ -1128,6 +1135,7 @@ void BeamedChordHelper::transfer_stem_directions_to_notes(ImoBeam* pBeam, int be
     }
 
     pBeam->set_stems_direction(m_pStemsDir);
+    m_fTransferred = true;
 }
 
 

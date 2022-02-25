@@ -2223,7 +2223,8 @@ public:
         {
             ImoScoreText* pText = get_name_abbrev();
             if (pText)
-                pGrp->set_name(pText);
+                pGrp->set_name(pText->get_text_info());
+            delete pText;
         }
 
         // grpAbbrev?
@@ -2231,7 +2232,8 @@ public:
         {
             ImoScoreText* pText = get_name_abbrev();
             if (pText)
-                pGrp->set_abbrev(pText);
+                pGrp->set_abbrev(pText->get_text_info());
+            delete pText;
         }
 
         // grpSymbol?
@@ -2443,7 +2445,8 @@ public:
         {
             ImoScoreText* pText = get_name_abbrev();
             if (pText)
-                pInstrument->set_name(pText);
+                pInstrument->set_name(pText->get_text_info());
+            delete pText;
         }
 
         // instrAbbrev?
@@ -2451,7 +2454,8 @@ public:
         {
             ImoScoreText* pText = get_name_abbrev();
             if (pText)
-                pInstrument->set_abbrev(pText);
+                pInstrument->set_abbrev(pText->get_text_info());
+            delete pText;
         }
 
         // staves?

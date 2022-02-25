@@ -42,13 +42,19 @@ namespace lomse
 {
 
 //forward declarations
+class AnalysisData;
+class ImoData;
+class JumpData;
+class EventData;
+
+class AnalysisResult;
+class ImoNote;
+class ImoObj;
+class ImoRest;
+class LdpFactory;
 class LibraryScope;
 class MnxElementAnalyser;
-class LdpFactory;
 class MnxAnalyser;
-class ImoObj;
-class ImoNote;
-class ImoRest;
 
 typedef std::vector<XmlNode> MeasuresVector;    //global measures for a part
 
@@ -211,7 +217,7 @@ protected:
     std::string m_fileLocator;
 
     //analysis output
-    void*           m_pResult;
+    std::unique_ptr<AnalysisResult> m_result;
 
     // information maintained in MnxAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
@@ -264,7 +270,12 @@ public:
     bool analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
     ImoMusicData* analyse_global_measure(XmlNode* pNode);
     void prepare_for_new_instrument_content();
-    void* get_result() { return m_pResult; }
+
+    //access to analysers' result
+    std::unique_ptr<AnalysisData> get_result();
+    std::unique_ptr<ImoData> get_imo_result();
+    std::unique_ptr<JumpData> get_jump_result();
+    std::unique_ptr<EventData> get_event_result();
 
     //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
@@ -432,11 +443,18 @@ public:
     //bool get_measure_location_value(const string& value, );
     //bool get_smufl_glyph_name(const string& value, );
 
+    //additional types for set_result()
+    enum {
+        k_jump_data = 10000,
+        k_event_data,
+    };
 
 protected:
     friend class MnxElementAnalyser;
     MnxElementAnalyser* new_analyser(const std::string& name, ImoObj* pAnchor=nullptr);
-    void set_result(void* pValue) { m_pResult = pValue; }
+    void set_result(AnalysisData* pData);
+    void delete_result();
+
 
     void delete_relation_builders();
     void delete_globals();

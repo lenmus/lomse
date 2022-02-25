@@ -3270,8 +3270,8 @@ SUITE(LdpAnalyserTest)
         ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name().get_text() == "Guitar" );
-        CHECK( pInstr->get_abbrev().get_text() == "" );
+        CHECK( pInstr->get_name().text == "Guitar" );
+        CHECK( pInstr->get_abbrev().text == "" );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -3297,8 +3297,8 @@ SUITE(LdpAnalyserTest)
         ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name().get_text() == "" );
-        CHECK( pInstr->get_abbrev().get_text() == "G." );
+        CHECK( pInstr->get_name().text == "" );
+        CHECK( pInstr->get_abbrev().text == "G." );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -3324,8 +3324,8 @@ SUITE(LdpAnalyserTest)
         ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name().get_text() == "Guitar" );
-        CHECK( pInstr->get_abbrev().get_text() == "G." );
+        CHECK( pInstr->get_name().text == "Guitar" );
+        CHECK( pInstr->get_abbrev().text == "G." );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -3481,8 +3481,8 @@ SUITE(LdpAnalyserTest)
         ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name().get_text() == "" );
-        CHECK( pInstr->get_abbrev().get_text() == "" );
+        CHECK( pInstr->get_name().text == "" );
+        CHECK( pInstr->get_abbrev().text == "" );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );

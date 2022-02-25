@@ -3249,6 +3249,8 @@ protected:
             pStyle->font_style(pFont->style);
             pStyle->font_weight(pFont->weight);
         }
+
+        delete pFont;
     }
 
     //-----------------------------------------------------------------------------------
@@ -4385,10 +4387,12 @@ public:
         error_if_more_elements();
 
         ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
-        if (pSO == nullptr || !pSO->is_barline())
-            add_barline(pInfo);
+        if (pSO == nullptr)
+            delete pInfo;   //TODO: What is the scenario for this case?
         else if (pSO->is_barline())
             static_cast<ImoBarline*>(pSO)->set_measure_info(pInfo);
+        else
+            add_barline(pInfo);
 
         return pMD;
     }
@@ -6019,11 +6023,7 @@ public:
 
         // group-name?
         if (get_optional("group-name"))
-        {
-            ImoScoreText* pText = get_name_abbrev();
-            if (pText)
-                pGrp->set_name(pText);
-        }
+            pGrp->set_name(m_childToAnalyse.value());
 
         // group-name-display?
         if (get_optional("group-name-display"))
@@ -6033,11 +6033,7 @@ public:
 
         // group-abbreviation?
         if (get_optional("group-abbreviation"))
-        {
-            ImoScoreText* pText = get_name_abbrev();
-            if (pText)
-                pGrp->set_abbrev(pText);
-        }
+            pGrp->set_abbrev(m_childToAnalyse.value());
 
         // group-abbreviation-display?
         if (get_optional("group-abbreviation-display"))
@@ -6103,25 +6099,6 @@ protected:
         }
     }
 
-    ImoScoreText* get_name_abbrev()
-    {
-        string name = m_childToAnalyse.value();
-        if (!name.empty())
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            ImoScoreText* pText = static_cast<ImoScoreText*>(
-                                        ImFactory::inject(k_imo_score_text, pDoc));
-            pText->set_text(name);
-
-            ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-            ImoStyle* pStyle = nullptr;
-            if (pScore)     //in unit tests the score might not exist
-                pStyle = pScore->get_default_style();
-            pText->set_style(pStyle);
-            return pText;
-        }
-        return nullptr;
-    }
 };
 
 

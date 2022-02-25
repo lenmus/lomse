@@ -175,6 +175,7 @@ protected:
     size_t m_numStaves;
     int m_nUpForced;                    //number of forced chords/single notes up
     int m_nDownForced;                  //number of forced chords/single notes down
+    bool m_fTransferred = false;        //ownership of m_pStemsDir transferred to m_pBeam
     ImoBeam* m_pBeam;                   //the beam to compute
     std::vector<int>* m_pClefs;         //current clefs for each staff
     std::vector<ImoChord*> m_chords;     //the beamed chords
@@ -187,7 +188,7 @@ protected:
 
 public:
     BeamedChordHelper(ImoBeam* pBeam, std::vector<int>* pLastClefs);
-    ~BeamedChordHelper() {}
+    ~BeamedChordHelper();
 
 
     //methods and variables to determine stems direction for beamed chords

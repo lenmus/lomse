@@ -123,54 +123,6 @@ AttrObj::~AttrObj()
 }
 
 //---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, const string& value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_string_value(value);
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, int value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_int_value(value);
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, double value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_double_value(value);
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, bool value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_bool_value(value);
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, float value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_float_value(value);
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj::AttrObj(int idx, Color value)
-    : m_attrbIdx(idx)
-    , m_next(nullptr)
-{
-    set_color_value(value);
-}
-
-//---------------------------------------------------------------------------------------
 const string AttrObj::get_name()
 {
     return get_name(m_attrbIdx);
@@ -181,6 +133,188 @@ const string AttrObj::get_name(int idx)
 {
     AttributesData data = AttributesTable::get_data_for(idx);
     return data.label;
+}
+
+//---------------------------------------------------------------------------------------
+AttrObj* AttrObj::replace_by(AttrObj* newAttr)
+{
+    newAttr->set_next_attrib(m_next);
+    newAttr->set_prev_attrib(m_prev);
+    if (m_prev)
+        m_prev->set_next_attrib(newAttr);
+
+    m_next = nullptr;
+    delete this;
+
+    return newAttr;
+}
+
+//---------------------------------------------------------------------------------------
+int AttrObj::get_int_value()
+{
+    return static_cast< Attr<int>* >(this)->get_value();
+}
+
+//---------------------------------------------------------------------------------------
+double AttrObj::get_double_value()
+{
+    return static_cast< Attr<double>* >(this)->get_value();
+}
+
+//---------------------------------------------------------------------------------------
+std::string AttrObj::get_string_value()
+{
+    return static_cast< Attr<string>* >(this)->get_value();
+}
+
+//---------------------------------------------------------------------------------------
+bool AttrObj::get_bool_value()
+{
+    return static_cast< Attr<bool>* >(this)->get_value();
+}
+
+//---------------------------------------------------------------------------------------
+float AttrObj::get_float_value()
+{
+    return static_cast< Attr<float>* >(this)->get_value();
+}
+
+//---------------------------------------------------------------------------------------
+Color AttrObj::get_color_value()
+{
+    return static_cast< Attr< Color >* >(this)->get_value();
+}
+
+
+//=======================================================================================
+// AttrVariant implementation
+//=======================================================================================
+AttrVariant::AttrVariant(int idx, const string& value)
+    : AttrObj(idx)
+{
+    set_string_value(value);
+}
+
+//---------------------------------------------------------------------------------------
+AttrVariant::AttrVariant(int idx, int value)
+    : AttrObj(idx)
+{
+    set_int_value(value);
+}
+
+//---------------------------------------------------------------------------------------
+AttrVariant::AttrVariant(int idx, double value)
+    : AttrObj(idx)
+{
+    set_double_value(value);
+}
+
+//---------------------------------------------------------------------------------------
+AttrVariant::AttrVariant(int idx, bool value)
+    : AttrObj(idx)
+{
+    set_bool_value(value);
+}
+
+//---------------------------------------------------------------------------------------
+AttrVariant::AttrVariant(int idx, float value)
+    : AttrObj(idx)
+{
+    set_float_value(value);
+}
+
+//---------------------------------------------------------------------------------------
+AttrVariant::AttrVariant(int idx, Color value)
+    : AttrObj(idx)
+{
+    set_color_value(value);
+}
+
+
+//=======================================================================================
+// AttrList implementation
+//=======================================================================================
+size_t AttrList::size()
+{
+    AttrObj* pAttr = m_first;
+    size_t i = 0;
+    while (pAttr)
+    {
+        ++i;
+        pAttr = pAttr->get_next_attrib();
+    }
+
+    return i;
+}
+
+//---------------------------------------------------------------------------------------
+void AttrList::clear()
+{
+    delete m_first;
+    m_first = nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+AttrObj* AttrList::back()
+{
+    AttrObj* pAttr = m_first;
+    AttrObj* pLast = pAttr;
+    while (pAttr)
+    {
+        pLast = pAttr;
+        pAttr = pAttr->get_next_attrib();
+    }
+
+    return pLast;
+}
+
+//---------------------------------------------------------------------------------------
+AttrObj* AttrList::push_back(AttrObj* newAttr)
+{
+    newAttr->set_next_attrib(nullptr);
+    AttrObj* pLast = back();
+    if (pLast)
+    {
+        pLast->set_next_attrib(newAttr);
+        newAttr->set_prev_attrib(pLast);
+    }
+    else
+        m_first = newAttr;
+
+    return newAttr;
+}
+
+//---------------------------------------------------------------------------------------
+void AttrList::remove(TIntAttribute idx)
+{
+    AttrObj* pAttr = find(idx);
+    if (pAttr)
+    {
+        AttrObj* pPrev = pAttr->get_prev_attrib();
+        if (pPrev)
+        {
+            AttrObj* pNext = pAttr->get_next_attrib();
+            pPrev->set_next_attrib(pNext);
+            if (pNext)
+                pNext->set_prev_attrib(pPrev);
+        }
+
+        if (pAttr == m_first)
+            m_first = nullptr;
+
+        pAttr->set_next_attrib(nullptr);
+        delete pAttr;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+AttrObj* AttrList::find(TIntAttribute idx)
+{
+    AttrObj* pAttr = m_first;
+    while (pAttr && pAttr->get_attrib_idx() != idx)
+        pAttr = pAttr->get_next_attrib();
+
+    return pAttr;
 }
 
 
@@ -388,7 +522,6 @@ ImoObj::ImoObj(int objtype, ImoId id)
     , m_id(id)
     , m_objtype(objtype)
     , m_flags(k_dirty)
-    , m_pAttribs(nullptr)
 {
 }
 
@@ -405,7 +538,6 @@ ImoObj::~ImoObj()
     }
 
     remove_id();
-    delete m_pAttribs;
 }
 
 //---------------------------------------------------------------------------------------
@@ -515,7 +647,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_style] = "style";
         m_TypeToName[k_imo_system_info] = "system-info";
         m_TypeToName[k_imo_textblock_info] = "textblock";
-        m_TypeToName[k_imo_text_info] = "text-info";
         m_TypeToName[k_imo_text_style] = "text-style";
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
         m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
@@ -834,203 +965,107 @@ string ImoObj::to_string(bool fWithIds)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoObj::set_int_attribute(TIntAttribute idx, int value)
+bool ImoObj::has_attributte(TIntAttribute idx)
 {
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        pAttr->set_int_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
+    return get_attribute(idx) != nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoObj::get_supported_attributes()
+{
+    list<TIntAttribute> supported;
+    return supported;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_int_attribute(TIntAttribute attrib, int value)
+{
+    set_attribute<int>(attrib, value);
+    set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoObj::get_int_attribute(TIntAttribute attrib)
+{
+    return get_attribute_value<int>(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_bool_attribute(TIntAttribute attrib, bool value)
+{
+    set_attribute<bool>(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoObj::get_bool_attribute(TIntAttribute attrib)
+{
+    return get_attribute_value<bool>(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_double_attribute(TIntAttribute attrib, double value)
+{
+    set_attribute<double>(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+double ImoObj::get_double_attribute(TIntAttribute attrib)
+{
+    return get_attribute_value<double>(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_float_attribute(TIntAttribute attrib, float value)
+{
+    set_attribute<float>(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+float ImoObj::get_float_attribute(TIntAttribute attrib)
+{
+    return get_attribute_value<float>(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_string_attribute(TIntAttribute attrib, const string& value)
+{
+    set_attribute<string>(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+string ImoObj::get_string_attribute(TIntAttribute attrib)
+{
+    return get_attribute_value<string>(attrib);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_color_attribute(TIntAttribute idx, Color value)
 {
-    AttrObj* pAttr = get_attribute_node(idx);
+    AttrObj* pAttr = get_attribute(idx);
     if (pAttr)
-        pAttr->set_color_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
-}
+    {
+        Attr< Color >* pT = dynamic_cast< Attr< Color >* >(pAttr);
+        if (pT)
+        {
+            pT->set_value(value);
+            return;
+        }
 
-//---------------------------------------------------------------------------------------
-void ImoObj::set_bool_attribute(TIntAttribute idx, bool value)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        pAttr->set_bool_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
-}
+        else
+        {
+            pAttr->replace_by( LOMSE_NEW Attr< Color >(idx, value) );
+            return;
+        }
+    }
 
-//---------------------------------------------------------------------------------------
-void ImoObj::set_double_attribute(TIntAttribute idx, double value)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        pAttr->set_double_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
-}
-
-//---------------------------------------------------------------------------------------
-void ImoObj::set_float_attribute(TIntAttribute idx, float value)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        pAttr->set_float_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
-}
-
-//---------------------------------------------------------------------------------------
-void ImoObj::set_string_attribute(TIntAttribute idx, const string& value)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        pAttr->set_string_value(value);
-    else
-        set_attribute_node( LOMSE_NEW AttrObj(idx, value) );
-}
-
-//---------------------------------------------------------------------------------------
-int ImoObj::get_int_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_int_value();
-    else
-        return 0;
+    add_attribute( LOMSE_NEW Attr< Color >(idx, value) );
+    set_dirty(true);
 }
 
 //---------------------------------------------------------------------------------------
 Color ImoObj::get_color_attribute(TIntAttribute idx)
 {
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_color_value();
-    else
-        return Color(0,0,0);
-}
-
-//---------------------------------------------------------------------------------------
-bool ImoObj::get_bool_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_bool_value();
-    else
-        return false;
-}
-
-//---------------------------------------------------------------------------------------
-double ImoObj::get_double_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_double_value();
-    else
-        return 0.0;
-}
-
-
-//---------------------------------------------------------------------------------------
-float ImoObj::get_float_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_float_value();
-    else
-        return 0.0f;
-}
-
-//---------------------------------------------------------------------------------------
-string ImoObj::get_string_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_attribute_node(idx);
-    if (pAttr)
-        return pAttr->get_string_value();
-    else
-        return string();
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj* ImoObj::get_attribute_node(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_first_attribute();
-    while (pAttr && pAttr->get_attrib_idx() != idx)
-        pAttr = pAttr->get_next_attrib();
-
-    return pAttr;
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj* ImoObj::set_attribute_node(AttrObj* newAttr)
-{
-    newAttr->set_next_attrib(nullptr);
-    AttrObj* pLast = get_last_attribute();
-    if (pLast)
-        pLast->set_next_attrib(newAttr);
-    else
-        m_pAttribs = newAttr;
-
-    return newAttr;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoObj::remove_attribute(TIntAttribute idx)
-{
-    AttrObj* pAttr = get_first_attribute();
-    AttrObj* pPrev = nullptr;
-    while (pAttr && pAttr->get_attrib_idx() != idx)
-    {
-        pPrev = pAttr;
-        pAttr = pAttr->get_next_attrib();
-    }
-
-    if (pAttr)
-    {
-        if (pPrev)
-        {
-            AttrObj* pNext = pAttr->get_next_attrib();
-            pPrev->set_next_attrib(pNext);
-            if (pNext)
-                pNext->set_next_attrib(pPrev);
-        }
-
-        if (pAttr == get_first_attribute())
-            m_pAttribs = nullptr;
-
-        delete pAttr;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-AttrObj* ImoObj::get_last_attribute()
-{
-    AttrObj* pAttr = get_first_attribute();
-    AttrObj* pLast = pAttr;
-    while (pAttr)
-    {
-        pLast = pAttr;
-        pAttr = pAttr->get_next_attrib();
-    }
-
-    return pLast;
-}
-
-//---------------------------------------------------------------------------------------
-int ImoObj::get_num_attributes()
-{
-    AttrObj* pAttr = get_first_attribute();
-    int i = 0;
-    while (pAttr)
-    {
-        ++i;
-        pAttr = pAttr->get_next_attrib();
-    }
-
-    return i;
+    return get_attribute_value< Color >(idx);
 }
 
 
@@ -2291,11 +2326,6 @@ ImoContentObj::ImoContentObj(ImoId id, int objtype)
 }
 
 //---------------------------------------------------------------------------------------
-ImoContentObj::~ImoContentObj()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void ImoContentObj::add_attachment(Document* pDoc, ImoAuxObj* pAO)
 {
     ImoAttachments* pAuxObjs = get_attachments();
@@ -2463,15 +2493,14 @@ EventNotifier* ImoContentObj::get_event_notifier()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoContentObj::set_int_attribute(TIntAttribute attrib, int value)
+list<TIntAttribute> ImoContentObj::get_supported_attributes()
 {
-    ImoObj::set_int_attribute(attrib, value);
-}
-
-//---------------------------------------------------------------------------------------
-int ImoContentObj::get_int_attribute(TIntAttribute attrib)
-{
-    return ImoObj::get_int_attribute(attrib);
+    list<TIntAttribute> supported;
+    supported.push_back(k_attr_style);
+    supported.push_back(k_attr_xpos);
+    supported.push_back(k_attr_ypos);
+    supported.push_back(k_attr_visible);
+    return supported;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2481,12 +2510,12 @@ void ImoContentObj::set_bool_attribute(TIntAttribute attrib, bool value)
     {
         case k_attr_visible:
             m_fVisible = value;
-            set_dirty(true);
             break;
 
         default:
-            ImoObj::set_bool_attribute(attrib, value);
+            set_attribute<bool>(attrib, value);
     }
+    set_dirty(true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2494,9 +2523,10 @@ bool ImoContentObj::get_bool_attribute(TIntAttribute attrib)
 {
     switch(attrib)
     {
-        case k_attr_visible:        return m_fVisible;
+        case k_attr_visible:
+            return m_fVisible;
         default:
-            return ImoObj::get_bool_attribute(attrib);
+            return get_attribute_value<bool>(attrib);
     }
 }
 
@@ -2507,17 +2537,16 @@ void ImoContentObj::set_double_attribute(TIntAttribute attrib, double value)
     {
         case k_attr_xpos:
             m_txUserLocation = Tenths(value);
-            set_dirty(true);
             break;
 
         case k_attr_ypos:
             m_tyUserLocation = Tenths(value);
-            set_dirty(true);
             break;
 
         default:
-            ImoObj::set_double_attribute(attrib, value);
+            set_attribute<double>(attrib, value);
     }
+    set_dirty(true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2525,10 +2554,12 @@ double ImoContentObj::get_double_attribute(TIntAttribute attrib)
 {
     switch(attrib)
     {
-        case k_attr_xpos:       return m_txUserLocation;
-        case k_attr_ypos:       return m_tyUserLocation;
+        case k_attr_xpos:
+            return m_txUserLocation;
+        case k_attr_ypos:
+            return m_tyUserLocation;
         default:
-            return ImoObj::get_double_attribute(attrib);
+            return get_attribute_value<double>(attrib);
     }
 }
 
@@ -2539,12 +2570,12 @@ void ImoContentObj::set_string_attribute(TIntAttribute attrib, const string& val
     {
         case k_attr_style:
             //TODO
-            set_dirty(true);
             break;
 
         default:
-            ImoObj::set_string_attribute(attrib, value);
+            set_attribute<string>(attrib, value);
     }
+    set_dirty(true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2552,21 +2583,11 @@ string ImoContentObj::get_string_attribute(TIntAttribute attrib)
 {
     switch(attrib)
     {
-        case k_attr_style:      return (m_pStyle ? m_pStyle->get_name() : "");
+        case k_attr_style:
+            return (m_pStyle ? m_pStyle->get_name() : "");
         default:
-            return ImoObj::get_string_attribute(attrib);
+            return get_attribute_value<string>(attrib);
     }
-}
-
-//---------------------------------------------------------------------------------------
-list<TIntAttribute> ImoContentObj::get_supported_attributes()
-{
-    list<TIntAttribute> supported = ImoObj::get_supported_attributes();
-    supported.push_back(k_attr_style);
-    supported.push_back(k_attr_xpos);
-    supported.push_back(k_attr_ypos);
-    supported.push_back(k_attr_visible);
-    return supported;
 }
 
 
@@ -2885,41 +2906,27 @@ void ImoInstrument::set_staff_margin(int iStaff, LUnits distance)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::set_name(ImoScoreText* pText)
+void ImoInstrument::set_name(TypeTextInfo& text)
 {
-    m_name = *pText;
-    delete pText;
+    m_name = text;
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::set_abbrev(ImoScoreText* pText)
+void ImoInstrument::set_abbrev(TypeTextInfo& text)
 {
-    m_abbrev = *pText;
-    delete pText;
+    m_abbrev = text;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_name(const string& value)
 {
-    if (!m_name.get_document())
-    {
-        Document* pDoc = get_the_document();
-        m_name.set_owner_document(pDoc);
-    }
-
-    m_name.set_text(value);
+    m_name.text = value;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_abbrev(const string& value)
 {
-    if (!m_abbrev.get_document())
-    {
-        Document* pDoc = get_the_document();
-        m_abbrev.set_owner_document(pDoc);
-    }
-
-    m_abbrev.set_text(value);
+    m_abbrev.text = value;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3197,41 +3204,27 @@ ImoInstrGroup::~ImoInstrGroup()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrGroup::set_name(ImoScoreText* pText)
+void ImoInstrGroup::set_name(TypeTextInfo& text)
 {
-    m_name = *pText;
-    delete pText;
+    m_name = text;
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrGroup::set_abbrev(ImoScoreText* pText)
+void ImoInstrGroup::set_abbrev(TypeTextInfo& text)
 {
-    m_abbrev = *pText;
-    delete pText;
+    m_abbrev = text;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrGroup::set_name(const string& value)
 {
-    if (!m_name.get_document())
-    {
-        Document* pDoc = get_the_document();
-        m_name.set_owner_document(pDoc);
-    }
-
-    m_name.set_text(value);
+    m_name.text = value;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrGroup::set_abbrev(const string& value)
 {
-    if (!m_abbrev.get_document())
-    {
-        Document* pDoc = get_the_document();
-        m_abbrev.set_owner_document(pDoc);
-    }
-
-    m_abbrev.set_text(value);
+    m_abbrev.text = value;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3475,16 +3468,6 @@ void ImoLyric::add_text_item(ImoLyricsTextInfo* pText)
 {
     append_child_imo(pText);
     m_numTextItems++;
-}
-
-
-//=======================================================================================
-// ImoLyricsTextInfo implementation
-//=======================================================================================
-ImoStyle* ImoLyricsTextInfo::get_syllable_style()
-{
-    ImoStyle* pStyle = m_text.get_style();
-    return pStyle;
 }
 
 
@@ -5466,7 +5449,7 @@ ImoPageInfo::ImoPageInfo()
 //=======================================================================================
 string& ImoScoreText::get_language()
 {
-    string& language = m_text.get_language();
+    string& language = m_text.language;
     if (!language.empty())
         return language;
     else
@@ -5682,39 +5665,6 @@ ImoStyle* ImoTableRow::get_style(bool fInherit)
             throw runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
         }
     }
-}
-
-
-//=======================================================================================
-// ImoTextInfo implementation
-//=======================================================================================
-const std::string& ImoTextInfo::get_font_name()
-{
-    return m_pStyle->font_name();
-}
-
-//---------------------------------------------------------------------------------------
-float ImoTextInfo::get_font_size()
-{
-    return m_pStyle->font_size();
-}
-
-//---------------------------------------------------------------------------------------
-int ImoTextInfo::get_font_style()
-{
-    return m_pStyle->font_style();
-}
-
-//---------------------------------------------------------------------------------------
-int ImoTextInfo::get_font_weight()
-{
-    return m_pStyle->font_weight();
-}
-
-//---------------------------------------------------------------------------------------
-Color ImoTextInfo::get_color()
-{
-    return m_pStyle->color();
 }
 
 
