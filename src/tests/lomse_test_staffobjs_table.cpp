@@ -529,9 +529,9 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n d4 e v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      0,  32,     1, "(barline simple)" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace b4 s v1 p1 (stem up)(beam 58 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +c5 s v1 p1 (stem up)(beam 58 ==))" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +d5 s v1 p1 (stem up)(beam 58 --))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace b4 s v1 p1 (stem up)(beam 57 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +c5 s v1 p1 (stem up)(beam 57 ==))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +d5 s v1 p1 (stem up)(beam 57 --))" );
         CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(n e5 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 1,    0,      1,  32,     1, "(n c4 q v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      1,  96,     0, "(barline simple)" );

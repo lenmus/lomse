@@ -584,10 +584,10 @@ SUITE(MxlAnalyserTest)
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name().get_text() == "Guitar" );
-//        cout << "Name: '" << pInstr->get_name().get_text()
-//             << "', Abbrev: '" << pInstr->get_abbrev().get_text() << "'" << endl;
-        CHECK( pInstr->get_abbrev().get_text() == "" );
+        CHECK( pInstr->get_name().text == "Guitar" );
+//        cout << "Name: '" << pInstr->get_name().text
+//             << "', Abbrev: '" << pInstr->get_abbrev().text << "'" << endl;
+        CHECK( pInstr->get_abbrev().text == "" );
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
@@ -4092,8 +4092,8 @@ SUITE(MxlAnalyserTest)
         CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_name().get_text() == "Flute 1" );
-        CHECK( pInstr->get_abbrev().get_text() == "Fl. 1" );
+        CHECK( pInstr->get_name().text == "Flute 1" );
+        CHECK( pInstr->get_abbrev().text == "Fl. 1" );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
@@ -4115,8 +4115,8 @@ SUITE(MxlAnalyserTest)
         CHECK( pMidi && pMidi->get_midi_pan() == -70.0 );
         CHECK( pMidi && pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
-//        cout << "instr.name= " << pInstr->get_name().get_text() << endl
-//             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
+//        cout << "instr.name= " << pInstr->get_name().text << endl
+//             << "instr.abbrev= " << pInstr->get_abbrev().text << endl
 //             << "id= " << pInfo->get_score_instr_id() << endl
 //             << "name= " << pInfo->get_score_instr_name() << endl
 //             << "abbrev= " << pInfo->get_score_instr_abbrev() << endl
@@ -6445,7 +6445,7 @@ SUITE(MxlAnalyserTest)
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
                                         pSO->get_child_of_type(k_imo_sound_change) );
         CHECK( pSC != nullptr );
-        CHECK( pSC && pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
+        CHECK( pSC && pSC->get_attribute(k_attr_tocoda) != nullptr  );
 
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
@@ -6495,7 +6495,7 @@ SUITE(MxlAnalyserTest)
 
                 ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( *it );
                 CHECK( pSC != nullptr );
-                CHECK( pSC && pSC->get_attribute_node(k_attr_tempo) != nullptr  );
+                CHECK( pSC && pSC->get_attribute(k_attr_tempo) != nullptr  );
 
                 ++it;
                 ImoNote* pNote = dynamic_cast<ImoNote*>( *it );

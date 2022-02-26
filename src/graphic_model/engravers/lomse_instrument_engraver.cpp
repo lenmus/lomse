@@ -443,12 +443,12 @@ void GroupEngraver::measure_name_abbrev()
     LUnits uSpaceAfterName = tenths_to_logical(LOMSE_INSTR_SPACE_AFTER_NAME);
     if (m_pGroup->has_name())
     {
-        ImoScoreText& text = m_pGroup->get_name();
-        ImoStyle* pStyle = text.get_style();
+        TypeTextInfo& text = m_pGroup->get_name();
+        ImoStyle* pStyle = m_pGroup->get_name_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                          text.get_language(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text,
+                          text.language, pStyle);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -457,12 +457,12 @@ void GroupEngraver::measure_name_abbrev()
     }
     if (m_pGroup->has_abbrev())
     {
-        ImoScoreText& text = m_pGroup->get_abbrev();
-        ImoStyle* pStyle = text.get_style();
+        TypeTextInfo& text = m_pGroup->get_abbrev();
+        ImoStyle* pStyle = m_pGroup->get_abbrev_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                          text.get_language(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text,
+                          text.language, pStyle);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -521,12 +521,12 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
         {
             LUnits xLeft = m_nameBox.x + pBox->get_left();
 
-            ImoScoreText& text = m_pGroup->get_name();
-            ImoStyle* pStyle = text.get_style();
+            TypeTextInfo& text = m_pGroup->get_name();
+            ImoStyle* pStyle = m_pGroup->get_name_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                              text.get_language(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text,
+                              text.language, pStyle);
             GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -537,12 +537,12 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
         {
             LUnits xLeft = m_abbrevBox.x + pBox->get_left();
 
-            ImoScoreText& text = m_pGroup->get_abbrev();
-            ImoStyle* pStyle = text.get_style();
+            TypeTextInfo& text = m_pGroup->get_abbrev();
+            ImoStyle* pStyle = m_pGroup->get_abbrev_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                              text.get_language(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text,
+                              text.language, pStyle);
             GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -646,12 +646,11 @@ void InstrumentEngraver::measure_name_abbrev()
     LUnits uSpaceAfterName = tenths_to_logical(LOMSE_INSTR_SPACE_AFTER_NAME);
     if (m_pInstr->has_name())
     {
-        ImoScoreText& text = m_pInstr->get_name();
-        ImoStyle* pStyle = text.get_style();
+        TypeTextInfo& text = m_pInstr->get_name();
+        ImoStyle* pStyle = m_pInstr->get_name_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                          text.get_language(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -660,12 +659,11 @@ void InstrumentEngraver::measure_name_abbrev()
     }
     if (m_pInstr->has_abbrev())
     {
-        ImoScoreText& text = m_pInstr->get_abbrev();
-        ImoStyle* pStyle = text.get_style();
+        TypeTextInfo& text = m_pInstr->get_abbrev();
+        ImoStyle* pStyle = m_pInstr->get_abbrev_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                          text.get_language(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -720,12 +718,11 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             m_nameBox.y = (get_staff_top_position() + get_staff_bottom_position()) / 2.0f;
             LUnits yTop = m_nameBox.y + m_org.y;
 
-            ImoScoreText& text = m_pInstr->get_name();
-            ImoStyle* pStyle = text.get_style();
+            TypeTextInfo& text = m_pInstr->get_name();
+            ImoStyle* pStyle = m_pInstr->get_name_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                              text.get_language(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -738,12 +735,11 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             m_abbrevBox.y = (get_staff_top_position() + get_staff_bottom_position()) / 2.0f;
             LUnits yTop = m_abbrevBox.y + m_org.y;
 
-            ImoScoreText& text = m_pInstr->get_abbrev();
-            ImoStyle* pStyle = text.get_style();
+            TypeTextInfo& text = m_pInstr->get_abbrev();
+            ImoStyle* pStyle = m_pInstr->get_abbrev_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
-                              text.get_language(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }

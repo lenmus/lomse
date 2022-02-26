@@ -1468,7 +1468,7 @@ SUITE(MnxAnalyserTest)
                 CHECK( (*it) && (*it)->is_sound_change() );
                 ImoSoundChange* pSC = static_cast<ImoSoundChange*>( *it );
                 CHECK( pSC != nullptr );
-                CHECK( pSC && pSC->get_attribute_node(k_attr_segno) != nullptr  );
+                CHECK( pSC && pSC->get_attribute(k_attr_segno) != nullptr  );
 
                 ++it;
                 CHECK( (*it) && (*it)->is_barline() );

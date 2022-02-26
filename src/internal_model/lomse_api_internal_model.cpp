@@ -1211,8 +1211,8 @@ LOMSE_IMPLEMENT_IM_API_CLASS(AInstrument, ImoInstrument, AObject)
 std::string& AInstrument::name_string() const
 {
     ensure_validity();
-    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-    return text.get_text();
+    TypeTextInfo& text = const_cast<ImoInstrument*>(pimpl())->get_name();
+    return text.text;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1223,8 +1223,8 @@ std::string& AInstrument::name_string() const
 std::string& AInstrument::abbreviation_string() const
 {
     ensure_validity();
-    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_abbrev();
-    return text.get_text();
+    TypeTextInfo& text = const_cast<ImoInstrument*>(pimpl())->get_abbrev();
+    return text.text;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1384,8 +1384,8 @@ EGroupSymbol AInstrGroup::symbol() const
 const std::string& AInstrGroup::name_string() const
 {
     ensure_validity();
-    ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_name();
-    return text.get_text();
+    TypeTextInfo& text = const_cast<ImoInstrGroup*>(pimpl())->get_name();
+    return text.text;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1396,8 +1396,8 @@ const std::string& AInstrGroup::name_string() const
 const std::string& AInstrGroup::abbreviation_string() const
 {
     ensure_validity();
-    ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_abbrev();
-    return text.get_text();
+    TypeTextInfo& text = const_cast<ImoInstrGroup*>(pimpl())->get_abbrev();
+    return text.text;
 }
 
 //@}    //Access to group properties

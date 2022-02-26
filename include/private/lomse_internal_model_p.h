@@ -150,7 +150,6 @@ class ImoTableCell;
 class ImoTableBody;
 class ImoTableHead;
 class ImoTableRow;
-class ImoTextInfo;
 class ImoTextItem;
 class ImoTextStyle;
 class ImoTieData;
@@ -837,7 +836,6 @@ enum EImoObjType
     k_imo_sound_info,
     k_imo_staff_info,
     k_imo_system_info,
-    k_imo_text_info,
     k_imo_textblock_info,
     k_imo_text_style,
 
@@ -1087,7 +1085,6 @@ protected:
 
 public:
     InlineLevelCreatorApi() : m_pParent(nullptr) {}
-    virtual ~InlineLevelCreatorApi() {}
 
     //API
     ImoTextItem* add_text_item(const std::string& text, ImoStyle* pStyle=nullptr);
@@ -1116,7 +1113,6 @@ protected:
 
 public:
     BlockLevelCreatorApi() : m_pParent(nullptr) {}
-    virtual ~BlockLevelCreatorApi() {}
 
     //API
     ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr);
@@ -1269,7 +1265,7 @@ private:
 
     As the IM is not a generic DOM and all possible attributes names are known in
     advance, an enummerated type is used for attributes name instead of a string,
-    to save memory.
+    to save memory and speed up comparisons.
 
     Also the values for attributes are not strings but can be different types:
     string, int, float, bool, color, etc.
@@ -1283,21 +1279,83 @@ private:
 class AttrObj
 {
 protected:
-    int m_attrbIdx;         //attribute name, from enum EImoAttribute
-    AttribValue m_value;    //attrib. value
-    AttrObj* m_next = nullptr;      //ptr to next attribute for the element, if any
+    int m_attrbIdx = 0;         //attribute name, from enum EImoAttribute
+    AttrObj* m_prev = nullptr;
+    AttrObj* m_next = nullptr;
+
+    AttrObj(int idx) : m_attrbIdx(idx) {}
 
 public:
-    AttrObj(int idx) : m_attrbIdx(idx), m_next(nullptr) {}
-    AttrObj(int idx, const std::string& value);
-    AttrObj(int idx, int value);
-    AttrObj(int idx, float value);
-    AttrObj(int idx, double value);
-    AttrObj(int idx, bool value);
-    AttrObj(int idx, Color value);
     virtual ~AttrObj();
+    AttrObj(const AttrObj&) = delete;
+    AttrObj& operator= (const AttrObj&) = delete;
+    AttrObj(AttrObj&&) = delete;
+    AttrObj& operator= (AttrObj&&) = delete;
 
     const std::string get_name();
+    static const std::string get_name(int idx);
+
+    inline int get_attrib_idx() { return m_attrbIdx; }
+
+    inline AttrObj* get_next_attrib() { return m_next; }
+    inline AttrObj* get_prev_attrib() { return m_prev; }
+
+    int get_int_value();
+    double get_double_value();
+    std::string get_string_value();
+    bool get_bool_value();
+    float get_float_value();
+    Color get_color_value();
+
+protected:
+    friend class AttrList;
+    inline void set_next_attrib(AttrObj* pNext) { m_next = pNext; }
+    inline void set_prev_attrib(AttrObj* pPrev) { m_prev = pPrev; }
+
+    friend class ImoObj;
+    AttrObj* replace_by(AttrObj* newAttr);
+
+
+};
+
+//=======================================================================================
+template <class T> class Attr : public AttrObj
+{
+protected:
+    T m_value;
+
+public:
+    Attr(int idx, const T& value) : AttrObj(idx), m_value(value) {}
+
+    inline const T& get_value() { return m_value; }
+    inline void set_value(const T& value) { m_value = value; }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+typedef Attr<int> AttrInt;
+typedef Attr<double> AttrDouble;
+typedef Attr<float> AttrFloat;
+typedef Attr<std::string> AttrString;
+typedef Attr<bool> AttrBool;
+typedef Attr< Color > AttrColor;
+
+
+//=======================================================================================
+class AttrVariant : public AttrObj
+{
+protected:
+    AttribValue m_value;
+
+public:
+    AttrVariant(int idx) : AttrObj(idx) {}
+    AttrVariant(int idx, const std::string& value);
+    AttrVariant(int idx, int value);
+    AttrVariant(int idx, float value);
+    AttrVariant(int idx, double value);
+    AttrVariant(int idx, bool value);
+    AttrVariant(int idx, Color value);
 
     inline int get_int_value() { return static_cast<int>(m_value); }
     inline double get_double_value() { return static_cast<double>(m_value); }
@@ -1313,14 +1371,40 @@ public:
     inline void set_bool_value(bool value) { m_value = value; }
     inline void set_color_value(Color value) { m_value = value; }
 
-    inline int get_attrib_idx() { return m_attrbIdx; }
-    inline AttrObj* get_next_attrib() { return m_next; }
+};
 
-    static const std::string get_name(int idx);
-
+//=======================================================================================
+/** A simple double linked list to store AttrObj objects with minimum memory footprint.
+*/
+class AttrList
+{
 protected:
-    friend class ImoObj;
-    inline void set_next_attrib(AttrObj* pAttr) { m_next = pAttr; }
+    AttrObj* m_first = nullptr;
+
+public:
+    AttrList() {}
+    ~AttrList() { delete m_first; }
+
+//    AttrList(const AttrList&) = delete;
+//    AttrList& operator= (const AttrList&) = delete;
+//    AttrList(AttrList&&) = delete;
+//    AttrList& operator= (AttrList&&) = delete;
+
+    //capacity
+    size_t size();                                      //returns the number of elements
+    inline bool empty() { return m_first == nullptr; }  //checks whether the list is empty
+
+    //modifiers
+    void clear();                               //clears the contents
+    AttrObj* push_back(AttrObj* newAttr);       //adds an element to the end
+
+    //element access
+    inline AttrObj* front() { return m_first; }     //access the first element
+    AttrObj* back();                                //access the last element
+
+    //operations
+    void remove(TIntAttribute idx);         //removes and deletes the element
+    AttrObj* find(TIntAttribute idx);       //access element by name identifier
 
 };
 
@@ -1369,7 +1453,19 @@ public:
     {
     }
 
-    ~TypeMeasureInfo() {}
+};
+
+
+//---------------------------------------------------------------------------------------
+/** %TypeTextInfo is a container for a text and its language
+*/
+struct TypeTextInfo
+{
+    std::string text;
+    std::string language;
+
+    TypeTextInfo() {}
+    TypeTextInfo(const std::string& txt) : text(txt) {}
 };
 
 
@@ -1402,7 +1498,7 @@ protected:
     ImoId m_id;
     int m_objtype;
     unsigned int m_flags;
-    AttrObj* m_pAttribs;
+    AttrList m_attribs;
 
 protected:
     ImoObj(int objtype, ImoId id=k_no_imoid);
@@ -1474,33 +1570,6 @@ public:
 
     //properties
     virtual bool can_generate_secondary_shapes() { return false; }
-
-    //IM attributes interface
-    //set attribute value
-    virtual void set_int_attribute(TIntAttribute idx, int value);
-    virtual void set_color_attribute(TIntAttribute idx, Color value);
-    virtual void set_bool_attribute(TIntAttribute idx, bool value);
-    virtual void set_float_attribute(TIntAttribute idx, float value);
-    virtual void set_double_attribute(TIntAttribute idx, double value);
-    virtual void set_string_attribute(TIntAttribute idx, const std::string& value);
-    //get attribute value
-    virtual int get_int_attribute(TIntAttribute idx);
-    virtual float get_float_attribute(TIntAttribute idx);
-    virtual double get_double_attribute(TIntAttribute idx);
-    virtual Color get_color_attribute(TIntAttribute idx);
-    virtual bool get_bool_attribute(TIntAttribute idx);
-    virtual string get_string_attribute(TIntAttribute idx);
-    //attribute nodes
-    AttrObj* get_attribute_node(TIntAttribute idx);
-    void remove_attribute(TIntAttribute idx);
-    //miscellaneous
-    virtual int get_num_attributes();
-    inline AttrObj* get_first_attribute() { return m_pAttribs; }
-    virtual list<TIntAttribute> get_supported_attributes()
-    {
-        list<TIntAttribute> supported;
-        return supported;
-    }
 
     //object classification
     inline int get_obj_type() { return m_objtype; }
@@ -1634,7 +1703,6 @@ public:
     inline bool is_table_head() { return m_objtype == k_imo_table_head; }
     inline bool is_table_row() { return m_objtype == k_imo_table_row; }
     inline bool is_technical() { return m_objtype == k_imo_technical || m_objtype == k_imo_fingering; }
-    inline bool is_text_info() { return m_objtype == k_imo_text_info; }
     inline bool is_text_item() { return m_objtype == k_imo_text_item; }
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
     inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
@@ -1658,14 +1726,78 @@ public:
                   || m_objtype == k_imo_button
                   ; }
 
+
+    //IM attributes interface ------------------------------------
+    bool has_attributte(TIntAttribute idx);
+
+        //set attribute value
+    template<typename T> void set_attribute(TIntAttribute idx, const T& value)
+    {
+        AttrObj* pAttr = get_attribute(idx);
+        if (pAttr)
+        {
+            Attr<T>* pT = dynamic_cast< Attr<T>* >(pAttr);
+            if (pT)
+            {
+                pT->set_value(value);
+                return;
+            }
+
+            else
+            {
+                pAttr->replace_by( LOMSE_NEW Attr<T>(idx, value) );
+                return;
+            }
+        }
+
+        add_attribute( LOMSE_NEW Attr<T>(idx, value) );
+        set_dirty(true);
+    }
+
+    virtual void set_int_attribute(TIntAttribute idx, int value);
+    virtual void set_color_attribute(TIntAttribute idx, Color value);
+    virtual void set_bool_attribute(TIntAttribute idx, bool value);
+    virtual void set_float_attribute(TIntAttribute idx, float value);
+    virtual void set_double_attribute(TIntAttribute idx, double value);
+    virtual void set_string_attribute(TIntAttribute idx, const std::string& value);
+
+        //get attribute value
+    template<typename T> T get_attribute_value(TIntAttribute idx)
+    {
+        AttrObj* pAttr = get_attribute(idx);
+        if (pAttr)
+        {
+            Attr<T>* pT = dynamic_cast< Attr<T>* >(pAttr);
+            if (pT)
+                return pT->get_value();
+        }
+        T value = T();
+        return value;
+    }
+
+    virtual int get_int_attribute(TIntAttribute idx);
+    virtual float get_float_attribute(TIntAttribute idx);
+    virtual double get_double_attribute(TIntAttribute idx);
+    virtual Color get_color_attribute(TIntAttribute idx);
+    virtual bool get_bool_attribute(TIntAttribute idx);
+    virtual string get_string_attribute(TIntAttribute idx);
+
+        //attribute nodes
+    AttrObj* get_attribute(TIntAttribute idx) { return m_attribs.find(idx); };
+    void remove_attribute(TIntAttribute idx) { m_attribs.remove(idx); };
+
+        //miscellaneous
+    virtual size_t get_num_attributes() { return m_attribs.size(); }
+    inline AttrObj* get_first_attribute() { return m_attribs.front(); }
+    virtual list<TIntAttribute> get_supported_attributes();
+
+protected:
+    AttrObj* add_attribute(AttrObj* newAttr) { m_attribs.push_back(newAttr); return newAttr; }
+
 protected:
     void visit_children(BaseVisitor& v);
     void propagate_dirty();
     void remove_id();
-
-    //attributes
-    AttrObj* set_attribute_node(AttrObj* newAttr);
-    AttrObj* get_last_attribute();
 
 };
 
@@ -1677,7 +1809,6 @@ protected:
     ImoDto(int objtype) : ImoObj(objtype) {}
 
 public:
-    virtual ~ImoDto() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1713,7 +1844,6 @@ protected:
 public:
     ImoColorDto() : ImoDto(k_imo_color_dto), m_color(0, 0, 0, 255), m_ok(true) {}
     ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a = 255);
-    virtual ~ImoColorDto() {}
 
     Color& set_from_rgb_string(const std::string& rgb);
     Color& set_from_rgba_string(const std::string& rgba);
@@ -1743,7 +1873,6 @@ protected:
     ImoSimpleObj(int objtype) : ImoObj(objtype) {}
 
 public:
-    virtual ~ImoSimpleObj() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -2406,7 +2535,7 @@ protected:
     of a document must derive.
 
     %ImoContentObj objects have style, location, visibility and can
-    have attachments.
+    have attachments and attributes.
 */
 class ImoContentObj : public ImoObj
     , public Observable
@@ -2423,7 +2552,10 @@ protected:
     ImoContentObj(ImoId id, int objtype);
 
 public:
-    ~ImoContentObj() override;
+    ImoContentObj(const ImoContentObj&) = delete;
+    ImoContentObj& operator= (const ImoContentObj&) = delete;
+    ImoContentObj(ImoContentObj&&) = delete;
+    ImoContentObj& operator= (ImoContentObj&&) = delete;
 
     //getters
     inline Tenths get_user_location_x() { return m_txUserLocation; }
@@ -2482,41 +2614,35 @@ public:
         return pStyle ? pStyle->margin_bottom() : 0.0f;
     }
 
-    //IM attributes interface
-    void set_int_attribute(TIntAttribute attrib, int value) override;
-    int get_int_attribute(TIntAttribute attrib) override;
+
+    //attributes interface
+    list<TIntAttribute> get_supported_attributes() override;
     void set_bool_attribute(TIntAttribute attrib, bool value) override;
     bool get_bool_attribute(TIntAttribute attrib) override;
     void set_double_attribute(TIntAttribute attrib, double value) override;
     double get_double_attribute(TIntAttribute attrib) override;
-    void set_string_attribute(TIntAttribute attrib, const std::string& value) override;
-    std::string get_string_attribute(TIntAttribute attrib) override;
-    list<TIntAttribute> get_supported_attributes() override;
+    void set_string_attribute(TIntAttribute attrib, const string& value) override;
+    string get_string_attribute(TIntAttribute attrib) override;
 
 };
 
 //---------------------------------------------------------------------------------------
 class ImoCollection : public ImoSimpleObj
 {
-public:
-    virtual ~ImoCollection() {}
-
-    //contents
-    inline ImoObj* get_item(int iItem)
-    {
-        return get_child(iItem);    //iItem = 0..n-1
-    }
-    inline int get_num_items()
-    {
-        return get_num_children();
-    }
-    inline void remove_item(ImoContentObj* pItem)
-    {
-        remove_child_imo(pItem);
-    }
-
 protected:
     ImoCollection(int objtype) : ImoSimpleObj(objtype) {}
+
+public:
+    ImoCollection(const ImoCollection&) = delete;
+    ImoCollection& operator= (const ImoCollection&) = delete;
+    ImoCollection(ImoCollection&&) = delete;
+    ImoCollection& operator= (ImoCollection&&) = delete;
+
+    //contents.    iItem = 0..n-1
+    inline ImoObj* get_item(int iItem) { return get_child(iItem); }
+    inline int get_num_items() { return get_num_children(); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -2531,6 +2657,10 @@ protected:
 
 public:
     ~ImoRelations() override;
+    ImoRelations(const ImoRelations&) = delete;
+    ImoRelations& operator= (const ImoRelations&) = delete;
+    ImoRelations(ImoRelations&&) = delete;
+    ImoRelations& operator= (ImoRelations&&) = delete;
 
     //overrides, to traverse this special node
     void accept_visitor(BaseVisitor& v) override;
@@ -2563,7 +2693,10 @@ protected:
     ImoContainerObj(int objtype) : ImoObj(objtype) {}
 
 public:
-    virtual ~ImoContainerObj() {}
+    ImoContainerObj(const ImoContainerObj&) = delete;
+    ImoContainerObj& operator= (const ImoContainerObj&) = delete;
+    ImoContainerObj(ImoContainerObj&&) = delete;
+    ImoContainerObj& operator= (ImoContainerObj&&) = delete;
 
 };
 
@@ -2576,7 +2709,10 @@ protected:
     ImoBlockLevelObj(int objtype) : ImoContentObj(objtype) {}
 
 public:
-    virtual ~ImoBlockLevelObj() {}
+    ImoBlockLevelObj(const ImoBlockLevelObj&) = delete;
+    ImoBlockLevelObj& operator= (const ImoBlockLevelObj&) = delete;
+    ImoBlockLevelObj(ImoBlockLevelObj&&) = delete;
+    ImoBlockLevelObj& operator= (ImoBlockLevelObj&&) = delete;
 
 };
 
@@ -2599,7 +2735,10 @@ protected:
     }
 
 public:
-    virtual ~ImoBlocksContainer() {}
+    ImoBlocksContainer(const ImoBlocksContainer&) = delete;
+    ImoBlocksContainer& operator= (const ImoBlocksContainer&) = delete;
+    ImoBlocksContainer(ImoBlocksContainer&&) = delete;
+    ImoBlocksContainer& operator= (ImoBlocksContainer&&) = delete;
 
     //support for storing content inside an ImoContent node.
     //Container ImoContent node will be automatically created when storing the
@@ -2633,7 +2772,10 @@ protected:
     }
 
 public:
-    virtual ~ImoInlinesContainer() {}
+    ImoInlinesContainer(const ImoInlinesContainer&) = delete;
+    ImoInlinesContainer& operator= (const ImoInlinesContainer&) = delete;
+    ImoInlinesContainer(ImoInlinesContainer&&) = delete;
+    ImoInlinesContainer& operator= (ImoInlinesContainer&&) = delete;
 
     //contents
     inline int get_num_items() { return get_num_children(); }
@@ -2648,30 +2790,6 @@ public:
 
 };
 
-////---------------------------------------------------------------------------------------
-//class ImoTextBlock : public ImoInlinesContainer, public InlineLevelCreatorApi
-//{
-//protected:
-//    ImoTextBlock(int objtype)
-//        : ImoInlinesContainer(objtype)
-//        , InlineLevelCreatorApi()
-//    {
-//        set_inline_level_creator_api_parent(this);
-//    }
-//
-//public:
-//    virtual ~ImoTextBlock() {}
-//
-//    //contents
-//    inline int get_num_items() { return get_num_children(); }
-//    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
-//    inline void add_item(ImoContentObj* pItem) { append_child_imo(pItem); }
-//    inline ImoContentObj* get_first_item() {
-//        return dynamic_cast<ImoContentObj*>( get_first_child() );
-//    }
-//
-//};
-
 //---------------------------------------------------------------------------------------
 // ImoInlineLevelObj: Abstract class from which any ImoInlinesContainer content object must derive
 class ImoInlineLevelObj : public ImoContentObj
@@ -2680,7 +2798,10 @@ protected:
     ImoInlineLevelObj(int objtype) : ImoContentObj(objtype) {}
 
 public:
-    virtual ~ImoInlineLevelObj() {}
+    ImoInlineLevelObj(const ImoInlineLevelObj&) = delete;
+    ImoInlineLevelObj& operator= (const ImoInlineLevelObj&) = delete;
+    ImoInlineLevelObj(ImoInlineLevelObj&&) = delete;
+    ImoInlineLevelObj& operator= (ImoInlineLevelObj&&) = delete;
 
 };
 
@@ -2707,7 +2828,10 @@ protected:
     }
 
 public:
-    virtual ~ImoBoxInline() {}
+    ImoBoxInline(const ImoBoxInline&) = delete;
+    ImoBoxInline& operator= (const ImoBoxInline&) = delete;
+    ImoBoxInline(ImoBoxInline&&) = delete;
+    ImoBoxInline& operator= (ImoBoxInline&&) = delete;
 
     //add/remove content
     inline void add_item(ImoInlineLevelObj* pItem) { append_child_imo(pItem); }
@@ -2744,7 +2868,10 @@ protected:
     ImoInlineWrapper() : ImoBoxInline(k_imo_inline_wrapper) {}
 
 public:
-    virtual ~ImoInlineWrapper() {}
+    ImoInlineWrapper(const ImoInlineWrapper&) = delete;
+    ImoInlineWrapper& operator= (const ImoInlineWrapper&) = delete;
+    ImoInlineWrapper(ImoInlineWrapper&&) = delete;
+    ImoInlineWrapper& operator= (ImoInlineWrapper&&) = delete;
 };
 
 //---------------------------------------------------------------------------------------
@@ -2759,22 +2886,16 @@ private:
     ImoLink() : ImoBoxInline(k_imo_link) {}
 
 public:
-    virtual ~ImoLink() {}
+    ImoLink(const ImoLink&) = delete;
+    ImoLink& operator= (const ImoLink&) = delete;
+    ImoLink(ImoLink&&) = delete;
+    ImoLink& operator= (ImoLink&&) = delete;
 
     //url
-    inline std::string& get_url()
-    {
-        return m_url;
-    }
-    inline void set_url(const std::string& url)
-    {
-        m_url = url;
-    }
+    inline std::string& get_url() { return m_url; }
+    inline void set_url(const std::string& url) { m_url = url; }
     std::string& get_language();
-    void set_language(const std::string& value)
-    {
-        m_language = value;
-    }
+    void set_language(const std::string& value) { m_language = value; }
 
 };
 
@@ -2789,7 +2910,10 @@ protected:
     ImoScoreObj(int objtype) : ImoContentObj(objtype), m_color(0,0,0) {}
 
 public:
-    ~ImoScoreObj() override {}
+    ImoScoreObj(const ImoScoreObj&) = delete;
+    ImoScoreObj& operator= (const ImoScoreObj&) = delete;
+    ImoScoreObj(ImoScoreObj&&) = delete;
+    ImoScoreObj& operator= (ImoScoreObj&&) = delete;
 
     //getters
     inline Color& get_color() { return m_color; }
@@ -2823,6 +2947,10 @@ protected:
 
 public:
     ~ImoStaffObj() override;
+    ImoStaffObj(const ImoStaffObj&) = delete;
+    ImoStaffObj& operator= (const ImoStaffObj&) = delete;
+    ImoStaffObj(ImoStaffObj&&) = delete;
+    ImoStaffObj& operator= (ImoStaffObj&&) = delete;
 
     //relations
     void include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
@@ -2864,15 +2992,18 @@ public:
 //         directly to an staff. Do not consume time
 class ImoAuxObj : public ImoScoreObj
 {
-public:
-    virtual ~ImoAuxObj() {}
-
 protected:
     ImoAuxObj(int objtype) : ImoScoreObj(objtype) {}
     ImoAuxObj(ImoId id, int objtype)
         : ImoScoreObj(id, objtype)
     {
     }
+
+public:
+    ImoAuxObj(const ImoAuxObj&) = delete;
+    ImoAuxObj& operator= (const ImoAuxObj&) = delete;
+    ImoAuxObj(ImoAuxObj&&) = delete;
+    ImoAuxObj& operator= (ImoAuxObj&&) = delete;
 
 };
 
@@ -2900,6 +3031,10 @@ protected:
 
 public:
     virtual ~ImoAuxRelObj();
+    ImoAuxRelObj(const ImoAuxRelObj&) = delete;
+    ImoAuxRelObj& operator= (const ImoAuxRelObj&) = delete;
+    ImoAuxRelObj(ImoAuxRelObj&&) = delete;
+    ImoAuxRelObj& operator= (ImoAuxRelObj&&) = delete;
 
     //information
     inline bool is_start_of_relation()
@@ -2923,11 +3058,15 @@ protected:
 //An abstract object containing the specific data for one node in a relation
 class ImoRelDataObj : public ImoSimpleObj
 {
-public:
-    virtual ~ImoRelDataObj() {}
-
 protected:
     ImoRelDataObj(int objtype) : ImoSimpleObj(objtype) {}
+
+public:
+    virtual ~ImoRelDataObj() {}
+    ImoRelDataObj(const ImoRelDataObj&) = delete;
+    ImoRelDataObj& operator= (const ImoRelDataObj&) = delete;
+    ImoRelDataObj(ImoRelDataObj&&) = delete;
+    ImoRelDataObj& operator= (ImoRelDataObj&&) = delete;
 
 };
 
@@ -2938,47 +3077,28 @@ class ImoRelObj : public ImoScoreObj
 protected:
     std::list< pair<ImoStaffObj*, ImoRelDataObj*> > m_relatedObjects;
 
+    ImoRelObj(int objtype) : ImoScoreObj(objtype) {}
+
 public:
     virtual ~ImoRelObj();
+    ImoRelObj(const ImoRelObj&) = delete;
+    ImoRelObj& operator= (const ImoRelObj&) = delete;
+    ImoRelObj(ImoRelObj&&) = delete;
+    ImoRelObj& operator= (ImoRelObj&&) = delete;
 
     virtual void push_back(ImoStaffObj* pSO, ImoRelDataObj* pData);
     void remove(ImoStaffObj* pSO);
     void remove_all();
-    inline int get_num_objects()
-    {
-        return int( m_relatedObjects.size() );
-    }
-    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& get_related_objects()
-    {
-        return m_relatedObjects;
-    }
-    ImoStaffObj* get_start_object()
-    {
-        return m_relatedObjects.front().first;
-    }
-    ImoStaffObj* get_end_object()
-    {
-        return m_relatedObjects.back().first;
-    }
-    ImoRelDataObj* get_start_data()
-    {
-        return m_relatedObjects.front().second;
-    }
-    ImoRelDataObj* get_end_data()
-    {
-        return m_relatedObjects.back().second;
-    }
+    inline int get_num_objects() { return int( m_relatedObjects.size() ); }
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& get_related_objects() { return m_relatedObjects; }
+    ImoStaffObj* get_start_object() { return m_relatedObjects.front().first; }
+    ImoStaffObj* get_end_object() { return m_relatedObjects.back().first; }
+    ImoRelDataObj* get_start_data() { return m_relatedObjects.front().second; }
+    ImoRelDataObj* get_end_data() { return m_relatedObjects.back().second; }
     ImoRelDataObj* get_data_for(ImoStaffObj* pSO);
 
     virtual void reorganize_after_object_deletion()=0;
-    virtual int get_min_number_for_autodelete()
-    {
-        return 2;
-    }
-
-protected:
-    ImoRelObj(int objtype) : ImoScoreObj(objtype) {}
-
+    virtual int get_min_number_for_autodelete() { return 2; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -2990,16 +3110,13 @@ protected:
     ImoAttachments() : ImoCollection(k_imo_attachments) {}
 
 public:
-    virtual ~ImoAttachments() {}
+    ImoAttachments(const ImoAttachments&) = delete;
+    ImoAttachments& operator= (const ImoAttachments&) = delete;
+    ImoAttachments(ImoAttachments&&) = delete;
+    ImoAttachments& operator= (ImoAttachments&&) = delete;
 
-    void remove(ImoAuxObj* pAO)
-    {
-        remove_child_imo(pAO);
-    }
-    void add(ImoAuxObj* pAO)
-    {
-        append_child_imo(pAO);
-    }
+    void remove(ImoAuxObj* pAO) { remove_child_imo(pAO); }
+    void add(ImoAuxObj* pAO) { append_child_imo(pAO); }
     ImoAuxObj* find_item_of_type(int type)
     {
         return static_cast<ImoAuxObj*>( get_child_of_type(type) );
@@ -3023,7 +3140,10 @@ protected:
     ImoBeamData();
 
 public:
-    virtual ~ImoBeamData() {}
+    ImoBeamData(const ImoBeamData&) = delete;
+    ImoBeamData& operator= (const ImoBeamData&) = delete;
+    ImoBeamData(ImoBeamData&&) = delete;
+    ImoBeamData& operator= (ImoBeamData&&) = delete;
 
     //getters
     inline int get_beam_type(int level) { return m_beamType[level]; }
@@ -3050,7 +3170,6 @@ protected:
 
 public:
     ImoBeamDto();
-    virtual ~ImoBeamDto() {}
 
     //getters
     inline int get_beam_number()
@@ -3118,8 +3237,6 @@ protected:
 public:
     ImoBezierInfo(ImoBezierInfo* pBezier);
 
-    virtual ~ImoBezierInfo() {}
-
     enum { k_start=0, k_end, k_ctrol1, k_ctrol2, k_max};     // point number
 
     //points
@@ -3144,7 +3261,6 @@ class ImoBorderDto : public ImoSimpleObj
 public:
     ImoBorderDto() : ImoSimpleObj(k_imo_border_dto)
         , m_color(Color(0,0,0,255)), m_width(1.0f), m_style(k_line_solid) {}
-    virtual ~ImoBorderDto() {}
 
     //getters
     inline Color get_color()
@@ -3196,7 +3312,10 @@ protected:
     }
 
 public:
-    ~ImoChord() override {}
+    ImoChord(const ImoChord&) = delete;
+    ImoChord& operator= (const ImoChord&) = delete;
+    ImoChord(ImoChord&&) = delete;
+    ImoChord& operator= (ImoChord&&) = delete;
 
     inline bool is_cross_staff() { return m_fCrossStaff; }
     void update_cross_staff_data();
@@ -3234,7 +3353,6 @@ protected:
         , m_instrument(0), m_staff(0), m_time(0.0), m_id(k_no_imoid) {}
 
 public:
-    virtual ~ImoCursorInfo() {}
 
     //getters
     inline int get_instrument()
@@ -3306,7 +3424,6 @@ protected:
     }
 
 public:
-    virtual ~ImoLineStyle() {}
 
     //getters
     inline ELineStyle get_line_style() const
@@ -3395,46 +3512,36 @@ protected:
     std::string	m_soundId;          //id of the score-instrument
 
     //midi device
-    int     m_port;			    //port: 0-15 (MIDI 1-16)
-    std::string  m_midiDeviceName;   //DeviceName meta event
+    int     m_port = -1;            //port: 0-15 (MIDI 1-16)
+    std::string  m_midiDeviceName;  //DeviceName meta event
 
     //midi instrument
-    std::string m_midiName;  //name: ProgramName meta-events
-    int m_bank;			//bank: 0-16383 (MIDI 1-16,384)
-    int m_channel;		//channel: 0-15 (MIDI 1-16)
-    int m_program;		//patch: 0-127 (MIDI 1-128)
-    int m_unpitched;	//pitch number for percussion: 1-128
+    std::string m_midiName; //name: ProgramName meta-events
+    int m_bank = 0;			//bank: 0-16383 (MIDI 1-16,384)
+    int m_channel = -1;		//channel: 0-15 (MIDI 1-16)
+    int m_program = 0;		//patch: 0-127 (MIDI 1-128)
+    int m_unpitched = 0;	//pitch number for percussion: 1-128
 
     //mixer information
-    float m_volume;		//channel volume: 0.0 (muted) to 1.0
-    int m_pan;			//degrees: -180 to 180.
-                        // 0 = in front of the listener, centered
-                        //-90 = hard left, 90 is hard right
-                        //-180 and 180 = behind the listener, centered
-    int m_elevation;	//degrees: -90 to 90.
-                        // 0 = listener level
-                        // 90 = directly above
-                        //-90 = directly below.
+    float m_volume = 1.0f;  //channel volume: 0.0 (muted) to 1.0
+    int m_pan = 0;			//degrees: -180 to 180.
+                            //      0 = in front of the listener, centered
+                            //    -90 = hard left, 90 is hard right
+                            //   -180 and 180 = behind the listener, centered
+    int m_elevation = 0;    //degrees: -90 to 90.
+                            //      0 = listener level
+                            //     90 = directly above
+                            //    -90 = directly below.
 
     friend class ImFactory;
     friend class ImoInstrument;
-    ImoMidiInfo()
-        : ImoSimpleObj(k_imo_midi_info)
-        , m_port(-1)
-        , m_midiDeviceName("")
-        , m_midiName("")
-        , m_bank(0)
-        , m_channel(-1)
-        , m_program(0)
-        , m_unpitched(0)
-        , m_volume(1.0)
-        , m_pan(0)
-        , m_elevation(0)
-    {
-    }
+    ImoMidiInfo() : ImoSimpleObj(k_imo_midi_info) {}
 
 public:
-    virtual ~ImoMidiInfo() {}
+//    ImoMidiInfo(const ImoMidiInfo&) = delete;
+//    ImoMidiInfo& operator= (const ImoMidiInfo&) = delete;
+//    ImoMidiInfo(ImoMidiInfo&&) = delete;
+//    ImoMidiInfo& operator= (ImoMidiInfo&&) = delete;
 
     //getters
     inline std::string& get_score_instr_id() { return 	m_soundId; }
@@ -3494,8 +3601,6 @@ public:
         , m_borderStyle(k_line_solid)
     {
     }
-
-    virtual ~ImoTextBlockInfo() {}
 
     //getters
     inline Tenths get_height()
@@ -3585,7 +3690,10 @@ protected:
     void initialize_object(Document* pDoc) override;
 
 public:
-    ~ImoSoundInfo() override {}
+    ImoSoundInfo(const ImoSoundInfo&) = delete;
+    ImoSoundInfo& operator= (const ImoSoundInfo&) = delete;
+    ImoSoundInfo(ImoSoundInfo&&) = delete;
+    ImoSoundInfo& operator= (ImoSoundInfo&&) = delete;
 
     //getters
     inline std::string& get_score_instr_id() { return m_soundId; }
@@ -3615,60 +3723,6 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTextInfo : public ImoSimpleObj
-{
-protected:
-    std::string m_text;
-    std::string m_language;
-    ImoStyle* m_pStyle;
-
-    friend class ImFactory;
-    friend class ImoTextBox;
-    friend class ImoButton;
-    friend class ImoScoreText;
-    friend class ImoTextItem;
-    friend class ImoLyricsTextInfo;
-    friend class ImoTextRepetitionMark;
-    ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(nullptr) {}
-
-public:
-    virtual ~ImoTextInfo() {}
-
-    //getters
-    inline std::string& get_text()
-    {
-        return m_text;
-    }
-    inline std::string& get_language()
-    {
-        return m_language;
-    }
-    inline ImoStyle* get_style()
-    {
-        return m_pStyle;
-    }
-    const std::string& get_font_name();
-    float get_font_size();
-    int get_font_style();
-    int get_font_weight();
-    Color get_color();
-
-    //setters
-    inline void set_text(const std::string& text)
-    {
-        m_text = text;
-    }
-    inline void set_style(ImoStyle* pStyle)
-    {
-        m_pStyle = pStyle;
-    }
-    inline void set_language(const std::string& language)
-    {
-        m_language = language;
-    }
-};
-
-//---------------------------------------------------------------------------------------
 class ImoPageInfo : public ImoSimpleObj
 {
 protected:
@@ -3692,7 +3746,6 @@ protected:
     ImoPageInfo();
 
 public:
-    virtual ~ImoPageInfo() {}
 
     //margins, odd pages
     inline LUnits get_left_margin_odd() { return m_uLeftMarginOdd; }
@@ -3742,7 +3795,10 @@ protected:
     ImoAnonymousBlock() : ImoInlinesContainer(k_imo_anonymous_block) {}
 
 public:
-    ~ImoAnonymousBlock() override {}
+    ImoAnonymousBlock(const ImoAnonymousBlock&) = delete;
+    ImoAnonymousBlock& operator= (const ImoAnonymousBlock&) = delete;
+    ImoAnonymousBlock(ImoAnonymousBlock&&) = delete;
+    ImoAnonymousBlock& operator= (ImoAnonymousBlock&&) = delete;
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
@@ -3785,6 +3841,10 @@ protected:
 
 public:
     ~ImoBarline() override;
+    ImoBarline(const ImoBarline&) = delete;
+    ImoBarline& operator= (const ImoBarline&) = delete;
+    ImoBarline(ImoBarline&&) = delete;
+    ImoBarline& operator= (ImoBarline&&) = delete;
 
     //getters
     inline int get_type() { return m_barlineType; }
@@ -3830,6 +3890,10 @@ protected:
 
 public:
     ~ImoBeam() override { delete m_pStemsDir; }
+    ImoBeam(const ImoBeam&) = delete;
+    ImoBeam& operator= (const ImoBeam&) = delete;
+    ImoBeam(ImoBeam&&) = delete;
+    ImoBeam& operator= (ImoBeam&&) = delete;
 
     //type of beam
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
@@ -3853,7 +3917,10 @@ protected:
     ImoBlock(int objtype, ImoTextBlockInfo& box) : ImoAuxObj(objtype), m_box(box) {}
 
 public:
-    virtual ~ImoBlock() {}
+    ImoBlock(const ImoBlock&) = delete;
+    ImoBlock& operator= (const ImoBlock&) = delete;
+    ImoBlock(ImoBlock&&) = delete;
+    ImoBlock& operator= (ImoBlock&&) = delete;
 
 };
 
@@ -3872,7 +3939,10 @@ protected:
         , m_fHasAnchorLine(false) {}
 
 public:
-    virtual ~ImoTextBox() {}
+    ImoTextBox(const ImoTextBox&) = delete;
+    ImoTextBox& operator= (const ImoTextBox&) = delete;
+    ImoTextBox(ImoTextBox&&) = delete;
+    ImoTextBox& operator= (ImoTextBox&&) = delete;
 
     inline ImoTextBlockInfo* get_box_info() { return &m_box;
     }
@@ -3887,9 +3957,9 @@ public:
     {
         return m_text;
     }
-    inline void set_text(ImoTextInfo* pTI)
+    inline void set_text(TypeTextInfo& pTI)
     {
-        m_text = pTI->get_text();
+        m_text = pTI.text;
     }
     inline void set_anchor_line(ImoLineStyle* pLine)
     {
@@ -3914,6 +3984,10 @@ protected:
 
 public:
     virtual ~ImoControl();
+    ImoControl(const ImoControl&) = delete;
+    ImoControl& operator= (const ImoControl&) = delete;
+    ImoControl(ImoControl&&) = delete;
+    ImoControl& operator= (ImoControl&&) = delete;
 
     //delegates on its associated Control for determining its size
     USize measure();
@@ -3943,33 +4017,19 @@ protected:
     ImoButton();
 
 public:
-    virtual ~ImoButton() {}
+    ImoButton(const ImoButton&) = delete;
+    ImoButton& operator= (const ImoButton&) = delete;
+    ImoButton(ImoButton&&) = delete;
+    ImoButton& operator= (ImoButton&&) = delete;
 
     //getters
-    inline std::string& get_label()
-    {
-        return m_text;
-    }
-    inline std::string& get_language()
-    {
-        return m_language;
-    }
-    inline USize get_size()
-    {
-        return m_size;
-    }
-    inline LUnits get_width()
-    {
-        return m_size.width;
-    }
-    inline LUnits get_height()
-    {
-        return m_size.height;
-    }
-    inline Color get_bg_color()
-    {
-        return m_bgColor;
-    }
+    inline std::string& get_label() { return m_text; }
+    inline std::string& get_language() { return m_language; }
+    inline USize get_size() { return m_size; }
+    inline LUnits get_width() { return m_size.width; }
+    inline LUnits get_height() { return m_size.height; }
+    inline Color get_bg_color() { return m_bgColor; }
+    inline bool is_enabled() { return m_fEnabled; }
 
     //setters
     inline void set_style(ImoStyle* pStyle)
@@ -3978,42 +4038,13 @@ public:
         if (pStyle)
             m_bgColor = pStyle->background_color();
     }
-    inline void set_bg_color(Color color)
-    {
-        m_bgColor = color;
-    }
-    inline void set_label(const std::string& text)
-    {
-        m_text = text;
-    }
-    inline void set_language(const std::string& value)
-    {
-        m_language = value;
-    }
-    inline void set_size(const USize& size)
-    {
-        m_size = size;
-    }
-    inline void set_width(LUnits value)
-    {
-        m_size.width = value;
-    }
-    inline void set_height(LUnits value)
-    {
-        m_size.height = value;
-    }
-
-    //getters
-    inline bool is_enabled()
-    {
-        return m_fEnabled;
-    }
-
-    //setters
-    inline void enable(bool value)
-    {
-        m_fEnabled = value;
-    }
+    inline void set_bg_color(Color color) { m_bgColor = color; }
+    inline void set_label(const std::string& text) { m_text = text; }
+    inline void set_language(const std::string& value) { m_language = value; }
+    inline void set_size(const USize& size) { m_size = size; }
+    inline void set_width(LUnits value) { m_size.width = value; }
+    inline void set_height(LUnits value) { m_size.height = value; }
+    inline void enable(bool value) { m_fEnabled = value; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -4029,7 +4060,10 @@ protected:
     ImoClef() : ImoStaffObj(k_imo_clef) {}
 
 public:
-    ~ImoClef() override {}
+    ImoClef(const ImoClef&) = delete;
+    ImoClef& operator= (const ImoClef&) = delete;
+    ImoClef(ImoClef&&) = delete;
+    ImoClef& operator= (ImoClef&&) = delete;
 
     //building
     void set_clef(int sign, int line, int octaveChange);
@@ -4088,25 +4122,19 @@ protected:
     ImoContent(int objtype) : ImoBlocksContainer(objtype) {}
 
 public:
-    virtual ~ImoContent() {}
+    ImoContent(const ImoContent&) = delete;
+    ImoContent& operator= (const ImoContent&) = delete;
+    ImoContent(ImoContent&&) = delete;
+    ImoContent& operator= (ImoContent&&) = delete;
 
-    inline Document* get_owner()
-    {
-        return m_pDoc;
-    }
+    inline Document* get_owner() { return m_pDoc; }
 
     //contents
-    ImoContentObj* get_item(int iItem)     //iItem = 0..n-1
-    {
-        return dynamic_cast<ImoContentObj*>( get_child(iItem) );
-    }
-    inline int get_num_items()
-    {
-        return get_num_children();
-    }
-    inline void remove_item(ImoContentObj* pItem)
-    {
-        remove_child_imo(pItem);
+    inline int get_num_items() { return get_num_children(); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
+        //iItem = 0..n-1
+    ImoContentObj* get_item(int iItem) {
+         return dynamic_cast<ImoContentObj*>( get_child(iItem) );
     }
 
 };
@@ -4134,7 +4162,10 @@ protected:
     ImoDirection() : ImoStaffObj(k_imo_direction) {}
 
 public:
-    virtual ~ImoDirection() {}
+    ImoDirection(const ImoDirection&) = delete;
+    ImoDirection& operator= (const ImoDirection&) = delete;
+    ImoDirection(ImoDirection&&) = delete;
+    ImoDirection& operator= (ImoDirection&&) = delete;
 
     //getters
     inline Tenths get_width() { return m_space; }
@@ -4155,27 +4186,6 @@ public:
     inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
 };
 
-////---------------------------------------------------------------------------------------
-//class ImoDirectionSymbol : public ImoAuxObj
-//{
-//protected:
-//    ImoTextInfo m_text;
-//
-//    friend class ImFactory;
-//    ImoDirectionSymbol() : ImoAuxObj(k_imo_score_text), m_text() {}
-//    ImoDirectionSymbol(int objtype) : ImoAuxObj(objtype), m_text() {}
-//
-//public:
-//    virtual ~ImoDirectionSymbol() {}
-//
-//    //getters
-//    inline std::string& get_text() { return m_text.get_text(); }
-//
-//    //setters
-//    inline void set_text(const std::string& value) { m_text.set_text(value); }
-//
-//};
-
 //---------------------------------------------------------------------------------------
 class ImoSymbolRepetitionMark : public ImoAuxObj
 {
@@ -4186,7 +4196,10 @@ protected:
     ImoSymbolRepetitionMark() : ImoAuxObj(k_imo_symbol_repetition_mark) {}
 
 public:
-    virtual ~ImoSymbolRepetitionMark() {}
+    ImoSymbolRepetitionMark(const ImoSymbolRepetitionMark&) = delete;
+    ImoSymbolRepetitionMark& operator= (const ImoSymbolRepetitionMark&) = delete;
+    ImoSymbolRepetitionMark(ImoSymbolRepetitionMark&&) = delete;
+    ImoSymbolRepetitionMark& operator= (ImoSymbolRepetitionMark&&) = delete;
 
     enum ESymbolRepetitionMark
     {
@@ -4213,6 +4226,10 @@ protected:
 
 public:
     virtual ~ImoDynamic();
+    ImoDynamic(const ImoDynamic&) = delete;
+    ImoDynamic& operator= (const ImoDynamic&) = delete;
+    ImoDynamic(ImoDynamic&&) = delete;
+    ImoDynamic& operator= (ImoDynamic&&) = delete;
 
     //construction
     inline void set_classid(const std::string& value) { m_classid = value; }
@@ -4232,7 +4249,10 @@ protected:
     ImoSystemBreak() : ImoStaffObj(k_imo_system_break) {}
 
 public:
-    virtual ~ImoSystemBreak() {}
+    ImoSystemBreak(const ImoSystemBreak&) = delete;
+    ImoSystemBreak& operator= (const ImoSystemBreak&) = delete;
+    ImoSystemBreak(ImoSystemBreak&&) = delete;
+    ImoSystemBreak& operator= (ImoSystemBreak&&) = delete;
 };
 
 //---------------------------------------------------------------------------------------
@@ -4266,6 +4286,10 @@ protected:
 
 public:
     virtual ~ImoDocument();
+    ImoDocument(const ImoDocument&) = delete;
+    ImoDocument& operator= (const ImoDocument&) = delete;
+    ImoDocument(ImoDocument&&) = delete;
+    ImoDocument& operator= (ImoDocument&&) = delete;
 
     //info
     inline std::string& get_version() { return m_version; }
@@ -4320,6 +4344,11 @@ protected:
     }
 
 public:
+    ImoArpeggio(const ImoArpeggio&) = delete;
+    ImoArpeggio& operator= (const ImoArpeggio&) = delete;
+    ImoArpeggio(ImoArpeggio&&) = delete;
+    ImoArpeggio& operator= (ImoArpeggio&&) = delete;
+
     //getters
     EArpeggio get_type() const { return m_type; }
 
@@ -4371,7 +4400,10 @@ protected:
     }
 
 public:
-    virtual ~ImoFermata() {}
+    ImoFermata(const ImoFermata&) = delete;
+    ImoFermata& operator= (const ImoFermata&) = delete;
+    ImoFermata(ImoFermata&&) = delete;
+    ImoFermata& operator= (ImoFermata&&) = delete;
 
     enum { k_normal, k_short, k_long, k_henze_short, k_henze_long,
            k_very_short, k_very_long,
@@ -4414,7 +4446,10 @@ protected:
     }
 
 public:
-    virtual ~ImoArticulation() {}
+    ImoArticulation(const ImoArticulation&) = delete;
+    ImoArticulation& operator= (const ImoArticulation&) = delete;
+    ImoArticulation(ImoArticulation&&) = delete;
+    ImoArticulation& operator= (ImoArticulation&&) = delete;
 
     //getters
     inline int get_placement()
@@ -4454,7 +4489,10 @@ protected:
     }
 
 public:
-    virtual ~ImoArticulationSymbol() {}
+    ImoArticulationSymbol(const ImoArticulationSymbol&) = delete;
+    ImoArticulationSymbol& operator= (const ImoArticulationSymbol&) = delete;
+    ImoArticulationSymbol(ImoArticulationSymbol&&) = delete;
+    ImoArticulationSymbol& operator= (ImoArticulationSymbol&&) = delete;
 
     enum
     {
@@ -4527,7 +4565,10 @@ protected:
     }
 
 public:
-    virtual ~ImoArticulationLine() {}
+    ImoArticulationLine(const ImoArticulationLine&) = delete;
+    ImoArticulationLine& operator= (const ImoArticulationLine&) = delete;
+    ImoArticulationLine(ImoArticulationLine&&) = delete;
+    ImoArticulationLine& operator= (ImoArticulationLine&&) = delete;
 
     //getters
     inline int get_line_shape()
@@ -4586,7 +4627,10 @@ protected:
     }
 
 public:
-    virtual ~ImoDynamicsMark() {}
+    ImoDynamicsMark(const ImoDynamicsMark&) = delete;
+    ImoDynamicsMark& operator= (const ImoDynamicsMark&) = delete;
+    ImoDynamicsMark(ImoDynamicsMark&&) = delete;
+    ImoDynamicsMark& operator= (ImoDynamicsMark&&) = delete;
 
     //getters
     inline int get_placement()
@@ -4629,7 +4673,10 @@ protected:
     }
 
 public:
-    virtual ~ImoOrnament() {}
+    ImoOrnament(const ImoOrnament&) = delete;
+    ImoOrnament& operator= (const ImoOrnament&) = delete;
+    ImoOrnament(ImoOrnament&&) = delete;
+    ImoOrnament& operator= (ImoOrnament&&) = delete;
 
     //getters
     inline int get_placement()
@@ -4682,7 +4729,10 @@ protected:
     }
 
 public:
-    virtual ~ImoTechnical() {}
+    ImoTechnical(const ImoTechnical&) = delete;
+    ImoTechnical& operator= (const ImoTechnical&) = delete;
+    ImoTechnical(ImoTechnical&&) = delete;
+    ImoTechnical& operator= (ImoTechnical&&) = delete;
 
     //getters and setters
     inline int get_placement() { return m_placement; }
@@ -4776,7 +4826,10 @@ protected:
     {}
 
 public:
-    virtual ~ImoGoBackFwd() {}
+    ImoGoBackFwd(const ImoGoBackFwd&) = delete;
+    ImoGoBackFwd& operator= (const ImoGoBackFwd&) = delete;
+    ImoGoBackFwd(ImoGoBackFwd&&) = delete;
+    ImoGoBackFwd& operator= (ImoGoBackFwd&&) = delete;
 
     //getters and setters
     inline bool is_forward()
@@ -4834,7 +4887,10 @@ protected:
     }
 
 public:
-    ~ImoGraceRelObj() override {}
+    ImoGraceRelObj(const ImoGraceRelObj&) = delete;
+    ImoGraceRelObj& operator= (const ImoGraceRelObj&) = delete;
+    ImoGraceRelObj(ImoGraceRelObj&&) = delete;
+    ImoGraceRelObj& operator= (ImoGraceRelObj&&) = delete;
 
     // grace notes behaviour
     enum EGraceType
@@ -4868,7 +4924,7 @@ public:
 class ImoScoreText : public ImoAuxObj
 {
 protected:
-    ImoTextInfo m_text;
+    TypeTextInfo m_text;
 
     friend class ImFactory;
     friend class ImoInstrument;
@@ -4877,30 +4933,20 @@ protected:
     ImoScoreText(int objtype) : ImoAuxObj(objtype), m_text() {}
 
 public:
-    virtual ~ImoScoreText() {}
+    ImoScoreText(const ImoScoreText&) = delete;
+    ImoScoreText& operator= (const ImoScoreText&) = delete;
+    ImoScoreText(ImoScoreText&&) = delete;
+    ImoScoreText& operator= (ImoScoreText&&) = delete;
 
     //getters
-    inline std::string& get_text()
-    {
-        return m_text.get_text();
-    }
-    inline ImoTextInfo* get_text_info() { return &m_text;
-    }
+    inline std::string& get_text() { return m_text.text; }
+    inline TypeTextInfo& get_text_info() { return m_text; }
     std::string& get_language();
-    inline void set_language(const std::string& lang)
-    {
-        m_text.set_language(lang);
-    }
-    inline bool has_language()
-    {
-        return !m_text.get_language().empty();
-    }
+    inline void set_language(const std::string& lang) { m_text.language = lang; }
+    inline bool has_language() { return !(m_text.language).empty(); }
 
     //setters
-    inline void set_text(const std::string& value)
-    {
-        m_text.set_text(value);
-    }
+    inline void set_text(const std::string& value) { m_text.text = value; }
 
 };
 
@@ -4914,7 +4960,10 @@ protected:
     ImoScoreTitle() : ImoScoreText(k_imo_score_title), m_hAlign(k_halign_center) {}
 
 public:
-    virtual ~ImoScoreTitle() {}
+    ImoScoreTitle(const ImoScoreTitle&) = delete;
+    ImoScoreTitle& operator= (const ImoScoreTitle&) = delete;
+    ImoScoreTitle(ImoScoreTitle&&) = delete;
+    ImoScoreTitle& operator= (ImoScoreTitle&&) = delete;
 
     inline int get_h_align()
     {
@@ -4940,7 +4989,10 @@ protected:
     }
 
 public:
-    virtual ~ImoSoundChange() {}
+    ImoSoundChange(const ImoSoundChange&) = delete;
+    ImoSoundChange& operator= (const ImoSoundChange&) = delete;
+    ImoSoundChange(ImoSoundChange&&) = delete;
+    ImoSoundChange& operator= (ImoSoundChange&&) = delete;
 
     ImoMidiInfo* get_midi_info(const std::string& soundId);
 
@@ -4978,7 +5030,10 @@ protected:
     }
 
 public:
-    virtual ~ImoTranspose() {}
+    ImoTranspose(const ImoTranspose&) = delete;
+    ImoTranspose& operator= (const ImoTranspose&) = delete;
+    ImoTranspose(ImoTranspose&&) = delete;
+    ImoTranspose& operator= (ImoTranspose&&) = delete;
 
     inline int get_applicable_staff() { return m_numStaff; }
     inline int get_diatonic() { return m_diatonic; }
@@ -5012,7 +5067,10 @@ protected:
     }
 
 public:
-    virtual ~ImoTextRepetitionMark() {}
+    ImoTextRepetitionMark(const ImoTextRepetitionMark&) = delete;
+    ImoTextRepetitionMark& operator= (const ImoTextRepetitionMark&) = delete;
+    ImoTextRepetitionMark(ImoTextRepetitionMark&&) = delete;
+    ImoTextRepetitionMark& operator= (ImoTextRepetitionMark&&) = delete;
 
     //getters
     inline int get_repeat_mark()
@@ -5045,64 +5103,28 @@ protected:
     friend class ImageLmdAnalyser;
     friend class ImageMxlAnalyser;
     friend class ImageMnxAnalyser;
-    inline void set_content(SpImage img)
-    {
-        m_image = img;
-    }
+    inline void set_content(SpImage img) { m_image = img; }
 
 public:
-    virtual ~ImoImage() {}
+    ImoImage(const ImoImage&) = delete;
+    ImoImage& operator= (const ImoImage&) = delete;
+    ImoImage(ImoImage&&) = delete;
+    ImoImage& operator= (ImoImage&&) = delete;
 
     //accessors
-    SpImage get_image()
-    {
-        return m_image;
-    }
-    inline unsigned char* get_buffer()
-    {
-        return m_image->get_buffer();
-    }
-    inline LUnits get_image_width()
-    {
-        return m_image->get_image_width();
-    }
-    inline LUnits get_image_height()
-    {
-        return m_image->get_image_height();
-    }
-    inline USize& get_image_size()
-    {
-        return m_image->get_image_size();
-    }
-    inline Pixels get_bitmap_width()
-    {
-        return m_image->get_bitmap_width();
-    }
-    inline Pixels get_bitmap_height()
-    {
-        return m_image->get_bitmap_height();
-    }
-    inline VSize& get_bitmap_size()
-    {
-        return m_image->get_bitmap_size();
-    }
-    inline int get_stride()
-    {
-        return m_image->get_stride();
-    }
-    inline int get_format()
-    {
-        return m_image->get_format();
-    }
+    SpImage get_image() { return m_image; }
+    inline unsigned char* get_buffer() { return m_image->get_buffer(); }
+    inline LUnits get_image_width() { return m_image->get_image_width(); }
+    inline LUnits get_image_height() { return m_image->get_image_height(); }
+    inline USize& get_image_size() { return m_image->get_image_size(); }
+    inline Pixels get_bitmap_width() { return m_image->get_bitmap_width(); }
+    inline Pixels get_bitmap_height() { return m_image->get_bitmap_height(); }
+    inline VSize& get_bitmap_size() { return m_image->get_bitmap_size(); }
+    inline int get_stride() { return m_image->get_stride(); }
+    inline int get_format() { return m_image->get_format(); }
 
-    inline int get_bits_per_pixel()
-    {
-        return m_image->get_bits_per_pixel();
-    }
-    inline bool has_alpha()
-    {
-        return m_image->has_alpha();
-    }
+    inline int get_bits_per_pixel() { return m_image->get_bits_per_pixel(); }
+    inline bool has_alpha() { return m_image->has_alpha(); }
 
 protected:
     friend class InlineLevelCreatorApi;
@@ -5121,10 +5143,12 @@ protected:
     ImoScore* m_pScore;
     int m_joinBarlines;     // enum EJoinBarlines
     int m_symbol;           // enum EGroupSymbol
-    ImoScoreText m_name;
-    ImoScoreText m_abbrev;
+    TypeTextInfo m_name;
+    TypeTextInfo m_abbrev;
     int m_numInstrs;        //number of instruments in the group
     int m_iFirstInstr;      //index to first instrument
+    ImoStyle* m_pNameStyle = nullptr;
+    ImoStyle* m_pAbbrevStyle = nullptr;
 
     friend class ImFactory;
     ImoInstrGroup();
@@ -5135,19 +5159,23 @@ public:
     //getters
     inline int join_barlines() { return m_joinBarlines; }
     inline int get_symbol() { return m_symbol; }
-    inline const std::string& get_name_string() { return m_name.get_text(); }
-    inline const std::string& get_abbrev_string() { return m_abbrev.get_text(); }
-    inline ImoScoreText& get_name() { return m_name; }
-    inline ImoScoreText& get_abbrev() { return m_abbrev; }
+    inline const std::string& get_name_string() { return m_name.text; }
+    inline const std::string& get_abbrev_string() { return m_abbrev.text; }
+    inline TypeTextInfo& get_name() { return m_name; }
+    inline TypeTextInfo& get_abbrev() { return m_abbrev; }
+    inline ImoStyle* get_name_style() { return m_pNameStyle; }
+    inline ImoStyle* get_abbrev_style() { return m_pAbbrevStyle; }
 
     //setters
-    void set_name(ImoScoreText* pText);
-    void set_abbrev(ImoScoreText* pText);
+    void set_name(TypeTextInfo& text);
+    void set_abbrev(TypeTextInfo& text);
     void set_name(const std::string& value);
     void set_abbrev(const std::string& value);
     inline void set_symbol(int symbol) { m_symbol = symbol; }
     inline void set_join_barlines(int value) { m_joinBarlines = value; }
     inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
+    inline void set_name_style(ImoStyle* style) { m_pNameStyle = style; }
+    inline void set_abbrev_style(ImoStyle* style) { m_pAbbrevStyle = style; }
 
     //instruments
     ImoInstrument* get_first_instrument();
@@ -5161,8 +5189,8 @@ public:
 
     //info
     inline ImoScore* get_score() { return m_pScore; }
-    inline bool has_name() { return m_name.get_text() != ""; }
-    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
+    inline bool has_name() { return m_name.text != ""; }
+    inline bool has_abbrev() { return m_abbrev.text != ""; }
 
 protected:
 
@@ -5182,10 +5210,12 @@ protected:
 class ImoInstrument : public ImoContainerObj
 {
 protected:
-    ImoScore*       m_pScore;
-    ImoScoreText    m_name;
-    ImoScoreText    m_abbrev;
-    std::string          m_partId;
+    ImoScore*   m_pScore;
+    TypeTextInfo    m_name;
+    TypeTextInfo    m_abbrev;
+    ImoStyle*   m_pNameStyle = nullptr;
+    ImoStyle*   m_pAbbrevStyle = nullptr;
+    std::string m_partId;
     std::list<ImoStaffInfo*> m_staves;
 
     //layout options
@@ -5206,14 +5236,18 @@ protected:
 
 public:
     virtual ~ImoInstrument();
+    ImoInstrument(const ImoInstrument&) = delete;
+    ImoInstrument& operator= (const ImoInstrument&) = delete;
+    ImoInstrument(ImoInstrument&&) = delete;
+    ImoInstrument& operator= (ImoInstrument&&) = delete;
 
     //methods for accessing ImoSounds child
     LOMSE_DECLARE_IMOSOUNDS_INTERFACE
 
     //getters
     inline int get_num_staves() const { return static_cast<int>(m_staves.size()); }
-    inline ImoScoreText& get_name() { return m_name; }
-    inline ImoScoreText& get_abbrev() { return m_abbrev; }
+    inline TypeTextInfo& get_name() { return m_name; }
+    inline TypeTextInfo& get_abbrev() { return m_abbrev; }
     ImoMusicData* get_musicdata();
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
@@ -5221,16 +5255,20 @@ public:
     inline const std::string& get_instr_id() const { return m_partId; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
     inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
+    inline ImoStyle* get_name_style() { return m_pNameStyle; }
+    inline ImoStyle* get_abbrev_style() { return m_pAbbrevStyle; }
 
     //setters
     ImoStaffInfo* add_staff();
-    void set_name(ImoScoreText* pText);
-    void set_abbrev(ImoScoreText* pText);
+    void set_name(TypeTextInfo& text);
+    void set_abbrev(TypeTextInfo& text);
     void set_name(const std::string& value);
     void set_abbrev(const std::string& value);
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const std::string& id) { m_partId = id; }
     inline void set_last_measure_info(TypeMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
+    inline void set_name_style(ImoStyle* style) { m_pNameStyle = style; }
+    inline void set_abbrev_style(ImoStyle* style) { m_pAbbrevStyle = style; }
 
     //to change default settings at creation time (MusicXML importer)
     void set_staff_margin(int iStaff, LUnits distance);
@@ -5269,8 +5307,8 @@ public:
 
 
     //info
-    inline bool has_name() { return m_name.get_text() != ""; }
-    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
+    inline bool has_name() { return m_name.text != ""; }
+    inline bool has_abbrev() { return m_abbrev.text != ""; }
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
     inline ImoScore* get_score() const { return m_pScore; }
 
@@ -5316,7 +5354,10 @@ protected:
     ImoInstruments() : ImoCollection(k_imo_instruments) {}
 
 public:
-    virtual ~ImoInstruments() {}
+    ImoInstruments(const ImoInstruments&) = delete;
+    ImoInstruments& operator= (const ImoInstruments&) = delete;
+    ImoInstruments(ImoInstruments&&) = delete;
+    ImoInstruments& operator= (ImoInstruments&&) = delete;
 
 };
 
@@ -5328,7 +5369,10 @@ protected:
     ImoInstrGroups() : ImoCollection(k_imo_instrument_groups) {}
 
 public:
-    virtual ~ImoInstrGroups() {}
+    ImoInstrGroups(const ImoInstrGroups&) = delete;
+    ImoInstrGroups& operator= (const ImoInstrGroups&) = delete;
+    ImoInstrGroups(ImoInstrGroups&&) = delete;
+    ImoInstrGroups& operator= (ImoInstrGroups&&) = delete;
 
 };
 
@@ -5340,7 +5384,6 @@ protected:
     ImoSounds() : ImoCollection(k_imo_sounds) {}
 
 public:
-    virtual ~ImoSounds() {}
 
     void add_sound_info(ImoSoundInfo* pInfo);
     int get_num_sounds();
@@ -5424,7 +5467,10 @@ protected:
 
 
 public:
-    ~ImoKeySignature() override {}
+    ImoKeySignature(const ImoKeySignature&) = delete;
+    ImoKeySignature& operator= (const ImoKeySignature&) = delete;
+    ImoKeySignature(ImoKeySignature&&) = delete;
+    ImoKeySignature& operator= (ImoKeySignature&&) = delete;
 
     //building
     void set_standard_key(int fifths, bool fMajor);
@@ -5487,10 +5533,11 @@ protected:
     ImoListItem(Document* pDoc);    //pDoc is needed for unit tests
 
 public:
-    virtual ~ImoListItem() {}
+    ImoListItem(const ImoListItem&) = delete;
+    ImoListItem& operator= (const ImoListItem&) = delete;
+    ImoListItem(ImoListItem&&) = delete;
+    ImoListItem& operator= (ImoListItem&&) = delete;
 
-//   //required by Visitable parent class
-    //virtual void accept_visitor(BaseVisitor& v);
 };
 
 //---------------------------------------------------------------------------------------
@@ -5503,18 +5550,15 @@ protected:
     ImoList(Document* pDoc);
 
 public:
-    virtual ~ImoList() {}
+    ImoList(const ImoList&) = delete;
+    ImoList& operator= (const ImoList&) = delete;
+    ImoList(ImoList&&) = delete;
+    ImoList& operator= (ImoList&&) = delete;
 
     enum { k_itemized=0, k_ordered, };
 
-    inline void set_list_type(int type)
-    {
-        m_listType = type;
-    }
-    inline int get_list_type()
-    {
-        return m_listType;
-    }
+    inline void set_list_type(int type) { m_listType = type; }
+    inline int get_list_type() { return m_listType; }
 
     //API
     ImoListItem* add_listitem(ImoStyle* pStyle=nullptr);
@@ -5550,7 +5594,10 @@ protected:
     {}
 
 public:
-    virtual ~ImoMetronomeMark() {}
+    ImoMetronomeMark(const ImoMetronomeMark&) = delete;
+    ImoMetronomeMark& operator= (const ImoMetronomeMark&) = delete;
+    ImoMetronomeMark(ImoMetronomeMark&&) = delete;
+    ImoMetronomeMark& operator= (ImoMetronomeMark&&) = delete;
 
     enum { k_note_value=0, k_note_note, k_value, };
 
@@ -5625,13 +5672,13 @@ protected:
     ImoMultiColumn(Document* pDoc);
 
 public:
-    virtual ~ImoMultiColumn() {}
+    ImoMultiColumn(const ImoMultiColumn&) = delete;
+    ImoMultiColumn& operator= (const ImoMultiColumn&) = delete;
+    ImoMultiColumn(ImoMultiColumn&&) = delete;
+    ImoMultiColumn& operator= (ImoMultiColumn&&) = delete;
 
     //contents
-    inline int get_num_columns()
-    {
-        return get_num_content_items();
-    }
+    inline int get_num_columns() { return get_num_content_items(); }
     inline ImoContent* get_column(int iCol)     //iCol = 0..n-1
     {
         return dynamic_cast<ImoContent*>( get_content_item(iCol) );
@@ -5654,7 +5701,10 @@ protected:
     ImoMusicData() : ImoCollection(k_imo_music_data) {}
 
 public:
-    virtual ~ImoMusicData() {}
+    ImoMusicData(const ImoMusicData&) = delete;
+    ImoMusicData& operator= (const ImoMusicData&) = delete;
+    ImoMusicData(ImoMusicData&&) = delete;
+    ImoMusicData& operator= (ImoMusicData&&) = delete;
 
     ImoInstrument* get_instrument();
 };
@@ -5663,20 +5713,21 @@ public:
 class ImoOptionInfo : public ImoSimpleObj
 {
 protected:
-    int         m_type;
+    int         m_type = k_boolean;
     std::string m_name;
     std::string m_sValue;
-    bool        m_fValue;
-    long        m_nValue;
-    float       m_rValue;
+    bool        m_fValue = false;
+    long        m_nValue = 0L;
+    float       m_rValue = 0.0f;
 
     friend class ImFactory;
-    ImoOptionInfo()
-        : ImoSimpleObj(k_imo_option), m_type(k_boolean), m_name("")
-        , m_fValue(false), m_nValue(0L), m_rValue(0.0f)  {}
+    ImoOptionInfo() : ImoSimpleObj(k_imo_option) {}
 
 public:
-    virtual ~ImoOptionInfo() {}
+    ImoOptionInfo(const ImoOptionInfo&) = delete;
+    ImoOptionInfo& operator= (const ImoOptionInfo&) = delete;
+    ImoOptionInfo(ImoOptionInfo&&) = delete;
+    ImoOptionInfo& operator= (ImoOptionInfo&&) = delete;
 
     enum { k_boolean=0, k_number_long, k_number_float, k_string };
 
@@ -5757,7 +5808,10 @@ protected:
     ImoOptions() : ImoCollection(k_imo_options) {}
 
 public:
-    virtual ~ImoOptions() {}
+    ImoOptions(const ImoOptions&) = delete;
+    ImoOptions& operator= (const ImoOptions&) = delete;
+    ImoOptions(ImoOptions&&) = delete;
+    ImoOptions& operator= (ImoOptions&&) = delete;
 
 };
 
@@ -5768,14 +5822,13 @@ protected:
     friend class ImoBlocksContainer;
     friend class Document;
     friend class ImFactory;
-    ImoParagraph()
-        : ImoInlinesContainer(k_imo_para)
-    {
-        set_edit_terminal(true);
-    }
+    ImoParagraph() : ImoInlinesContainer(k_imo_para) { set_edit_terminal(true); }
 
 public:
-    ~ImoParagraph() override {}
+    ImoParagraph(const ImoParagraph&) = delete;
+    ImoParagraph& operator= (const ImoParagraph&) = delete;
+    ImoParagraph(ImoParagraph&&) = delete;
+    ImoParagraph& operator= (ImoParagraph&&) = delete;
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
@@ -5792,28 +5845,19 @@ protected:
     ImoParamInfo() : ImoSimpleObj(k_imo_param_info), m_name(), m_value() {}
 
 public:
-    virtual ~ImoParamInfo() {}
+    ImoParamInfo(const ImoParamInfo&) = delete;
+    ImoParamInfo& operator= (const ImoParamInfo&) = delete;
+    ImoParamInfo(ImoParamInfo&&) = delete;
+    ImoParamInfo& operator= (ImoParamInfo&&) = delete;
 
     //getters
-    inline std::string& get_name()
-    {
-        return m_name;
-    }
-    inline std::string& get_value()
-    {
-        return m_value;
-    }
+    inline std::string& get_name() { return m_name; }
+    inline std::string& get_value() { return m_value; }
     bool get_value_as_int(int* pNumber);
 
     //setters
-    inline void set_name(const std::string& name)
-    {
-        m_name = name;
-    }
-    inline void set_value(const std::string& value)
-    {
-        m_value = value;
-    }
+    inline void set_name(const std::string& name) { m_name = name; }
+    inline void set_value(const std::string& value) { m_value = value; }
 
 };
 
@@ -5821,28 +5865,20 @@ public:
 class ImoHeading : public ImoInlinesContainer
 {
 protected:
-    int m_level;
+    int m_level = 1;
 
     friend class ImFactory;
-    ImoHeading()
-        : ImoInlinesContainer(k_imo_heading)
-        , m_level(1)
-    {
-        set_edit_terminal(true);
-    }
+    ImoHeading() : ImoInlinesContainer(k_imo_heading) { set_edit_terminal(true); }
 
 public:
-    ~ImoHeading() override {}
+    ImoHeading(const ImoHeading&) = delete;
+    ImoHeading& operator= (const ImoHeading&) = delete;
+    ImoHeading(ImoHeading&&) = delete;
+    ImoHeading& operator= (ImoHeading&&) = delete;
 
     //level
-    inline int get_level()
-    {
-        return m_level;
-    }
-    inline void set_level(int level)
-    {
-        m_level = level;
-    }
+    inline int get_level() { return m_level; }
+    inline void set_level(int level) { m_level = level; }
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
@@ -5856,7 +5892,6 @@ class ImoPointDto : public ImoSimpleObj
 
 public:
     ImoPointDto() : ImoSimpleObj(k_imo_point_dto) {}
-    virtual ~ImoPointDto() {}
 
     inline TPoint get_point()
     {
@@ -5900,115 +5935,40 @@ protected:
     }
 
 public:
-    virtual ~ImoScoreLine() {}
+    ImoScoreLine(const ImoScoreLine&) = delete;
+    ImoScoreLine& operator= (const ImoScoreLine&) = delete;
+    ImoScoreLine(ImoScoreLine&&) = delete;
+    ImoScoreLine& operator= (ImoScoreLine&&) = delete;
 
     //setters
-    inline void set_start_point(TPoint point)
-    {
-        m_startPoint = point;
-    }
-    inline void set_end_point(TPoint point)
-    {
-        m_endPoint = point;
-    }
-    inline void set_x_start(Tenths value)
-    {
-        m_startPoint.x = value;
-    }
-    inline void set_y_start(Tenths value)
-    {
-        m_startPoint.y = value;
-    }
-    inline void set_x_end(Tenths value)
-    {
-        m_endPoint.x = value;
-    }
-    inline void set_y_end(Tenths value)
-    {
-        m_endPoint.y = value;
-    }
-    inline void set_line_style(ELineStyle value)
-    {
-        m_style.set_line_style(value);
-    }
-    inline void set_start_edge(ELineEdge value)
-    {
-        m_style.set_start_edge(value);
-    }
-    inline void set_end_edge(ELineEdge value)
-    {
-        m_style.set_end_edge(value);
-    }
-    inline void set_start_cap(ELineCap value)
-    {
-        m_style.set_start_cap(value);
-    }
-    inline void set_end_cap(ELineCap value)
-    {
-        m_style.set_end_cap(value);
-    }
-    inline void set_color(Color value)
-    {
-        m_style.set_color(value);
-    }
-    inline void set_width(Tenths value)
-    {
-        m_style.set_width(value);
-    }
+    inline void set_start_point(TPoint point) { m_startPoint = point; }
+    inline void set_end_point(TPoint point) { m_endPoint = point; }
+    inline void set_x_start(Tenths value) { m_startPoint.x = value; }
+    inline void set_y_start(Tenths value) { m_startPoint.y = value; }
+    inline void set_x_end(Tenths value) { m_endPoint.x = value; }
+    inline void set_y_end(Tenths value) { m_endPoint.y = value; }
+    inline void set_line_style(ELineStyle value) { m_style.set_line_style(value); }
+    inline void set_start_edge(ELineEdge value) { m_style.set_start_edge(value); }
+    inline void set_end_edge(ELineEdge value) { m_style.set_end_edge(value); }
+    inline void set_start_cap(ELineCap value) { m_style.set_start_cap(value); }
+    inline void set_end_cap(ELineCap value) { m_style.set_end_cap(value); }
+    inline void set_color(Color value) { m_style.set_color(value); }
+    inline void set_width(Tenths value) { m_style.set_width(value); }
 
     //getters
-    inline Tenths get_x_start() const
-    {
-        return m_startPoint.x;
-    }
-    inline Tenths get_y_start() const
-    {
-        return m_startPoint.y;
-    }
-    inline Tenths get_x_end() const
-    {
-        return m_endPoint.x;
-    }
-    inline Tenths get_y_end() const
-    {
-        return m_endPoint.y;
-    }
-    inline TPoint get_start_point() const
-    {
-        return m_startPoint;
-    }
-    inline TPoint get_end_point() const
-    {
-        return m_endPoint;
-    }
-    inline Tenths get_line_width() const
-    {
-        return m_style.get_width();
-    }
-    inline Color get_color() const
-    {
-        return m_style.get_color();
-    }
-    inline ELineEdge get_start_edge() const
-    {
-        return m_style.get_start_edge();
-    }
-    inline ELineEdge get_end_edge() const
-    {
-        return m_style.get_end_edge();
-    }
-    inline ELineStyle get_line_style() const
-    {
-        return m_style.get_line_style();
-    }
-    inline ELineCap get_start_cap() const
-    {
-        return m_style.get_start_cap();
-    }
-    inline ELineCap get_end_cap() const
-    {
-        return m_style.get_end_cap();
-    }
+    inline Tenths get_x_start() const { return m_startPoint.x; }
+    inline Tenths get_y_start() const { return m_startPoint.y; }
+    inline Tenths get_x_end() const { return m_endPoint.x; }
+    inline Tenths get_y_end() const { return m_endPoint.y; }
+    inline TPoint get_start_point() const { return m_startPoint; }
+    inline TPoint get_end_point() const { return m_endPoint; }
+    inline Tenths get_line_width() const { return m_style.get_width(); }
+    inline Color get_color() const { return m_style.get_color(); }
+    inline ELineEdge get_start_edge() const { return m_style.get_start_edge(); }
+    inline ELineEdge get_end_edge() const { return m_style.get_end_edge(); }
+    inline ELineStyle get_line_style() const { return m_style.get_line_style(); }
+    inline ELineCap get_start_cap() const { return m_style.get_start_cap(); }
+    inline ELineCap get_end_cap() const { return m_style.get_end_cap(); }
 };
 
 
@@ -6027,38 +5987,24 @@ protected:
 
     friend class ScorePlayerAnalyser;
     friend class ScorePlayerLmdAnalyser;
-    inline void attach_score(ImoScore* pScore)
-    {
-        m_pScore = pScore;
-    }
+    inline void attach_score(ImoScore* pScore) { m_pScore = pScore; }
     void attach_player(ScorePlayerCtrl* pPlayer);
     void set_metronome_mm(int value);
     void set_play_label(const std::string& value);
-    inline void set_stop_label(const std::string& value)
-    {
-        m_stopLabel = value;
-    }
+    inline void set_stop_label(const std::string& value) { m_stopLabel = value; }
 
 public:
     virtual ~ImoScorePlayer();
+    ImoScorePlayer(const ImoScorePlayer&) = delete;
+    ImoScorePlayer& operator= (const ImoScorePlayer&) = delete;
+    ImoScorePlayer(ImoScorePlayer&&) = delete;
+    ImoScorePlayer& operator= (ImoScorePlayer&&) = delete;
 
-    inline ImoScore* get_score()
-    {
-        return m_pScore;
-    }
-    inline ScorePlayerCtrl* get_player()
-    {
-        return m_pPlayer;
-    }
+    inline ImoScore* get_score() { return m_pScore; }
+    inline ScorePlayerCtrl* get_player() { return m_pPlayer; }
     int get_metronome_mm();
-    inline const std::string& get_play_label()
-    {
-        return m_playLabel;
-    }
-    inline const std::string& get_stop_label()
-    {
-        return m_stopLabel;
-    }
+    inline const std::string& get_play_label() { return m_playLabel; }
+    inline const std::string& get_stop_label() { return m_stopLabel; }
 
 };
 
@@ -6069,7 +6015,6 @@ class ImoSizeDto : public ImoSimpleObj
 
 public:
     ImoSizeDto() : ImoSimpleObj(k_imo_size_dto) {}
-    virtual ~ImoSizeDto() {}
 
     inline TSize get_size()
     {
@@ -6102,7 +6047,6 @@ protected:
     ImoSystemInfo();
 
 public:
-    virtual ~ImoSystemInfo() {}
 
     //getters
     inline bool is_first() { return m_fFirst; }
@@ -6141,6 +6085,10 @@ protected:
 
 public:
     ~ImoScore() override;
+    ImoScore(const ImoScore&) = delete;
+    ImoScore& operator= (const ImoScore&) = delete;
+    ImoScore(ImoScore&&) = delete;
+    ImoScore& operator= (ImoScore&&) = delete;
 
     //to support different models for encoding notes in source files
     enum {
@@ -6241,46 +6189,28 @@ protected:
 class ImoSlur : public ImoRelObj
 {
 protected:
-    int     m_slurNum;
-    int     m_orientation;
-    Color   m_color;
+    int     m_slurNum = 0;
+    int     m_orientation = k_orientation_default;
 
     friend class ImFactory;
-    ImoSlur()
-        : ImoRelObj(k_imo_slur), m_slurNum(0), m_orientation(k_orientation_default)
-    {}
-    ImoSlur(int num)
-        : ImoRelObj(k_imo_slur), m_slurNum(num), m_orientation(k_orientation_default)
-    {}
+    ImoSlur() : ImoRelObj(k_imo_slur) {}
+    ImoSlur(int num) : ImoRelObj(k_imo_slur), m_slurNum(num) {}
 
 public:
-    ~ImoSlur() override {}
+    ImoSlur(const ImoSlur&) = delete;
+    ImoSlur& operator= (const ImoSlur&) = delete;
+    ImoSlur(ImoSlur&&) = delete;
+    ImoSlur& operator= (ImoSlur&&) = delete;
 
     //getters
-    inline int get_slur_number()
-    {
-        return m_slurNum;
-    }
-    inline int get_orientation()
-    {
-        return m_orientation;
-    }
+    inline int get_slur_number() { return m_slurNum; }
+    inline int get_orientation() { return m_orientation; }
     ImoNote* get_start_note();
     ImoNote* get_end_note();
 
     //setters
-    inline void set_slur_number(int num)
-    {
-        m_slurNum = num;
-    }
-    inline void set_orientation(int value)
-    {
-        m_orientation = value;
-    }
-    inline void set_color(Color value)
-    {
-        m_color = value;
-    }
+    inline void set_slur_number(int num) { m_slurNum = num; }
+    inline void set_orientation(int value) { m_orientation = value; }
 
     //access to data objects
     ImoBezierInfo* get_start_bezier();
@@ -6306,24 +6236,16 @@ protected:
 
 public:
     virtual ~ImoSlurData();
+    ImoSlurData(const ImoSlurData&) = delete;
+    ImoSlurData& operator= (const ImoSlurData&) = delete;
+    ImoSlurData(ImoSlurData&&) = delete;
+    ImoSlurData& operator= (ImoSlurData&&) = delete;
 
     //getters
-    inline bool is_start()
-    {
-        return m_fStart;
-    }
-    inline int get_slur_number()
-    {
-        return m_slurNum;
-    }
-    inline int get_orientation()
-    {
-        return m_orientation;
-    }
-    inline ImoBezierInfo* get_bezier()
-    {
-        return m_pBezier;
-    }
+    inline bool is_start() { return m_fStart; }
+    inline int get_slur_number() { return m_slurNum; }
+    inline int get_orientation() { return m_orientation; }
+    inline ImoBezierInfo* get_bezier() { return m_pBezier; }
 
     //edition
     ImoBezierInfo* add_bezier();
@@ -6459,7 +6381,6 @@ protected:
     }
 
 public:
-    virtual ~ImoStaffInfo() {}
 
     enum { k_staff_ossia=0, k_staff_cue, k_staff_editorial, k_staff_regular,
            k_staff_alternate,
@@ -6508,6 +6429,10 @@ protected:
 
 public:
     ~ImoStyles() override;
+    ImoStyles(const ImoStyles&) = delete;
+    ImoStyles& operator= (const ImoStyles&) = delete;
+    ImoStyles(ImoStyles&&) = delete;
+    ImoStyles& operator= (ImoStyles&&) = delete;
 
     //overrides, to traverse this special node
     void accept_visitor(BaseVisitor& v) override;
@@ -6542,28 +6467,22 @@ protected:
 
     friend class TableColumnAnalyser;
     friend class TableColumnLmdAnalyser;
-    inline void add_column_style(ImoStyle* pStyle)
-    {
-        m_colStyles.push_back(pStyle);
-    }
+    inline void add_column_style(ImoStyle* pStyle) { m_colStyles.push_back(pStyle); }
 
     friend class ImFactory;
     ImoTable() : ImoBlocksContainer(k_imo_table) {}
 
 public:
-    virtual ~ImoTable() {}
+    ImoTable(const ImoTable&) = delete;
+    ImoTable& operator= (const ImoTable&) = delete;
+    ImoTable(ImoTable&&) = delete;
+    ImoTable& operator= (ImoTable&&) = delete;
 
     //contents
     ImoTableHead* get_head();
     ImoTableBody* get_body();
-    inline std::list<ImoStyle*>& get_column_styles()
-    {
-        return m_colStyles;
-    }
-    inline int get_num_columns()
-    {
-        return int( m_colStyles.size() );
-    }
+    inline std::list<ImoStyle*>& get_column_styles() { return m_colStyles; }
+    inline int get_num_columns() { return int( m_colStyles.size() ); }
 
 protected:
     friend class BlockLevelCreatorApi;
@@ -6582,29 +6501,17 @@ protected:
     ImoTableCell(Document* pDoc);
 
 public:
-    virtual ~ImoTableCell() {}
+    ImoTableCell(const ImoTableCell&) = delete;
+    ImoTableCell& operator= (const ImoTableCell&) = delete;
+    ImoTableCell(ImoTableCell&&) = delete;
+    ImoTableCell& operator= (ImoTableCell&&) = delete;
 
     //accessors
-    inline void set_rowspan(int value)
-    {
-        m_rowspan = value;
-    }
-    inline int get_rowspan()
-    {
-        return m_rowspan;
-    }
-    inline void set_colspan(int value)
-    {
-        m_colspan = value;
-    }
-    inline int get_colspan()
-    {
-        return m_colspan;
-    }
+    inline void set_rowspan(int value) { m_rowspan = value; }
+    inline int get_rowspan() { return m_rowspan; }
+    inline void set_colspan(int value) { m_colspan = value; }
+    inline int get_colspan() { return m_colspan; }
 
-
-//   //required by Visitable parent class
-    //virtual void accept_visitor(BaseVisitor& v);
 };
 
 //---------------------------------------------------------------------------------------
@@ -6616,7 +6523,10 @@ protected:
     ImoTableRow(Document* pDoc);
 
 public:
-    ~ImoTableRow() override {}
+    ImoTableRow(const ImoTableRow&) = delete;
+    ImoTableRow& operator= (const ImoTableRow&) = delete;
+    ImoTableRow(ImoTableRow&&) = delete;
+    ImoTableRow& operator= (ImoTableRow&&) = delete;
 
     //contents
     inline int get_num_cells()
@@ -6648,16 +6558,13 @@ protected:
     ImoTableSection(int type) : ImoCollection(type) {}
 
 public:
-    virtual ~ImoTableSection() {}
+    ImoTableSection(const ImoTableSection&) = delete;
+    ImoTableSection& operator= (const ImoTableSection&) = delete;
+    ImoTableSection(ImoTableSection&&) = delete;
+    ImoTableSection& operator= (ImoTableSection&&) = delete;
 
-    void remove(ImoTableRow* pTR)
-    {
-        remove_child_imo(pTR);
-    }
-    void add(ImoTableRow* pTR)
-    {
-        append_child_imo(pTR);
-    }
+    void remove(ImoTableRow* pTR) { remove_child_imo(pTR); }
+    void add(ImoTableRow* pTR) { append_child_imo(pTR); }
 };
 
 //---------------------------------------------------------------------------------------
@@ -6669,7 +6576,10 @@ protected:
     ImoTableBody() : ImoTableSection(k_imo_table_body) {}
 
 public:
-    virtual ~ImoTableBody() {}
+    ImoTableBody(const ImoTableBody&) = delete;
+    ImoTableBody& operator= (const ImoTableBody&) = delete;
+    ImoTableBody(ImoTableBody&&) = delete;
+    ImoTableBody& operator= (ImoTableBody&&) = delete;
 };
 
 //---------------------------------------------------------------------------------------
@@ -6681,7 +6591,10 @@ protected:
     ImoTableHead() : ImoTableSection(k_imo_table_head) {}
 
 public:
-    virtual ~ImoTableHead() {}
+    ImoTableHead(const ImoTableHead&) = delete;
+    ImoTableHead& operator= (const ImoTableHead&) = delete;
+    ImoTableHead(ImoTableHead&&) = delete;
+    ImoTableHead& operator= (ImoTableHead&&) = delete;
 };
 
 //---------------------------------------------------------------------------------------
@@ -6699,24 +6612,18 @@ protected:
     ImoTextItem() : ImoInlineLevelObj(k_imo_text_item), m_text("") {}
 
 public:
-    virtual ~ImoTextItem() {}
+    ImoTextItem(const ImoTextItem&) = delete;
+    ImoTextItem& operator= (const ImoTextItem&) = delete;
+    ImoTextItem(ImoTextItem&&) = delete;
+    ImoTextItem& operator= (ImoTextItem&&) = delete;
 
     //getters
-    inline std::string& get_text()
-    {
-        return m_text;
-    }
+    inline std::string& get_text() { return m_text; }
     std::string& get_language();
 
     //setters
-    inline void set_text(const std::string& text)
-    {
-        m_text = text;
-    }
-    inline void set_language(const std::string& value)
-    {
-        m_language = value;
-    }
+    inline void set_text(const std::string& text) { m_text = text; }
+    inline void set_language(const std::string& value) { m_language = value; }
 
 };
 
@@ -6735,6 +6642,10 @@ protected:
 
 public:
     virtual ~ImoTieData();
+    ImoTieData(const ImoTieData&) = delete;
+    ImoTieData& operator= (const ImoTieData&) = delete;
+    ImoTieData(ImoTieData&&) = delete;
+    ImoTieData& operator= (ImoTieData&&) = delete;
 
     //getters
     inline bool is_start()
@@ -6762,46 +6673,28 @@ public:
 class ImoTie : public ImoRelObj
 {
 protected:
-    int     m_tieNum;
-    int     m_orientation;
-    Color   m_color;
+    int     m_tieNum = 0;
+    int     m_orientation = k_orientation_default;
 
     friend class ImFactory;
-    ImoTie()
-        : ImoRelObj(k_imo_tie), m_tieNum(0), m_orientation(k_orientation_default)
-    {}
-    ImoTie(int num)
-        : ImoRelObj(k_imo_tie), m_tieNum(num), m_orientation(k_orientation_default)
-    {}
+    ImoTie() : ImoRelObj(k_imo_tie) {}
+    ImoTie(int num) : ImoRelObj(k_imo_tie), m_tieNum(num) {}
 
 public:
-    ~ImoTie() override {}
+    ImoTie(const ImoTie&) = delete;
+    ImoTie& operator= (const ImoTie&) = delete;
+    ImoTie(ImoTie&&) = delete;
+    ImoTie& operator= (ImoTie&&) = delete;
 
     //getters
-    inline int get_tie_number()
-    {
-        return m_tieNum;
-    }
-    inline int get_orientation()
-    {
-        return m_orientation;
-    }
+    inline int get_tie_number() { return m_tieNum; }
+    inline int get_orientation() { return m_orientation; }
     ImoNote* get_start_note();
     ImoNote* get_end_note();
 
     //setters
-    inline void set_tie_number(int num)
-    {
-        m_tieNum = num;
-    }
-    inline void set_orientation(int value)
-    {
-        m_orientation = value;
-    }
-    inline void set_color(Color value)
-    {
-        m_color = value;
-    }
+    inline void set_tie_number(int num) { m_tieNum = num; }
+    inline void set_orientation(int value) { m_orientation = value; }
 
     //access to data objects
     ImoBezierInfo* get_start_bezier();
@@ -6818,25 +6711,16 @@ public:
 class ImoTieDto : public ImoSimpleObj
 {
 protected:
-    bool m_fStart;
-    int m_tieNum;
-    int m_orientation;
-    ImoNote* m_pNote;
-    ImoBezierInfo* m_pBezier;
-    Color m_color;
-    int m_lineNum;
+    bool m_fStart = true;
+    int m_tieNum = 0;
+    int m_orientation = k_orientation_default;
+    ImoNote* m_pNote = nullptr;
+    ImoBezierInfo* m_pBezier = nullptr;
+    Color m_color = Color(0,0,0);
+    int m_lineNum = 0;
 
 public:
-    ImoTieDto()
-        : ImoSimpleObj(k_imo_tie_dto)
-        , m_fStart(true)
-        , m_tieNum(0)
-        , m_orientation(k_orientation_default)
-        , m_pNote(nullptr)
-        , m_pBezier(nullptr)
-        , m_lineNum(0)
-    {
-    }
+    ImoTieDto() : ImoSimpleObj(k_imo_tie_dto) {}
     virtual ~ImoTieDto();
 
     //getters
@@ -6919,13 +6803,11 @@ public:
 class ImoTimeModificationDto : public ImoDto
 {
 protected:
-    int m_top;
-    int m_bottom;
+    int m_top = 1;
+    int m_bottom = 1;
 
 public:
-    ImoTimeModificationDto() : ImoDto(k_imo_time_modification_dto)
-        , m_top(1), m_bottom(1) {}
-    virtual ~ImoTimeModificationDto() {}
+    ImoTimeModificationDto() : ImoDto(k_imo_time_modification_dto) {}
 
     //getters & setters
     inline int get_top_number()
@@ -6964,7 +6846,10 @@ protected:
     }
 
 public:
-    ~ImoTimeSignature() override {}
+    ImoTimeSignature(const ImoTimeSignature&) = delete;
+    ImoTimeSignature& operator= (const ImoTimeSignature&) = delete;
+    ImoTimeSignature(ImoTimeSignature&&) = delete;
+    ImoTimeSignature& operator= (ImoTimeSignature&&) = delete;
 
     //getters and setters
     inline int get_top_number()
@@ -7048,7 +6933,6 @@ protected:
 
 public:
     ImoTupletDto();
-    virtual ~ImoTupletDto() {}
 
     enum { k_unknown = 0, k_start, k_continue, k_stop, };
 
@@ -7167,7 +7051,10 @@ protected:
     ImoTuplet(ImoTupletDto* dto);
 
 public:
-    ~ImoTuplet() override {}
+    ImoTuplet(const ImoTuplet&) = delete;
+    ImoTuplet& operator= (const ImoTuplet&) = delete;
+    ImoTuplet(ImoTuplet&&) = delete;
+    ImoTuplet& operator= (ImoTuplet&&) = delete;
 
     enum { k_straight = 0, k_curved, k_slurred, };
     enum { k_number_actual=0, k_number_both, k_number_none, };
@@ -7227,6 +7114,10 @@ protected:
 
 public:
     virtual ~ImoLyric();
+    ImoLyric(const ImoLyric&) = delete;
+    ImoLyric& operator= (const ImoLyric&) = delete;
+    ImoLyric(ImoLyric&&) = delete;
+    ImoLyric& operator= (ImoLyric&&) = delete;
 
     //getters
     inline int get_number() { return m_number; }
@@ -7274,39 +7165,39 @@ protected:
 class ImoLyricsTextInfo : public ImoSimpleObj
 {
 protected:
-    int m_syllableType;
-    ImoTextInfo m_text;
+    int m_syllableType = k_single;
+    TypeTextInfo m_text;
+    ImoStyle* m_pStyle = nullptr;
     std::string m_elision;       //before this syllable
 //    std::string m_elisionFont;
 //    Color m_elisionColor;
 
     friend class ImFactory;
-    ImoLyricsTextInfo()
-        : ImoSimpleObj(k_imo_lyrics_text_info)
-        , m_syllableType(k_single)
-    {
-    }
+    ImoLyricsTextInfo() : ImoSimpleObj(k_imo_lyrics_text_info) {}
 
 
 public:
-    virtual ~ImoLyricsTextInfo() {}
+    ImoLyricsTextInfo(const ImoLyricsTextInfo&) = delete;
+    ImoLyricsTextInfo& operator= (const ImoLyricsTextInfo&) = delete;
+    ImoLyricsTextInfo(ImoLyricsTextInfo&&) = delete;
+    ImoLyricsTextInfo& operator= (ImoLyricsTextInfo&&) = delete;
 
     //syllable type
     enum { k_single, k_begin, k_end, k_middle, };
 
     //getters
     inline int get_syllable_type() { return m_syllableType; }
-    inline std::string& get_syllable_text() { return m_text.get_text(); }
-    inline std::string& get_syllable_language() { return m_text.get_language(); }
-    ImoStyle* get_syllable_style();
+    inline std::string& get_syllable_text() { return m_text.text; }
+    inline std::string& get_syllable_language() { return m_text.language; }
+    ImoStyle* get_syllable_style() { return m_pStyle; }
     inline bool has_elision() { return !m_elision.empty(); }
     inline std::string& get_elision_text() { return m_elision; }
 
     //setters
     inline void set_syllable_type(int value) { m_syllableType = value; }
-    inline void set_syllable_text(const std::string& text) { m_text.set_text(text); }
-    inline void set_syllable_style(ImoStyle* pStyle) { m_text.set_style(pStyle); }
-    inline void set_syllable_language(const std::string& language) { m_text.set_language(language); }
+    inline void set_syllable_text(const std::string& text) { m_text.text = text; }
+    inline void set_syllable_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
+    inline void set_syllable_language(const std::string& language) { m_text.language = language; }
     inline void set_elision_text(const std::string& text) { m_elision = text; }
 
 };
@@ -7329,7 +7220,10 @@ protected:
     }
 
 public:
-    ~ImoOctaveShift() override {}
+    ImoOctaveShift(const ImoOctaveShift&) = delete;
+    ImoOctaveShift& operator= (const ImoOctaveShift&) = delete;
+    ImoOctaveShift(ImoOctaveShift&&) = delete;
+    ImoOctaveShift& operator= (ImoOctaveShift&&) = delete;
 
     //setters
     inline void set_shift_steps(int value) { m_steps = value; }
@@ -7368,7 +7262,6 @@ public:
         , m_iStaff(0)
     {
     }
-    virtual ~ImoOctaveShiftDto() {}
 
     //setters
     inline void set_line_number(int value) { m_lineNum = value; }
@@ -7407,6 +7300,11 @@ protected:
     ImoPedalMark() : ImoAuxObj(k_imo_pedal_mark) {}
 
 public:
+    ImoPedalMark(const ImoPedalMark&) = delete;
+    ImoPedalMark& operator= (const ImoPedalMark&) = delete;
+    ImoPedalMark(ImoPedalMark&&) = delete;
+    ImoPedalMark& operator= (ImoPedalMark&&) = delete;
+
     //setters
     void set_type(EPedalMark value) { m_type = value; }
     void set_abbreviated(bool value) { m_fAbbreviated = value; }
@@ -7434,6 +7332,11 @@ protected:
     ImoPedalLine() : ImoRelObj(k_imo_pedal_line) {}
 
 public:
+    ImoPedalLine(const ImoPedalLine&) = delete;
+    ImoPedalLine& operator= (const ImoPedalLine&) = delete;
+    ImoPedalLine(ImoPedalLine&&) = delete;
+    ImoPedalLine& operator= (ImoPedalLine&&) = delete;
+
     //setters
     void set_draw_start_corner(bool value) { m_fDrawStartCorner = value; }
     void set_draw_end_corner(bool value) { m_fDrawEndCorner = value; }
@@ -7527,7 +7430,10 @@ protected:
     }
 
 public:
-    ~ImoVoltaBracket() override {}
+    ImoVoltaBracket(const ImoVoltaBracket&) = delete;
+    ImoVoltaBracket& operator= (const ImoVoltaBracket&) = delete;
+    ImoVoltaBracket(ImoVoltaBracket&&) = delete;
+    ImoVoltaBracket& operator= (ImoVoltaBracket&&) = delete;
 
     //getters
     inline bool has_final_jog()
@@ -7615,7 +7521,6 @@ public:
         , m_pBarline(nullptr)
     {
     }
-    virtual ~ImoVoltaBracketDto() {}
 
     enum { k_unknown = 0, k_start, k_stop, k_discontinue,  };
 
@@ -7710,26 +7615,20 @@ public:
 class ImoWedge : public ImoRelObj
 {
 protected:
-    Tenths  m_startSpread;
-    Tenths  m_endSpread;
-    bool    m_fNiente;
-    bool    m_fCrescendo;
+    Tenths  m_startSpread = 0.0f;
+    Tenths  m_endSpread = 0.0f;
+    bool    m_fNiente = false;
+    bool    m_fCrescendo = false;
     int     m_wedgeNum;
-//    Color   m_color;
 
     friend class ImFactory;
-    ImoWedge(int num=0)
-        : ImoRelObj(k_imo_wedge)
-        , m_startSpread(0.0f)
-        , m_endSpread(0.0f)
-        , m_fNiente(false)
-        , m_fCrescendo(false)
-        , m_wedgeNum(num)
-    {
-    }
+    ImoWedge(int num=0) : ImoRelObj(k_imo_wedge), m_wedgeNum(num) {}
 
 public:
-    ~ImoWedge() override {}
+    ImoWedge(const ImoWedge&) = delete;
+    ImoWedge& operator= (const ImoWedge&) = delete;
+    ImoWedge(ImoWedge&&) = delete;
+    ImoWedge& operator= (ImoWedge&&) = delete;
 
     //setters
     inline void set_start_spread(Tenths value) { m_startSpread = value; }
@@ -7737,7 +7636,6 @@ public:
     inline void set_niente(bool value) { m_fNiente = value; }
     inline void set_crescendo(bool value) { m_fCrescendo = value; }
     inline void set_wedge_number(int value) { m_wedgeNum = value; }
-//    inline void set_color(Color value) { m_color = value; }
 
     //getters
     inline Tenths get_start_spread() { return m_startSpread; }
@@ -7745,7 +7643,6 @@ public:
     inline bool is_niente() { return m_fNiente; }
     inline bool is_crescendo() { return m_fCrescendo; }
     inline int get_wedge_number() { return m_wedgeNum; }
-//    inline Color get_color() { return m_color; }
 
     //required override for ImoRelObj
     void reorganize_after_object_deletion() override;
@@ -7847,7 +7744,6 @@ typedef Visitor<ImoParagraph> ImParagraphVisitor;
 //typedef Visitor<ImoStaffInfo> ImVisitor;
 //typedef Visitor<ImoStaffObj> ImVisitor;
 //typedef Visitor<ImoStyles> ImVisitor;
-//typedef Visitor<ImoTextInfo> ImVisitor;
 //typedef Visitor<ImoTextItem> ImVisitor;
 //typedef Visitor<ImoTextStyle> ImVisitor;
 //typedef Visitor<ImoStyle> ImVisitor;

@@ -139,7 +139,6 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_technical:           pObj = LOMSE_NEW ImoTechnical();          break;
         case k_imo_textblock_info:      pObj = LOMSE_NEW ImoTextBlockInfo();      break;
         case k_imo_text_box:            pObj = LOMSE_NEW ImoTextBox();            break;
-        case k_imo_text_info:           pObj = LOMSE_NEW ImoTextInfo();           break;
         case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;
         case k_imo_text_repetition_mark:   pObj = LOMSE_NEW ImoTextRepetitionMark();   break;
         case k_imo_tie:                 pObj = LOMSE_NEW ImoTie();                break;
