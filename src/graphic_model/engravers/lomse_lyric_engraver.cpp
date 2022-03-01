@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -152,12 +152,19 @@ int LyricEngraver::create_shapes(const RelObjEngravingContext& ctx)
     int ret = int(m_lyrics.size());
     m_numShapes += ret;
 
-    //prepare for next system
-    m_lyrics.clear();
-    m_shapesInfo.clear();
-
     return ret;
 };
+
+//---------------------------------------------------------------------------------------
+void LyricEngraver::prepare_for_next_system()
+{
+    //AWARE: m_shapesInfo cannot be cleared at end of LyricEngraver::create_shapes()
+    //       as it has to be used in SystemLayouter::add_lyrics_shapes_to_model(). Thus
+    //       it will be cleared here and this method will be invoked by
+    //       SystemLayouter::add_lyrics_shapes_to_model() when appropriate.
+    m_lyrics.clear();
+    m_shapesInfo.clear();
+}
 
 //---------------------------------------------------------------------------------------
 void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* pLyric,

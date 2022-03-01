@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@
 #include "lomse_beam_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_aux_shapes_aligner.h"
+#include "lomse_lyric_engraver.h"
 
 #include <sstream>
 #include <algorithm>
@@ -1255,8 +1256,13 @@ void SystemLayouter::delete_rel_obj_engraver(ImoRelObj* pRO)
 void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bool fLast,
                                                 int iInstr, int iStaff)
 {
-    AuxRelObjEngraver* pEngrv
-        = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
+    LyricEngraver* pEngrv
+        = dynamic_cast<LyricEngraver*>(m_engravers.get_engraver(tag));
+    if (pEngrv == nullptr)
+    {
+        LOMSE_LOG_ERROR("Fatal: Engraver is not LyricEngraver!");
+        return;
+    }
 
     //create the shapes
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
@@ -1283,6 +1289,8 @@ void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bo
         m_engravers.remove_engraver(tag);
         delete pEngrv;
     }
+    else
+        pEngrv->prepare_for_next_system();
 }
 
 

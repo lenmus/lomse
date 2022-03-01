@@ -86,6 +86,9 @@ public:
     int get_num_shapes() override { return m_numShapes; }
     ShapeBoxInfo* get_shape_box_info(int i) override { return m_shapesInfo[i]; }
 
+    //specific methods for this engraver
+    void prepare_for_next_system();
+
 
 protected:
 
