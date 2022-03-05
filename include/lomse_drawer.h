@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,13 @@
 #include "agg_color_rgba.h"     //rgba & rgba8
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
+#include "agg_ellipse.h"
+#include "agg_renderer_markers.h"       //for rendering markers
+#include "agg_conv_curve.h"
+#include "agg_conv_stroke.h"
+#include "agg_conv_marker.h"
+#include "agg_conv_concat.h"
+#include "agg_vcgen_markers_term.h"
 #include "lomse_shape_base.h"   //enums ELineEdge, ...
 #include "lomse_agg_types.h"    //RenderingBuffer
 #include "lomse_gm_basic.h"     //for GmoObj::k_max
@@ -182,6 +189,19 @@ struct RenderOptions
     }
 
 
+};
+
+//---------------------------------------------------------------------------------------
+// SvgOptions: struct holding the rendering options for generating SVG
+//---------------------------------------------------------------------------------------
+struct SvgOptions
+{
+    int indent = 0;                 //num.spaces for each indentation step
+    bool add_id = true;             //include id='..' in elements
+    bool add_class = true;          //include class="...." in elements
+    bool add_newlines = false;      //add a new lines after each element
+
+    SvgOptions() {}
 };
 
 
@@ -768,6 +788,259 @@ public:
     virtual bool is_ready() const = 0;
     //@}    //Other methods
 
+};
+
+
+//=======================================================================================
+// Helper class LineVertexSource: a vertex source for a line
+//=======================================================================================
+class LineVertexSource : public VertexSource
+{
+protected:
+    double x1, y1, x2, y2;
+    int f;
+
+public:
+    LineVertexSource(double x1_, double y1_, double x2_, double y2_)
+        : VertexSource()
+        , x1(x1_)
+        , y1(y1_)
+        , x2(x2_)
+        , y2(y2_)
+        , f(0)
+    {
+    }
+
+    void rewind(unsigned) override { f = 0; }
+    unsigned vertex(double* x, double* y) override
+    {
+        if(f == 0) { ++f; *x = x1; *y = y1; return agg::path_cmd_move_to; }
+        if(f == 1) { ++f; *x = x2; *y = y2; return agg::path_cmd_line_to; }
+        return agg::path_cmd_stop;
+    }
+};
+
+
+//=======================================================================================
+// Helper class MarkerVertexSource:
+//    It is a vertex source for different line caps markers
+//=======================================================================================
+class MarkerVertexSource : public VertexSource
+{
+public:
+    MarkerVertexSource();
+
+    void head_arrowhead(double d1, double d2, double d3, double d4)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d3;
+        m_head_d4 = d4;
+        m_head_type = k_arrowhead;
+    }
+
+    void head_arrowtail(double d1, double d2, double d3, double d4)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d3;
+        m_head_d4 = d4;
+        m_head_type = k_arrowtail;
+    }
+
+    void head_circle(double r1)
+    {
+        m_head_d1 = r1;
+        m_head_type = k_circle;
+    }
+
+    void head_square(double d1, double d2)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d1 / 2.0;
+        m_head_type = k_square;
+    }
+
+    void head_diamond(double d1)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d1;
+        m_head_d3 = d1;
+        m_head_d4 = -d1;
+        m_head_type = k_arrowhead;
+    }
+
+    void no_head() { m_head_type = k_none; }
+
+    //-----------------------------------------------------------------------------------
+
+    void tail_diamond(double d1)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d1;
+        m_tail_d3 = d1;
+        m_tail_d4 = -d1;
+        m_tail_type = k_arrowhead;
+    }
+
+    void tail_arrowhead(double d1, double d2, double d3, double d4)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d3;
+        m_tail_d4 = d4;
+        m_tail_type = k_arrowhead;
+    }
+
+    void tail_arrowtail(double d1, double d2, double d3, double d4)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d3;
+        m_tail_d4 = d4;
+        m_tail_type = k_arrowtail;
+    }
+
+    void tail_square(double d1, double d2)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d1 / 2.0;
+        m_tail_type = k_square;
+    }
+
+    void tail_circle(double r1)
+    {
+        m_tail_d1 = r1;
+        m_tail_type = k_circle;
+    }
+
+    void no_tail() { m_tail_type = k_none; }
+
+    void rewind(unsigned path_id) override;
+    unsigned vertex(double* x, double* y) override;
+
+private:
+    double   m_head_d1;
+    double   m_head_d2;
+    double   m_head_d3;
+    double   m_head_d4;
+    double   m_tail_d1;
+    double   m_tail_d2;
+    double   m_tail_d3;
+    double   m_tail_d4;
+
+    enum type_e { k_none=0, k_arrowhead, k_arrowtail, k_circle, k_square, };
+    unsigned    m_head_type;
+    unsigned    m_tail_type;
+
+    double      m_coord[16];
+    unsigned    m_cmd[8];
+    unsigned    m_curr_id;
+    unsigned    m_curr_coord;
+
+    enum status_e
+    {
+        stop,
+        circle_start,
+        circle_point,
+        points,
+    };
+
+    unsigned        m_status;
+    agg::ellipse    m_circle;
+    double			m_radius;
+};
+
+
+//=======================================================================================
+// Helper class LineCapsConverter
+// It is a conversion pipeline to add stroke and line head/tail markers.
+// Internally it has three converters:
+//  * stroke_type [of type agg::conv_stroke] converts the path to the required stroke
+//  * marker_type [of type agg::conv_marker, MarkerVertexSource>] adds an arrow head
+//    to the line.
+//  * concat_type [of type agg::conv_concat] concats both converters
+//=======================================================================================
+template<class Source> class LineCapsConverter : public VertexSource
+{
+protected:
+    typedef agg::conv_stroke<Source, agg::vcgen_markers_term> stroke_type;
+    typedef agg::conv_marker<typename stroke_type::marker_type, MarkerVertexSource>
+            marker_type;
+    typedef agg::conv_concat<stroke_type, marker_type> concat_type;
+
+    stroke_type    s;
+    MarkerVertexSource   vs;
+    marker_type    m;
+    concat_type    c;
+
+public:
+    LineCapsConverter(Source& src, double w, ELineCap nStartCap, ELineCap nEndCap)
+        : s(src)
+        , vs()
+        , m(s.markers(), vs)
+        , c(s, m)
+    {
+        s.width(w);
+
+        switch(nStartCap)
+        {
+            case k_cap_none:
+                break;
+
+            case k_cap_arrowhead:
+                vs.head_arrowhead(3.0*w, 3.0*w, 2.25*w, 1.5*w);
+                break;
+
+            case k_cap_arrowtail:
+                vs.head_arrowtail(5.0*w, 2.0*w, 2.0*w, 5.0*w);
+                break;
+
+            case k_cap_diamond:
+                vs.head_diamond(3.0*w);
+                break;
+
+            case k_cap_square:
+                vs.head_square(4.0*w, 2.0*w);
+                break;
+
+            case k_cap_circle:
+                vs.head_circle(2.8*w);
+                break;
+        }
+
+        switch(nEndCap)
+        {
+            case k_cap_none:
+                break;
+
+            case k_cap_arrowhead:
+                vs.tail_arrowhead(3.0*w, 3.0*w, 2.25*w, 1.5*w);
+                break;
+
+            case k_cap_arrowtail:
+                vs.tail_arrowtail(5.0*w, 2.0*w, 2.0*w, 5.0*w);
+                break;
+
+            case k_cap_diamond:
+                vs.tail_diamond(3.0*w);
+                break;
+
+            case k_cap_square:
+                vs.tail_square(4.0*w, 2.0*w);
+                break;
+
+            case k_cap_circle:
+                vs.tail_circle(2.8*w);
+                break;
+        }
+        //s.shorten(w * 2.0);       //reduce el tamaño de la linea, recortando el final
+    }
+
+    void rewind(unsigned path_id) override { c.rewind(path_id); }
+    unsigned vertex(double* x, double* y) override { return c.vertex(x, y); }
 };
 
 

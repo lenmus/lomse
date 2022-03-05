@@ -206,6 +206,7 @@ set(RENDER_FILES
     ${LOMSE_SRC_DIR}/render/lomse_font_freetype.cpp
     ${LOMSE_SRC_DIR}/render/lomse_font_storage.cpp
     ${LOMSE_SRC_DIR}/render/lomse_renderer.cpp
+    ${LOMSE_SRC_DIR}/render/lomse_svg_drawer.cpp
 )
 
 set(SCORE_FILES

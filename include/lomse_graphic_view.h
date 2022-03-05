@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,6 +51,7 @@ namespace lomse
 
 //forward declarations
 class BitmapDrawer;
+class SvgDrawer;
 class Drawer;
 class Interactor;
 class GraphicModel;
@@ -217,6 +218,7 @@ public:
     void set_viewport_at_page_center(Pixels screenWidth);
     virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
     LUnits get_viewport_width();
+    virtual USize get_page_size(int page);
     void use_cursor(DocCursor* pCursor);
     void use_selection_set(SelectionSet* pSelectionSet);
     void add_visual_effect(VisualEffect* pEffect);
@@ -450,6 +452,16 @@ public:
     void set_print_ppi(double ppi) { m_print_ppi = ppi; }
 
     ///@}    //Support for printing
+
+
+    /// @name Support for svg rendering
+    ///@{
+
+    void render_as_svg(SvgDrawer& drawer, int page);
+
+    void set_svg_canvas_width(Pixels x);
+
+    ///@}    //Support for svg rendering
 
 
     //info

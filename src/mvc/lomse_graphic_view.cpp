@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,6 +49,7 @@
 #include "lomse_timegrid_table.h"
 #include "lomse_half_page_view.h"
 #include "lomse_renderer.h"
+#include "lomse_svg_drawer.h"
 
 using namespace std;
 
@@ -788,6 +789,26 @@ VisualEffect* GraphicView::get_tracking_effect(int effect)
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicView::render_as_svg(SvgDrawer& drawer, int page)
+{
+    if (!drawer.is_ready())
+        return;
+
+    drawer.reset(Color(255, 255, 255));
+
+    UPoint origin(0.0f, 0.0f);
+    GraphicModel* pGModel = get_graphic_model();
+    pGModel->draw_page(page, origin, &drawer, m_options);
+    drawer.render();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_svg_canvas_width(Pixels x)
+{
+    m_viewportSize.width = x;
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::print_page(int page, VPoint viewport)
 {
     if (!m_pPrintDrawer->is_ready())
@@ -1192,6 +1213,20 @@ LUnits GraphicView::get_viewport_width()
         return m_pDrawer->device_units_to_model( double(m_viewportSize.width) );
     else
         return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+USize GraphicView::get_page_size(int page)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel)
+    {
+        GmoBoxDocPage* pPage = pGModel->get_page(page);
+        URect rect = pPage->get_bounds();
+        return USize(rect.width, rect.height);
+    }
+    else
+        return USize(0.0, 0.0);
 }
 
 //---------------------------------------------------------------------------------------

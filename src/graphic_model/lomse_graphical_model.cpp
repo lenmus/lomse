@@ -95,9 +95,19 @@ void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
                              RenderOptions& opt)
 {
     pDrawer->set_shift(-origin.x, -origin.y);
-    get_page(iPage)->on_draw(pDrawer, opt);
-    pDrawer->render();
-    pDrawer->remove_shift();
+    GmoBoxDocPage* pPage = get_page(iPage);
+    if (pPage)
+    {
+        pPage->on_draw(pDrawer, opt);
+        pDrawer->render();
+        pDrawer->remove_shift();
+    }
+    else
+    {
+        stringstream msg;
+        msg << "Page " << iPage << " does not exists!";
+        LOMSE_LOG_ERROR(msg.str());
+    }
 }
 
 //---------------------------------------------------------------------------------------

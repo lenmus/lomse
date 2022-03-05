@@ -6,11 +6,13 @@
 
 @section mvc-rendering How to render a document
 
-The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for asking for services to the operating system (e.g. creating windows, receiving mouse events, etc.) and for requesting Lomse the appropriate services, such as rendering the document in the windows buffer or handling the passed events.
+The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for creating windows, handling mouse events, etc., and for requesting Lomse the appropriate services, such as rendering the document in the windows buffer or handling the passed events.
 
-As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, Drawer, and implements a specific derived class, BitmapDrawer, that renders on a bitmap. This solution allows any user application to implement its own drawer classes and do all drawing natively without having to use the BitmapDrawer class implemented by Lomse. See @subpage page-user-drawers.
+As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, Drawer, and implements two specific derived classes, BitmapDrawer and SvgDrawer. But any user application can implement its own drawer classes and do all drawing natively without having to use the drawer classes implemented by Lomse. See @subpage page-user-drawers.
 
-By default, Lomse renders the documents on a bitmap buffer, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:
+- SvgDrawer is oriented to web and modern UI applications. It renders the document as a stream of SVG commands (as text, in HTML format). And your application should manage this stream as convenient (e.g. inserting it in an HTML page).
+
+- BitmapDrawer is oriented to traditional desktop applications. It renders the document on a bitmap, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:
     -# Create a new empty bitmap when necessary (i.e when the window is created or resized),
     -# Ask Lomse to render the desired portion of the document on this bitmap, and
     -# Copy the bitmap onto the window.
@@ -27,7 +29,7 @@ Lomse MVC model has four components: the ``Model`` (the document), the ``View`` 
 
 - The Document object (the Model) stores the document content (music scores, paragraphs, images, etc.) and notifies other objects when changes occur to the document. 
 
-- The View object takes care of rendering the document so that it can be displayed by your application. The %View is responsible for providing the rendered document, usually by providing a bitmap, and it is your application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output). The rendering type depends on the specific %View class used. For instance, class GraphicView renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of GraphicView (VerticalBookView, HorizontalBookView, and SingleSystemView).
+- The View object takes care of rendering the document so that it can be displayed by your application. The %View is responsible for providing the rendered document and it is your application responsibility to present this rendered document to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output). The layout of the rendered document depends on the specific %View class used. For instance, class GraphicView renders the document as a graphic representation of the document, either as SVG code or as an image on a bitmap. But other classes would be possible (i.e. a view class to render the document as Braille code, a view for rendering as source code, etc.). Currently Lomse has implemented several variations of GraphicView such as VerticalBookView, HorizontalBookView, SingleSystemView and FreeFlowView. See below @section page-render-overview-viewtypes .
 
 - A Document can have many View objects. For instance, your application can display two windows, one for presenting a music score as a music sheet, and another window for displaying the same music score but as MusicXML source code. This behavior can be achieved by associating two simultaneous views to the document.
 
@@ -44,7 +46,7 @@ The %Presenter and most associated objects are created when your application inv
 
 Your application will take ownership of the %Presenter and will have to delete it when no longer needed. Deleting the %Presenter will automatically cause deletion of all MVC involved objects: the %Document, all existing %Views and their %Interactors, selection sets, undo/redo stacks, etc.
 
-By default, when the presented is created a View and its Interactor are created. Method Presenter::get_interactor() provides a [smart pointer](https://en.wikipedia.org/wiki/Smart_pointer) to the desired %Interactor:
+By default, when the presented is created, a View and its Interactor are created. Method Presenter::get_interactor() provides a [smart pointer](https://en.wikipedia.org/wiki/Smart_pointer) to the desired %Interactor:
 
 @code
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
@@ -59,11 +61,76 @@ By default, when the presented is created a View and its Interactor are created.
 Normally, the %Interactor is the only object you would need to use for interacting with the associated %View and with the %Document.
 
 
+@section rendering-svg   Redering as SVG code
+
+The SVG rendering facilities are very simple. It is basically opening a document and requesting its rendition. The View will render the document on a std::ostream that your application must provide, and once Lomse has generated the SVG code, it is your application responsibility to do whatever is needed with that code: injecting it in an HTML page and displaying it on a browser window embedded into your application, exporting it as an image file, etc. For instance:
+
+@code
+#include <iostream>
+using namespace std;
+
+#include <lomse_doorway.h>
+#include <lomse_graphic_view.h>     //for view types
+#include <lomse_interactor.h>       //Interactor
+using namespace lomse;
+
+int main()
+{
+    //initialize lomse library. As we are only going to generate SVG, any 
+    //values for the pixel format and resolution parameters will be acceptable
+    //as they are not going to be used
+    lomse::LomseDoorway lomse;
+    lomse.init_library(k_pix_format_rgba32, 96);
+
+    //open an score
+    lomse::Presenter* pPresenter = 
+        lomse.open_document(k_view_vertical_book,
+                            "<path>/<to>/<the>/MusicXMLscore.xml");
+
+    if (SpInteractor spInteractor = pPresenter->get_interactor(0).lock())
+    {
+        //generate the SVG rendition for the first page
+        std::stringstream svg;
+        int page = 0;
+        pIntor->svg_add_newlines(true);     //for human legibility
+        spInteractor->render_as_svg(svg, page);
+
+        //do whatever you like with the svg code
+        cout << svg.str() << endl;
+    }
+    else
+        cout << "Could not open document!" << endl;
+
+    
+    delete pPresenter;
+    return 0;
+}
+@endcode
 
 
-@section rendering-buffer  The rendering buffer for the View
+Lomse behaviour for generating SVG is as follows:
 
-The View renders the document on a memory buffer that your application must provide. Once Lomse has rendered the document on this bitmap buffer, it is your application responsibility to do whatever is needed with the bitmap: rendering it on a window, exporting it as a file, printing it, etc.
+- The lomse infinite logical space is also the infinite SVG document canvas.
+
+- Lomse generates SVG code to render the View type specified when opening/creating de document. The generated SVG code is only the <svg> element and all its content but it does not contain “width” and “height” attributes. Therefore, the behaviour will depend on how your application uses the generated SVG code. For instance, if the SVG code is inserted in an HTML page, the <svg> element will inherit the “width” and “height” attributes from the context. 
+
+- For View types oriented to generate pages (<i>k_view_vertical_book</i> and <i>k_view_horizontal_book</i>) the SVG viewBox is adjusted to include only a whole page and the page to generate is selected when invoking the render_as_svg() method.
+
+- For the other View types the SVG viewBox is adjusted to cover the full document.
+
+- For View types oriented to pages, the width of the document determines the width of the viewBox. But for the <i>k_view_free_flow</i> View type, there is no reference for Lomse about the target width and thus, your application must first inform Lomse of the desired width before invoking the SVG rendering method:
+
+@code
+interactor->set_svg_canvas_width(Pixels x);
+@endcode
+
+  This method only works for <i>k_view_free_flow</i>. For all other view types any value set using this method will be overriden by the document page width.
+
+
+
+@section rendering-bitmap  Rendering as a bitmap
+
+The Lomse facilities for rendering on a bitmap are oriented to traditional desktop applications. The View renders the document on a memory buffer that your application must provide. Once Lomse has rendered the document on this bitmap buffer, it is your application responsibility to do whatever is needed with the bitmap: rendering it on a window, exporting it as a file, printing it, etc.
 
 Once the View is created (remember that it is created automatically when your application invokes any of the methods in LomseDoorway for opening/creating documents), and before processing any paint event, it is necessary to inform Lomse about the rendering buffer to use. The memory for this buffer must be allocated when necessary, normally when the window is created and each time it is resized. Therefore, the event handler for <b>window resize</b> events is, usually, the best place for allocating memory for the buffer and informing Lomse about the new buffer:
 
@@ -146,15 +213,17 @@ The LomseDoorway object is the access point to the Lomse library and the main in
 You need to define and create an instance of LomseDoorway, usually with global scope:
 
 @code
-LomseDoorway&   m_lomse;        //the Lomse library doorway
+LomseDoorway   m_lomse;        //the Lomse library doorway
 @endcode
 
-The most important aspect to consider to initialize Lomse is the format of the images to be generated. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about:
+For rendering on bitmaps, the most important aspect to consider to initialize Lomse is the format of the images to be generated:
 
 -# the bitmap format to use, and
 -# the resolution to use (pixels per inch)
 
-The <b>most important</b> decision is how your application will allocate memory for the rendering buffer and the bitmap format to use, and how this bitmap will be rendered (or converted to a image format to be exported to a file or embedded in a document). Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decisions by analyzing the most convenient and fast method for rendering the bitmaps and to avoid format conversions. Sometimes the options are very limited.
+But if your application will render only SVG code, these values are irrelevant and you can use any valid values.
+
+For rendering on bitmaps, the <b>most important</b> decision is how your application will allocate memory for the rendering buffer and the bitmap format to use, and how this bitmap will be rendered (or converted to a image format to be exported to a file or embedded in a document). Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decisions by analyzing the most convenient and fast method for rendering the bitmaps and to avoid format conversions. Sometimes the options are very limited.
 
 Once you have decided the most suitable bitmap format to use, the next parameter to decide is the intended screen resolution. This value is not important because Lomse uses vectorial graphics for all, typography included and, thus, your application can always scale the image to as much resolution as you like. Nevertheless, Lomse requires a screen resolution value to adjust internal scaling factors so that when your application sets the scale to 1.0 (100%) the document get displayed on the screen at real size. If this is not a requirement for your application, any typical value can be used (e.g. 72, 96, 144, ...). Otherwise, probably you should get this value by invoking some operating system related methods (i.e. wxDC::GetPPI() method, in wxWidgets framework). 
             
@@ -174,7 +243,7 @@ void MyApp::initialize_lomse()
 }
 @endcode
 
-@attention The library must be always initialized, even if your application will not use Lomse to render scores (e.g.: uses it only for playback or other), or uses an application specific Drawer class. In these cases any values for pixel format and resolution will be valid. But your application will have to invoke the init_library() method. 
+@attention The library must be always initialized, even if your application will not use Lomse to render scores (e.g.: uses it only for playback or other), or only renders SVG code. In these cases any values for pixel format and resolution will be valid. But your application will have to invoke the init_library() method. 
 
 At end of this chapter there are summary cards with information about using Lomse in different frameworks and operating systems. See page @ref page-examples for full application code samples.
 
@@ -252,9 +321,7 @@ but without gaps in the content for separating pages. As with %k_view_vertical_b
 
 
 <b>Free Flow View</b>. View type <i>k_view_free_flow</i> is for rendering documents in a single page as high
-as necessary. It is similar to a VerticalBookView but using a paper size of infinite
-height, so that only paper width is meaningful and the document has just one page
-(e.g., an HTML page with unconstrained body width)
+as necessary and as wide as the rendering window. It is similar to an HTML page with unconstrained body width.
 
 @image html view-free-flow.png "Image: The 'real world' when using a 'k_view_free_flow' View"
 

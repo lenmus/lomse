@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -60,7 +60,7 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
-    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
+    void rewind(unsigned UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
 
 
 protected:

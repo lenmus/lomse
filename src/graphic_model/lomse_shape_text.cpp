@@ -81,16 +81,19 @@ Color GmoShapeText::get_normal_color()
 void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     //select_font();
-    TextMeter meter(m_libraryScope);
     if (!m_pStyle)
-        meter.select_font(m_language, "", "Liberation serif", 12.0);
+        pDrawer->select_font(m_language, "", "Liberation serif", 12.0);
     else
-        meter.select_font(m_language,
+        pDrawer->select_font(m_language,
                           m_pStyle->font_file(),
                           m_pStyle->font_name(),
                           m_pStyle->font_size(),
                           m_pStyle->is_bold(),
                           m_pStyle->is_italic() );
+
+    //AWARE: the selected font is stored in library scope. Thus the next TextMeter
+    //       will use the font selected in the drawer
+    TextMeter meter(m_libraryScope);
 
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_origin.x;
@@ -146,8 +149,8 @@ GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, ShapeId idx, const wstring& text
     , m_halfLeading(halfLeading)
 {
     //bounds
-    TextMeter meter(m_libraryScope);
     select_font();
+    TextMeter meter(m_libraryScope);
     m_size.width = meter.measure_width(text);
     m_size.height = halfLeading + meter.get_font_height() + halfLeading;
 
@@ -172,7 +175,20 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
     if (!static_cast<ImoContentObj*>(m_pCreatorImo)->is_visible())
         return;
 
-    select_font();
+    //select_font
+    if (!m_pStyle)
+        pDrawer->select_font(m_language, "", "Liberation serif", 12.0);
+    else
+        pDrawer->select_font(m_language,
+                          m_pStyle->font_file(),
+                          m_pStyle->font_name(),
+                          m_pStyle->font_size(),
+                          m_pStyle->is_bold(),
+                          m_pStyle->is_italic() );
+
+    //AWARE: the selected font is stored in library scope. Thus any TextMeter
+    //       created after this point will use the font selected in the drawer
+
     Color color = determine_color_to_use(opt);
     pDrawer->set_text_color(color);
     //AWARE: FreeType reference is at baseline

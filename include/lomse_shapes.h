@@ -152,7 +152,7 @@ public:
 
     //VertexSource
     unsigned vertex(double* px, double* py) override;
-    void rewind(int UNUSED(pathId) = 0) override;
+    void rewind(unsigned UNUSED(pathId) = 0) override;
 
 };
 
