@@ -38,74 +38,86 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 Vertex m_BraceVertices[] = {
-    {   0.0, 2051.0, agg::path_cmd_move_to },
-    {   0.0, 2036.0, agg::path_cmd_line_to },
-    {  84.0, 1975.0, agg::path_cmd_curve3 },      //ctrol
-    { 131.0, 1896.0, agg::path_cmd_curve3 },      //on-curve
-    { 183.0, 1808.0, agg::path_cmd_curve3 },      //ctrol
-    { 183.0, 1703.0, agg::path_cmd_curve3 },      //on-curve
-    { 183.0, 1623.0, agg::path_cmd_curve3 },      //ctrol
-    { 143.0, 1454.0, agg::path_cmd_curve3 },      //on-curve
-    {  75.0, 1164.0, agg::path_cmd_curve3 },      //ctrol
-    {  69.0, 1137.0, agg::path_cmd_curve3 },      //on-curve
-    {  28.0,  936.0, agg::path_cmd_curve3 },      //ctrol
-    {  28.0,  794.0, agg::path_cmd_curve3 },      //on-curve
-    {  28.0,  614.0, agg::path_cmd_curve3 },      //ctrol
-    {  91.0,  425.0, agg::path_cmd_curve3 },      //on-curve
-    { 163.0,  210.0, agg::path_cmd_curve3 },      //ctrol
-    { 311.0,    0.0, agg::path_cmd_curve3 },      //on-curve
-    { 311.0,   15.0, agg::path_cmd_line_to },
-    { 247.0,  133.0, agg::path_cmd_curve3 },      //ctrol
-    { 216.0,  204.0, agg::path_cmd_curve3 },      //on-curve
-    { 172.0,  300.0, agg::path_cmd_curve3 },      //ctrol
-    { 151.0,  396.0, agg::path_cmd_curve3 },      //on-curve
-    { 129.0,  489.0, agg::path_cmd_curve3 },      //ctrol
-    { 129.0,  596.0, agg::path_cmd_curve3 },      //on-curve
-    { 129.0,  724.0, agg::path_cmd_curve3 },      //ctrol
-    { 175.0,  910.0, agg::path_cmd_curve3 },      //on-curve
-    { 219.0, 1066.0, agg::path_cmd_curve3 },      //ctrol
-    { 263.0, 1229.0, agg::path_cmd_curve3 },      //on-curve
-    { 307.0, 1389.0, agg::path_cmd_curve3 },      //ctrol
-    { 307.0, 1488.0, agg::path_cmd_curve3 },      //on-curve
-    { 307.0, 1697.0, agg::path_cmd_curve3 },      //ctrol
-    { 237.0, 1820.0, agg::path_cmd_curve3 },      //on-curve
-    { 173.0, 1932.0, agg::path_cmd_curve3 },      //ctrol
-    {  11.0, 2043.0, agg::path_cmd_curve3 },
-    { 176.0, 2165.0, agg::path_cmd_curve3 },      //ctrol
-    { 237.0, 2274.0, agg::path_cmd_curve3 },      //on-curve
-    { 307.0, 2398.0, agg::path_cmd_curve3 },      //ctrol
-    { 307.0, 2609.0, agg::path_cmd_curve3 },      //on-curve
-    { 307.0, 2703.0, agg::path_cmd_curve3 },      //ctrol
-    { 263.0, 2865.0, agg::path_cmd_curve3 },      //on-curve
-    { 218.0, 3030.0, agg::path_cmd_curve3 },      //ctrol
-    { 175.0, 3185.0, agg::path_cmd_curve3 },      //on-curve
-    { 129.0, 3371.0, agg::path_cmd_curve3 },      //ctrol
-    { 129.0, 3501.0, agg::path_cmd_curve3 },      //on-curve
-    { 129.0, 3658.0, agg::path_cmd_curve3 },      //ctrol
-    { 177.0, 3802.0, agg::path_cmd_curve3 },      //on-curve
-    { 216.0, 3919.0, agg::path_cmd_curve3 },      //ctrol
-    { 307.0, 4078.0, agg::path_cmd_curve3 },      //on-curve
-    { 307.0, 4094.0, agg::path_cmd_line_to },
-    { 162.0, 3894.0, agg::path_cmd_curve3 },      //ctrol
-    {  90.0, 3673.0, agg::path_cmd_curve3 },      //on-curve
-    {  28.0, 3483.0, agg::path_cmd_curve3 },      //ctrol
-    {  28.0, 3301.0, agg::path_cmd_curve3 },      //on-curve
-    {  28.0, 3156.0, agg::path_cmd_curve3 },      //ctrol
-    {  68.0, 2960.0, agg::path_cmd_curve3 },      //on-curve
-    {  75.0, 2927.0, agg::path_cmd_curve3 },      //ctrol
-    { 142.0, 2643.0, agg::path_cmd_curve3 },      //on-curve
-    { 183.0, 2470.0, agg::path_cmd_curve3 },      //ctrol
-    { 183.0, 2394.0, agg::path_cmd_curve3 },      //on-curve
-    { 183.0, 2287.0, agg::path_cmd_curve3 },      //ctrol
-    { 132.0, 2199.0, agg::path_cmd_curve3 },      //on-curve
-    {  89.0, 2124.0, agg::path_cmd_curve3 },      //ctrol
-    {   0.0, 2051.0, agg::path_cmd_curve3 },      //on_curve
+    {   0.0, 2051.5, agg::path_cmd_move_to },
+    {   0.0, 2036.5, agg::path_cmd_line_to },
+    {  85.0, 1975.7, agg::path_cmd_curve3 },      //ctrol
+    { 131.5, 1897.4, agg::path_cmd_curve3 },      //on-curve
+    { 183.5, 1809.7, agg::path_cmd_curve3 },      //ctrol
+    { 183.5, 1704.0, agg::path_cmd_curve3 },      //on-curve
+    { 183.5, 1624.2, agg::path_cmd_curve3 },      //ctrol
+    { 143.5, 1456.2, agg::path_cmd_curve3 },      //on-curve
+    {  72.5, 1157.1, agg::path_cmd_curve3 },      //ctrol
+    {  69.0, 1140.7, agg::path_cmd_curve3 },      //on-curve
+    {  28.5,  943.7, agg::path_cmd_curve3 },      //ctrol
+    {  28.5,  800.2, agg::path_cmd_curve3 },      //on-curve
+    {  28.5,  683.0, agg::path_cmd_curve3 },      //ctrol
+    {  54.5,  560.4, agg::path_cmd_curve3 },      //on-curve
+    {  83.5,  424.8, agg::path_cmd_curve3 },      //ctrol
+    { 142.5,  289.6, agg::path_cmd_curve3 },      //on-curve
+    { 207.0,  142.1, agg::path_cmd_curve3 },      //ctrol
+    { 307.0,    0.0, agg::path_cmd_curve3 },      //on-curve
+    { 307.0,   15.0, agg::path_cmd_line_to },
+    { 247.0,  126.1, agg::path_cmd_curve3 },      //ctrol
+    { 213.0,  206.4, agg::path_cmd_curve3 },      //on-curve
+    { 171.0,  305.6, agg::path_cmd_curve3 },      //ctrol
+    { 151.0,  394.8, agg::path_cmd_curve3 },      //on-curve
+    { 129.0,  493.6, agg::path_cmd_curve3 },      //ctrol
+    { 129.0,  601.2, agg::path_cmd_curve3 },      //on-curve
+    { 129.0,  729.4, agg::path_cmd_curve3 },      //ctrol
+    { 175.0,  914.8, agg::path_cmd_curve3 },      //on-curve
+    { 218.0, 1069.4, agg::path_cmd_curve3 },      //ctrol
+    { 261.0, 1224.4, agg::path_cmd_curve3 },      //on-curve
+    { 307.0, 1395.9, agg::path_cmd_curve3 },      //ctrol
+    { 307.0, 1490.6, agg::path_cmd_curve3 },      //on-curve
+    { 307.0, 1633.7, agg::path_cmd_curve3 },      //ctrol
+    { 272.0, 1729.4, agg::path_cmd_curve3 },      //on-curve
+    { 247.0, 1825.1, agg::path_cmd_curve3 },      //ctrol
+    { 178.5, 1902.4, agg::path_cmd_curve3 },      //on-curve
+    { 117.0, 1971.7, agg::path_cmd_curve3 },      //ctrol
+    {  11.0, 2043.0, agg::path_cmd_curve3 },      //on-curve
+//
+    {   0.0, 2051.5, agg::path_cmd_move_to },
+    {  85.0, 2112.3, agg::path_cmd_curve3 },      //ctrol
+    { 131.5, 2190.6, agg::path_cmd_curve3 },      //on-curve
+    { 183.5, 2278.3, agg::path_cmd_curve3 },      //ctrol
+    { 183.5, 2383.0, agg::path_cmd_curve3 },      //on-curve
+    { 183.5, 2463.8, agg::path_cmd_curve3 },      //ctrol
+    { 143.5, 2631.8, agg::path_cmd_curve3 },      //on-curve
+    {  72.5, 2930.9, agg::path_cmd_curve3 },      //ctrol
+    {  69.0, 2947.3, agg::path_cmd_curve3 },      //on-curve
+    {  28.5, 3144.3, agg::path_cmd_curve3 },      //ctrol
+    {  28.5, 3287.8, agg::path_cmd_curve3 },      //on-curve
+    {  28.5, 3405.0, agg::path_cmd_curve3 },      //ctrol
+    {  54.5, 3527.6, agg::path_cmd_curve3 },      //on-curve
+    {  83.5, 3663.2, agg::path_cmd_curve3 },      //ctrol
+    { 142.5, 3798.4, agg::path_cmd_curve3 },      //on-curve
+    { 207.0, 3945.9, agg::path_cmd_curve3 },      //ctrol
+    { 307.0, 4088.0, agg::path_cmd_curve3 },      //on-curve
+    { 307.0, 4073.0, agg::path_cmd_line_to },
+    { 247.0, 3961.9, agg::path_cmd_curve3 },      //ctrol
+    { 213.0, 3881.6, agg::path_cmd_curve3 },      //on-curve
+    { 171.0, 3782.4, agg::path_cmd_curve3 },      //ctrol
+    { 151.0, 3693.2, agg::path_cmd_curve3 },      //on-curve
+    { 129.0, 3594.4, agg::path_cmd_curve3 },      //ctrol
+    { 129.0, 3486.8, agg::path_cmd_curve3 },      //on-curve
+    { 129.0, 3358.6, agg::path_cmd_curve3 },      //ctrol
+    { 175.0, 3173.2, agg::path_cmd_curve3 },      //on-curve
+    { 218.0, 3018.6, agg::path_cmd_curve3 },      //ctrol
+    { 261.0, 2863.6, agg::path_cmd_curve3 },      //on-curve
+    { 307.0, 2692.1, agg::path_cmd_curve3 },      //ctrol
+    { 307.0, 2597.4, agg::path_cmd_curve3 },      //on-curve
+    { 307.0, 2454.3, agg::path_cmd_curve3 },      //ctrol
+    { 272.0, 2358.6, agg::path_cmd_curve3 },      //on-curve
+    { 247.0, 2262.9, agg::path_cmd_curve3 },      //ctrol
+    { 178.5, 2185.6, agg::path_cmd_curve3 },      //on-curve
+    { 117.0, 2116.3, agg::path_cmd_curve3 },      //ctrol
+    {  11.0, 2043.0, agg::path_cmd_curve3 },      //on_curve
     {   0.0,    0.0, agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw }, //close polygon
     {   0.0,    0.0, agg::path_cmd_stop }
 };
 
-float m_rxMaxBrace = 311.0f;
-float m_ryMaxBrace = 4094.0f;
+float m_rxMaxBrace = 307.0f;
+float m_ryMaxBrace = 4088.0f;
 const int m_nNumVerticesBrace = sizeof(m_BraceVertices)/sizeof(Vertex);
 
 
