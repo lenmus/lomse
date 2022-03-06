@@ -49,7 +49,7 @@ public:
     VertexSource() {}
 	virtual ~VertexSource() {}
 
-    virtual void rewind(int pathId = 0) = 0;
+    virtual void rewind(unsigned pathId = 0) = 0;
     virtual unsigned vertex(double* px, double* py) = 0;
 };
 

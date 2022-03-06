@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,6 +37,8 @@
 #include "lomse_events.h"
 #include "lomse_document_cursor.h"
 #include "lomse_pitch.h"
+#include "lomse_drawer.h"       //for declaration of struct SvgOptions
+
 
 #include <iostream>
 #include <chrono>
@@ -184,6 +186,7 @@ protected:
     GmoRef          m_grefLastMouseOver;
     int             m_operatingMode;
     bool            m_fEditionEnabled;
+    SvgOptions      m_svgOptions;
 
     //for controlling repaints
     bool        m_fViewParamsChanged;       //viewport, scale, ... have been modified
@@ -722,6 +725,16 @@ public:
     */
     virtual void get_viewport(Pixels* x, Pixels* y);
 
+    /** Returns the size (logical units) of a page of the rendered document.
+
+        @param page The page (0..num_pages - 1) whose size is requested. This parameter
+        is only meaningful for View types that can generate several pages
+        (<i>k_view_vertical_book</i> and <i>k_view_horizontal_book</i>). For all
+        others there is only one page (page == 0) and the value of this parameter
+        is ignored.
+    */
+    USize get_page_size(int page=0);
+
     /** Returns the total size (pixels) of the whole rendered document (the whole visual
         space, all pages).
         @param xWidth
@@ -731,6 +744,7 @@ public:
 
         @see new_viewport(), set_viewport_at_page_center(), get_viewport()
     */
+
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
     /** This method invokes Lomse auto-scrolling algorithm to determine if scroll is
@@ -1174,6 +1188,67 @@ public:
     virtual int get_num_pages();
 
     //@}    //interface to GraphicView. Printing
+
+
+
+    //interface to GraphicView. SVG drawing
+    /// @name Interface to GraphicView. SVG drawing
+    //@{
+
+    /** Request Lomse to render a document as SVG stream.
+
+        @param svg The std::ostream in which SVG code will be written.
+        @param page The page to render (0..num_pages - 1). This parameter is only
+        meaningful for View types that can generate several pages
+        (<i>k_view_vertical_book</i> and <i>k_view_horizontal_book</i>). For all
+        others there is only one page (page == 0) and the value of this parameter
+        is ignored.
+
+        See @subpage svg-drawing
+    */
+    void render_as_svg(std::ostream& svg, int page=0);
+
+    /** Lomse normally layouts the score to fit in the page width specified in
+        the document. But when
+        View type <i>k_view_free_flow</i> is selected, it is necessary specify the
+        desired width for the rendered score, and this is the purpose of this method.
+
+        The width must be set before invoking render_as_svg() but this is only needed
+        when using the <i>k_view_free_flow</i> View type. For all other view types any
+        value set using this method will be overriden by the document page width so it
+        is useless to invoke it but does not harm.
+
+        @param the desired width for the score in pixels. For most applications, this
+        value should be the width of the HTML element in which the generated SVG code
+        will be inserted.
+
+        See @subpage svg-drawing
+    */
+    void set_svg_canvas_width(Pixels x);
+
+    //svg options
+//    /** Set the number of spaces for indenting SVG elements.
+//
+//        @param value The number of spaces for an indentation. Note that a value of
+//        zero supress indentation.
+//
+//        By default, Lomse generates the SVG code to be as compact as possible and,
+//        thus, it does not include indentation spaces. So default value is 0.
+//    */
+//    inline void svg_indent(int value) { m_svgOptions.indent = value; }
+//    inline void svg_add_id(bool value) { m_svgOptions.add_id = value; }
+//    inline void svg_add_class(bool value) { m_svgOptions.add_class = value; }
+    /** Enable or disable the generation of a line break after each SVG element.
+
+        @param value @TRUE for enabling the generation of line breaks. @FALSE for
+        disabling it.
+
+        By default, Lomse generates the SVG code to be as compact as possible and,
+        thus, it does not include line breaks.
+    */
+    inline void svg_add_newlines(bool value) { m_svgOptions.add_newlines = value; }
+
+    //@}    //interface to GraphicView. SVG drawing
 
 
 

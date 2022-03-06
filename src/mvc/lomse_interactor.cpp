@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,9 +53,11 @@
 #include "lomse_shape_staff.h"
 #include "lomse_score_algorithms.h"
 #include "lomse_renderer.h"
+#include "lomse_svg_drawer.h"
 
 #include <sstream>
 #include <chrono>
+#include <ostream>
 using namespace std;
 
 namespace lomse
@@ -1073,6 +1075,20 @@ void Interactor::get_viewport(Pixels* x, Pixels* y)
 }
 
 //---------------------------------------------------------------------------------------
+USize Interactor::get_page_size(int page)
+{
+    //ensure page is always valid
+    if (page < 0 || page > get_num_pages() - 1)
+        page = 0;
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_page_size(page);
+    else
+        return USize(0.0, 0.0);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::request_viewport_change(Pixels x, Pixels y)
 {
     //AWARE: This code is executed in the sound thread
@@ -1563,6 +1579,40 @@ int Interactor::get_num_pages()
         return pGModel->get_num_pages();
     else
         return 0;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::render_as_svg(std::ostream& svg, int page)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        //ensure page is always valid
+        if (page < 0 || page > get_num_pages() - 1)
+            page = 0;
+
+        //render page
+        stringstream ss;
+        SvgDrawer drawer(m_libScope, ss, m_svgOptions);
+        pGView->render_as_svg(drawer, page);
+
+        //determine the resulting viewport
+        USize size = get_page_size(page);
+
+        //add <svg> element with the viewport
+        svg << "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 "
+                << size.width << " " << size.height << "'>";
+        svg << ss.str();
+        svg << "</svg>";
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_svg_canvas_width(Pixels x)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_svg_canvas_width(x);
 }
 
 

@@ -67,7 +67,7 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
-    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; }
+    void rewind(unsigned UNUSED(pathId) = 0) override { m_nCurVertex = 0; }
     unsigned vertex(double* px, double* py) override;
 
     //support for handlers

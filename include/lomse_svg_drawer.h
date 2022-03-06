@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2022. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,58 +27,38 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-//  This file is based on Anti-Grain Geometry version 2.4 examples' code and on
-//  Agg2D version 1.0 code.
-//
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
-//  (http://www.antigrain.com). AGG 2.4 is distributed as follows:
-//    "Permission to copy, use, modify, sell and distribute this software
-//    is granted provided this copyright notice appears in all copies.
-//    This software is provided "as is" without express or implied
-//    warranty, and with no claim as to its suitability for any purpose."
-//
-//---------------------------------------------------------------------------------------
-
-#ifndef __LOMSE_SCREEN_DRAWER_H__        //to avoid nested includes
-#define __LOMSE_SCREEN_DRAWER_H__
+#ifndef __LOMSE_SVG_DRAWER_H__        //to avoid nested includes
+#define __LOMSE_SVG_DRAWER_H__
 
 #include "lomse_drawer.h"
-#include "lomse_pixel_formats.h"
-#include "lomse_agg_types.h"
-#include "lomse_path_attributes.h"
-#include "lomse_font_storage.h"
-#include "lomse_calligrapher.h"
 
-using namespace agg;
+//std
+#include <sstream>
 
 namespace lomse
 {
 
-//forward declarations
-class Renderer;
-
-
 //---------------------------------------------------------------------------------------
-/** %BitmapDrawer: a Drawer that renders on a bitmap using agg
+/** %SvgDrawer: a Drawer that renders as svg stream
 */
-class LOMSE_EXPORT BitmapDrawer : public Drawer
+class LOMSE_EXPORT SvgDrawer : public Drawer
 {
 private:
-    AttrStorage     m_attr_storage;
-    PathStorage     m_path;
-    Renderer*       m_pRenderer;
-//    TextMeter*      m_pTextMeter;
-    Calligrapher*   m_pCalligrapher;
-    int             m_numPaths;
-    RenderingBuffer m_rbuf;
-    unsigned char*  m_pBuf;         //the memory for the bitmap. Owned by user app.
-    unsigned        m_bufWidth;
-    unsigned        m_bufHeight;
+    std::ostream&       m_svg;
+    bool                m_fStartStream = true;
+    std::stringstream   m_attribs;
+    std::stringstream   m_path;
+    bool                m_fPathEmpty = true;
+    TransAffine         m_transform;
+    const SvgOptions&   m_options;
+    double              m_fontSize = 10;
+    std::string         m_fontStyle = "normal";
+    std::string         m_fontWeight = "normal";
+    std::string         m_fontFamily = "Bravura";
 
 public:
-    BitmapDrawer(LibraryScope& libraryScope);
-    virtual ~BitmapDrawer();
-
+    SvgDrawer(LibraryScope& libraryScope, std::ostream& svgstream, const SvgOptions& opt);
+    virtual ~SvgDrawer();
 
     //===================================================================
     // Implementation of pure virtual methods in Drawer base class
@@ -251,30 +231,15 @@ public:
     // Specific methods not in Drawer base class
     //===================================================================
 
-    //Inform about the RenderingBuffer to use and clear it with the desired color.
-    void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height,
-                              Color bgcolor=Color(255,255,255));
-
-    //The view area is the region to which drawing is restricted. View area must be
-    //given in device coordinates (e.g. Pixel).
-    void set_view_area(unsigned width, unsigned height, unsigned xShift, unsigned yShift);
-
-    unsigned char* get_rendering_buffer() { return m_pBuf; };
-    unsigned get_rendering_buffer_width() const { return m_bufWidth; };
-    unsigned get_rendering_buffer_height() const { return m_bufHeight; };
-
 
 protected:
-    void push_attr();
-    void pop_attr();
-    PathAttributes& cur_attr();
-    void render_existing_paths();
-    void delete_paths();
+    std::string to_svg(Color color);
+    void add_newline();
 
 };
 
 
 }   //namespace lomse
 
-#endif    // __LOMSE_SCREEN_DRAWER_H__
+#endif    // __LOMSE_SVG_DRAWER_H__
 

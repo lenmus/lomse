@@ -113,7 +113,7 @@ protected:
 
     //VertexSource
     unsigned vertex(double* px, double* py) override;
-    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
+    void rewind(unsigned UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
 };
 
 //=======================================================================================
@@ -160,7 +160,7 @@ protected:
 
     //VertexSource
     unsigned vertex(double* px, double* py) override;
-    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
+    void rewind(unsigned UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
 };
 
 
