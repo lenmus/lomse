@@ -177,8 +177,8 @@ struct RenderOptions
 struct SvgOptions
 {
     int indent = 0;                 //num.spaces for each indentation step
-    bool add_id = true;             //include id='..' in elements
-    bool add_class = true;          //include class="...." in elements
+    bool add_id = false;            //include id='..' in elements
+    bool add_class = false;         //include class="...." in elements
     bool add_newlines = false;      //add a new lines after each element
 
     SvgOptions() {}
@@ -738,6 +738,29 @@ public:
     */
     virtual double model_to_device_units(LUnits value) const = 0;
     //@}    //Device <--> model units conversion
+
+
+    /** @name Shapes info
+        These methods serve to provide the Drawer with information about the shapes it
+        is drawing. This information is normally irrelevant but in some cases (e.g.SVG)
+        it can be incorporated into the output if desired.
+    */
+    //@{
+    /** This method is used to inform the Drawer that the drawing of a new simple element
+        (that is, an element requiring just one SVG command) is going to start.
+    */
+    virtual void start_simple_notation(std::string UNUSED(id), std::string UNUSED(classname)) {}
+
+    /** This method is used to inform the Drawer that the drawing of a new composite
+        element (that is, an element requiring several SVG commands) is going to start.
+    */
+    virtual void start_composite_notation(std::string UNUSED(id), std::string UNUSED(classname)) {}
+
+    /** This method is used to inform the Drawer that the drawing of a composite
+        element has finished.
+    */
+    virtual void end_composite_notation() {}
+    //@}    //Shapes info
 
 
 

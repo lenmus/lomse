@@ -1571,18 +1571,18 @@ void Interactor::render_as_svg(std::ostream& svg, int page)
         if (page < 0 || page > get_num_pages() - 1)
             page = 0;
 
-        //render page
-        stringstream ss;
-        SvgDrawer drawer(m_libScope, ss, m_svgOptions);
-        pGView->render_as_svg(drawer, page);
-
-        //determine the resulting viewport
+        //determine the GM viewport
         USize size = get_page_size(page);
 
         //add <svg> element with the viewport
         svg << "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 "
                 << size.width << " " << size.height << "'>";
-        svg << ss.str();
+
+        //render the page
+        SvgDrawer drawer(m_libScope, svg, m_svgOptions);
+        pGView->render_as_svg(drawer, page);
+
+        //terminate svg element
         svg << "</svg>";
     }
 }

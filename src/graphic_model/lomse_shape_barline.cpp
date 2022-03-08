@@ -177,6 +177,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
     LUnits uyTop = m_origin.y;
     LUnits uyBottom = m_origin.y + m_size.height;
 
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
     switch(m_nBarlineType)
     {
         case k_barline_double:
@@ -244,6 +245,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------

@@ -54,6 +54,7 @@ GmoShapeNote::~GmoShapeNote()
 //---------------------------------------------------------------------------------------
 void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
     if (opt.draw_anchor_lines)
     {
         pDrawer->begin_path();
@@ -98,6 +99,8 @@ void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
     else
         GmoCompositeShape::on_draw(pDrawer, opt);
+
+    pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------
@@ -439,6 +442,16 @@ GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
 void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     GmoCompositeShape::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeNotehead implementation
+//=======================================================================================
+void GmoShapeNotehead::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
 }
 
 

@@ -180,6 +180,7 @@ void GmoShapeSimpleLine::set_new_values(LUnits xStart, LUnits yStart,
 //---------------------------------------------------------------------------------------
 void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    pDrawer->start_simple_notation("", get_name());
     Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
     pDrawer->fill(color);
@@ -489,7 +490,8 @@ void GmoShapeArpeggio::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     LUnits x = m_origin.x + m_xInitialAdvance;
     LUnits y = m_origin.y + m_yInitialAdvance;
-    pDrawer->move_to(x, y);
+
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
 
     for (unsigned int i = 0; i < m_segmentCount; ++i)
     {
@@ -503,6 +505,7 @@ void GmoShapeArpeggio::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------
@@ -573,6 +576,57 @@ void GmoShapeArpeggio::compute_shape_geometry(LUnits xRight, LUnits yTop, LUnits
     }
 }
 
+
+//=======================================================================================
+// GmoShapeKeySignature
+//=======================================================================================
+void GmoShapeKeySignature::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    GmoCompositeShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeClef
+//=======================================================================================
+void GmoShapeClef::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_notation_class());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeTimeSignature
+//=======================================================================================
+void GmoShapeTimeSignature::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    GmoCompositeShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeTimeGlyph
+//=======================================================================================
+void GmoShapeTimeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeAccidental
+//=======================================================================================
+void GmoShapeAccidental::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
 
 
 ////---------------------------------------------------------------------------------------

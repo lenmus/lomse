@@ -22,6 +22,7 @@
 
 #include <cstdlib>      //abs
 #include <iomanip>
+using namespace std;
 
 
 namespace lomse
@@ -109,8 +110,8 @@ void GmoObj::dump(ostream& outStream, int level)
     std::ios_base::fmtflags f( outStream.flags() );  //save formating options
 
     outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
-              << get_name(m_objtype)
-              << fixed << setprecision(2) << setfill(' ')
+              << setw(15) << setfill(' ') << get_name(m_objtype)
+              << fixed << setprecision(2)
               << setw(10) << round_half_up(m_origin.x) << ", "
               << setw(10) << round_half_up(m_origin.y) << ", "
               << setw(10) << round_half_up(m_size.width) << ", "
@@ -124,76 +125,75 @@ const string& GmoObj::get_name(int objtype)
 {
     if (!m_fNamesLoaded)
     {
-        m_typeToName[k_box]                     = "box (A)        ";
-        m_typeToName[k_box_control]             = "box-control    ";
-        m_typeToName[k_box_document]            = "box-document   ";
-        m_typeToName[k_box_doc_page]            = "box-doc-page   ";
+        m_typeToName[k_box]                     = "box (A)";
+        m_typeToName[k_box_control]             = "box-control";
+        m_typeToName[k_box_document]            = "box-document";
+        m_typeToName[k_box_doc_page]            = "box-doc-page";
         m_typeToName[k_box_doc_page_content]    = "box-docpg-cont.";
-        m_typeToName[k_box_inline]              = "box-inline     ";
-        m_typeToName[k_box_link]                = "box-link       ";
-        m_typeToName[k_box_paragraph]           = "box-paragraph  ";
-        m_typeToName[k_box_score_page]          = "box-score-page ";
-        m_typeToName[k_box_slice]               = "box-slice      ";
-        m_typeToName[k_box_slice_instr]         = "box-slice-intr ";
+        m_typeToName[k_box_inline]              = "box-inline";
+        m_typeToName[k_box_link]                = "box-link";
+        m_typeToName[k_box_paragraph]           = "box-paragraph";
+        m_typeToName[k_box_score_page]          = "box-score-page";
+        m_typeToName[k_box_slice]               = "box-slice";
+        m_typeToName[k_box_slice_instr]         = "box-slice-intr";
         m_typeToName[k_box_slice_staff]         = "box-slice-staff";
-        m_typeToName[k_box_system]              = "box-system     ";
-        m_typeToName[k_box_table]               = "box-table      ";
-        m_typeToName[k_box_table_rows]          = "box-table-rows ";
+        m_typeToName[k_box_system]              = "box-system";
+        m_typeToName[k_box_table]               = "box-table";
+        m_typeToName[k_box_table_rows]          = "box-table-rows";
 
         // shapes
-        m_typeToName[k_shape]                   = "shape (A)      ";
-        m_typeToName[k_shape_accidentals]       = "accidentals    ";
+        m_typeToName[k_shape]                   = "shape (A)";
+        m_typeToName[k_shape_accidentals]       = "accidentals";
         m_typeToName[k_shape_accidental_sign]   = "accidental-sign";
-        m_typeToName[k_shape_arpeggio]          = "arpeggio       ";
-        m_typeToName[k_shape_articulation]      = "articulation   ";
-        m_typeToName[k_shape_barline]           = "barline        ";
-        m_typeToName[k_shape_beam]              = "beam           ";
-        m_typeToName[k_shape_brace]             = "brace          ";
-        m_typeToName[k_shape_bracket]           = "bracket        ";
-        m_typeToName[k_shape_button]            = "button         ";
-        m_typeToName[k_shape_clef]              = "clef           ";
-        m_typeToName[k_shape_coda_segno]        = "coda-segno     ";
-        m_typeToName[k_shape_debug]             = "shape-debug    ";
-        m_typeToName[k_shape_dot]               = "dot            ";
-        m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark  ";
-        m_typeToName[k_shape_fermata]           = "fermata        ";
-        m_typeToName[k_shape_fingering_box]     = "fingering-box  ";
-        m_typeToName[k_shape_fingering]         = "fingering      ";
-        m_typeToName[k_shape_flag]              = "flag           ";
-        m_typeToName[k_shape_grace_stroke]      = "grace-stroke   ";
-        m_typeToName[k_shape_image]             = "image          ";
-        m_typeToName[k_shape_invisible]         = "invisible      ";
-        m_typeToName[k_shape_key_signature]     = "key            ";
-        m_typeToName[k_shape_line]              = "line           ";
-        m_typeToName[k_shape_lyrics]            = "lyrics         ";
+        m_typeToName[k_shape_arpeggio]          = "arpeggio";
+        m_typeToName[k_shape_articulation]      = "articulation";
+        m_typeToName[k_shape_barline]           = "barline";
+        m_typeToName[k_shape_beam]              = "beam";
+        m_typeToName[k_shape_brace]             = "brace";
+        m_typeToName[k_shape_bracket]           = "bracket";
+        m_typeToName[k_shape_clef]              = "clef";
+        m_typeToName[k_shape_coda_segno]        = "coda-segno";
+        m_typeToName[k_shape_debug]             = "shape-debug";
+        m_typeToName[k_shape_dot]               = "dot";
+        m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark";
+        m_typeToName[k_shape_fermata]           = "fermata";
+        m_typeToName[k_shape_fingering_box]     = "fingering-box";
+        m_typeToName[k_shape_fingering]         = "fingering";
+        m_typeToName[k_shape_flag]              = "flag";
+        m_typeToName[k_shape_grace_stroke]      = "grace-stroke";
+        m_typeToName[k_shape_image]             = "image";
+        m_typeToName[k_shape_invisible]         = "invisible";
+        m_typeToName[k_shape_key_signature]     = "key";
+        m_typeToName[k_shape_line]              = "line";
+        m_typeToName[k_shape_lyrics]            = "lyrics";
         m_typeToName[k_shape_metronome_glyph]   = "metronome-glyph";
-        m_typeToName[k_shape_metronome_mark]    = "metronome-mark ";
-        m_typeToName[k_shape_note]              = "note           ";
+        m_typeToName[k_shape_metronome_mark]    = "metronome-mark";
+        m_typeToName[k_shape_note]              = "note";
         m_typeToName[k_shape_chord_base_note]   = "chord-base-note";
-        m_typeToName[k_shape_notehead]          = "notehead       ";
-        m_typeToName[k_shape_octave_shift]      = "octave-shift   ";
-        m_typeToName[k_shape_octave_glyph]      = "octave-glyph   ";
-        m_typeToName[k_shape_ornament]          = "ornament       ";
-        m_typeToName[k_shape_pedal_glyph]       = "pedal-glyph    ";
-        m_typeToName[k_shape_pedal_line]        = "pedal-line     ";
-        m_typeToName[k_shape_rectangle]         = "rectangle      ";
-        m_typeToName[k_shape_rest]              = "rest           ";
-        m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
-        m_typeToName[k_shape_slur]              = "slur           ";
-        m_typeToName[k_shape_stem]              = "stem           ";
+        m_typeToName[k_shape_notehead]          = "notehead";
+        m_typeToName[k_shape_octave_shift]      = "octave-shift";
+        m_typeToName[k_shape_octave_glyph]      = "octave-glyph";
+        m_typeToName[k_shape_ornament]          = "ornament";
+        m_typeToName[k_shape_pedal_glyph]       = "pedal-glyph";
+        m_typeToName[k_shape_pedal_line]        = "pedal-line";
+        m_typeToName[k_shape_rectangle]         = "rectangle";
+        m_typeToName[k_shape_rest]              = "rest";
+        m_typeToName[k_shape_rest_glyph]        = "rest-glyph";
+        m_typeToName[k_shape_slur]              = "slur";
+        m_typeToName[k_shape_stem]              = "stem";
         m_typeToName[k_shape_squared_bracket]   = "squared-bracket";
-        m_typeToName[k_shape_staff]             = "staff          ";
-        m_typeToName[k_shape_technical]         = "technical      ";
-        m_typeToName[k_shape_text]              = "text           ";
-        m_typeToName[k_shape_text_box]          = "text-box       ";
-        m_typeToName[k_shape_time_signature]    = "time           ";
-        m_typeToName[k_shape_tie]               = "tie            ";
+        m_typeToName[k_shape_staff]             = "staff";
+        m_typeToName[k_shape_technical]         = "technical";
+        m_typeToName[k_shape_text]              = "text";
+        m_typeToName[k_shape_text_box]          = "text-box";
+        m_typeToName[k_shape_time_signature]    = "time";
+        m_typeToName[k_shape_tie]               = "tie";
         m_typeToName[k_shape_time_signature_glyph]
-                                                = "time-glyph     ";
-        m_typeToName[k_shape_tuplet]            = "tuplet         ";
-        m_typeToName[k_shape_volta_bracket]     = "volta-bracket  ";
-        m_typeToName[k_shape_word]              = "word           ";
-        m_typeToName[k_shape_wedge]             = "wedge          ";
+                                                = "time-glyph";
+        m_typeToName[k_shape_tuplet]            = "tuplet";
+        m_typeToName[k_shape_volta_bracket]     = "volta-bracket";
+        m_typeToName[k_shape_word]              = "word";
+        m_typeToName[k_shape_wedge]             = "wedge";
 
         m_fNamesLoaded = true;
     }
@@ -277,6 +277,30 @@ GmoBoxDocPage* GmoObj::get_page_box()
     }
 }
 
+//---------------------------------------------------------------------------------------
+const string GmoObj::get_notation_id()
+{
+    ImoObj* pImo = get_creator_imo();
+    if (pImo)
+    {
+        stringstream ss;
+        ss << "m" << pImo->get_id();
+        if (is_shape() && static_cast<GmoShape*>(this)->get_shape_id() != 0)
+            ss << "-" << static_cast<GmoShape*>(this)->get_shape_id();
+        return ss.str();
+    }
+    return string();
+}
+
+//---------------------------------------------------------------------------------------
+const string GmoObj::get_notation_class()
+{
+    ImoObj* pImo = get_creator_imo();
+    if (pImo)
+        return pImo->get_name();
+
+    return string();
+}
 
 
 //=======================================================================================

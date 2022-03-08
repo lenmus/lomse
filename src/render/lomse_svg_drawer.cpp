@@ -48,39 +48,34 @@ void SvgDrawer::reset(Color UNUSED(bgcolor))
 }
 
 //---------------------------------------------------------------------------------------
-void SvgDrawer::add_newline()
-{
-    if (m_options.add_newlines)
-        m_svg << endl;
-}
-
-//---------------------------------------------------------------------------------------
 void SvgDrawer::begin_path()
 {
-    if (m_path.tellp() != std::streampos(0))
+    if (m_fPathOpen)
     {
         LOMSE_LOG_ERROR("Path already open: [" + m_path.str() + "]");
         m_path.str("");
         m_path.clear();
     }
-    m_path << "<path d='";
+    m_fPathOpen = true;
 }
 
 //---------------------------------------------------------------------------------------
 void SvgDrawer::end_path()
 {
-    if (m_path.tellp() == std::streampos(0))
+    if (!m_fPathOpen)
     {
         LOMSE_LOG_ERROR("The path was not begun!");
     }
     else
     {
-        if (m_path.str() != "<path d='")
+        if (!m_path.str().empty())
         {
-            m_svg << m_path.str() << "'" << m_attribs.str() << "/>";
-            add_newline();
+            start_element("path");
+            m_svg << " d='" << m_path.str() << "'" << m_attribs.str() << "/>";
+            new_line();
         }
     }
+    m_fPathOpen = false;
 
     m_path.str("");
     m_path.clear();
@@ -302,7 +297,8 @@ bool SvgDrawer::select_font(const std::string& language,
 void SvgDrawer::draw_glyph(double x, double y, unsigned int ch)
 {
     const double factor = 35.2778;   //to convert font-size (pt) to LUnits  (25.4*100/72)
-    m_svg << "<text x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
+    start_element("text");
+    m_svg << " x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
          << "' font-family='" << m_fontFamily << "' font-size='" << m_fontSize * factor;
 
     if (m_fontWeight != "normal")
@@ -312,7 +308,7 @@ void SvgDrawer::draw_glyph(double x, double y, unsigned int ch)
         m_svg << "' font-style='" << m_fontStyle;
 
     m_svg << "'>&#" << ch << ";</text>";
-    add_newline();
+    new_line();
 }
 
 //---------------------------------------------------------------------------------------
@@ -320,7 +316,8 @@ void SvgDrawer::draw_glyph_rotated(double x, double y, unsigned int ch, double r
 {
     const double factor = 35.2778;   //to convert font-size (pt) to LUnits  (25.4*100/72)
     const double degrees = 180.0 / 3.141592654;   //to convert radians to degrees
-    m_svg << "<text x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
+    start_element("text");
+    m_svg << " x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
          << "' transform='rotate(" << rotation * degrees << "," << x << "," << y << ")"
          << "' font-family='" << m_fontFamily << "' font-size='" << m_fontSize * factor;
 
@@ -331,7 +328,7 @@ void SvgDrawer::draw_glyph_rotated(double x, double y, unsigned int ch, double r
         m_svg << "' font-style='" << m_fontStyle;
 
     m_svg << "'>&#" << ch << ";</text>";
-    add_newline();
+    new_line();
  }
 
 //---------------------------------------------------------------------------------------
@@ -340,7 +337,8 @@ int SvgDrawer::draw_text(double x, double y, const std::string& str)
     //returns the number of chars drawn
 
     const double factor = 35.2778;   //to convert font-size (pt) to LUnits  (25.4*100/72)
-    m_svg << "<text x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
+    start_element("text");
+    m_svg << " x='" << x << "' y='" << y << "' fill='" << to_svg(m_textColor)
          << "' font-family='" << m_fontFamily << "' font-size='" << m_fontSize * factor;
 
     if (m_fontWeight != "normal")
@@ -350,7 +348,7 @@ int SvgDrawer::draw_text(double x, double y, const std::string& str)
         m_svg << "' font-style='" << m_fontStyle;
 
     m_svg << "'>" << str << "</text>";
-    add_newline();
+    new_line();
 
     return str.size();
 }
@@ -451,9 +449,10 @@ void SvgDrawer::remove_shift()
 //---------------------------------------------------------------------------------------
 void SvgDrawer::circle(LUnits xCenter, LUnits yCenter, LUnits radius)
 {
-    m_svg << "<circle cx='" << xCenter << "' cy='" << yCenter
+    start_element("circle");
+    m_svg << " cx='" << xCenter << "' cy='" << yCenter
           << "' r='" << radius << "'" << m_attribs.str() << "/>";
-    add_newline();
+    new_line();
 }
 
 //---------------------------------------------------------------------------------------
@@ -523,13 +522,14 @@ void SvgDrawer::polygon(int n, UPoint points[])
 //---------------------------------------------------------------------------------------
 void SvgDrawer::rect(UPoint pos, USize size, LUnits radius)
 {
-    m_svg << "<rect x='" << pos.x << "' y='" << pos.y
+    start_element("rect");
+    m_svg << " x='" << pos.x << "' y='" << pos.y
           << "' width='" << size.width << "' height='" << size.height;
     if (radius > 0.0)
         m_svg << "' rx='" << radius << "' ry='" << radius;
 
     m_svg << "'/>";
-    add_newline();
+    new_line();
  }
 
 //---------------------------------------------------------------------------------------
@@ -640,6 +640,8 @@ string SvgDrawer::to_svg(Color color)
 {
     if (is_equal(color, Color(0,0,0)) )
         return "#000";
+    else if (is_equal(color, Color(255,255,255)) )
+        return "#fff";
 
     stringstream ss;
     ss << "#";
@@ -652,6 +654,87 @@ string SvgDrawer::to_svg(Color color)
     ss << std::hex << setfill('0') << setw(2) << b;
     ss << std::hex << setfill('0') << setw(2) << a;
     return ss.str();
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::indent_spaces()
+{
+    if (m_options.indent > 0)
+    {
+        int indent = m_options.indent * m_indentLevel;
+        while (indent > 0)
+        {
+            m_svg << " ";
+            indent--;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::new_line()
+{
+    if (m_options.add_newlines)
+        m_svg << endl;
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::add_id_and_class(string id, string classname)
+{
+    if (m_options.add_id && !id.empty())
+        m_svg << " id='" << id << "'";
+
+    if (m_options.add_class && !classname.empty())
+        m_svg << " class='" << classname << "'";
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::add_id_and_class()
+{
+    if (m_fIsSimple)
+    {
+        if (m_options.add_id && !m_id.empty())
+            m_svg << " id='" << m_id << "'";
+
+        if (m_options.add_class && !m_class.empty())
+            m_svg << " class='" << m_class << "'";
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::start_element(string name)
+{
+    indent_spaces();
+    m_svg << "<" << name;
+    add_id_and_class();
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::start_simple_notation(string id, string classname)
+{
+    m_id = id;
+    m_class = classname;
+    m_fIsSimple = true;
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::start_composite_notation(string id, string classname)
+{
+    m_fIsSimple = false;
+    indent_spaces();
+    m_svg << "<g";
+    add_id_and_class(id, classname);
+    m_svg << ">";
+    new_line();
+    increment_indent_level();
+}
+
+//---------------------------------------------------------------------------------------
+void SvgDrawer::end_composite_notation()
+{
+    decrement_indent_level();
+    indent_spaces();
+    m_svg << "</g>";
+    new_line();
 }
 
 

@@ -1215,9 +1215,9 @@ public:
 //        By default, Lomse generates the SVG code to be as compact as possible and,
 //        thus, it does not include indentation spaces. So default value is 0.
 //    */
-//    inline void svg_indent(int value) { m_svgOptions.indent = value; }
-//    inline void svg_add_id(bool value) { m_svgOptions.add_id = value; }
-//    inline void svg_add_class(bool value) { m_svgOptions.add_class = value; }
+    inline void svg_indent(int value) { m_svgOptions.indent = value; }
+    inline void svg_add_id(bool value) { m_svgOptions.add_id = value; }
+    inline void svg_add_class(bool value) { m_svgOptions.add_class = value; }
     /** Enable or disable the generation of a line break after each SVG element.
 
         @param value @TRUE for enabling the generation of line breaks. @FALSE for

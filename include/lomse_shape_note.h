@@ -199,6 +199,8 @@ public:     //TO_FIX: Constructor used in tests
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------

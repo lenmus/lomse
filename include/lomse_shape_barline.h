@@ -41,14 +41,12 @@ protected:
 
     std::vector<LUnits> m_relStaffTopPositions;
 
-    friend class BarlineEngraver;
+public:
     GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineType,
                     LUnits xPos, LUnits yTop, LUnits yBottom,
                     LUnits uThinLineWidth, LUnits uThickLineWidth,
                     LUnits uSpacing, LUnits uRadius, Color color,
                     LUnits uMinWidth);
-
-public:
 	~GmoShapeBarline();
 
 	//implementation of virtual methods in base class

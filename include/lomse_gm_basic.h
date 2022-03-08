@@ -18,7 +18,6 @@
 #include <list>
 #include <ostream>
 #include <map>
-using namespace std;
 
 namespace lomse
 {
@@ -62,7 +61,7 @@ class ScoreStub
 {
 protected:
     ImoId m_scoreId;
-    vector<GmoBoxScorePage*> m_pages;
+    std::vector<GmoBoxScorePage*> m_pages;
     GmMeasuresTable* m_measures;
 
 public:
@@ -70,7 +69,7 @@ public:
     ~ScoreStub();
 
     inline void add_page(GmoBoxScorePage* pPage) { m_pages.push_back(pPage); }
-    inline vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
+    inline std::vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
 
     /** Returns the GmoBoxScorePage containing timepos @c time. If @c time is not in
         the score, returns @nullptr. This method gives preference to find pages for
@@ -154,25 +153,23 @@ public:
                 k_shape_arpeggio,
                 k_shape_articulation,
                 k_shape_barline, k_shape_beam, k_shape_brace,
-                k_shape_bracket, k_shape_button,
-                k_shape_clef, k_shape_coda_segno,
+                k_shape_bracket, k_shape_clef, k_shape_coda_segno,
                 k_shape_debug, k_shape_dot, k_shape_dynamics_mark,
                 k_shape_fermata, k_shape_fingering_box, k_shape_fingering,
                 k_shape_flag, k_shape_grace_stroke, k_shape_image,
-                k_shape_invisible, k_shape_key_signature, k_shape_lyrics,
+                k_shape_invisible, k_shape_key_signature, k_shape_line, k_shape_lyrics,
                 k_shape_metronome_glyph, k_shape_metronome_mark,
-                k_shape_line, k_shape_note, k_shape_chord_base_note, k_shape_notehead,
+                k_shape_note, k_shape_chord_base_note, k_shape_notehead,
                 k_shape_octave_shift, k_shape_octave_glyph, k_shape_ornament,
                 k_shape_pedal_glyph, k_shape_pedal_line,
                 k_shape_rectangle, k_shape_rest, k_shape_rest_glyph,
                 k_shape_slur, k_shape_squared_bracket,
-                k_shape_stem, k_shape_staff,
+                k_shape_staff, k_shape_stem,
                 k_shape_technical,
                 k_shape_text,
                 k_shape_text_box,
-                k_shape_time_signature,
-                k_shape_tie,
-                k_shape_time_signature_glyph, k_shape_tuplet,
+                k_shape_tie, k_shape_time_signature_glyph,
+                k_shape_time_signature, k_shape_tuplet,
                 k_shape_volta_bracket, k_shape_wedge, k_shape_word,
             k_max
          };
@@ -212,7 +209,6 @@ public:
     inline bool is_shape_beam() { return m_objtype == k_shape_beam; }
     inline bool is_shape_brace() { return m_objtype == k_shape_brace; }
     inline bool is_shape_bracket() { return m_objtype == k_shape_bracket; }
-    inline bool is_shape_button() { return m_objtype == k_shape_button; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
     inline bool is_shape_coda_segno() { return m_objtype == k_shape_coda_segno; }
     inline bool is_shape_debug() { return m_objtype == k_shape_debug; }
@@ -297,10 +293,14 @@ public:
     virtual void on_handler_dragged(int UNUSED(iHandler), UPoint UNUSED(newPos)) {}
     virtual void on_end_of_handler_drag(int UNUSED(iHandler), UPoint UNUSED(newPos)) {}
 
+    //info
+    const std::string get_notation_id();
+    const std::string get_notation_class();
+
     //tests & debug
     virtual void dump(ostream& outStream, int level);
-    static const string& get_name(int objtype);
-    inline const string& get_name() { return get_name(m_objtype); }
+    static const std::string& get_name(int objtype);
+    inline const std::string& get_name() { return get_name(m_objtype); }
 
 protected:
     GmoObj(int objtype, ImoObj* pCreatorImo);
@@ -369,7 +369,7 @@ public:
     }
     inline void assign_id_as_prolog_shape(int iSystem, int iStaff, int numStaves)
     {
-        m_idx = (2 + iSystem) * numStaves + iStaff;
+        m_idx = iSystem * numStaves + iStaff;
     }
     static ShapeId generate_main_or_implicity_shape_id(int iStaff) { return iStaff; }
 
@@ -407,7 +407,7 @@ public:
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
     void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
-    inline vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
+    inline std::vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
 
     //parent
     GmoBox* get_parent_box() { return m_pParentBox; }

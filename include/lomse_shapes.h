@@ -27,7 +27,7 @@ class ImoImage;
 class ImoStyle;
 
 //---------------------------------------------------------------------------------------
-// a shape drawn by using a single glyph from LenMus font
+// a shape drawn by using a single glyph
 class GmoShapeGlyph : public GmoSimpleShape
 {
 protected:
@@ -57,8 +57,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeAccidentals : public GmoCompositeShape, public VoiceRelatedShape
 {
-protected:
-    friend class AccidentalsEngraver;
+public:
     GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                         Color color)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
@@ -70,8 +69,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeAccidental : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class AccidentalsEngraver;
+public:
     GmoShapeAccidental(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,
@@ -79,6 +77,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -107,6 +107,8 @@ public: //TO_FIX: constructor used in tests.
                         libraryScope, fontSize )
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -224,13 +226,15 @@ class GmoShapeKeySignature : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class KeyEngraver;
+public:
     GmoShapeKeySignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                          Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_key_signature, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -445,14 +449,15 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeTimeGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class TimeEngraver;
+public:
     GmoShapeTimeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                   Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -461,13 +466,15 @@ class GmoShapeTimeSignature : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class TimeEngraver;
+public:
     GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                           Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -515,14 +522,13 @@ protected:
     LUnits m_segmentAdvance;
     bool m_fUp;
 
-    friend class ChordEngraver;
+public:
     GmoShapeArpeggio(ImoObj* pCreatorImo, ShapeId idx,
                      LUnits xRight, LUnits yTop, LUnits yBottom,
                      bool fUp, bool fHasArrow,
                      Color color, LibraryScope& libraryScope,
                      double fontHeight);
 
-public:
     //implementation of virtual methods in base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
@@ -531,6 +537,7 @@ public:
 protected:
     void compute_shape_geometry(LUnits xPosRight, LUnits yTop, LUnits yBottom);
 };
+
 
 }   //namespace lomse
 
