@@ -414,6 +414,7 @@ void GmoShapeDebug::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //set_affine_transform();
 
     Color color = determine_color_to_use(opt);
+    pDrawer->start_simple_notation("", get_name());
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->add_path(*this);
@@ -625,6 +626,67 @@ void GmoShapeTimeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void GmoShapeAccidental::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeArticulation
+//=======================================================================================
+void GmoShapeArticulation::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeCodaSegno
+//=======================================================================================
+void GmoShapeCodaSegno::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeDynamicsMark
+//=======================================================================================
+void GmoShapeDynamicsMark::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeFermata
+//=======================================================================================
+void GmoShapeFermata::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeFingeringContainer
+//=======================================================================================
+void GmoShapeFingeringContainer::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    GmoCompositeShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeFingering
+//=======================================================================================
+void GmoShapeFingering::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", "");
     GmoShapeGlyph::on_draw(pDrawer, opt);
 }
 

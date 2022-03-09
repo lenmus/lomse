@@ -275,7 +275,8 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
 
         LUnits width = tenths_to_logical(1.0f);     //TODO engraving option
         LUnits boundsExtraWidth = tenths_to_logical(0.5f);
-        GmoShape* pShape = LOMSE_NEW GmoShapeLine(pLyric, idx, xStart, yPos, xEnd, yPos,
+        GmoShape* pShape = LOMSE_NEW GmoShapeLine(pLyric, idx, GmoObj::k_shape_line,
+                                        xStart, yPos, xEnd, yPos,
                                         width, boundsExtraWidth, k_line_solid, color,
                                         k_edge_normal, k_cap_none, k_cap_none);
         m_pLyricsShape->add(pShape);

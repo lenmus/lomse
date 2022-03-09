@@ -267,8 +267,8 @@ void NoteEngraver::add_shapes_for_dots_if_required()
 LUnits NoteEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += tenths_to_logical(get_glyph_offset(k_glyph_dot));
-    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pNote, 0, k_glyph_dot, UPoint(x, y),
-                                          color, m_libraryScope, m_fontSize);
+    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pNote, 0, UPoint(x, y), color,
+                                                m_libraryScope, m_fontSize);
     add_voice(pShape);
 	m_pNoteShape->add(pShape);
     return pShape->get_width();

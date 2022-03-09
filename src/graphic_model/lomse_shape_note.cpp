@@ -455,5 +455,25 @@ void GmoShapeNotehead::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 
+//=======================================================================================
+// GmoShapeDot implementation
+//=======================================================================================
+void GmoShapeDot::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeFlag implementation
+//=======================================================================================
+void GmoShapeFlag::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
 
 }  //namespace lomse

@@ -64,7 +64,7 @@ protected:
     friend class LineEngraver;
     friend class LyricEngraver;
     friend class OctaveShiftEngraver;
-    GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
+    GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx, int type,
                  LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
                  LUnits uWidth, LUnits uBoundsExtraWidth, ELineStyle nStyle,
                  Color color, ELineEdge nEdge, ELineCap nStartCap, ELineCap nEndCap);
@@ -105,19 +105,17 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeGraceStroke : public GmoShapeLine, public VoiceRelatedShape
 {
-protected:
-    friend class NoteEngraver;
-    friend class StemFlagEngraver;
-    friend class BeamEngraver;
+public:
     GmoShapeGraceStroke(ImoObj* pCreatorImo, LUnits xStart, LUnits yStart, LUnits xEnd,
                         LUnits yEnd, LUnits uWidth, Color color)
-        : GmoShapeLine(pCreatorImo, 0, xStart, yStart, xEnd, yEnd, uWidth, 0.0f,
-                       k_line_solid, color, k_edge_normal, k_cap_none, k_cap_none)
+        : GmoShapeLine(pCreatorImo, 0, GmoObj::k_shape_grace_stroke, xStart, yStart,
+                       xEnd, yEnd, uWidth, 0.0f, k_line_solid, color, k_edge_normal,
+                       k_cap_none, k_cap_none)
         , VoiceRelatedShape()
     {
     }
 
-public:
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 ////---------------------------------------------------------------------------------------

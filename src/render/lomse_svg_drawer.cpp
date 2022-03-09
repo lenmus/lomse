@@ -685,6 +685,9 @@ void SvgDrawer::add_id_and_class(string id, string classname)
 
     if (m_options.add_class && !classname.empty())
         m_svg << " class='" << classname << "'";
+
+    m_id = "";
+    m_class = "";
 }
 
 //---------------------------------------------------------------------------------------
@@ -698,6 +701,9 @@ void SvgDrawer::add_id_and_class()
         if (m_options.add_class && !m_class.empty())
             m_svg << " class='" << m_class << "'";
     }
+
+    m_id = "";
+    m_class = "";
 }
 
 //---------------------------------------------------------------------------------------

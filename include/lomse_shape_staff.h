@@ -27,12 +27,9 @@ protected:
 	int m_iStaff;			    //num of staff in the instrument (0..n-1)
     LUnits m_lineThickness;
 
-public: //TO_FIX: constructor invoked from test
-//    friend class InstrumentEngraver;
+public:
     GmoShapeStaff(ImoObj* pCreatorImo, ShapeId idx, ImoStaffInfo* m_pStaff, int iStaff,
                   LUnits width, Color color);
-
-public:
     ~GmoShapeStaff();
 
 	//implementation of pure virtual methods in base class

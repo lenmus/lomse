@@ -46,8 +46,16 @@
 #include <lomse_glyphs.h>
 #include <private/lomse_internal_model_p.h>     //enums
 #include <lomse_im_factory.h>
-#include "lomse_shape_barline.h"
+#include <lomse_shape_barline.h>
+#include <lomse_shape_beam.h>
+#include <lomse_shape_brace_bracket.h>
+#include <lomse_shape_line.h>
 #include <lomse_shape_note.h>
+#include <lomse_shape_staff.h>
+
+
+//std
+#include <list>
 
 using namespace UnitTest;
 using namespace std;
@@ -677,7 +685,23 @@ SUITE(SvgDrawerTest)
         delete pImo;
     }
 
-//TODO        //@400 shape GmoShapeArticulation
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_400)
+    {
+        //@400 shape GmoShapeArticulation
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_articulation_symbol, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeArticulation shape(pImo, 0, k_glyph_staccato_above, pos,
+                                   Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text class='articulation' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#58530;</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
 
     TEST_FIXTURE(SvgDrawerTestFixture, shapes_500)
     {
@@ -703,21 +727,339 @@ SUITE(SvgDrawerTest)
 
         delete pImo;
     }
-//TODO        //@600 shape GmoShapeBeam
-//TODO        //@700 shape GmoShapeBrace
-//TODO        //@800 shape GmoShapeBracket
-//TODO        //@900 shape GmoShapeClef
-//TODO        //@1000 shape GmoShapeCodaSegno
-//TODO        //@1100 shape GmoShapeDebug
-//TODO        //@1200 shape GmoShapeDot
-//TODO        //@1300 shape GmoShapeDynamicsMark
-//TODO        //@1400 shape GmoShapeFermata
-//TODO        //@1500 shape GmoShapeFingeringContainer
-//TODO        //@1600 shape GmoShapeFingering
-//TODO        //@1700 shape GmoShapeFlag
-//TODO        //@1800 shape GmoShapeGraceStroke
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_600)
+    {
+        //@600 shape GmoShapeBeam
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_beam, &doc, 83);
+        GmoShapeBeam shape(pImo, 50.0);
+        std::list<LUnits> segments = {100.0, 150.0, 200.0, 180.0};
+        UPoint pos(200.0f, 500.0f);
+        shape.set_layout_data(segments, pos, USize(400.0, 80.0), false, false,
+                              EComputedBeam::k_beam_above, 0);
+
+        stringstream expected;
+        expected
+            << "<g id='m83' class='beam'>" << endl
+            << "   <path d=' M 300 623.899 L 300 676.101 L 400 706.101 L 400 653.899' fill='#000'/>" << endl
+            << "</g>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_700)
+    {
+        //@700 shape GmoShapeBrace. For instrument
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
+        GmoShapeBrace shape(pImo, 0, 100.0, 200.0, 200.0, 800.0, Color(0,0,0));
+
+        stringstream expected;
+        expected << "<path id='m83-brace' class='instrument-brace' d=' M 100 501.101 L 100 498.899 "
+            << "S 127.687 489.976 142.834 478.483 S 159.772 465.612 159.772 450.098 "
+            << "S 159.772 438.386 146.743 413.728 S 123.616 369.829 122.476 367.422 "
+            << "S 109.283 338.508 109.283 317.446 S 109.283 300.245 117.752 282.25 "
+            << "S 127.199 262.348 146.417 242.505 S 167.427 220.856 200 200 "
+            << "L 200 202.202 S 180.456 218.508 169.381 230.294 "
+            << "S 155.7 244.853 149.186 257.945 S 142.02 272.446 142.02 288.239 "
+            << "S 142.02 307.055 157.003 334.266 S 171.01 356.957 185.016 379.706 "
+            << "S 200 404.878 200 418.777 S 200 439.78 188.599 453.826 "
+            << "S 180.456 467.872 158.143 479.217 S 138.111 489.388 103.583 499.853 "
+            << "M 100 501.101 S 127.687 510.024 142.834 521.517 "
+            << "S 159.772 534.388 159.772 549.755 S 159.772 561.615 146.743 586.272 "
+            << "S 123.616 630.171 122.476 632.578 S 109.283 661.492 109.283 682.554 "
+            << "S 109.283 699.755 117.752 717.75 S 127.199 737.652 146.417 757.495 "
+            << "S 167.427 779.144 200 800 L 200 797.798 "
+            << "S 180.456 781.492 169.381 769.706 S 155.7 755.147 149.186 742.055 "
+            << "S 142.02 727.554 142.02 711.761 S 142.02 692.945 157.003 665.734 "
+            << "S 171.01 643.043 185.016 620.294 S 200 595.122 200 581.223 "
+            << "S 200 560.22 188.599 546.174 S 180.456 532.128 158.143 520.783 "
+            << "S 138.111 510.612 103.583 499.853 Z' fill='#000'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_701)
+    {
+        //@701 shape GmoShapeBrace. For group
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument_groups, &doc, 83);
+        GmoShapeBrace shape(pImo, 0, 100.0, 200.0, 200.0, 800.0, Color(0,0,0));
+
+        stringstream expected;
+        expected << "<path id='m83-brace' class='instr-groups-brace' d=' M 100 501.101 L 100 498.899 "
+            << "S 127.687 489.976 142.834 478.483 S 159.772 465.612 159.772 450.098 "
+            << "S 159.772 438.386 146.743 413.728 S 123.616 369.829 122.476 367.422 "
+            << "S 109.283 338.508 109.283 317.446 S 109.283 300.245 117.752 282.25 "
+            << "S 127.199 262.348 146.417 242.505 S 167.427 220.856 200 200 "
+            << "L 200 202.202 S 180.456 218.508 169.381 230.294 "
+            << "S 155.7 244.853 149.186 257.945 S 142.02 272.446 142.02 288.239 "
+            << "S 142.02 307.055 157.003 334.266 S 171.01 356.957 185.016 379.706 "
+            << "S 200 404.878 200 418.777 S 200 439.78 188.599 453.826 "
+            << "S 180.456 467.872 158.143 479.217 S 138.111 489.388 103.583 499.853 "
+            << "M 100 501.101 S 127.687 510.024 142.834 521.517 "
+            << "S 159.772 534.388 159.772 549.755 S 159.772 561.615 146.743 586.272 "
+            << "S 123.616 630.171 122.476 632.578 S 109.283 661.492 109.283 682.554 "
+            << "S 109.283 699.755 117.752 717.75 S 127.199 737.652 146.417 757.495 "
+            << "S 167.427 779.144 200 800 L 200 797.798 "
+            << "S 180.456 781.492 169.381 769.706 S 155.7 755.147 149.186 742.055 "
+            << "S 142.02 727.554 142.02 711.761 S 142.02 692.945 157.003 665.734 "
+            << "S 171.01 643.043 185.016 620.294 S 200 595.122 200 581.223 "
+            << "S 200 560.22 188.599 546.174 S 180.456 532.128 158.143 520.783 "
+            << "S 138.111 510.612 103.583 499.853 Z' fill='#000'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_800)
+    {
+        //@800 shape GmoShapeBracket. For instrument
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
+        GmoShapeBracket shape(pImo, 0, 100.0, 200.0, 200.0, 800.0, 50.0, Color(0,0,0));
+
+        stringstream expected;
+        expected << "<path id='m83-bracket' class='instrument-bracket' d=' M 100 176.98 "
+            << "S 188.925 175.33 282.736 166.172 S 308.795 162.459 326.71 158.416 "
+            << "S 340.717 155.281 357.655 150 L 372.313 151.32 "
+            << "S 361.889 156.848 347.557 161.469 S 335.831 165.264 313.355 170.957 "
+            << "S 295.765 175.248 279.479 178.218 S 266.124 180.693 244.3 183.663 "
+            << "S 231.596 185.479 200 189.521 L 200 806.518 "
+            << "S 231.596 810.561 244.3 812.376 S 266.124 815.347 279.479 817.822 "
+            << "S 295.765 820.792 313.355 825.083 S 335.831 830.776 347.557 834.571 "
+            << "S 361.889 839.191 372.313 844.719 L 357.655 846.04 "
+            << "S 340.717 840.759 326.71 837.624 S 308.795 840.924 282.736 829.868 "
+            << "S 188.925 820.71 100 823.02 Z' fill='#000'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_801)
+    {
+        //@801 shape GmoShapeBracket. For group
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument_groups, &doc, 83);
+        GmoShapeBracket shape(pImo, 0, 100.0, 200.0, 200.0, 800.0, 50.0, Color(0,0,0));
+
+        stringstream expected;
+        expected << "<path id='m83-bracket' class='instr-groups-bracket' d=' M 100 176.98 "
+            << "S 188.925 175.33 282.736 166.172 S 308.795 162.459 326.71 158.416 "
+            << "S 340.717 155.281 357.655 150 L 372.313 151.32 "
+            << "S 361.889 156.848 347.557 161.469 S 335.831 165.264 313.355 170.957 "
+            << "S 295.765 175.248 279.479 178.218 S 266.124 180.693 244.3 183.663 "
+            << "S 231.596 185.479 200 189.521 L 200 806.518 "
+            << "S 231.596 810.561 244.3 812.376 S 266.124 815.347 279.479 817.822 "
+            << "S 295.765 820.792 313.355 825.083 S 335.831 830.776 347.557 834.571 "
+            << "S 361.889 839.191 372.313 844.719 L 357.655 846.04 "
+            << "S 340.717 840.759 326.71 837.624 S 308.795 840.924 282.736 829.868 "
+            << "S 188.925 820.71 100 823.02 Z' fill='#000'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_900)
+    {
+        //@900 shape GmoShapeClef
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_clef, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeClef shape(pImo, 0, k_glyph_f_clef, pos, Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text id='m83' class='clef' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#57442;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1000)
+    {
+        //@1000 shape GmoShapeCodaSegno
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_symbol_repetition_mark, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeCodaSegno shape(pImo, 0, k_glyph_coda, pos, Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text id='m83' class='coda-segno' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#57416;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1100)
+    {
+        //@1100 shape GmoShapeDebug
+        GmoShapeDebug shape(Color(0,0,0));
+        shape.add_vertex('M', 100.0, 200.0);
+        shape.add_vertex('L', 250.0, 450.0);
+        shape.add_vertex('Z', 0.0f, 0.0f);
+        shape.close_vertex_list();
+
+        stringstream expected;
+        expected << "<path class='shape-debug' d=' M 100 200 L 250 450 Z' fill='#000'/>" << endl;
+        run_test_for(shape, expected);
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1200)
+    {
+        //@1200 shape GmoShapeDot
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_note_regular, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeDot shape(pImo, 0, pos, Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text class='dot' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#57831;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1300)
+    {
+        //@1300 shape GmoShapeDynamicsMark
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_fermata, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeDynamicsMark shape(pImo, 0, k_glyph_fermata_above, pos, Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text id='m83' class='dynamics-mark' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#58560;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1400)
+    {
+        //@1400 shape GmoShapeFermata
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_dynamics_mark, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeFermata shape(pImo, 0, k_glyph_dynamic_mf, pos, Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text id='m83' class='fermata' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#58669;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1500)
+    {
+        //@1500 shape GmoShapeFingeringContainer. Empty container
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_fingering, &doc, 83);
+        GmoShapeFingeringContainer shape(pImo, 0);
+
+        stringstream expected;
+        expected << "<g id='m83' class='fingering'>" << endl
+                 << "</g>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1501)
+    {
+        //@1501 shape GmoShapeFingeringContainer. Has fingering
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_fingering, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeFingeringContainer shape(pImo, 0);
+        GmoShapeFingering* shape2 =
+            LOMSE_NEW GmoShapeFingering(pImo, 0, k_glyph_fingering_3, pos,
+                                        m_libraryScope, Color(0,0,0), 21.0);
+        shape.add(shape2);
+
+        stringstream expected;
+        expected
+            << "<g id='m83' class='fingering'>" << endl
+            << "   <text x='200' y='500' fill='#000' "
+            <<      "font-family='Bravura' font-size='740.834'>&#60691;</text>" << endl
+            << "</g>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1600)
+    {
+        //@1600 shape GmoShapeFingering
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_fingering, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeFingering shape(pImo, 0, k_glyph_fingering_3, pos, m_libraryScope, Color(0,0,0), 21.0);
+
+        stringstream expected;
+        expected << "<text x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#60691;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1700)
+    {
+        //@1700 shape GmoShapeFlag
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_note_regular, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeFlag shape(pImo, 0, k_glyph_16th_flag_up, pos,
+                           Color(0,0,0), m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected << "<text class='flag' x='200' y='500' fill='#000' "
+            << "font-family='Bravura' font-size='740.834'>&#57922;</text>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1800)
+    {
+        //@1800 shape GmoShapeGraceStroke
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_note_regular, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeGraceStroke shape(pImo, 200.0f, 500.0f, 250.0f, 550.0f, 5.0, Color(0,0,0));
+
+        stringstream expected;
+        expected << "<path class='grace-stroke' d=' M 198.232 501.768 L 201.768 498.232 "
+            << "L 251.768 548.232 L 248.232 551.768 Z' fill='#000' "
+            << "stroke='#000' stroke-width='5'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
 //TODO        //@1900 shape GmoShapeImage
-//TODO        //@2000 shape GmoShapeInvisible
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_2000)
+    {
+        //@2000 shape GmoShapeInvisible
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_note_regular, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeInvisible shape(pImo, 0, pos, USize(100.0f, 300.0f));
+
+        stringstream expected;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
 
     TEST_FIXTURE(SvgDrawerTestFixture, shapes_2100)
     {
@@ -794,7 +1136,26 @@ SUITE(SvgDrawerTest)
 //TODO        //@3600 shape GmoShapeRestGlyph
 //TODO        //@3700 shape GmoShapeSlur
 //TODO        //@3800 shape GmoShapeSquaredBracket
-//TODO        //@3900 shape GmoShapeStaff
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_3900)
+    {
+        //@3900 shape GmoShapeStaff
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff shape(pImo, 0, pInfo, 0, 20.0f, Color(0,0,0));
+
+        stringstream expected;
+        expected
+            << "<path id='m83-staff' class='staff-lines' d=' M 0 0 L 20 0 M 0 180 "
+            << "L 20 180 M 0 360 L 20 360 M 0 540 L 20 540 M 0 720 L 20 720' "
+            << "stroke='#000' stroke-width='15'/>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+        delete pInfo;
+    }
 //TODO        //@4000 shape GmoShapeStem
 //TODO        //@4100 shape GmoShapeTechnical
 //TODO        //@4200 shape GmoShapeText
@@ -867,8 +1228,8 @@ SUITE(SvgDrawerTest)
 //    k_view_free_flow,
 //    k_view_half_page,
         Presenter* pPresenter = doorway.open_document(k_view_free_flow,
-            m_scores_path + "unit-tests/svg/01-arpeggios.xml");
-            //m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
+            //m_scores_path + "unit-tests/svg/01-arpeggios.xml");
+            m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
             //m_scores_path + "MozartTrio.mxl");
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
 

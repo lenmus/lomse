@@ -219,8 +219,8 @@ void RestEngraver::add_shapes_for_dots_if_required()
 LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += get_glyph_offset(k_glyph_dot);
-    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, k_glyph_dot, UPoint(x, y),
-                                                color, m_libraryScope, m_fontSize);
+    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, UPoint(x, y), color,
+                                                m_libraryScope, m_fontSize);
     add_voice(pShape);
 	m_pRestShape->add(pShape);
     return pShape->get_width();

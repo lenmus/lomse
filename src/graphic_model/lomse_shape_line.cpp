@@ -20,13 +20,13 @@ namespace lomse
 //=======================================================================================
 // GmoShapeLine object implementation
 //=======================================================================================
-GmoShapeLine::GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
+GmoShapeLine::GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx, int type,
                            LUnits xStart, LUnits yStart,
                            LUnits xEnd, LUnits yEnd, LUnits uWidth,
                            LUnits uBoundsExtraWidth, ELineStyle nStyle,
                            Color color, ELineEdge nEdge,
                            ELineCap nStartCap, ELineCap nEndCap)
-	: GmoSimpleShape(pCreatorImo, GmoObj::k_shape_line, idx, color)
+	: GmoSimpleShape(pCreatorImo, type, idx, color)
     , m_uWidth(uWidth)
 	, m_uBoundsExtraWidth(uBoundsExtraWidth)
     , m_nStyle(nStyle)
@@ -80,6 +80,16 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->end_path();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeGraceStroke
+//=======================================================================================
+void GmoShapeGraceStroke::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeLine::on_draw(pDrawer, opt);
 }
 
 ////---------------------------------------------------------------------------------------

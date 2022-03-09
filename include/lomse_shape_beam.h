@@ -31,11 +31,9 @@ protected:
     unsigned int m_BeamFlags;
     int m_staff;
 
-    friend class BeamEngraver;
+public:
     GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness,
                  Color color = Color(0,0,0));
-
-public:
     ~GmoShapeBeam();
 
     void set_layout_data(std::list<LUnits>& segments, UPoint origin, USize size,
