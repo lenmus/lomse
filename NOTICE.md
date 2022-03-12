@@ -4,15 +4,15 @@ Lomse incorporates source code from third parties:
 
 - [agg](#agg)
 - [pugixml](#pugixml)
-- [MiniZip](#MiniZip)
-- [utf8cpp](#utf8cpp)
+- [MiniZip](#minizip)
+- [utfcpp](#utfcpp)
 
 When building the library it links with other libraries:
 
 - [zlib](#zlib)
 - [libpng](#libpng)
-- [FreeType](#FreeType)
-- [UnitTest++](#UnitTest++)
+- [FreeType](#freetype2)
+- [UnitTest++](#unittest)
 - [fontconfig](#fontconfig) (only for Unix platforms)
 
 Details about these third party materials follow.
