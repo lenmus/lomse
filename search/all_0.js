@@ -27,5 +27,6 @@ var searchData=
   ['applicationmark',['ApplicationMark',['../classApplicationMark.html',1,'']]],
   ['ascore',['AScore',['../classAScore.html',1,'']]],
   ['asoundinfo',['ASoundInfo',['../classASoundInfo.html',1,'']]],
-  ['atextitem',['ATextItem',['../classATextItem.html',1,'']]]
+  ['atextitem',['ATextItem',['../classATextItem.html',1,'']]],
+  ['application_20specific_20_25drawer_20objects',['Application specific %Drawer objects',['../page-user-drawers.html',1,'page-render-overview']]]
 ];

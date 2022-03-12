@@ -107,7 +107,7 @@ $(document).ready(function(){initNavTree('page-render-overview.html','');});
 <div class="textblock"><h1><a class="anchor" id="mvc-rendering"></a>
 How to render a document</h1>
 <p>The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for creating windows, handling mouse events, etc., and for requesting Lomse the appropriate services, such as rendering the document in the windows buffer or handling the passed events.</p>
-<p>As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, <a class="el" href="classDrawer.html">Drawer</a>, and implements two specific derived classes, BitmapDrawer and SvgDrawer. But any user application can implement its own drawer classes and do all drawing natively without having to use the drawer classes implemented by Lomse. See page-user-drawers.</p>
+<p>As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, <a class="el" href="classDrawer.html">Drawer</a>, and implements two specific derived classes, BitmapDrawer and SvgDrawer. But any user application can implement its own drawer classes and do all drawing natively without having to use the drawer classes implemented by Lomse. See <a class="el" href="page-user-drawers.html">Application specific Drawer objects</a>.</p>
 <ul>
 <li>SvgDrawer is oriented to web and modern UI applications. It renders the document as a stream of SVG commands (as text, in HTML format). And your application should manage this stream as convenient (e.g. inserting it in an HTML page).</li>
 <li>BitmapDrawer is oriented to traditional desktop applications. It renders the document on a bitmap, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:<ol type="1">
@@ -248,7 +248,7 @@ Using Lomse in MS Windows</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Mar 12 2022 10:01:42 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 12 2022 16:06:25 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>
