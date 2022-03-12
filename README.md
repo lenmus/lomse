@@ -3,7 +3,7 @@
 [![Travis CI](https://travis-ci.org/lenmus/lomse.svg)](https://travis-ci.org/lenmus/lomse)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/m0sbs3tkwvnih9bl/branch/master?svg=true)](https://ci.appveyor.com/project/cecilios/lomse-aai68/branch/master)
 [![Coverity Scan](https://img.shields.io/coverity/scan/16694.svg)](https://scan.coverity.com/projects/lenmus-lomse)
-[![License: BSD2](https://img.shields.io/badge/License-BSD--2-blue.svg)](https://lenmus.github.io/lomse/page-library-license.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://lenmus.github.io/lomse/page-library-license.html)
 
 
 Lomse objective is provide software developers with a library to add capabilities to any program for rendering, editing and playing back music scores. It is written in C++ and it is free open source and platform independent. Lomse stands for *LenMus Open Music Score Edition Library*.
@@ -11,7 +11,7 @@ Lomse objective is provide software developers with a library to add capabilitie
 
 
 ## License
-Lomse is distributed under the BSD 2-clause license, a permissive open source license to allow Lomse to be used in any projects, whether open source or proprietary. This license is a GPL compatible license, so you can use Lomse in GPL licensed projects.
+Lomse is distributed under the MIT license, a permissive open source license to allow Lomse to be used in any projects, whether open source or proprietary. This license is a GPL compatible license, so you can use Lomse in GPL licensed projects.
 
 For details, see file [LICENSE](LICENSE).
 
@@ -22,7 +22,8 @@ For details, see file [LICENSE](LICENSE).
 * Platform independent.
 * Can be safely used in commercial closed source projects.
 * MusicXML import.
-* Renderization of full documents (paragraphs, tables, lists, scores, images, etc.).
+* Rendering in two formats: as SVG and as images on provided memory (bitmap, window buffer, etc.).
+* Rendition of full documents (paragraphs, tables, lists, scores, images, etc.).
 * Support for score playback, by generating *MIDI events* in real time
 * Support for visual tracking effects (i.e. moving cursor) during playback in sync. with MIDI events or with external player.
 * Support for music scores edition.
