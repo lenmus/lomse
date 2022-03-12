@@ -15,7 +15,7 @@ Please be aware that Lomse is a work in progress, not having yet reached version
 
 ## License
 
-Lomse is distributed under the BSD 2-clause license, a permissive open source license to allow Lomse to be used in any projects, whether open source or proprietary. The BSD-2 license does not require that source code be distributed at all and can safely used in proprietary projects. This license is also a GPL compatible license, so you can use Lomse in Open Source GPL licensed projects or in projects using other open source licenses (see @ref page-library-license).
+Lomse is distributed under the MIT license, a permissive open source license to allow Lomse to be used in any projects, whether open source or proprietary. The MIT license does not require that source code be distributed at all and can be safely used in proprietary projects. This license is also a GPL compatible license, so you can use Lomse in Open Source GPL licensed projects or in projects using other open source licenses (see @ref page-library-license).
 
 The tutorials and the code samples included in the library and the code examples included in this API documentation are intended to show how the Lomse library can be used and so, intended to be copied. Therefore, they are released into the public domain (see @ref page-tutorials-license).
 
