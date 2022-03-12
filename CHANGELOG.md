@@ -1,16 +1,52 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.28.0
+[Since last version] 0.29.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.27.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.28.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.29.0] (11/Mar/2022)
+==============================
+
+#### More music notation supported:
+- Fingering
+- Pedal marks
+- All accidental signs
+- Non-standard key signatures
+- Full support for cue notes
+
+#### Improvements in MusicXML support:
+- Enable edition in MusicXML
+- Import `<staff-lines>` elements
+- Import `<defaults>` element
+- Import rest placement on the staff
+- Import `<fingering>` elements
+- Support MusicXML files encoded in UTF-16
+
+#### Improvements in score layout:
+- Display cautionary time and key changes at end of system
+- Display naturals on a key change to Cmaj/Amin
+- Enforce a minimum distance between systems
+- Fix overlaps when two voices in the same staff
+- Implement relative alignment of auxiliary objects, align voltas and hairpin-dynamic sequences
+- Improvements in horizontal spacing algorithm
+
+#### Playback:
+- Support arpeggiated chords in playback
+
+#### Other changes:
+- Prepare Lomse to accept other Drawer classes
+- Initial support to render scores in SVG format
+- Many bug fixes
 
 
 
@@ -831,7 +867,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.28.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.29.0...HEAD
+[0.29.0]: https://github.com/lenmus/lomse/compare/0.28.0...0.29.0
 [0.28.0]: https://github.com/lenmus/lomse/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/lenmus/lomse/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/lenmus/lomse/compare/0.25.0...0.26.0
