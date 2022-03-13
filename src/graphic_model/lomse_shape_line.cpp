@@ -72,6 +72,7 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     UPoint start = m_uPoint[k_start] + m_origin;
     UPoint end = m_uPoint[k_end] + m_origin;
 
+    pDrawer->start_simple_notation("", get_name());
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->stroke(color);

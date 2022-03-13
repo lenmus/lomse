@@ -267,6 +267,13 @@ void GmoShapeWord::select_font()
 }
 
 
+////=======================================================================================
+//// GmoShapeLyricText object implementation
+////=======================================================================================
+//void GmoShapeLyricText::on_draw(Drawer* pDrawer, RenderOptions& opt)
+//{
+//}
+
 
 ////---------------------------------------------------------------------------------------
 ////helper class to contain a line of text (to distribute text inside the box)

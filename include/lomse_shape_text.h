@@ -36,14 +36,10 @@ protected:
     LibraryScope& m_libraryScope;
     LUnits m_space;
 
-    friend class TextEngraver;
-    friend class LyricEngraver;
-    friend class MeasureNumberEngraver;
+public:
     GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                  ImoStyle* pStyle, const string& language,
                  LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope);
-
-public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
@@ -87,6 +83,24 @@ protected:
     Color get_normal_color() override;
 
 };
+
+////---------------------------------------------------------------------------------------
+///** %GmoShapeLyricText represents any textual content (syllable, elision symbol,
+//    hyphenation) for the lyric content associated to a note/rest.
+//*/
+//class GmoShapeLyricText : public GmoShapeText
+//{
+//public:
+//    GmoShapeLyricText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
+//                      ImoStyle* pStyle, const string& language,
+//                      LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope)
+//        : GmoShapeText(pCreatorImo, idx, text, pStyle, language,
+//                            xLeft, yBaseline, libraryScope)
+//    {
+//    }
+//
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+//};
 
 
 //---------------------------------------------------------------------------------------

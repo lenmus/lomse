@@ -245,13 +245,15 @@ class GmoShapeLyrics : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class LyricEngraver;
+public:
     GmoShapeLyrics(ImoObj* pCreatorImo, ShapeId idx, Color color,
                    LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_lyrics, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -260,33 +262,35 @@ class GmoShapeMetronomeMark : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class MetronomeMarkEngraver;
+public:
     GmoShapeMetronomeMark(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                           Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_metronome_mark, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeMetronomeGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class MetronomeMarkEngraver;
+public:
     GmoShapeMetronomeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                            Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_metronome_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeOrnament : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class OrnamentEngraver;
+public:
     GmoShapeOrnament(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_ornament, idx, nGlyph, pos, color,
@@ -294,6 +298,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -352,13 +358,10 @@ class GmoShapeStem : public GmoShapeSimpleLine, public VoiceRelatedShape
 private:
 	bool m_fStemDown;
 
-protected:
-    friend class StemFlagEngraver;
-    friend class ChordEngraver;
+public:
     GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits yEnd,
                  bool fStemDown, LUnits uWidth, Color color);
 
-public:
     void change_length(LUnits length);
 	inline bool is_stem_down() const { return m_fStemDown; }
     void set_stem_up(LUnits xRight, LUnits yNote);
@@ -483,28 +486,29 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeOctaveGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class OctaveShiftEngraver;
+public:
     GmoShapeOctaveGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                         Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_octave_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapePedalGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class PedalMarkEngraver;
-    friend class PedalLineEngraver;
+public:
     GmoShapePedalGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_pedal_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------

@@ -102,7 +102,7 @@ void RestEngraver::determine_position()
 void RestEngraver::create_main_shape()
 {
     ShapeId idx = 0;
-    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx, m_uxLeft, m_uyTop, m_color,
+    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx++, m_uxLeft, m_uyTop, m_color,
                                     m_libraryScope);
     add_voice(m_pRestShape);
 

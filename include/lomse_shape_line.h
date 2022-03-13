@@ -61,15 +61,12 @@ protected:
     enum { k_start=0, k_end };
     UPoint m_uPoint[2];
 
-    friend class LineEngraver;
-    friend class LyricEngraver;
-    friend class OctaveShiftEngraver;
+public:
     GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx, int type,
                  LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
                  LUnits uWidth, LUnits uBoundsExtraWidth, ELineStyle nStyle,
                  Color color, ELineEdge nEdge, ELineCap nStartCap, ELineCap nEndCap);
 
-public:
     virtual ~GmoShapeLine();
 
     //properties and options

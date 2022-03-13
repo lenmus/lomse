@@ -691,6 +691,68 @@ void GmoShapeFingering::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 
+//=======================================================================================
+// GmoShapeLyrics
+//=======================================================================================
+void GmoShapeLyrics::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    GmoCompositeShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeMetronomeMark
+//=======================================================================================
+void GmoShapeMetronomeMark::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    GmoCompositeShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeMetronomeGlyph
+//=======================================================================================
+void GmoShapeMetronomeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", "");
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeOctaveGlyph
+//=======================================================================================
+void GmoShapeOctaveGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", "");
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeOrnament
+//=======================================================================================
+void GmoShapeOrnament::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapePedalGlyph
+//=======================================================================================
+void GmoShapePedalGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation("", get_name());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
 ////---------------------------------------------------------------------------------------
 //// GmoShapeFiguredBass object implementation: a composite shape that can have
 //// attached shapes.

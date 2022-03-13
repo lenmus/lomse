@@ -245,6 +245,7 @@ void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
     pDrawer->render();
 
+    pDrawer->start_simple_notation(get_notation_id(), get_notation_class());
     GmoShapeSlurTie::on_draw(pDrawer, opt);
 }
 

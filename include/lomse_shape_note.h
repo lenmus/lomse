@@ -65,8 +65,7 @@ protected:
 
 
 
- public:    //TO_FIX: constructor used in tests
-    //friend class NoteEngraver;
+ public:
     GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
 
@@ -190,9 +189,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeNotehead : public GmoShapeGlyph, public VoiceRelatedShape
 {
-//protected:
-//    friend class NoteEngraver;
-public:     //TO_FIX: Constructor used in tests
+public:
     GmoShapeNotehead(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
@@ -254,8 +251,7 @@ protected:
     int m_nPosOnStaff = 0;
     LUnits m_uAnchorOffset = 0.0f;
 
-public:     //TO_FIX: Constructor used in tests
-//    friend class RestEngraver;
+public:
     GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
 
@@ -273,8 +269,7 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeRestGlyph : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class RestEngraver;
+public:
     GmoShapeRestGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
@@ -282,6 +277,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 
