@@ -374,8 +374,7 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeTechnical : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class TechnicalEngraver;
+public:
     GmoShapeTechnical(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_technical, idx, nGlyph, pos, color,
@@ -383,6 +382,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------

@@ -753,6 +753,16 @@ void GmoShapePedalGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 
+//=======================================================================================
+// GmoShapeTechnical
+//=======================================================================================
+void GmoShapeTechnical::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_notation_class());
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
 ////---------------------------------------------------------------------------------------
 //// GmoShapeFiguredBass object implementation: a composite shape that can have
 //// attached shapes.

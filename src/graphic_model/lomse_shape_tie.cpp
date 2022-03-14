@@ -200,6 +200,13 @@ GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points,
 {
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->start_simple_notation(get_notation_id(), get_notation_class());
+    GmoShapeSlurTie::on_draw(pDrawer, opt);
+}
+
 
 //=======================================================================================
 // GmoShapeSlur implementation

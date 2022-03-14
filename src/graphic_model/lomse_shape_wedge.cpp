@@ -64,6 +64,7 @@ void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);
 
+    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
     pDrawer->begin_path();
     pDrawer->fill_none();
     pDrawer->stroke(color);
@@ -85,6 +86,7 @@ void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+    pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------
