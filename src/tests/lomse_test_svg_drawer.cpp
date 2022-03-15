@@ -1986,13 +1986,11 @@ SUITE(SvgDrawerTest)
 //    k_view_half_page,
         Presenter* pPresenter = doorway.open_document(k_view_free_flow,
             //m_scores_path + "unit-tests/svg/01-arpeggios.xml");
-            m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
-            //m_scores_path + "MozartTrio.mxl");
+            //m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
+            //m_scores_path + "50411-standard-key-with-octave-shift-Mikrokosmos-40.mxl");
+            m_scores_path + "MozartTrio.mxl");
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
 
-//        pIntor->set_view_background(Color(100,100,100));
-//        ADocument doc = pPresenter->get_document();
-//        doc.set_page_size(USize(15000,30000));
         double width = 350;
         pIntor->set_svg_canvas_width(width);        //in CSS pixels
         pIntor->svg_indent(4);

@@ -797,6 +797,9 @@ public:
     //@{
     /** Returns @TRUE if the %Drawer is initialized and can be used. */
     virtual bool is_ready() const = 0;
+
+    /** Returns @TRUE if the %Drawer accepts 'id' and 'class' information */
+    virtual bool accepts_id_class() const { return false; }
     //@}    //Other methods
 
 };

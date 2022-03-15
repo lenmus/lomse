@@ -77,7 +77,9 @@ void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //       will use the font selected in the drawer
     TextMeter meter(m_libraryScope);
 
-    pDrawer->start_simple_notation(get_id(), get_class());
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation(get_id(), get_class());
+
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_origin.x;
     LUnits y = m_origin.y + meter.get_ascender() - m_space;     //reference is at text baseline
@@ -496,10 +498,14 @@ void GmoShapeTextBox::select_font()
 //---------------------------------------------------------------------------------------
 void GmoShapeTextBox::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     GmoShapeRectangle::on_draw(pDrawer, opt);
     draw_text(pDrawer, opt);
-    pDrawer->end_composite_notation();
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------

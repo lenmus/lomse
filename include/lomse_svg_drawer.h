@@ -203,6 +203,7 @@ public:
     //info
     //---------------------------------------
     bool is_ready() const override;
+    bool accepts_id_class() const override { return true; }
 
 
     //shapes info

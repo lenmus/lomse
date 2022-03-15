@@ -72,7 +72,9 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     UPoint start = m_uPoint[k_start] + m_origin;
     UPoint end = m_uPoint[k_end] + m_origin;
 
-    pDrawer->start_simple_notation("", get_name());
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->stroke(color);
@@ -89,7 +91,9 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //=======================================================================================
 void GmoShapeGraceStroke::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    pDrawer->start_simple_notation("", get_name());
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
     GmoShapeLine::on_draw(pDrawer, opt);
 }
 
