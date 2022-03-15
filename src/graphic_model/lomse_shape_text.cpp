@@ -13,6 +13,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_calligrapher.h"
+#include "lomse_text_engraver.h"
 
 
 namespace lomse
@@ -22,8 +23,8 @@ namespace lomse
 // GmoShapeText implementation
 //=======================================================================================
 GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
-                           ImoStyle* pStyle, const string& language, LUnits xLeft,
-                           LUnits yBaseline, LibraryScope& libraryScope)
+                           ImoStyle* pStyle, const string& language, int classid,
+                           LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
     , m_language(language)
@@ -31,6 +32,7 @@ GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& 
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
     , m_space(0.0f)
+    , m_classid(classid)
 {
     //bounds
     select_font();
@@ -60,7 +62,7 @@ Color GmoShapeText::get_normal_color()
 //---------------------------------------------------------------------------------------
 void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    //select_font();
+    //AWARE: select_font() cannot be used here as it must be selected by the Drawer
     if (!m_pStyle)
         pDrawer->select_font(m_language, "", "Liberation serif", 12.0);
     else
@@ -75,6 +77,7 @@ void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //       will use the font selected in the drawer
     TextMeter meter(m_libraryScope);
 
+    pDrawer->start_simple_notation(get_id(), get_class());
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_origin.x;
     LUnits y = m_origin.y + meter.get_ascender() - m_space;     //reference is at text baseline
@@ -109,6 +112,46 @@ void GmoShapeText::set_text(const std::string& text)
     TextMeter meter(m_libraryScope);
     m_size.width = meter.measure_width(text);
     set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
+string GmoShapeText::get_id()
+{
+    if (m_classid > TextEngraver::k_classes_with_id)
+        return get_notation_id();
+    else
+        return string();
+}
+
+//---------------------------------------------------------------------------------------
+string GmoShapeText::get_class()
+{
+    switch(m_classid)
+    {
+        case TextEngraver::k_class_group_name:          return string("group-name");
+        case TextEngraver::k_class_group_abbrev:        return string("group-abbrev");
+        case TextEngraver::k_class_instr_name:          return string("instr-name");
+        case TextEngraver::k_class_instr_abbrev:        return string("instr-abbrev");
+        case TextEngraver::k_class_lyric_elision:       return string("elision");
+        case TextEngraver::k_class_lyric_hyphenation:   return string("hyphenation");
+        case TextEngraver::k_class_lyric_syllable:      return string("syllable");
+        case TextEngraver::k_class_measure_number:      return string("measure-number");
+        case TextEngraver::k_class_metronome_text:      return string("metronome-text");
+        case TextEngraver::k_class_pedal_text:          return string("pedal-text");
+        case TextEngraver::k_class_score_text:          return string("score-text");
+        case TextEngraver::k_class_tuplet_text:         return string();
+        case TextEngraver::k_class_volta_text:          return string();
+        case TextEngraver::k_classes_with_id:           return string();
+        case TextEngraver::k_class_score_title:         return string("score-title");
+        case TextEngraver::k_class_repetition_mark:     return string("repetition-mark");
+        default:
+        {
+            stringstream ss;
+            ss << "Lomse error. Missing value " << m_classid;
+            LOMSE_LOG_ERROR(ss.str());
+            return string();
+        }
+    }
 }
 
 

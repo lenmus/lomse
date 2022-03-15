@@ -583,7 +583,8 @@ void ScoreLayouter::add_score_titles()
     {
         ImoScoreTitle* pImo = *it;
         TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                           pImo->get_language(), pImo->get_style());
+                           pImo->get_language(), pImo->get_style(),
+                           TextEngraver::k_class_score_title);
         GmoShape* pShape = engrv.create_shape(pImo, m_cursor.x, m_cursor.y);
         m_pCurBoxPage->add_shape(pShape, GmoShape::k_layer_aux_objs);
         m_cursor.y += pShape->get_height();
@@ -892,7 +893,8 @@ bool ScoreLayouter::column_has_system_break(int iCol)
 void ScoreLayouter::add_error_message(const string& msg)
 {
     ImoStyle* pStyle = m_pScore->get_default_style();
-    TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle);
+    TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle,
+                       TextEngraver::k_class_score_text);
     LUnits x = m_pageCursor.x + 400.0f;
     LUnits y = m_pageCursor.y + 800.0f;
     GmoShape* pText = engrv.create_shape(nullptr, x, y);
@@ -1311,7 +1313,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                               pImo->get_language(), pImo->get_style());
+                               pImo->get_language(), pImo->get_style(),
+                               TextEngraver::k_class_repetition_mark);
             return engrv.create_shape(pImo, pos.x, pos.y);
         }
         case k_imo_text_box:

@@ -24,13 +24,15 @@ namespace lomse
 // TextEngraver implementation
 //=======================================================================================
 TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           const string& text, const string& language, ImoStyle* pStyle)
+                           const string& text, const string& language, ImoStyle* pStyle,
+                           int classid)
     : Engraver(libraryScope, pScoreMeter)
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_language(language)
     , m_idxStaff(-1)
+    , m_classid(classid)
     , m_pVProfile(nullptr)
 {
 }
@@ -85,7 +87,7 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
 
     ShapeId idx = 0;
     GmoShapeText* pShape = LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle,
-                                                  m_language, pos.x, pos.y,
+                                                  m_language, m_classid, pos.x, pos.y,
                                                   m_libraryScope);
 //    stringstream msg;
 //    msg << "idxStaff=" << m_idxStaff;
@@ -218,6 +220,7 @@ GmoShapeText* MeasureNumberEngraver::create_shape(ImoObj* pCreator,
 {
     ShapeId idx = 0;
     return LOMSE_NEW GmoShapeText(pCreator, idx, m_text, m_pStyle, "en",
+                                  TextEngraver::k_class_measure_number,
                                   xLeft, yTop, m_libraryScope);
 }
 

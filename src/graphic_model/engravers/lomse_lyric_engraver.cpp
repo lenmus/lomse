@@ -21,6 +21,7 @@
 #include "lomse_shape_text.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_vertical_profile.h"
+#include "lomse_text_engraver.h"
 
 #include <cmath>        // fabs
 
@@ -203,8 +204,9 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         color = pStyle->color();
 
         //create shape for this syllable
-        pSyllableShape = LOMSE_NEW GmoShapeText(pLyric, idx++, text, pStyle,
-                                                language, xCur, yPos, m_libraryScope);
+        pSyllableShape = LOMSE_NEW GmoShapeText(pLyric, idx++, text, pStyle, language,
+                                                TextEngraver::k_class_lyric_syllable,
+                                                xCur, yPos, m_libraryScope);
         m_pLyricsShape->add(pSyllableShape);
         xCur = pSyllableShape->get_right();
 
@@ -215,8 +217,9 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         if (pText->has_elision())
         {
             const string& elision = pText->get_elision_text();
-            GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx++, elision, pStyle,
-                                                      "en", xCur, yPos, m_libraryScope);
+            GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx++, elision, pStyle, "en",
+                                                      TextEngraver::k_class_lyric_elision,
+                                                      xCur, yPos, m_libraryScope);
             m_pLyricsShape->add(pShape);
             xCur = pShape->get_right() + tenths_to_logical(2.0);
             syllablesWidth += pShape->get_width() + tenths_to_logical(2.0);
@@ -234,8 +237,9 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
     //add shape for hyphenation, if needed
     if (pLyric->has_hyphenation() && !pLyric->has_melisma())
     {
-        GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx++, "-", pStyle,
-                                                  "en", xCur, yPos, m_libraryScope);
+        GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx++, "-", pStyle, "en",
+                                                  TextEngraver::k_class_lyric_hyphenation,
+                                                  xCur, yPos, m_libraryScope);
         m_pLyricsShape->add(pShape);
 
         //shift shape to center between this and next syllable

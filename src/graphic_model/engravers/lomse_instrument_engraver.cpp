@@ -428,7 +428,7 @@ void GroupEngraver::measure_name_abbrev()
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                          text.language, pStyle);
+                          text.language, pStyle, TextEngraver::k_class_group_name);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -442,7 +442,7 @@ void GroupEngraver::measure_name_abbrev()
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                          text.language, pStyle);
+                          text.language, pStyle, TextEngraver::k_class_group_abbrev);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -506,7 +506,7 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                              text.language, pStyle);
+                              text.language, pStyle, TextEngraver::k_class_group_name);
             GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -522,7 +522,7 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                              text.language, pStyle);
+                              text.language, pStyle, TextEngraver::k_class_group_abbrev);
             GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -630,7 +630,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = m_pInstr->get_name_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                          TextEngraver::k_class_instr_name);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -643,7 +644,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = m_pInstr->get_abbrev_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                          TextEngraver::k_class_instr_abbrev);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -702,7 +704,8 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = m_pInstr->get_name_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                              TextEngraver::k_class_instr_name);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -719,7 +722,8 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = m_pInstr->get_abbrev_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                              TextEngraver::k_class_instr_abbrev);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }

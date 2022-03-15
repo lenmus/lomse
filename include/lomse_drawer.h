@@ -621,6 +621,14 @@ public:
         @param ch  The character to render.
     */
     virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
+
+    /** Render a character rotated. This method is equivalent to providing the x,y
+        attributes for the "<text>" SVG element, the string content for that element
+        and the rotation parameters for the affine transform.
+        @param x,y  Destination point, in model coordinates (LUnits).
+        @param ch  The character to render.
+        @param rotation  The rotation to apply, in radians.
+    */
     virtual void draw_glyph_rotated(double x, double y, unsigned int ch, double rotation) = 0;
     //@}    //Text redering methods
 
@@ -794,6 +802,7 @@ public:
 };
 
 
+///@cond INTERNALS
 //=======================================================================================
 // Helper class LineVertexSource: a vertex source for a line
 //=======================================================================================
@@ -1045,6 +1054,7 @@ public:
     void rewind(unsigned path_id) override { c.rewind(path_id); }
     unsigned vertex(double* x, double* y) override { return c.vertex(x, y); }
 };
+///@endcond
 
 
 }   //namespace lomse

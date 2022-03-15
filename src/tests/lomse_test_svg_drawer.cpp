@@ -26,6 +26,7 @@
 #include <lomse_glyphs.h>
 #include <private/lomse_internal_model_p.h>     //enums
 #include <lomse_im_factory.h>
+#include <lomse_text_engraver.h>
 #include <lomse_shape_barline.h>
 #include <lomse_shape_beam.h>
 #include <lomse_shape_brace_bracket.h>
@@ -1131,8 +1132,9 @@ SUITE(SvgDrawerTest)
         GmoShapeLyrics shape(pImo, idx++, Color(0,0,0), m_libraryScope);
 
         GmoShapeText* shape2 =
-            LOMSE_NEW GmoShapeText(pImo, idx++, "Ram", nullptr,
-                                   "en", 200.0f, 500.0f, m_libraryScope);
+            LOMSE_NEW GmoShapeText(pImo, idx++, "Ram", nullptr, "en",
+                                   TextEngraver::k_class_lyric_syllable,
+                                   200.0f, 500.0f, m_libraryScope);
         shape.add(shape2);
         GmoShapeLine* shape3 =
             LOMSE_NEW GmoShapeLine(pImo, idx++, GmoObj::k_shape_line,
@@ -1144,7 +1146,7 @@ SUITE(SvgDrawerTest)
         stringstream expected;
         expected
             << "<g id='m83' class='lyric'>" << endl
-            << "   <text x='200' y='500' fill='#000' font-family='Liberation serif' "
+            << "   <text class='syllable' x='200' y='500' fill='#000' font-family='Liberation serif' "
             <<         "font-size='423.334'>Ram</text>" << endl
             << "   <path class='line' d=' M 300 555 L 300 545 L 400 545 L 400 555 Z' fill='#000' "
             <<          "stroke='#000' stroke-width='10'/>" << endl
@@ -1533,33 +1535,195 @@ SUITE(SvgDrawerTest)
         delete pImo;
     }
 
-//TODO
-//    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4200)
-//    {
-//        //@4200 shape GmoShapeText. ImoInstrGroup. name, abbrev
-//        Document doc(m_libraryScope);
-//        ImoObj* pImo = ImFactory::inject(k_imo_instr_group, &doc, 83);
-//        GmoShapeText shape(pImo, 0, "Flutes", nullptr,
-//                           "en", 200.0f, 500.0f, m_libraryScope);
-//
-//        stringstream expected;
-//        expected
-//            << "<text x='200' y='500' fill='#000' font-family='Liberation serif' "
-//            <<       "font-size='423.334'>Flutes</text>" << endl;
-//
-//        run_test_for(shape, expected);
-//
-//        delete pImo;
-//    }
-//TODO        //@4201 shape GmoShapeText. ImoInstrument. name, abbrev
-//TODO        //@4202 shape GmoShapeText. ImoMetronomeMark
-//TODO        //@4203 shape GmoShapeText. ImoPedalLine. Continuation text
-//TODO        //@4204 shape GmoShapeText. ImoTuplet
-//TODO        //@4205 shape GmoShapeText. ImoVoltaBracket
-//TODO        //@4206 shape GmoShapeText. ImoScoreTitle
-//TODO        //@4207 shape GmoShapeText. ImoTextRepetitionMark
-//TODO        //@4208 shape GmoShapeText. ImoScoreText
-//TODO        //@4209 shape GmoShapeText. MeasureNumberEngraver::create_shape - ImoInstrument
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4200)
+    {
+        //@4200 shape GmoShapeText. ImoInstrGroup. name, abbrev
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instr_group, &doc, 83);
+        GmoShapeText shape(pImo, 0, "Flutes", nullptr, "en",
+                           TextEngraver::k_class_group_name,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='group-name' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>Flutes</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4201)
+    {
+        //@4201 shape GmoShapeText. ImoInstrument. name, abbrev
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
+        GmoShapeText shape(pImo, 0, "Fl.", nullptr, "en",
+                           TextEngraver::k_class_instr_abbrev,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='instr-abbrev' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>Fl.</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4202)
+    {
+        //@4202 shape GmoShapeText. ImoMetronomeMark
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_metronome_mark, &doc, 83);
+        GmoShapeText shape(pImo, 0, "120", nullptr, "en",
+                           TextEngraver::k_class_metronome_text,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='metronome-text' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>120</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4203)
+    {
+        //@4203 shape GmoShapeText. ImoPedalLine. Continuation text
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_pedal_line, &doc, 83);
+        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+                           TextEngraver::k_class_pedal_text,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='pedal-text' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4204)
+    {
+        //@4204 shape GmoShapeText. ImoTuplet
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_tuplet, &doc, 83);
+        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+                           TextEngraver::k_class_tuplet_text,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4205)
+    {
+        //@4205 shape GmoShapeText. ImoVoltaBracket
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_volta_bracket, &doc, 83);
+        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+                           TextEngraver::k_class_volta_text,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4206)
+    {
+        //@4206 shape GmoShapeText. ImoScoreTitle
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_score_title, &doc, 83);
+        GmoShapeText shape(pImo, 0, "Minuet", nullptr, "en",
+                           TextEngraver::k_class_score_title,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text id='m83' class='score-title' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>Minuet</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4207)
+    {
+        //@4207 shape GmoShapeText. ImoTextRepetitionMark
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_symbol_repetition_mark, &doc, 83);
+        GmoShapeText shape(pImo, 0, "Fine", nullptr, "en",
+                           TextEngraver::k_class_repetition_mark,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text id='m83' class='repetition-mark' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>Fine</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4208)
+    {
+        //@4208 shape GmoShapeText. ImoScoreText
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_text_item, &doc, 83);
+        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+                           TextEngraver::k_class_score_text,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='score-text' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_4209)
+    {
+        //@4209 shape GmoShapeText. MeasureNumberEngraver::create_shape - ImoInstrument
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
+        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+                           TextEngraver::k_class_measure_number,
+                           200.0f, 500.0f, m_libraryScope);
+
+        stringstream expected;
+        expected
+            << "<text class='measure-number' x='200' y='500' fill='#000' "
+            <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
+
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
 
     TEST_FIXTURE(SvgDrawerTestFixture, shapes_4300)
     {
@@ -1710,8 +1874,9 @@ SUITE(SvgDrawerTest)
                               &note1, &note2);
 
         GmoShapeText* shape2 =
-            LOMSE_NEW GmoShapeText(pImo, 0, "3:2", nullptr,
-                                  "en", 400.0f, 350.0f, m_libraryScope);
+            LOMSE_NEW GmoShapeText(pImo, 0, "3:2", nullptr, "en",
+                                   TextEngraver::k_class_tuplet_text,
+                                   400.0f, 350.0f, m_libraryScope);
         shape.add_label(shape2);
 
         stringstream expected;
@@ -1737,8 +1902,9 @@ SUITE(SvgDrawerTest)
         shape.enable_final_jog(true);
 
         GmoShapeText* shape2 =
-            LOMSE_NEW GmoShapeText(pImo, 0, "2", nullptr,
-                                  "en", 400.0f, 350.0f, m_libraryScope);
+            LOMSE_NEW GmoShapeText(pImo, 0, "2", nullptr, "en",
+                                   TextEngraver::k_class_volta_text,
+                                   400.0f, 350.0f, m_libraryScope);
         shape.add_label(shape2);
 
         shape.set_layout_data(300.0, 600.0, 500.0, 20.0, 10.0, 5.0, 20.0, 40.0, 60.0,

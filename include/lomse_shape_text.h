@@ -35,10 +35,11 @@ protected:
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
     LUnits m_space;
+    int m_classid;
 
 public:
     GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
-                 ImoStyle* pStyle, const string& language,
+                 ImoStyle* pStyle, const string& language, int classid,
                  LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope);
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
@@ -49,6 +50,8 @@ public:
 protected:
     void select_font();
     Color get_normal_color() override;
+    std::string get_id();
+    std::string get_class();
 
 };
 

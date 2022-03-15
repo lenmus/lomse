@@ -378,7 +378,8 @@ void PedalLineEngraver::add_pedal_changes(GmoShapePedalLine* pMainShape)
 void PedalLineEngraver::add_pedal_continuation_text(GmoShapePedalLine* pMainShape) {
     ImoStyle* pTextStyle = m_pMeter->get_style_info("Default style");
 
-    TextEngraver engrLeft(m_libraryScope, m_pMeter, "(", "it", pTextStyle);
+    TextEngraver engrLeft(m_libraryScope, m_pMeter, "(", "it", pTextStyle,
+                          TextEngraver::k_class_pedal_text);
     GmoShapeText* pLeftBracketShape = engrLeft.create_shape(m_pPedal, m_xStart, m_lineY);
     add_pedal_continuation_part_shape(pMainShape, pLeftBracketShape);
 
@@ -389,7 +390,8 @@ void PedalLineEngraver::add_pedal_continuation_text(GmoShapePedalLine* pMainShap
                                                          m_color, m_libraryScope, fontSize);
     add_pedal_continuation_part_shape(pMainShape, pGlyphShape);
 
-    TextEngraver engrRight(m_libraryScope, m_pMeter, ")", "it", pTextStyle);
+    TextEngraver engrRight(m_libraryScope, m_pMeter, ")", "it", pTextStyle,
+                           TextEngraver::k_class_pedal_text);
     GmoShapeText* pRightBracketShape = engrRight.create_shape(m_pPedal, m_xStart, m_lineY);
     add_pedal_continuation_part_shape(pMainShape, pRightBracketShape);
 

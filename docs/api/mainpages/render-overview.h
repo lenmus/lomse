@@ -112,7 +112,7 @@ Lomse behaviour for generating SVG is as follows:
 
 - The lomse infinite logical space is also the infinite SVG document canvas.
 
-- Lomse generates SVG code to render the View type specified when opening/creating de document. The generated SVG code is only the <svg> element and all its content but it does not contain “width” and “height” attributes. Therefore, the behaviour will depend on how your application uses the generated SVG code. For instance, if the SVG code is inserted in an HTML page, the <svg> element will inherit the “width” and “height” attributes from the context. 
+- Lomse generates SVG code to render the View type specified when opening/creating de document. The generated SVG code is only the @a \<svg\> element and all its content but it does not contain “width” and “height” attributes. Therefore, the behaviour will depend on how your application uses the generated SVG code. For instance, if the SVG code is inserted in an HTML page, the @a \<svg\> element will inherit the “width” and “height” attributes from the context. 
 
 - For View types oriented to generate pages (<i>k_view_vertical_book</i> and <i>k_view_horizontal_book</i>) the SVG viewBox is adjusted to include only a whole page and the page to generate is selected when invoking the render_as_svg() method.
 
