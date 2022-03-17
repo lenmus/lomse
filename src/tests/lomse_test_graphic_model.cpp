@@ -72,7 +72,7 @@ public:
 class MyGraphicModel : public GraphicModel
 {
 public:
-    MyGraphicModel() : GraphicModel() {}
+    MyGraphicModel(ImoDocument* pCreator) : GraphicModel(pCreator) {}
     ~MyGraphicModel() {}
 
 //    std::map<ImoObj*, RefToGmo*>& my_get_map() { return m_imoToGmo; }
@@ -108,7 +108,7 @@ SUITE(GraphicModelTest)
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_RootIsDocBox)
     {
-        GraphicModel* pGModel = LOMSE_NEW GraphicModel();
+        GraphicModel* pGModel = LOMSE_NEW GraphicModel(nullptr);
         GmoObj* pRoot = pGModel->get_root();
         CHECK( pRoot != nullptr );
         delete pGModel;

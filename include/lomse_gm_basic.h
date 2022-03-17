@@ -294,7 +294,7 @@ public:
     virtual void on_end_of_handler_drag(int UNUSED(iHandler), UPoint UNUSED(newPos)) {}
 
     //info
-    const std::string get_notation_id();
+    const std::string get_notation_id(const std::string& prefix="");
     const std::string get_notation_class();
 
     //tests & debug

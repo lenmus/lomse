@@ -120,7 +120,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -150,7 +150,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -188,7 +188,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -235,7 +235,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -281,7 +281,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -328,7 +328,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -374,7 +374,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -421,7 +421,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -450,7 +450,7 @@ SUITE(InlinesContainerLayouterTest)
         pParaStyle->margin_top(1000.0f);
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -590,7 +590,7 @@ SUITE(InlinesContainerLayouterTest)
         pTextStyle2->margin(0.0f)->vertical_align(ImoStyle::k_valign_baseline)->font_size(14.0f);
         pPara->add_text_item("Options ", pTextStyle2);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);
@@ -653,7 +653,7 @@ SUITE(InlinesContainerLayouterTest)
         ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         pPara->add_text_item("Exercise options", pDefStyle);
 
-        GraphicModel model;
+        GraphicModel model(nullptr);
         ImoDocument* pDoc = doc.get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         GmoBoxDocPage page(nullptr);

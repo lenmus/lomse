@@ -1577,6 +1577,8 @@ void Interactor::render_as_svg(std::ostream& svg, int page)
         //add <svg> element with the viewport
         svg << "<svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 "
                 << size.width << " " << size.height << "'>";
+        if (m_svgOptions.add_newlines)
+            svg << endl;
 
         //render the page
         SvgDrawer drawer(m_libScope, svg, m_svgOptions);

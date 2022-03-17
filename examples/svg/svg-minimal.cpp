@@ -24,11 +24,8 @@ using namespace lomse;
 
 int main()
 {
-    //initialize lomse library. As we are only going to generate SVG, any 
-    //values for the pixel format and resolution parameters will be acceptable
-    //as they are not going to be used
+    //create the instance of the library doorway
     lomse::LomseDoorway lomse;
-    lomse.init_library(k_pix_format_rgba32, 96);
 
     //open a score
     lomse::Presenter* pPresenter = 

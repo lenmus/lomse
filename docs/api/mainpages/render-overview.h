@@ -8,7 +8,7 @@
 
 The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about things such as how to display a document on a window on the screen or how to handle mouse events. Lomse provides the necessary services and interfaces for displaying documents and interacting with them but it is your application responsibility to code the presentation layer, that is the methods and functions for creating windows, handling mouse events, etc., and for requesting Lomse the appropriate services, such as rendering the document in the windows buffer or handling the passed events.
 
-As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, Drawer, and implements two specific derived classes, BitmapDrawer and SvgDrawer. But any user application can implement its own drawer classes and do all drawing natively without having to use the drawer classes implemented by Lomse. See @subpage page-user-drawers.
+As Lomse aims to be platform independent, it does not use any platform specific graphics interface. Instead it uses an abstract interface class, Drawer, and implements two specific derived classes, BitmapDrawer and SvgDrawer. But any user application can implement its own drawer classes and do all drawing natively without having to use the drawer classes implemented by Lomse.
 
 - SvgDrawer is oriented to web and modern UI applications. It renders the document as a stream of SVG commands (as text, in HTML format). And your application should manage this stream as convenient (e.g. inserting it in an HTML page).
 
@@ -76,11 +76,8 @@ using namespace lomse;
 
 int main()
 {
-    //initialize lomse library. As we are only going to generate SVG, any 
-    //values for the pixel format and resolution parameters will be acceptable
-    //as they are not going to be used
+    //create the instance of the library doorway
     lomse::LomseDoorway lomse;
-    lomse.init_library(k_pix_format_rgba32, 96);
 
     //open an score
     lomse::Presenter* pPresenter = 
@@ -108,23 +105,7 @@ int main()
 @endcode
 
 
-Lomse behaviour for generating SVG is as follows:
-
-- The lomse infinite logical space is also the infinite SVG document canvas.
-
-- Lomse generates SVG code to render the View type specified when opening/creating de document. The generated SVG code is only the @a \<svg\> element and all its content but it does not contain “width” and “height” attributes. Therefore, the behaviour will depend on how your application uses the generated SVG code. For instance, if the SVG code is inserted in an HTML page, the @a \<svg\> element will inherit the “width” and “height” attributes from the context. 
-
-- For View types oriented to generate pages (<i>k_view_vertical_book</i> and <i>k_view_horizontal_book</i>) the SVG viewBox is adjusted to include only a whole page and the page to generate is selected when invoking the render_as_svg() method.
-
-- For the other View types the SVG viewBox is adjusted to cover the full document.
-
-- For View types oriented to pages, the width of the document determines the width of the viewBox. But for the <i>k_view_free_flow</i> View type, there is no reference for Lomse about the target width and thus, your application must first inform Lomse of the desired width before invoking the SVG rendering method:
-
-@code
-interactor->set_svg_canvas_width(Pixels x);
-@endcode
-
-  This method only works for <i>k_view_free_flow</i>. For all other view types any value set using this method will be overriden by the document page width.
+See @ref page-render-svg for details
 
 
 
@@ -221,7 +202,7 @@ For rendering on bitmaps, the most important aspect to consider to initialize Lo
 -# the bitmap format to use, and
 -# the resolution to use (pixels per inch)
 
-But if your application will render only SVG code, these values are irrelevant and you can use any valid values.
+But if your application will render only SVG code, these values are irrelevant and initialization is not necessary.
 
 For rendering on bitmaps, the <b>most important</b> decision is how your application will allocate memory for the rendering buffer and the bitmap format to use, and how this bitmap will be rendered (or converted to a image format to be exported to a file or embedded in a document). Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decisions by analyzing the most convenient and fast method for rendering the bitmaps and to avoid format conversions. Sometimes the options are very limited.
 
@@ -243,7 +224,7 @@ void MyApp::initialize_lomse()
 }
 @endcode
 
-@attention The library must be always initialized, even if your application will not use Lomse to render scores (e.g.: uses it only for playback or other), or only renders SVG code. In these cases any values for pixel format and resolution will be valid. But your application will have to invoke the init_library() method. 
+@attention Library initialization is not necessary if your application will not use Lomse to render scores in bitmaps, e.g.: uses it only for playback or only renders SVG code. In these cases any values for pixel format and resolution will be valid and so, default values are enough and you will not have to invoke the init_library() method. 
 
 At end of this chapter there are summary cards with information about using Lomse in different frameworks and operating systems. See page @ref page-examples for full application code samples.
 

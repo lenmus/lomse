@@ -717,7 +717,7 @@ void SvgDrawer::start_element(string name)
 //---------------------------------------------------------------------------------------
 void SvgDrawer::start_simple_notation(string id, string classname)
 {
-    m_id = id;
+    m_id = validate_id(id);
     m_class = classname;
     m_fIsSimple = true;
 }
@@ -728,7 +728,7 @@ void SvgDrawer::start_composite_notation(string id, string classname)
     m_fIsSimple = false;
     indent_spaces();
     m_svg << "<g";
-    add_id_and_class(id, classname);
+    add_id_and_class(validate_id(id), classname);
     m_svg << ">";
     new_line();
     increment_indent_level();
@@ -741,6 +741,34 @@ void SvgDrawer::end_composite_notation()
     indent_spaces();
     m_svg << "</g>";
     new_line();
+}
+
+//---------------------------------------------------------------------------------------
+string SvgDrawer::validate_id(const string& id)
+{
+    static int counter = 0;
+
+    if (id.empty())
+        return id;
+
+    auto search = m_ids.find(id);
+    if (search != m_ids.end())
+    {
+        stringstream newid;
+        newid << id << "-" << counter++;
+
+        stringstream ss;
+        ss << "Duplicated id found '" << search->first << "'. Replaced by '"
+           << newid.str() << "'";
+        LOMSE_LOG_ERROR(ss.str());
+
+        return newid.str();
+    }
+    else
+    {
+        m_ids.emplace(id, 0);
+        return id;
+    }
 }
 
 

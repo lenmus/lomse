@@ -120,7 +120,9 @@ void GmoShapeText::set_text(const std::string& text)
 string GmoShapeText::get_id()
 {
     if (m_classid > TextEngraver::k_classes_with_id)
-        return get_notation_id();
+    {
+        return get_notation_id(get_id_prefix());
+    }
     else
         return string();
 }
@@ -153,6 +155,22 @@ string GmoShapeText::get_class()
             LOMSE_LOG_ERROR(ss.str());
             return string();
         }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+string GmoShapeText::get_id_prefix()
+{
+    switch(m_classid)
+    {
+        case TextEngraver::k_class_group_name:          return string("name");
+        case TextEngraver::k_class_group_abbrev:        return string("abbrev");
+        case TextEngraver::k_class_instr_name:          return string("name");
+        case TextEngraver::k_class_instr_abbrev:        return string("abbrev");
+        case TextEngraver::k_class_measure_number:      return string("measure-number");
+        case TextEngraver::k_class_score_title:         return string("title");
+        default:
+            return string();
     }
 }
 

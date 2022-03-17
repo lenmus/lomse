@@ -316,7 +316,7 @@ SUITE(TableLayouterTest)
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
-        GraphicModel model;
+        GraphicModel model(pDoc);
         GmoBoxDocPage page(nullptr);
         GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
@@ -347,7 +347,7 @@ SUITE(TableLayouterTest)
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
-        GraphicModel model;
+        GraphicModel model(pDoc);
 
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
@@ -382,7 +382,7 @@ SUITE(TableLayouterTest)
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
-        GraphicModel model;
+        GraphicModel model(pDoc);
 
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
@@ -416,7 +416,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -455,7 +455,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -478,7 +478,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -520,7 +520,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -542,7 +542,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -563,7 +563,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -596,7 +596,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -636,7 +636,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -722,7 +722,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -790,7 +790,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -856,7 +856,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
@@ -920,7 +920,7 @@ SUITE(TableLayouterTest)
         ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-        GraphicModel model;
+        GraphicModel model(pDoc);
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 

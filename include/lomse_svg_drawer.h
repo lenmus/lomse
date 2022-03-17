@@ -14,6 +14,7 @@
 
 //std
 #include <sstream>
+#include <unordered_map>
 
 namespace lomse
 {
@@ -40,6 +41,7 @@ private:
     int                 m_indentLevel = 0;
     bool                m_fIsSimple = true;     //it is a simple notation
     bool                m_fPathOpen = false;    //open path pending to be closed
+    std::unordered_map<std::string, int> m_ids;     //for detecting duplicated id
 
 public:
     SvgDrawer(LibraryScope& libraryScope, std::ostream& svgstream, const SvgOptions& opt);
@@ -232,6 +234,7 @@ protected:
     void add_id_and_class(std::string id, std::string classname);
     void add_id_and_class();
     void start_element(std::string name);
+    std::string validate_id(const string& id);
 
     //helper
     inline void set_indent_level(int value) { m_indentLevel = value; }

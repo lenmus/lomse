@@ -6,8 +6,7 @@
 
 @section page-printing-overview The print API
 
-Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. The default solution offered by Lomse for implementing printing in your application is based on printing bitmaps. Nevertheless, any user application can implement its own drawer classes and do all drawing natively without having to use bitmaps and the BitmapDrawer class implemented by Lomse. See @subpage page-user-drawers.
-
+Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. The default solution offered by Lomse for implementing printing in your application is based on printing bitmaps. Nevertheless, any user application can implement its own drawer classes and do all drawing natively without having to use bitmaps and the BitmapDrawer class implemented by Lomse.
 
 The Lomse print API is four methods, invoked in sequence:
 
@@ -164,7 +163,7 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
 
 @section page-printing-other Other ways of printing
 
-If you do not like the idea of using bitmaps for printing it is feasible to write a Driver class to perform printing using methods specific to your application and operating system. See @ref page-user-drawers
+If you do not like the idea of using bitmaps for printing it is feasible to write a Driver class to perform printing using methods specific to your application and operating system.
 
 
 */

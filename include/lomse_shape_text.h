@@ -52,6 +52,7 @@ protected:
     Color get_normal_color() override;
     std::string get_id();
     std::string get_class();
+    std::string get_id_prefix();
 
 };
 

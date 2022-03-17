@@ -104,7 +104,7 @@ GmoShape* VoltaBracketEngraver::create_single_shape()
         text = m_pVolta->get_volta_number();
     TextEngraver engr(m_libraryScope, m_pMeter, text, "", m_pStyle,
                       TextEngraver::k_class_volta_text);
-    GmoShapeText* pTextShape = engr.create_shape(m_pVolta, 0.0f, 0.0f);
+    GmoShapeText* pTextShape = engr.create_shape(m_pVolta, 0, 0.0f, 0.0f);
     pShape->add_label(pTextShape);
 
     set_shape_details(pShape, k_single_shape);
@@ -137,7 +137,8 @@ GmoShape* VoltaBracketEngraver::create_first_shape()
         text = m_pVolta->get_volta_number();
     TextEngraver engr(m_libraryScope, m_pMeter, text, "", m_pStyle,
                       TextEngraver::k_class_volta_text);
-    GmoShapeText* pTextShape = engr.create_shape(m_pVolta, 0.0f, 0.0f);
+    ShapeId idx = ShapeId(m_numShapes);
+    GmoShapeText* pTextShape = engr.create_shape(m_pVolta, idx, 0.0f, 0.0f);
     pShape->add_label(pTextShape);
 
     //terminate first shape

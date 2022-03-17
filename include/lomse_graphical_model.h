@@ -118,7 +118,7 @@ protected:
     AreaInfo m_areaInfo;
 
 public:
-    GraphicModel();
+    GraphicModel(ImoDocument* pCreator);
     virtual ~GraphicModel();
 
     //accessors

@@ -65,7 +65,8 @@ LUnits TextEngraver::measure_height()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop)
+GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, ShapeId idx,
+                                         LUnits xLeft, LUnits yTop)
 {
     UPoint pos(xLeft, yTop);
     if (pCreatorImo && pCreatorImo->is_contentobj())
@@ -85,7 +86,6 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
         yTop -= meter.get_descender();
     }
 
-    ShapeId idx = 0;
     GmoShapeText* pShape = LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle,
                                                   m_language, m_classid, pos.x, pos.y,
                                                   m_libraryScope);
@@ -215,10 +215,9 @@ LUnits MeasureNumberEngraver::measure_height()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeText* MeasureNumberEngraver::create_shape(ImoObj* pCreator,
+GmoShapeText* MeasureNumberEngraver::create_shape(ImoObj* pCreator, ShapeId idx,
                                                   LUnits xLeft, LUnits yTop)
 {
-    ShapeId idx = 0;
     return LOMSE_NEW GmoShapeText(pCreator, idx, m_text, m_pStyle, "en",
                                   TextEngraver::k_class_measure_number,
                                   xLeft, yTop, m_libraryScope);

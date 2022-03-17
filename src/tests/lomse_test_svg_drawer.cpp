@@ -1486,11 +1486,11 @@ SUITE(SvgDrawerTest)
         ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
-        GmoShapeStaff shape(pImo, 0, pInfo, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff shape(pImo, 2, pInfo, 0, 20.0f, Color(0,0,0));
 
         stringstream expected;
         expected
-            << "<path id='m83-staff' class='staff-lines' d=' M 0 0 L 20 0 M 0 180 "
+            << "<path id='m83-staff-1-2' class='staff-lines' d=' M 0 0 L 20 0 M 0 180 "
             << "L 20 180 M 0 360 L 20 360 M 0 540 L 20 540 M 0 720 L 20 720' "
             << "stroke='#000' stroke-width='15'/>" << endl;
         run_test_for(shape, expected);
@@ -1546,7 +1546,7 @@ SUITE(SvgDrawerTest)
 
         stringstream expected;
         expected
-            << "<text class='group-name' x='200' y='500' fill='#000' "
+            << "<text id='m83-name' class='group-name' x='200' y='500' fill='#000' "
             <<       "font-family='Liberation serif' font-size='423.334'>Flutes</text>" << endl;
 
         run_test_for(shape, expected);
@@ -1565,7 +1565,7 @@ SUITE(SvgDrawerTest)
 
         stringstream expected;
         expected
-            << "<text class='instr-abbrev' x='200' y='500' fill='#000' "
+            << "<text id='m83-abbrev' class='instr-abbrev' x='200' y='500' fill='#000' "
             <<       "font-family='Liberation serif' font-size='423.334'>Fl.</text>" << endl;
 
         run_test_for(shape, expected);
@@ -1660,7 +1660,7 @@ SUITE(SvgDrawerTest)
 
         stringstream expected;
         expected
-            << "<text id='m83' class='score-title' x='200' y='500' fill='#000' "
+            << "<text id='m83-title' class='score-title' x='200' y='500' fill='#000' "
             <<       "font-family='Liberation serif' font-size='423.334'>Minuet</text>" << endl;
 
         run_test_for(shape, expected);
@@ -1711,13 +1711,13 @@ SUITE(SvgDrawerTest)
         //@4209 shape GmoShapeText. MeasureNumberEngraver::create_shape - ImoInstrument
         Document doc(m_libraryScope);
         ImoObj* pImo = ImFactory::inject(k_imo_instrument, &doc, 83);
-        GmoShapeText shape(pImo, 0, "(", nullptr, "en",
+        GmoShapeText shape(pImo, 12, "(", nullptr, "en",
                            TextEngraver::k_class_measure_number,
                            200.0f, 500.0f, m_libraryScope);
 
         stringstream expected;
         expected
-            << "<text class='measure-number' x='200' y='500' fill='#000' "
+            << "<text id='m83-measure-number-12' class='measure-number' x='200' y='500' fill='#000' "
             <<       "font-family='Liberation serif' font-size='423.334'>(</text>" << endl;
 
         run_test_for(shape, expected);
@@ -1972,66 +1972,66 @@ SUITE(SvgDrawerTest)
 
     //@ develop -------------------------------------------------------------------------
 
-    TEST_FIXTURE(SvgDrawerTestFixture, develop_01)
-    {
-        LomseDoorway doorway;
-        doorway.init_library(k_pix_format_rgba32, 96);
-        LibraryScope libraryScope(cout, &doorway);
-        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-//    k_view_vertical_book,
-//    k_view_horizontal_book,
-//    k_view_single_system,
-//    k_view_single_page,
-//    k_view_free_flow,
-//    k_view_half_page,
-        Presenter* pPresenter = doorway.open_document(k_view_free_flow,
-            //m_scores_path + "unit-tests/svg/01-arpeggios.xml");
-            //m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
-            //m_scores_path + "50411-standard-key-with-octave-shift-Mikrokosmos-40.mxl");
-            m_scores_path + "MozartTrio.mxl");
-        Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
-
-        double width = 350;
-        pIntor->set_svg_canvas_width(width);        //in CSS pixels
-        pIntor->svg_indent(4);
-        pIntor->svg_add_id(true);
-        pIntor->svg_add_class(true);
-        pIntor->svg_add_newlines(true);
-
-        stringstream svg;
-        int page = 0;
-        pIntor->render_as_svg(svg, page);
-
-//        cout << test_name() << endl;
-//        USize size = pIntor->get_page_size(page);
-//        cout << "width=" << size.width << " LU, height=" << size.height << " LU" << endl;
-//        double width = size.width;
-//        double height = size.height;
-//        pIntor->model_point_to_device(&width, &height, 0);
-//        cout << "width=" << width << "px, height=" << height << "px" << endl;
-
-//        cout << svg.str() << endl;
-
-        ofstream file1(m_scores_path + "../z_test_svg.html", ios::out);
-        if (file1.good())
-        {
-            stringstream out;
-            out << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
-                << "<title>Lomse SVG</title></head><body><h1>Test of Lomse SVG</h1>"
-                << "<div style='margin-left:40px; width:" << width << "px;border: 1px solid #000;'>";
-            out << svg.str();
-            out << "</div></body></html>";
-
-            string str = out.str();
-            file1.write(str.c_str(), str.size());
-
-            file1.close();
-        }
-        else
-        {
-            std::cout << "file error write" << endl;
-        }
-    }
+//    TEST_FIXTURE(SvgDrawerTestFixture, develop_01)
+//    {
+//        LomseDoorway doorway;
+////        doorway.init_library(k_pix_format_rgba32, 96);
+//        LibraryScope libraryScope(cout, &doorway);
+//        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+////    k_view_vertical_book,
+////    k_view_horizontal_book,
+////    k_view_single_system,
+////    k_view_single_page,
+////    k_view_free_flow,
+////    k_view_half_page,
+//        Presenter* pPresenter = doorway.open_document(k_view_free_flow,
+//            //m_scores_path + "unit-tests/svg/01-arpeggios.xml");
+//            //m_scores_path + "00023-spacing-in-prolog-two-instr.lms");
+//            m_scores_path + "50411-standard-key-with-octave-shift-Mikrokosmos-40.xml");
+//            //m_scores_path + "MozartTrio.mxl");
+//        Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
+//
+//        double width = 400;
+//        pIntor->set_svg_canvas_width(width);        //in CSS pixels
+//        pIntor->svg_indent(4);
+//        pIntor->svg_add_id(true);
+//        pIntor->svg_add_class(true);
+//        pIntor->svg_add_newlines(true);
+//
+//        stringstream svg;
+//        int page = 0;
+//        pIntor->render_as_svg(svg, page);
+//
+////        cout << test_name() << endl;
+////        USize size = pIntor->get_page_size(page);
+////        cout << "width=" << size.width << " LU, height=" << size.height << " LU" << endl;
+////        double width = size.width;
+////        double height = size.height;
+////        pIntor->model_point_to_device(&width, &height, 0);
+////        cout << "width=" << width << "px, height=" << height << "px" << endl;
+//
+////        cout << svg.str() << endl;
+//
+//        ofstream file1(m_scores_path + "../z_test_svg.html", ios::out);
+//        if (file1.good())
+//        {
+//            stringstream out;
+//            out << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
+//                << "<title>Lomse SVG</title></head><body><h1>Test of Lomse SVG</h1>"
+//                << "<div style='margin-left:40px; width:" << width << "px;border: 1px solid #000;'>";
+//            out << svg.str();
+//            out << "</div></body></html>";
+//
+//            string str = out.str();
+//            file1.write(str.c_str(), str.size());
+//
+//            file1.close();
+//        }
+//        else
+//        {
+//            std::cout << "file error write" << endl;
+//        }
+//    }
 
 }
 

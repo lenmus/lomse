@@ -278,13 +278,15 @@ GmoBoxDocPage* GmoObj::get_page_box()
 }
 
 //---------------------------------------------------------------------------------------
-const string GmoObj::get_notation_id()
+const string GmoObj::get_notation_id(const string& prefix)
 {
     ImoObj* pImo = get_creator_imo();
     if (pImo)
     {
         stringstream ss;
         ss << "m" << pImo->get_id();
+        if (!prefix.empty())
+            ss << "-" << prefix;
         if (is_shape() && static_cast<GmoShape*>(this)->get_shape_id() != 0)
             ss << "-" << static_cast<GmoShape*>(this)->get_shape_id();
         return ss.str();
@@ -917,6 +919,13 @@ GmoBoxDocPage::GmoBoxDocPage(ImoObj* pCreatorImo)
 //---------------------------------------------------------------------------------------
 void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    if (pDrawer->accepts_id_class())
+    {
+        stringstream ss;
+        ss << "page-" << m_numPage;
+        pDrawer->start_simple_notation(get_notation_id(ss.str()), "background");
+    }
+
     draw_page_background(pDrawer, opt);
     GmoBox::on_draw(pDrawer, opt);
 }
@@ -1058,7 +1067,7 @@ GmoBoxDocument::GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo)
 //---------------------------------------------------------------------------------------
 GmoBoxDocPage* GmoBoxDocument::add_new_page()
 {
-    m_pLastPage = LOMSE_NEW GmoBoxDocPage(nullptr);      //TODO creator imo?
+    m_pLastPage = LOMSE_NEW GmoBoxDocPage(m_pCreatorImo);
     add_child_box(m_pLastPage);
     m_pLastPage->set_number(get_num_pages());
     return m_pLastPage;

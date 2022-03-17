@@ -27,7 +27,6 @@ If you are new to Lomse, @b please read the @subpage page-introduction and then 
 - @subpage page-render-overview
 - @subpage page-render-svg
 - @subpage page-printing
-- @subpage page-user-drawers
 - @subpage page-edit-overview
 - @subpage page-sound-generation
 - @subpage page-tasks

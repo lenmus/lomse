@@ -129,7 +129,7 @@ GmoShape* SlurEngraver::create_shape(int type)
     //add_user_displacements(0, &m_points[0]);
 
     ++m_numShapes;
-    GmoShapeSlur* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points[0],
+    GmoShapeSlur* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes, &m_points[0],
                                                   m_thickness, m_color);
 
     pShape->add_data_points(m_dataPoints, m_dbgPeak, m_dbgColor);  //only for debug

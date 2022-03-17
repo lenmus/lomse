@@ -131,7 +131,7 @@ void MetronomeMarkEngraver::create_text_shape(const string& text)
     ImoStyle* pStyle = m_pMeter->get_style_info("Metronome marks");
     TextEngraver engr(m_libraryScope, m_pMeter, text, "", pStyle,
                       TextEngraver::k_class_metronome_text);
-    GmoShape* pShape = engr.create_shape(m_pCreatorImo, m_uPos.x, y);
+    GmoShape* pShape = engr.create_shape(m_pCreatorImo, 0, m_uPos.x, y);
 	m_pMainShape->add(pShape);
     m_uPos.x += pShape->get_width();
 }

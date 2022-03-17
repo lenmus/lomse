@@ -53,7 +53,11 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     Color color = determine_color_to_use(opt);
     if (pDrawer->accepts_id_class())
-        pDrawer->start_simple_notation(get_notation_id()+"-staff", "staff-lines");
+    {
+        stringstream ss;
+        ss << "staff-" << m_iStaff+1;
+        pDrawer->start_simple_notation(get_notation_id(ss.str()), "staff-lines");
+    }
 
     pDrawer->begin_path();
     pDrawer->stroke(color);
