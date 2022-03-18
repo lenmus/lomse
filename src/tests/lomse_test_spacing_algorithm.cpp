@@ -159,7 +159,7 @@ SUITE(SpAlgGourlayTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 e g+)(n e4 e g-)(n d4 q)"
             ")) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 
@@ -213,7 +213,7 @@ SUITE(SpAlgGourlayTest)
             "(clef G p1)(clef F4 p2)(n c4 e p1 g+)(n +d4 e p1 g-)(n g4 q)"
             "(n c3 q p2 v2)(n d3 q)"
             ")) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 
@@ -275,7 +275,7 @@ SUITE(SpAlgGourlayTest)
             "(n a4 e (tm 2 3))(n d4 e g- (tm 2 3)(t 1 -))(n g4 q)"
             "(n c3 s p2 g+ v2)(n d3 e. g-)(n e3 q)"
             ")) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 
@@ -351,7 +351,7 @@ SUITE(SpAlgGourlayTest)
             "(n a4 e (tm 2 3))(n d4 e g- (tm 2 3)(t 1 -))(n g4 q)"
             "(n c3 s p2 g+ v2)(n d3 e. g-)(n e3 q)"
             ")) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 
@@ -397,7 +397,7 @@ SUITE(SpAlgGourlayTest)
             "(n d4 s g+ p1)(n g4 s)(n d4 s)(n b3 s g-)"
             "(barline)"
             ")) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 

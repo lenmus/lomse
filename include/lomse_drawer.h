@@ -177,8 +177,8 @@ struct RenderOptions
 struct SvgOptions
 {
     int indent = 0;                 //num.spaces for each indentation step
-    bool add_id = true;             //include id='..' in elements
-    bool add_class = true;          //include class="...." in elements
+    bool add_id = false;            //include id='..' in elements
+    bool add_class = false;         //include class="...." in elements
     bool add_newlines = false;      //add a new lines after each element
 
     SvgOptions() {}
@@ -621,6 +621,14 @@ public:
         @param ch  The character to render.
     */
     virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
+
+    /** Render a character rotated. This method is equivalent to providing the x,y
+        attributes for the "<text>" SVG element, the string content for that element
+        and the rotation parameters for the affine transform.
+        @param x,y  Destination point, in model coordinates (LUnits).
+        @param ch  The character to render.
+        @param rotation  The rotation to apply, in radians.
+    */
     virtual void draw_glyph_rotated(double x, double y, unsigned int ch, double rotation) = 0;
     //@}    //Text redering methods
 
@@ -740,6 +748,29 @@ public:
     //@}    //Device <--> model units conversion
 
 
+    /** @name Shapes info
+        These methods serve to provide the Drawer with information about the shapes it
+        is drawing. This information is normally irrelevant but in some cases (e.g.SVG)
+        it can be incorporated into the output if desired.
+    */
+    //@{
+    /** This method is used to inform the Drawer that the drawing of a new simple element
+        (that is, an element requiring just one SVG command) is going to start.
+    */
+    virtual void start_simple_notation(std::string UNUSED(id), std::string UNUSED(classname)) {}
+
+    /** This method is used to inform the Drawer that the drawing of a new composite
+        element (that is, an element requiring several SVG commands) is going to start.
+    */
+    virtual void start_composite_notation(std::string UNUSED(id), std::string UNUSED(classname)) {}
+
+    /** This method is used to inform the Drawer that the drawing of a composite
+        element has finished.
+    */
+    virtual void end_composite_notation() {}
+    //@}    //Shapes info
+
+
 
     /** @name Viewport info
         Viewport is a concept related to the View, not to the %Drawer. But for some %Drawer
@@ -766,11 +797,15 @@ public:
     //@{
     /** Returns @TRUE if the %Drawer is initialized and can be used. */
     virtual bool is_ready() const = 0;
+
+    /** Returns @TRUE if the %Drawer accepts 'id' and 'class' information */
+    virtual bool accepts_id_class() const { return false; }
     //@}    //Other methods
 
 };
 
 
+///@cond INTERNALS
 //=======================================================================================
 // Helper class LineVertexSource: a vertex source for a line
 //=======================================================================================
@@ -1022,6 +1057,7 @@ public:
     void rewind(unsigned path_id) override { c.rewind(path_id); }
     unsigned vertex(double* x, double* y) override { return c.vertex(x, y); }
 };
+///@endcond
 
 
 }   //namespace lomse

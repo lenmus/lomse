@@ -25,8 +25,8 @@ The tutorials and the code samples included in the library and the code examples
 If you are new to Lomse, @b please read the @subpage page-introduction and then read the topic or topics you are interested in:
 
 - @subpage page-render-overview
+- @subpage page-render-svg
 - @subpage page-printing
-- @subpage page-user-drawers
 - @subpage page-edit-overview
 - @subpage page-sound-generation
 - @subpage page-tasks

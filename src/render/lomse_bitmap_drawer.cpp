@@ -235,6 +235,7 @@ unsigned MarkerVertexSource::vertex(double* x, double* y)
 //=======================================================================================
 Drawer::Drawer(LibraryScope& libraryScope)
     : m_libraryScope(libraryScope)
+    , m_textColor(Color(0,0,0))
 {
     m_pFonts = libraryScope.font_storage();
 }

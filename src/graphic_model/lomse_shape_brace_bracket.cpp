@@ -174,6 +174,9 @@ void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
     set_affine_transform();
 
     Color color = determine_color_to_use(opt);
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation(get_notation_id(get_name()),
+                                       get_notation_class() + "-" + get_name());
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->add_path(*this);
@@ -323,6 +326,9 @@ GmoShapeSquaredBracket::~GmoShapeSquaredBracket()
 void GmoShapeSquaredBracket::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation(get_notation_id() + "-" + get_name(),
+                                   get_notation_class() + "-" + get_name());
     pDrawer->begin_path();
     pDrawer->stroke(color);
     pDrawer->fill(Color(0,0,0,0));  //transparent

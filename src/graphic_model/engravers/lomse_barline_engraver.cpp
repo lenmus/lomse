@@ -105,12 +105,12 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* BarlineEngraver::create_system_barline_shape(ImoObj* pCreatorImo, LUnits xPos,
-                                                       LUnits yTop, LUnits yBottom,
-                                                       Color color)
+GmoShape* BarlineEngraver::create_systemic_barline_shape(ImoObj* pCreatorImo, ShapeId idx,
+                                                       LUnits xPos, LUnits yTop,
+                                                       LUnits yBottom, Color color)
 {
     LUnits uLineThickness = m_pMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
-    return LOMSE_NEW GmoShapeBarline(pCreatorImo, 0, k_barline_simple,
+    return LOMSE_NEW GmoShapeBarline(pCreatorImo, idx, k_barline_simple,
                                      xPos, yTop, yBottom,
                                      uLineThickness, uLineThickness,
                                      0.0f, 0.0f, color, uLineThickness);

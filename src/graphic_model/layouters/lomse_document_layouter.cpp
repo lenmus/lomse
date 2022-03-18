@@ -37,7 +37,7 @@ DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constra
     , m_pScoreLayouter(nullptr)
 {
     m_pStyles = m_pDoc->get_styles();
-    m_pGModel = LOMSE_NEW GraphicModel();
+    m_pGModel = LOMSE_NEW GraphicModel(m_pDoc);
     m_constrains = constrains;
 }
 
@@ -83,7 +83,7 @@ void DocLayouter::delete_last_trial()
     delete m_pGModel;
 
     m_result = k_layout_not_finished;
-    m_pGModel = LOMSE_NEW GraphicModel();
+    m_pGModel = LOMSE_NEW GraphicModel(m_pDoc);
     m_pParentLayouter = nullptr;
     m_pStyles = nullptr;
     m_pItemMainBox = nullptr;

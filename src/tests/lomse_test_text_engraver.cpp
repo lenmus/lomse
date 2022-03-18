@@ -51,7 +51,8 @@ SUITE(TextEngraverTest)
         ImoStyle* pStyle = doc.get_default_style();
         string text("This is a test");
         ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
-        TextEngraver engraver(m_libraryScope, &meter, text, "", pStyle);
+        TextEngraver engraver(m_libraryScope, &meter, text, "", pStyle,
+                              TextEngraver::k_class_score_text);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );
@@ -67,7 +68,8 @@ SUITE(TextEngraverTest)
         TypeTextInfo& text = pInstr->get_name();
         ImoStyle* pStyle = pScore->get_default_style();
         ScoreMeter meter(pScore, 1, 1, LOMSE_STAFF_LINE_SPACING);
-        TextEngraver engraver(m_libraryScope, &meter, text.text, "", pStyle);
+        TextEngraver engraver(m_libraryScope, &meter, text.text, "", pStyle,
+                              TextEngraver::k_class_score_text);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );

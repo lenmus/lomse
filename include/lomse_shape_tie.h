@@ -72,6 +72,8 @@ public:
     GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
                 Color color = Color(0,0,0));
     virtual ~GmoShapeTie() {}
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------

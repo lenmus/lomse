@@ -278,7 +278,7 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, Box_GetGraphicModel)
     {
-        GraphicModel gm;
+        GraphicModel gm(nullptr);
         GmoBoxDocument* pDoc = gm.get_root();
         GmoBoxDocPage* pDP = LOMSE_NEW GmoBoxDocPage(nullptr);
         pDoc->add_child_box(pDP);

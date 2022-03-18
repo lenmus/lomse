@@ -40,7 +40,7 @@ ScoreMeter::ScoreMeter(ImoScore* pScore)
 ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
                        LUnits lineSpacing,
                        float rSpacingFactor, ESpacingMethod nSpacingMethod,
-                       Tenths rSpacingValue, bool fDrawLeftBarline)
+                       Tenths rSpacingValue, bool fDrawSystemicBarline)
     : m_renderSpacingOpts(k_render_opt_breaker_simple)
     , m_spacingOptForce(1.4f)
     , m_spacingAlpha(rSpacingFactor)
@@ -49,7 +49,7 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
     , m_nSpacingMethod(nSpacingMethod)
     , m_rSpacingValue(rSpacingValue)
     , m_rUpperLegerLinesDisplacement(0.0f)
-    , m_fDrawLeftBarline(fDrawLeftBarline)
+    , m_fDrawSystemicBarline(fDrawSystemicBarline)
     , m_fFillPageWithEmptyStaves(false)
     , m_fHideStaffLines(false)
     , m_nJustifyLastSystem(0L)
@@ -101,7 +101,7 @@ void ScoreMeter::get_options(ImoScore* pScore)
     m_rSpacingValue = Tenths( pOpt->get_long_value() );
 
     pOpt = pScore->get_option("Staff.DrawLeftBarline");
-    m_fDrawLeftBarline = pOpt->get_bool_value();
+    m_fDrawSystemicBarline = pOpt->get_bool_value();
 
     pOpt = pScore->get_option("Staff.UpperLegerLines.Displacement");
     m_rUpperLegerLinesDisplacement = Tenths( pOpt->get_long_value() );
@@ -127,7 +127,7 @@ void ScoreMeter::get_options(ImoScore* pScore)
         "SpacingOptions=%d, SpacingValue=%f, DrawLeftBarline=%s, "
         "UpperLegerLines.Displacement=%f, spacingDmin=%f, spacingSmin =%f",
         m_spacingAlpha, m_spacingOptForce, m_nSpacingMethod, m_renderSpacingOpts,
-        m_rSpacingValue, (m_fDrawLeftBarline ? "yes" : "no"),
+        m_rSpacingValue, (m_fDrawSystemicBarline ? "yes" : "no"),
         m_rUpperLegerLinesDisplacement, m_spacingDmin, m_spacingSmin);
 }
 

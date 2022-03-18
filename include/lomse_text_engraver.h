@@ -38,14 +38,40 @@ protected:
     FontStorage* m_pFontStorage;
     string m_language;
     int m_idxStaff;
+    int m_classid;          //text class, enum E
     VerticalProfile* m_pVProfile;
 
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 const string& text, const string& language, ImoStyle* pStyle);
+                 const string& text, const string& language, ImoStyle* pStyle,
+                 int classid);
     ~TextEngraver();
 
-    GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);
+    enum ETextClass
+    {
+        // 'id' attribute IS NOT added for these classes:
+        k_class_lyric_elision,
+        k_class_lyric_hyphenation,
+        k_class_lyric_syllable,
+        k_class_metronome_text,
+        k_class_pedal_text,
+        k_class_score_text,
+        k_class_tuplet_text,
+        k_class_volta_text,
+
+        k_classes_with_id,     //to mark texts that will have 'id' attribute
+
+        // 'id' attribute IS added for these classes:
+        k_class_group_name,
+        k_class_group_abbrev,
+        k_class_instr_name,
+        k_class_instr_abbrev,
+        k_class_measure_number,
+        k_class_score_title,
+        k_class_repetition_mark,
+    };
+
+    GmoShapeText* create_shape(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop);
     LUnits measure_width();
     LUnits measure_height();
 };
@@ -82,7 +108,7 @@ public:
                           const string& text);
     ~MeasureNumberEngraver();
 
-    GmoShapeText* create_shape(ImoObj* pCreator, LUnits xLeft, LUnits yTop);
+    GmoShapeText* create_shape(ImoObj* pCreator, ShapeId idx, LUnits xLeft, LUnits yTop);
     LUnits measure_width();
     LUnits measure_height();
 };

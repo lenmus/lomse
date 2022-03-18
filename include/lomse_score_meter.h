@@ -46,7 +46,7 @@ protected:
 
     //layout options
     Tenths m_rUpperLegerLinesDisplacement;
-    bool m_fDrawLeftBarline;            //draw left barline joining all system staves
+    bool m_fDrawSystemicBarline;        //draw left barline joining all system staves
     bool m_fFillPageWithEmptyStaves;
     bool m_fHideStaffLines;
     long m_nJustifyLastSystem;
@@ -71,7 +71,7 @@ public:
                 float rSpacingFactor=0.547f,
                 ESpacingMethod nSpacingMethod=k_spacing_proportional,
                 Tenths rSpacingValue=35.0f,
-                bool fDrawLeftBarline=true);
+                bool DrawSystemicBarline=true);
 
     //options
     inline float get_spacing_Fopt() { return m_spacingOptForce; }
@@ -85,7 +85,7 @@ public:
     inline bool is_proportional_spacing() {
         return m_nSpacingMethod == k_spacing_proportional;
     }
-    inline bool must_draw_left_barline() { return m_fDrawLeftBarline; }
+    inline bool must_draw_systemic_barline() { return m_fDrawSystemicBarline; }
     inline Tenths get_upper_ledger_lines_displacement() { return m_rUpperLegerLinesDisplacement; }
     inline bool must_fill_page_with_empty_systems() { return m_fFillPageWithEmptyStaves; }
     inline bool must_hide_stafflines() { return m_fHideStaffLines; }

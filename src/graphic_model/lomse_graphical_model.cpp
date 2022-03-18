@@ -38,10 +38,10 @@ namespace lomse
 static long m_idCounter = 0L;
 
 //---------------------------------------------------------------------------------------
-GraphicModel::GraphicModel()
+GraphicModel::GraphicModel(ImoDocument* pCreator)
     : m_modified(true)
 {
-    m_root = LOMSE_NEW GmoBoxDocument(this, nullptr);    //TODO: replace nullptr by ImoDocument
+    m_root = LOMSE_NEW GmoBoxDocument(this, pCreator);
     m_modelId = ++m_idCounter;
 }
 

@@ -583,8 +583,9 @@ void ScoreLayouter::add_score_titles()
     {
         ImoScoreTitle* pImo = *it;
         TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                           pImo->get_language(), pImo->get_style());
-        GmoShape* pShape = engrv.create_shape(pImo, m_cursor.x, m_cursor.y);
+                           pImo->get_language(), pImo->get_style(),
+                           TextEngraver::k_class_score_title);
+        GmoShape* pShape = engrv.create_shape(pImo, 0, m_cursor.x, m_cursor.y);
         m_pCurBoxPage->add_shape(pShape, GmoShape::k_layer_aux_objs);
         m_cursor.y += pShape->get_height();
     }
@@ -892,10 +893,11 @@ bool ScoreLayouter::column_has_system_break(int iCol)
 void ScoreLayouter::add_error_message(const string& msg)
 {
     ImoStyle* pStyle = m_pScore->get_default_style();
-    TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle);
+    TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle,
+                       TextEngraver::k_class_score_text);
     LUnits x = m_pageCursor.x + 400.0f;
     LUnits y = m_pageCursor.y + 800.0f;
-    GmoShape* pText = engrv.create_shape(nullptr, x, y);
+    GmoShape* pText = engrv.create_shape(nullptr, 0, x, y);
     m_pItemMainBox->add_shape(pText, GmoShape::k_layer_top);
     m_pageCursor.y += pText->get_height();
 }
@@ -1311,8 +1313,9 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                               pImo->get_language(), pImo->get_style());
-            return engrv.create_shape(pImo, pos.x, pos.y);
+                               pImo->get_language(), pImo->get_style(),
+                               TextEngraver::k_class_repetition_mark);
+            return engrv.create_shape(pImo, 0, pos.x, pos.y);
         }
         case k_imo_text_box:
         {
@@ -1349,11 +1352,11 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, const AuxObjContext
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_measure_number_shape(ImoObj* pCreator,
-                                                     const string& number,
+                                                     const string& number, ShapeId idx,
                                                      LUnits xPos, LUnits yPos)
 {
     MeasureNumberEngraver engrv(m_libraryScope, m_pScoreMeter, number);
-    return engrv.create_shape(pCreator, xPos, yPos);
+    return engrv.create_shape(pCreator, idx, xPos, yPos);
 }
 
 //---------------------------------------------------------------------------------------

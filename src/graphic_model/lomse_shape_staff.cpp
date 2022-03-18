@@ -52,6 +52,13 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
     double spacing = m_pStaff->get_line_spacing();
 
     Color color = determine_color_to_use(opt);
+    if (pDrawer->accepts_id_class())
+    {
+        stringstream ss;
+        ss << "staff-" << m_iStaff+1;
+        pDrawer->start_simple_notation(get_notation_id(ss.str()), "staff-lines");
+    }
+
     pDrawer->begin_path();
     pDrawer->stroke(color);
     pDrawer->stroke_width(m_lineThickness);

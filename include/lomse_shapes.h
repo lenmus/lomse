@@ -27,7 +27,7 @@ class ImoImage;
 class ImoStyle;
 
 //---------------------------------------------------------------------------------------
-// a shape drawn by using a single glyph from LenMus font
+// a shape drawn by using a single glyph
 class GmoShapeGlyph : public GmoSimpleShape
 {
 protected:
@@ -57,8 +57,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeAccidentals : public GmoCompositeShape, public VoiceRelatedShape
 {
-protected:
-    friend class AccidentalsEngraver;
+public:
     GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                         Color color)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
@@ -70,8 +69,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeAccidental : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class AccidentalsEngraver;
+public:
     GmoShapeAccidental(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,
@@ -79,13 +77,14 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeArticulation : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class ArticulationEngraver;
+public:
     GmoShapeArticulation(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                          Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_articulation, idx, nGlyph, pos, color,
@@ -93,20 +92,23 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeClef : public GmoShapeGlyph
 {
 //protected:
-//    friend class ClefEngraver;
-public: //TO_FIX: constructor used in tests.
+public:
     GmoShapeClef(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos, Color color,
                  LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_clef, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -139,8 +141,7 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeDynamicsMark : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class DynamicsMarkEngraver;
+public:
     GmoShapeDynamicsMark(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                          Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dynamics_mark, idx, nGlyph,
@@ -148,13 +149,14 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeFermata : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class FermataEngraver;
+public:
     GmoShapeFermata(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                     Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fermata, idx, nGlyph, pos, color,
@@ -162,31 +164,35 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeFingeringContainer : public GmoCompositeShape, public VoiceRelatedShape
 {
-protected:
-    friend class FingeringEngraver;
+public:
     GmoShapeFingeringContainer(ImoObj* pCreatorImo, ShapeId idx)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_fingering_box, idx, Color(0,0,0))
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeFingering : public GmoShapeGlyph
 {
-protected:
-    friend class FingeringEngraver;
+public:
     GmoShapeFingering(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                       LibraryScope& libraryScope, Color color, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fingering, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -210,11 +216,9 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeInvisible : public GmoSimpleShape
 {
-protected:
-    friend class InvisibleEngraver;
+public:
     GmoShapeInvisible(ImoObj* pCreatorImo, ShapeId idx, UPoint uPos, USize uSize);
 
-public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
@@ -224,13 +228,15 @@ class GmoShapeKeySignature : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class KeyEngraver;
+public:
     GmoShapeKeySignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                          Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_key_signature, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -239,13 +245,15 @@ class GmoShapeLyrics : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class LyricEngraver;
+public:
     GmoShapeLyrics(ImoObj* pCreatorImo, ShapeId idx, Color color,
                    LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_lyrics, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -254,33 +262,35 @@ class GmoShapeMetronomeMark : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class MetronomeMarkEngraver;
+public:
     GmoShapeMetronomeMark(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                           Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_metronome_mark, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeMetronomeGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class MetronomeMarkEngraver;
+public:
     GmoShapeMetronomeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                            Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_metronome_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeOrnament : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class OrnamentEngraver;
+public:
     GmoShapeOrnament(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_ornament, idx, nGlyph, pos, color,
@@ -288,6 +298,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -346,13 +358,10 @@ class GmoShapeStem : public GmoShapeSimpleLine, public VoiceRelatedShape
 private:
 	bool m_fStemDown;
 
-protected:
-    friend class StemFlagEngraver;
-    friend class ChordEngraver;
+public:
     GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits yEnd,
                  bool fStemDown, LUnits uWidth, Color color);
 
-public:
     void change_length(LUnits length);
 	inline bool is_stem_down() const { return m_fStemDown; }
     void set_stem_up(LUnits xRight, LUnits yNote);
@@ -365,8 +374,7 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeTechnical : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class TechnicalEngraver;
+public:
     GmoShapeTechnical(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_technical, idx, nGlyph, pos, color,
@@ -374,19 +382,22 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeCodaSegno : public GmoShapeGlyph
 {
-protected:
-    friend class CodaSegnoEngraver;
+public:
     GmoShapeCodaSegno(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_coda_segno, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 ////---------------------------------------------------------------------------------------
@@ -445,14 +456,15 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeTimeGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class TimeEngraver;
+public:
     GmoShapeTimeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                   Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -461,40 +473,43 @@ class GmoShapeTimeSignature : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class TimeEngraver;
+public:
     GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                           Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeOctaveGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class OctaveShiftEngraver;
+public:
     GmoShapeOctaveGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                         Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_octave_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapePedalGlyph : public GmoShapeGlyph
 {
-protected:
-    friend class PedalMarkEngraver;
-    friend class PedalLineEngraver;
+public:
     GmoShapePedalGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_pedal_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -515,14 +530,13 @@ protected:
     LUnits m_segmentAdvance;
     bool m_fUp;
 
-    friend class ChordEngraver;
+public:
     GmoShapeArpeggio(ImoObj* pCreatorImo, ShapeId idx,
                      LUnits xRight, LUnits yTop, LUnits yBottom,
                      bool fUp, bool fHasArrow,
                      Color color, LibraryScope& libraryScope,
                      double fontHeight);
 
-public:
     //implementation of virtual methods in base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
@@ -531,6 +545,7 @@ public:
 protected:
     void compute_shape_geometry(LUnits xPosRight, LUnits yTop, LUnits yBottom);
 };
+
 
 }   //namespace lomse
 

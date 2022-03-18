@@ -36,7 +36,7 @@ GmoShapeLine* LineEngraver::create_shape(ImoScoreLine* pLine, UPoint pos)
                pos.y + tenths_to_logical(pLine->get_y_end()) );
 
     ShapeId idx = 0;
-    return LOMSE_NEW GmoShapeLine(pLine, idx,
+    return LOMSE_NEW GmoShapeLine(pLine, idx, GmoObj::k_shape_line,
                                   start.x, start.y,
                                   end.x, end.y,
                                   tenths_to_logical(pLine->get_line_width()),
@@ -53,7 +53,8 @@ GmoShapeLine* LineEngraver::dbg_create_shape(UPoint start, UPoint end, Color col
                                              LUnits lineWidth)
 {
     ShapeId idx = 0;
-    return LOMSE_NEW GmoShapeLine(nullptr, idx, start.x, start.y, end.x, end.y,
+    return LOMSE_NEW GmoShapeLine(nullptr, idx, GmoObj::k_shape_line,
+                                  start.x, start.y, end.x, end.y,
                                   lineWidth, 0.5f, k_line_solid, color,
                                   k_edge_normal, k_cap_none, k_cap_none);
 }

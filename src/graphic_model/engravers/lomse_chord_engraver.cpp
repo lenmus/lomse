@@ -569,7 +569,7 @@ void ChordEngraver::layout_arpeggio()
     const ShapeId idx = 0;
     ChordNoteData* pArpeggioNoteData = m_pStartNoteData ? m_pStartNoteData : m_pBaseNoteData;
 
-    GmoShapeArpeggio* pArpeggioShape = LOMSE_NEW GmoShapeArpeggio(pArpeggioNoteData->pNote, idx,
+    GmoShapeArpeggio* pArpeggioShape = LOMSE_NEW GmoShapeArpeggio(pArpeggio, idx,
                                                                   xArpeggioRight, yTop, yBottom,
                                                                   fArpeggioUp, fArpeggioHasArrow,
                                                                   pArpeggio->get_color(), m_libraryScope, fontSize);

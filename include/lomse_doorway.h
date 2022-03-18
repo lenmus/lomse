@@ -83,11 +83,16 @@ public:
     /** @name Library initialization and configuration  */
     //@{
 
-	/** Before using the library, method init_library() **must** be invoked for
+	/** Before using the library, method init_library() should be invoked for
         initializing the library and providing the necessary information. As Lomse
         renders scores and documents on a bitmap it is necessary to inform Lomse about
         the required bitmap properties. Also, you can set an ostream to be used by
         Lomse for reporting errors.
+
+        Initialization is not required if your application will not use Lomse to render
+        scores in bitmaps, e.g.: uses it only for playback or only renders SVG code.
+        In these cases any values for pixel format and resolution will be valid and so,
+        default values are enough and you will not have to invoke this method.
 
         @param pixel_format A value from the global enumeration type #EPixelFormat
         @param ppi The display resolution in pixels per inch (e.g. 96). Lomse uses
@@ -276,7 +281,7 @@ public:
             the Document, all existing Views and Interactors, etc., as well as any
             passed Drawer objects.
 
-        @see @subpage page-render-overview, @subpage page-user-drawers
+        @see @subpage page-render-overview
 	*/
     Presenter* new_document(int viewType, Drawer* screenDrawer=nullptr,
                             Drawer* printDrawer=nullptr);

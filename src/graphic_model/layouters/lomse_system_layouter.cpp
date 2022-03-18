@@ -663,11 +663,11 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
             return;
     }
 
-    //do not draw if so asked when score meter was created (//TODO: what is this for?)
-	if (m_pScoreMeter->must_draw_left_barline())
+    //systemic barline is optional. do not draw if so asked
+	if (m_pScoreMeter->must_draw_systemic_barline())
 	{
         InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(0);
-        ImoObj* pCreator = m_pScore->get_instrument(0);
+        ImoObj* pCreator = m_pScore;
         LUnits xPos = pInstrEngrv->get_staves_left();
         LUnits yTop = pInstrEngrv->get_staves_top_line();
         int iInstr = m_pScoreMeter->num_instruments() - 1;
@@ -676,7 +676,7 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
         BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
         Color color = Color(0,0,0); //TODO staff lines color?
         GmoShape* pLine =
-            engrv.create_system_barline_shape(pCreator, xPos, yTop, yBottom, color);
+            engrv.create_systemic_barline_shape(pCreator, m_iSystem+1, xPos, yTop, yBottom, color);
         m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
 	}
 }
@@ -1118,6 +1118,7 @@ void SystemLayouter::engrave_measure_numbers()
             continue;   //nothing to render in this measure
 
         string number = pInfo->number;
+        ShapeId idx = ShapeId(pInfo->count);
 
         if (number.empty())
             continue;   //nothing to render in this measure
@@ -1156,7 +1157,7 @@ void SystemLayouter::engrave_measure_numbers()
                    - m_pScoreMeter->tenths_to_logical(20.0f, iInstr, iStaff);
 
             GmoShape* pShape = m_pShapesCreator->create_measure_number_shape(
-                                        pCreator, number, xPos, yPos);
+                                        pCreator, number, idx, xPos, yPos);
 
             m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
 

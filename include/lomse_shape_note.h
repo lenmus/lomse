@@ -14,8 +14,9 @@
 #include "lomse_shapes.h"
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+#include "lomse_glyphs.h"
+
 #include <string>
-using namespace std;
 
 namespace lomse
 {
@@ -64,8 +65,7 @@ protected:
 
 
 
- public:    //TO_FIX: constructor used in tests
-    //friend class NoteEngraver;
+ public:
     GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
 
@@ -189,9 +189,7 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeNotehead : public GmoShapeGlyph, public VoiceRelatedShape
 {
-//protected:
-//    friend class NoteEngraver;
-public:     //TO_FIX: Constructor used in tests
+public:
     GmoShapeNotehead(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
@@ -199,35 +197,38 @@ public:     //TO_FIX: Constructor used in tests
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeFlag : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class StemFlagEngraver;
+public:
     GmoShapeFlag(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                  Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_flag, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
         , VoiceRelatedShape()
-{
+    {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeDot : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class NoteEngraver;
-    friend class RestEngraver;
-    GmoShapeDot(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
-                Color color, LibraryScope& libraryScope, double fontSize)
-        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, iGlyph,
+public:
+    GmoShapeDot(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
+                LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, k_glyph_dot,
                         pos, color, libraryScope, fontSize)
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 ////global functions defined in this module
@@ -250,8 +251,7 @@ protected:
     int m_nPosOnStaff = 0;
     LUnits m_uAnchorOffset = 0.0f;
 
-public:     //TO_FIX: Constructor used in tests
-//    friend class RestEngraver;
+public:
     GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
 
@@ -269,8 +269,7 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeRestGlyph : public GmoShapeGlyph, public VoiceRelatedShape
 {
-protected:
-    friend class RestEngraver;
+public:
     GmoShapeRestGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
@@ -278,6 +277,8 @@ protected:
         , VoiceRelatedShape()
     {
     }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 

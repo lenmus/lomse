@@ -175,7 +175,7 @@ public:
     void reset_staff_position_shifts();
 
     //shapes
-    void add_staff_lines(GmoBoxSystem* pBox);
+    void add_staff_lines(GmoBoxSystem* pBox, int iSystem);
     void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
     void add_brace_bracket(GmoBoxSystem* pBox, int iSystem);
     inline LUnits get_staves_bottom() { return get_staff_bottom_position() + m_org.y; }

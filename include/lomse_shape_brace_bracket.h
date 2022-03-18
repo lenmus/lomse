@@ -52,13 +52,10 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeBrace : public GmoShapeBracketBrace
 {
-    friend class InstrumentEngraver;
-    friend class GroupEngraver;
-    friend class FragmentMark;
+public:
     GmoShapeBrace(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                     LUnits xRight, LUnits yBottom, Color color);
 
-public:
 	~GmoShapeBrace();
 
     //VertexSource
@@ -77,12 +74,10 @@ protected:
     double m_rBracketBarHeight;
     LUnits m_udyHook;
 
-    friend class InstrumentEngraver;
-    friend class GroupEngraver;
+public:
     GmoShapeBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                   LUnits xRight, LUnits yBottom, LUnits dyHook, Color color);
 
-public:
     ~GmoShapeBracket();
 
     //VertexSource
@@ -100,13 +95,11 @@ class GmoShapeSquaredBracket : public GmoSimpleShape
 protected:
     LUnits m_lineThickness;
 
-    friend class InstrumentEngraver;
-    friend class GroupEngraver;
+public:
     GmoShapeSquaredBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                            LUnits xRight, LUnits yBottom, LUnits lineThickness,
                            Color color);
 
-public:
     ~GmoShapeSquaredBracket();
 
 	//implementation of pure virtual methods in base class

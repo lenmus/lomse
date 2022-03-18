@@ -311,7 +311,7 @@ void PartsEngraver::engrave_names_and_brackets(bool fDrawStafflines, GmoBoxSyste
     for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
     {
         if (fDrawStafflines)
-            (*it)->add_staff_lines(pBox);
+            (*it)->add_staff_lines(pBox, iSystem);
         (*it)->add_name_abbrev(pBox, iSystem);
         (*it)->add_brace_bracket(pBox, iSystem);
     }
@@ -428,7 +428,7 @@ void GroupEngraver::measure_name_abbrev()
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                          text.language, pStyle);
+                          text.language, pStyle, TextEngraver::k_class_group_name);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -442,7 +442,7 @@ void GroupEngraver::measure_name_abbrev()
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                          text.language, pStyle);
+                          text.language, pStyle, TextEngraver::k_class_group_abbrev);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -495,6 +495,7 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
     determine_staves_position();
     LUnits yTop = m_org.y + (m_stavesBottom + m_stavesTop) / 2.0f;
 
+    ShapeId idx = ShapeId(iSystem + 1);
     if (iSystem == 0)
     {
         if (m_pGroup->has_name())
@@ -506,8 +507,8 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                              text.language, pStyle);
-            GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
+                              text.language, pStyle, TextEngraver::k_class_group_name);
+            GmoShape* pShape = engr.create_shape(m_pGroup, idx, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
@@ -522,8 +523,8 @@ void GroupEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.text,
-                              text.language, pStyle);
-            GmoShape* pShape = engr.create_shape(m_pGroup, xLeft, yTop);
+                              text.language, pStyle, TextEngraver::k_class_group_abbrev);
+            GmoShape* pShape = engr.create_shape(m_pGroup, idx, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
@@ -551,7 +552,7 @@ void GroupEngraver::add_brace_bracket(GmoBoxSystem* pBox, int iSystem)
         }
 
         GmoShape* pShape;
-        ShapeId idx = 0;
+        ShapeId idx = ShapeId(iSystem + 1);
         int symbol = m_pGroup->get_symbol();
         if (symbol == k_group_symbol_brace)
             pShape = LOMSE_NEW GmoShapeBrace(m_pGroup, idx, xLeft, yTop,
@@ -630,7 +631,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = m_pInstr->get_name_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                          TextEngraver::k_class_instr_name);
 
         m_nameBox.width = engr.measure_width() + uSpaceAfterName;
         m_nameBox.height = engr.measure_height();
@@ -643,7 +645,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = m_pInstr->get_abbrev_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                          TextEngraver::k_class_instr_abbrev);
 
         m_abbrevBox.width = engr.measure_width() + uSpaceAfterName;
         m_abbrevBox.height = engr.measure_height();
@@ -690,6 +693,7 @@ bool InstrumentEngraver::has_brace_or_bracket()
 //---------------------------------------------------------------------------------------
 void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
 {
+    ShapeId idx = ShapeId(iSystem + 1);
     if (iSystem == 0)
     {
         if (m_pInstr->has_name())
@@ -702,8 +706,9 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = m_pInstr->get_name_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
-            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                              TextEngraver::k_class_instr_name);
+            GmoShape* pShape = engr.create_shape(m_pInstr, idx, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
@@ -719,8 +724,9 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = m_pInstr->get_abbrev_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle);
-            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.text, text.language, pStyle,
+                              TextEngraver::k_class_instr_abbrev);
+            GmoShape* pShape = engr.create_shape(m_pInstr, idx, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
@@ -749,20 +755,21 @@ void InstrumentEngraver::add_brace_bracket(GmoBoxSystem* pBox, int iSystem)
             yBottom = yTop + m_bracketOtherBox.height;
         }
 
-        GmoShape* pShape = LOMSE_NEW GmoShapeBrace(m_pInstr, 0, xLeft, yTop, xRight,
+        ShapeId idx = ShapeId(iSystem + 1);
+        GmoShape* pShape = LOMSE_NEW GmoShapeBrace(m_pInstr, idx, xLeft, yTop, xRight,
                                                    yBottom, Color(0,0,0));
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox)
+void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, int iSystem)
 {
     for (int iStaff=0; iStaff < m_pInstr->get_num_staves(); iStaff++)
 	{
         ImoStaffInfo* pStaff = m_pInstr->get_staff(iStaff);
         GmoShapeStaff* pShape
-            = LOMSE_NEW GmoShapeStaff(m_pInstr, iStaff, pStaff, iStaff, m_stavesWidth,
+            = LOMSE_NEW GmoShapeStaff(m_pInstr, iSystem+1, pStaff, iStaff, m_stavesWidth,
                                 Color(0,0,0));
         pShape->set_origin(m_stavesLeft + m_org.x,
                            m_org.y + m_staffTop[iStaff] + m_yShifts[iStaff]);

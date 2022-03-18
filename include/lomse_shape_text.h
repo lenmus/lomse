@@ -35,15 +35,12 @@ protected:
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
     LUnits m_space;
-
-    friend class TextEngraver;
-    friend class LyricEngraver;
-    friend class MeasureNumberEngraver;
-    GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
-                 ImoStyle* pStyle, const string& language,
-                 LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope);
+    int m_classid;
 
 public:
+    GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
+                 ImoStyle* pStyle, const string& language, int classid,
+                 LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope);
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
@@ -53,6 +50,9 @@ public:
 protected:
     void select_font();
     Color get_normal_color() override;
+    std::string get_id();
+    std::string get_class();
+    std::string get_id_prefix();
 
 };
 
@@ -68,12 +68,10 @@ protected:
     LUnits m_halfLeading;
     LUnits m_baseline;          //relative to m_origin.y
 
-    friend class WordEngrouter;
+public:
     GmoShapeWord(ImoObj* pCreatorImo, ShapeId idx, const wstring& text,
                  ImoStyle* pStyle, const string& language, LUnits x, LUnits y,
                  LUnits halfLeading, LibraryScope& libraryScope);
-
-public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
@@ -87,6 +85,24 @@ protected:
     Color get_normal_color() override;
 
 };
+
+////---------------------------------------------------------------------------------------
+///** %GmoShapeLyricText represents any textual content (syllable, elision symbol,
+//    hyphenation) for the lyric content associated to a note/rest.
+//*/
+//class GmoShapeLyricText : public GmoShapeText
+//{
+//public:
+//    GmoShapeLyricText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
+//                      ImoStyle* pStyle, const string& language,
+//                      LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope)
+//        : GmoShapeText(pCreatorImo, idx, text, pStyle, language,
+//                            xLeft, yBaseline, libraryScope)
+//    {
+//    }
+//
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+//};
 
 
 //---------------------------------------------------------------------------------------
@@ -103,8 +119,7 @@ protected:
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
-    friend class MeasureNumberEngraver;
-    friend class TextBoxEngraver;
+public:
     GmoShapeTextBox(ImoObj* pCreatorImo, ShapeId idx
                     , const string& text                //text inside the box
                     , const string& language            //text language
@@ -114,119 +129,17 @@ protected:
                     , const USize& size = USize(0.0f, 0.0f)     //rectangle size
                     , LUnits radius = 0.0f                      //for rounded corners
                     );
-//    GmoShapeTextBox(lmScoreObj* pOwner, int nShapeIdx,
-//            //text related
-//            lmPaper* pPaper,
-//            const std::string& sText, wxFont* pFont, wxColour nTxtColor,
-//            //block related
-//            lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
-//            LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom,
-//            wxColour nBgColor = *wxWHITE,
-//            //border
-//            LUnits uBorderWidth = 1.0f,
-//            wxColour nBorderColor = *wxBLACK,
-//            lmELineStyle nBorderStyle = lm_eLine_None,             //no border
-//            //other
-//            std::string sName=_T("ShapeTextbox"),
-//            bool fDraggable = true);
-
-public:
 
     virtual ~GmoShapeTextBox();
 
     //implementation of virtual methods from base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
-//    //other
-//    string dump(int nIndent);
-//
-//
-//    //specific methods
-//    void SetFont(wxFont *pFont);
-//    std::string* GetText() { return &m_text; }
-//
-//    //shape dragging: overrides of GmoShapeRectangle
-//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-
-
 private:
 
     void draw_text(Drawer* pDrawer, RenderOptions& opt);
     void select_font();
-
-//    void ComputeTextPosition(lmPaper* pPaper);
-//    LUnits ApplyHAlign(LUnits uAvailableWidth, LUnits uLineWidth, lmEHAlign nHAlign);
-//    void DeleteTextLines();
-//
-//
-//    lmEBlockAlign   m_nBlockAlign;
-//    lmEHAlign       m_nHAlign;
-//    lmEVAlign       m_nVAlign;
-//    std::string        m_text;
-//    wxFont*         m_pFont;
-//    wxColour        m_nTxtColor;
-//    UPoint        m_uTextPos;     // text position (relative to top-left of rectangle)
-//    LUnits        m_uTextWidth;
-//    LUnits        m_uTextHeight;
-//
-//
-//    std::list<TextLine*>   m_TextLines;
 };
-
-
-////------------------------------------------------------------------------------------
-//// GmoShapeTitle: a primitive textbox. To be replaced, in future, by a GmoShapeTextBox
-//
-//class GmoShapeTitle : public GmoShapeRectangle
-//{
-//public:
-//    GmoShapeTitle(lmScoreObj* pOwner, const std::string& sText, wxFont* pFont,
-//                     lmPaper* pPaper, lmEBlockAlign nBlockAlign,
-//                     lmEHAlign nHAlign, lmEVAlign nVAlign,
-//                     LUnits xLeft, LUnits yTop,
-//                     LUnits xRight, LUnits yBottom,
-//                     wxColour nColor = *wxBLACK, std::string sName=_T("ShapeTitle"),
-//					 bool fDraggable = true);
-//
-//    ~GmoShapeTitle() {}
-//
-//    //implementation of virtual methods from base class
-//    void Render(lmPaper* pPaper, wxColour color = *wxBLACK);
-//    std::string Dump(int nIndent);
-//    void Shift(LUnits xIncr, LUnits yIncr);
-//
-//    //specific methods
-//    void SetFont(wxFont *pFont);
-//    std::string* GetText() { return &m_text; }
-//
-//    //call backs
-//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-//	UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
-//
-//
-//
-//private:
-//    void Create(const std::string& sText, wxFont* pFont, lmPaper* pPaper,
-//                lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
-//                LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom);
-//
-//    void ComputeTextPosition(lmPaper* pPaper);
-//    void ComputeBlockBounds(LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom);
-//
-//    lmEBlockAlign   m_nBlockAlign;
-//    lmEHAlign       m_nHAlign;
-//    lmEVAlign       m_nVAlign;
-//    std::string        m_text;
-//	std::string		m_sClippedText;
-//    wxFont*         m_pFont;
-//    UPoint        m_uTextPos;     // text position (relative to top-left of rectangle)
-//    LUnits        m_uTextWidth;
-//    LUnits        m_uTextHeight;
-//    LUnits        m_uClippedTextWidth;
-//    LUnits        m_uClippedTextHeight;
-//
-//};
 
 
 }   //namespace lomse

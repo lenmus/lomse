@@ -91,10 +91,16 @@ void GmoShapeTuplet::add_label(GmoShapeText* pShape)
 //---------------------------------------------------------------------------------------
 void GmoShapeTuplet::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     draw_horizontal_line(pDrawer);
     draw_vertical_borders(pDrawer);
 
     GmoCompositeShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------

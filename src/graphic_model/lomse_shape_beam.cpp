@@ -58,6 +58,9 @@ void GmoShapeBeam::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);
 
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     std::list<LUnits>::iterator it = m_segments.begin();
     while (it != m_segments.end())
     {
@@ -74,6 +77,9 @@ void GmoShapeBeam::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------

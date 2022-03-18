@@ -54,6 +54,9 @@ GmoShapeNote::~GmoShapeNote()
 //---------------------------------------------------------------------------------------
 void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     if (opt.draw_anchor_lines)
     {
         pDrawer->begin_path();
@@ -98,6 +101,9 @@ void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
     else
         GmoCompositeShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------
@@ -106,6 +112,9 @@ void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
     //if note is on staff, nothing to draw
     if (m_nPosOnStaff > m_nBottomPosOnStaff && m_nPosOnStaff < m_nTopPosOnStaff)
         return;
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", "ledger-line");
 
     pDrawer->begin_path();
     pDrawer->fill(Color(0, 0, 0, 0));
@@ -438,7 +447,61 @@ GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
 //---------------------------------------------------------------------------------------
 void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     GmoCompositeShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
+// GmoShapeNotehead implementation
+//=======================================================================================
+void GmoShapeNotehead::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeDot implementation
+//=======================================================================================
+void GmoShapeDot::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeFlag implementation
+//=======================================================================================
+void GmoShapeFlag::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+}
+
+
+//=======================================================================================
+// GmoShapeRestGlyph implementation
+//=======================================================================================
+void GmoShapeRestGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_simple_notation("", get_name());
+
+    GmoShapeGlyph::on_draw(pDrawer, opt);
 }
 
 

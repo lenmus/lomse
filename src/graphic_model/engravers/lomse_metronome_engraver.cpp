@@ -129,8 +129,9 @@ void MetronomeMarkEngraver::create_text_shape(const string& text)
 {
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(2.0f, m_iInstr, m_iStaff);
     ImoStyle* pStyle = m_pMeter->get_style_info("Metronome marks");
-    TextEngraver engr(m_libraryScope, m_pMeter, text, "", pStyle);
-    GmoShape* pShape = engr.create_shape(m_pCreatorImo, m_uPos.x, y);
+    TextEngraver engr(m_libraryScope, m_pMeter, text, "", pStyle,
+                      TextEngraver::k_class_metronome_text);
+    GmoShape* pShape = engr.create_shape(m_pCreatorImo, 0, m_uPos.x, y);
 	m_pMainShape->add(pShape);
     m_uPos.x += pShape->get_width();
 }

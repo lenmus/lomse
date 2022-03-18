@@ -67,6 +67,9 @@ void GmoShapeOctaveShift::on_draw(Drawer* pDrawer, RenderOptions& opt)
     LUnits yStart = m_yLineStart + m_origin.y;
     LUnits yEnd = m_yLineEnd + m_origin.y;
 
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+
     pDrawer->begin_path();
     pDrawer->fill_none();
     pDrawer->stroke(color);
@@ -94,6 +97,9 @@ void GmoShapeOctaveShift::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoCompositeShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------

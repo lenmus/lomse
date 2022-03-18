@@ -271,7 +271,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData)))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -286,7 +286,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -304,7 +304,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
             "(n e4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -324,7 +324,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
             "(n e4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -350,7 +350,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
             "(n e4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -401,7 +401,7 @@ SUITE(ScoreLayouterTest)
                 "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
             "(n c5 q p1)(barline)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -432,7 +432,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -468,7 +468,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
             "(n e4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -495,7 +495,7 @@ SUITE(ScoreLayouterTest)
             "(systemLayout other (systemMargins 200 100 0 0))"
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
             "(n e4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -521,7 +521,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0) "
             "(systemLayout first (systemMargins 200 100 2200 4400))"
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -547,7 +547,7 @@ SUITE(ScoreLayouterTest)
             "(systemLayout first (systemMargins 200 100 2200 4400))"
             "(systemLayout other (systemMargins 200 100 2200 3400))"
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -573,7 +573,7 @@ SUITE(ScoreLayouterTest)
             "(systemLayout first (systemMargins 200 100 2200 4400))"
             "(systemLayout other (systemMargins 200 100 2200 3400))"
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -600,7 +600,7 @@ SUITE(ScoreLayouterTest)
 //        doc.from_string("(score (vers 2.0) "
 //            "(systemLayout first (systemMargins 200 100 2200 4400))"
 //            "(instrument (musicData (clef G)(n c4 q) )))" );
-//        GraphicModel gmodel;
+//        GraphicModel gmodel( doc.get_im_root() );
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        scoreLyt.prepare_to_start_layout();
@@ -625,7 +625,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -649,7 +649,7 @@ SUITE(ScoreLayouterTest)
 //        Document doc(m_libraryScope);
 //        doc.from_string("(score (vers 2.0) "
 //            "(instrument (musicData (clef G)(n c4 q) )))" );
-//        GraphicModel gmodel;
+//        GraphicModel gmodel( doc.get_im_root() );
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        scoreLyt.prepare_to_start_layout();
@@ -676,7 +676,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -717,7 +717,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (clef G)(n c4 q)(barline)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -737,7 +737,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)(n e4 h)(barline)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -760,7 +760,7 @@ SUITE(ScoreLayouterTest)
             "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)"
             "(n e4 h)(barline)(n g4 q)(n -b4 q)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -784,7 +784,7 @@ SUITE(ScoreLayouterTest)
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)(n e4 h)(barline)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -813,7 +813,7 @@ SUITE(ScoreLayouterTest)
             "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)"
             "(n e4 h)(barline)(n g4 q)(n -b4 q)"
             ")))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -844,7 +844,7 @@ SUITE(ScoreLayouterTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData)))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -859,7 +859,7 @@ SUITE(ScoreLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )))" );
-        GraphicModel gmodel;
+        GraphicModel gmodel( doc.get_im_root() );
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
         scoreLyt.prepare_to_start_layout();
@@ -883,7 +883,7 @@ SUITE(ScoreLayouterTest)
 //
 //        Document doc(m_libraryScope);
 //        doc.from_string("(score (vers 2.0)(instrument (musicData)))" );
-//        GraphicModel gmodel;
+//        GraphicModel gmodel( doc.get_im_root() );
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        scoreLyt.prepare_to_start_layout();
@@ -903,7 +903,7 @@ SUITE(ScoreLayouterTest)
 //        Document doc(m_libraryScope);
 //        doc.from_string("(score (vers 2.0) "
 //            "(instrument (musicData (clef G)(n c4 q) )))" );
-//        GraphicModel gmodel;
+//        GraphicModel gmodel( doc.get_im_root() );
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        scoreLyt.prepare_to_start_layout();

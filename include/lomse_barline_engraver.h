@@ -35,9 +35,9 @@ public:
 
     GmoShape* create_shape(ImoBarline* pBarline, LUnits xPos, LUnits yTop,
                            LUnits yBottom, Color color=Color(0,0,0));
-    GmoShape* create_system_barline_shape(ImoObj* pCreatorImo, LUnits xPos,
-                                          LUnits yTop, LUnits yBottom,
-                                          Color color=Color(0,0,0));
+    GmoShape* create_systemic_barline_shape(ImoObj* pCreatorImo, ShapeId idx,
+                                            LUnits xPos, LUnits yTop, LUnits yBottom,
+                                            Color color=Color(0,0,0));
     GmoShape* create_tool_dragged_shape(int barType);
     UPoint get_drag_offset();
 

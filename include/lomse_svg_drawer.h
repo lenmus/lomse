@@ -14,6 +14,7 @@
 
 //std
 #include <sstream>
+#include <unordered_map>
 
 namespace lomse
 {
@@ -35,6 +36,12 @@ private:
     std::string         m_fontStyle = "normal";
     std::string         m_fontWeight = "normal";
     std::string         m_fontFamily = "Bravura";
+    std::string         m_id;
+    std::string         m_class;
+    int                 m_indentLevel = 0;
+    bool                m_fIsSimple = true;     //it is a simple notation
+    bool                m_fPathOpen = false;    //open path pending to be closed
+    std::unordered_map<std::string, int> m_ids;     //for detecting duplicated id
 
 public:
     SvgDrawer(LibraryScope& libraryScope, std::ostream& svgstream, const SvgOptions& opt);
@@ -198,6 +205,14 @@ public:
     //info
     //---------------------------------------
     bool is_ready() const override;
+    bool accepts_id_class() const override { return true; }
+
+
+    //shapes info
+    //---------------------------------------
+    void start_simple_notation(std::string id, std::string classname) override;
+    void start_composite_notation(std::string id, std::string classname) override;
+    void end_composite_notation() override;
 
 
     //Viewport info
@@ -214,7 +229,17 @@ public:
 
 protected:
     std::string to_svg(Color color);
-    void add_newline();
+    void new_line();
+    void indent_spaces();
+    void add_id_and_class(std::string id, std::string classname);
+    void add_id_and_class();
+    void start_element(std::string name);
+    std::string validate_id(const string& id);
+
+    //helper
+    inline void set_indent_level(int value) { m_indentLevel = value; }
+    inline void increment_indent_level() { ++m_indentLevel; }
+    inline void decrement_indent_level() { --m_indentLevel; }
 
 };
 

@@ -177,6 +177,17 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
     LUnits uyTop = m_origin.y;
     LUnits uyBottom = m_origin.y + m_size.height;
 
+    ImoObj* pImo = get_creator_imo();
+    bool fSystemicBarline = (pImo && pImo->is_score()) ? true : false;
+
+    if (pDrawer->accepts_id_class())
+    {
+        if (fSystemicBarline)
+            pDrawer->start_simple_notation(get_notation_id("barline"), "systemic-barline");
+        else
+            pDrawer->start_composite_notation(get_notation_id(), get_notation_class());
+    }
+
     switch(m_nBarlineType)
     {
         case k_barline_double:
@@ -244,6 +255,9 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class() && !fSystemicBarline)
+        pDrawer->end_composite_notation();
 }
 
 //---------------------------------------------------------------------------------------
