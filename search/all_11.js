@@ -78,12 +78,17 @@ var searchData=
   ['speventupdateviewport',['SpEventUpdateViewport',['../group__typedefs.html#gaff7479a518c7017d5be9b4fdc1e33af3',1,'lomse_events.h']]],
   ['speventvisualtracking',['SpEventVisualTracking',['../group__typedefs.html#ga47be70345a2479a5149d0fbc11e14e6a',1,'lomse_events.h']]],
   ['spinteractor',['SpInteractor',['../group__typedefs.html#gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1',1,'lomse_presenter.h']]],
+  ['start_5fcomposite_5fnotation',['start_composite_notation',['../classDrawer.html#a7450b593a4e0b214414c59cf134f145d',1,'Drawer']]],
+  ['start_5fsimple_5fnotation',['start_simple_notation',['../classDrawer.html#ae84fa3c07092923c73cf60c5f55837b9',1,'Drawer']]],
   ['step',['step',['../classDiatonicPitch.html#a470c4c777e7fae4a1af057df12a808bf',1,'DiatonicPitch::step()'],['../classMidiPitch.html#ae2f5b6a3bb9f9569c5f27d26a09e2a37',1,'MidiPitch::step()'],['../classFPitch.html#a1096be9af9f02019e9585ac613d05bdb',1,'FPitch::step()']]],
   ['stop',['stop',['../classScorePlayer.html#a483c27df7c046f56517f6b610576636d',1,'ScorePlayer']]],
   ['stroke',['stroke',['../classDrawer.html#ab36eebcb9de8562cbd5b7d09747978ad',1,'Drawer']]],
   ['stroke_5fnone',['stroke_none',['../classDrawer.html#a7eda2ffe8865e51530a0035e219f4c43',1,'Drawer']]],
   ['stroke_5fwidth',['stroke_width',['../classDrawer.html#a10286704e69a18b06ccad40abcd5c065',1,'Drawer']]],
+  ['svg_5fadd_5fclass',['svg_add_class',['../classInteractor.html#a6ae3c8d90f9085f15d86aae5ddc6fa7b',1,'Interactor']]],
+  ['svg_5fadd_5fid',['svg_add_id',['../classInteractor.html#af813bf9d59ac9f48e09e91f059e3449e',1,'Interactor']]],
   ['svg_5fadd_5fnewlines',['svg_add_newlines',['../classInteractor.html#a3b76dce8cfd386733b6241b7ba3b515a',1,'Interactor']]],
+  ['svg_5findent',['svg_indent',['../classInteractor.html#afb078f8048218a16e433ee74f5d38501',1,'Interactor']]],
   ['switch_5ftask',['switch_task',['../classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f',1,'Interactor']]],
   ['symbol',['symbol',['../classAInstrGroup.html#a6d585a4d35423226e702000196f38a93',1,'AInstrGroup']]]
 ];

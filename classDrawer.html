@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.0</span>
+   &#160;<span id="projectnumber">0.29.1</span>
    </div>
   </td>
  </tr>
@@ -221,6 +221,15 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a04960eb3cb3f70addd65ad9f96c00aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfef86f31df19773a5fde6baac46c8d8"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#acfef86f31df19773a5fde6baac46c8d8">model_to_device_units</a> (LUnits value) const =0</td></tr>
 <tr class="separator:acfef86f31df19773a5fde6baac46c8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Shapes info</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>These methods serve to provide the <a class="el" href="classDrawer.html">Drawer</a> with information about the shapes it is drawing. This information is normally irrelevant but in some cases (e.g.SVG) it can be incorporated into the output if desired. </p>
+</div></td></tr>
+<tr class="memitem:ae84fa3c07092923c73cf60c5f55837b9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#ae84fa3c07092923c73cf60c5f55837b9">start_simple_notation</a> (std::string UNUSED(id), std::string UNUSED(classname))</td></tr>
+<tr class="separator:ae84fa3c07092923c73cf60c5f55837b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7450b593a4e0b214414c59cf134f145d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#a7450b593a4e0b214414c59cf134f145d">start_composite_notation</a> (std::string UNUSED(id), std::string UNUSED(classname))</td></tr>
+<tr class="separator:a7450b593a4e0b214414c59cf134f145d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1959c83923da6b3537521afe9ea06a71"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#a1959c83923da6b3537521afe9ea06a71">end_composite_notation</a> ()</td></tr>
+<tr class="separator:a1959c83923da6b3537521afe9ea06a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Viewport info</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>Viewport is a concept related to the View, not to the Drawer. But for some Drawer implementations, this information can be required. For instance, the Drawer can speed up rendition if it knows the area that is currently visible, so that it can ignore non-visible areas. Therefore, the View always informs the Drawer when any change in the viewport. Received coordinates are in device units (e.g. Pixels). </p>
 </div></td></tr>
@@ -231,6 +240,8 @@ Public Member Functions</h2></td></tr>
 <tr><td colspan="2"><div class="groupHeader">Other methods</div></td></tr>
 <tr class="memitem:a12dbac4eff7ef28898ba9a9f643434ba"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#a12dbac4eff7ef28898ba9a9f643434ba">is_ready</a> () const =0</td></tr>
 <tr class="separator:a12dbac4eff7ef28898ba9a9f643434ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26b7ee7adeaf2fdc384eb2c53c7a7feb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDrawer.html#a26b7ee7adeaf2fdc384eb2c53c7a7feb">accepts_id_class</a> () const</td></tr>
+<tr class="separator:a26b7ee7adeaf2fdc384eb2c53c7a7feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab2a64350c99445a02dbf5fd65118707a"></a>
@@ -285,6 +296,32 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a26b7ee7adeaf2fdc384eb2c53c7a7feb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26b7ee7adeaf2fdc384eb2c53c7a7feb">&#9670;&nbsp;</a></span>accepts_id_class()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool Drawer::accepts_id_class </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns <span class="literal">true</span> if the Drawer accepts 'id' and 'class' information </p>
+
+</div>
+</div>
 <a id="a5d9e490faf48d1436bbcc70da8510ca0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5d9e490faf48d1436bbcc70da8510ca0">&#9670;&nbsp;</a></span>add_path()</h2>
 
@@ -909,18 +946,14 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Select the font to be used form now on in all text rendering methods. The parameters are equivalent to the attibutes in the "text" SVG element. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Render a character rotated. This method is equivalent to providing the x,y attributes for the "&lt;text&gt;" SVG element, the string content for that element and the rotation parameters for the affine transform. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">language</td><td>A language code drawn from ISO 639, optionally extended with a country code drawn from ISO 3166, as 'en-US'. It represents the default language for the texts to be rendered. If not specified "en" is assumed. </td></tr>
-    <tr><td class="paramname">fontFile</td><td>Filename (without path) for the font file to use. This parameter is deprecated and should not be used; it will normally be empty. </td></tr>
-    <tr><td class="paramname">fontName</td><td>The name of a font, as it is usually specified in the 'font-name' CCS property. But it must contain only one font name, without quotes, e.g.: "Times New Roman". It can be generic, e.g.: "sans". </td></tr>
-    <tr><td class="paramname">height</td><td>Desired font height, in points. </td></tr>
-    <tr><td class="paramname">fBold</td><td><span class="literal">true</span> if the desired font weight is 'bold'. </td></tr>
-    <tr><td class="paramname">fItalic</td><td><span class="literal">true</span> if the desired font style is 'italic'.</td></tr>
+    <tr><td class="paramname">x,y</td><td>Destination point, in model coordinates (LUnits). </td></tr>
+    <tr><td class="paramname">ch</td><td>The character to render. </td></tr>
+    <tr><td class="paramname">rotation</td><td>The rotation to apply, in radians. </td></tr>
   </table>
   </dd>
 </dl>
-<p>The font file must be selected based on the values for all these parameters. If exact match is not possible it is expected than a substitution font be selected. </p>
 
 </div>
 </div>
@@ -1019,6 +1052,32 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a1959c83923da6b3537521afe9ea06a71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1959c83923da6b3537521afe9ea06a71">&#9670;&nbsp;</a></span>end_composite_notation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Drawer::end_composite_notation </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This method is used to inform the <a class="el" href="classDrawer.html">Drawer</a> that the drawing of a composite element has finished. </p>
 
 </div>
 </div>
@@ -2218,6 +2277,80 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a7450b593a4e0b214414c59cf134f145d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7450b593a4e0b214414c59cf134f145d">&#9670;&nbsp;</a></span>start_composite_notation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Drawer::start_composite_notation </td>
+          <td>(</td>
+          <td class="paramtype">std::string &#160;</td>
+          <td class="paramname"><em>UNUSED</em>id, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &#160;</td>
+          <td class="paramname"><em>UNUSED</em>classname&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This method is used to inform the <a class="el" href="classDrawer.html">Drawer</a> that the drawing of a new composite element (that is, an element requiring several SVG commands) is going to start. </p>
+
+</div>
+</div>
+<a id="ae84fa3c07092923c73cf60c5f55837b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae84fa3c07092923c73cf60c5f55837b9">&#9670;&nbsp;</a></span>start_simple_notation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Drawer::start_simple_notation </td>
+          <td>(</td>
+          <td class="paramtype">std::string &#160;</td>
+          <td class="paramname"><em>UNUSED</em>id, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &#160;</td>
+          <td class="paramname"><em>UNUSED</em>classname&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This method is used to inform the <a class="el" href="classDrawer.html">Drawer</a> that the drawing of a new simple element (that is, an element requiring just one SVG command) is going to start. </p>
+
+</div>
+</div>
 <a id="ab36eebcb9de8562cbd5b7d09747978ad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab36eebcb9de8562cbd5b7d09747978ad">&#9670;&nbsp;</a></span>stroke()</h2>
 
@@ -2358,7 +2491,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDrawer.html">Drawer</a></li>
-    <li class="footer">Generated on Sat Mar 12 2022 16:06:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 18 2022 10:45:31 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

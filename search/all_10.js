@@ -1,6 +1,7 @@
 var searchData=
 [
   ['rendering_20documents_20overview',['Rendering documents overview',['../page-render-overview.html',1,'index']]],
+  ['render_20in_20svg_20format',['Render in SVG format',['../page-render-svg.html',1,'index']]],
   ['rect',['rect',['../classDrawer.html#a386d1164011790fa544951eb21397c69',1,'Drawer']]],
   ['redo',['redo',['../classDocCommandExecuter.html#a7097c7794a72b27d9c8e026684c9f8d5',1,'DocCommandExecuter']]],
   ['redraw_5fbitmap',['redraw_bitmap',['../classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4',1,'Interactor']]],

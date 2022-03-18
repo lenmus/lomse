@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.0</span>
+   &#160;<span id="projectnumber">0.29.1</span>
    </div>
   </td>
  </tr>
@@ -260,8 +260,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr class="separator:a2ccfc63c77a50a8fb1cde79cf7ee409b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa040afd91607d22b6f8d8e4748acd524"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aa040afd91607d22b6f8d8e4748acd524">set_svg_canvas_width</a> (Pixels x)</td></tr>
 <tr class="separator:aa040afd91607d22b6f8d8e4748acd524"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb078f8048218a16e433ee74f5d38501"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#afb078f8048218a16e433ee74f5d38501">svg_indent</a> (int value)</td></tr>
+<tr class="separator:afb078f8048218a16e433ee74f5d38501"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b76dce8cfd386733b6241b7ba3b515a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a3b76dce8cfd386733b6241b7ba3b515a">svg_add_newlines</a> (bool value)</td></tr>
 <tr class="separator:a3b76dce8cfd386733b6241b7ba3b515a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af813bf9d59ac9f48e09e91f059e3449e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#af813bf9d59ac9f48e09e91f059e3449e">svg_add_id</a> (bool value)</td></tr>
+<tr class="separator:af813bf9d59ac9f48e09e91f059e3449e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ae3c8d90f9085f15d86aae5ddc6fa7b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a6ae3c8d90f9085f15d86aae5ddc6fa7b">svg_add_class</a> (bool value)</td></tr>
+<tr class="separator:a6ae3c8d90f9085f15d86aae5ddc6fa7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Cursor and caret related methods</div></td></tr>
 <tr class="memitem:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memItemLeft" align="right" valign="top">DocCursor *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">get_cursor</a> ()</td></tr>
 <tr class="separator:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2174,7 +2180,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<p>See svg-drawing </p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
 
 </div>
 </div>
@@ -2868,11 +2874,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <p>The width must be set before invoking <a class="el" href="classInteractor.html#a2ccfc63c77a50a8fb1cde79cf7ee409b">render_as_svg()</a> but this is only needed when using the <em>k_view_free_flow</em> View type. For all other view types any value set using this method will be overriden by the document page width so it is useless to invoke it but does not harm.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">the</td><td>desired width for the score in pixels. For most applications, this value should be the width of the HTML element in which the generated SVG code will be inserted.</td></tr>
+    <tr><td class="paramname">x</td><td>The desired width for the score in pixels. For most applications, this value should be the width of the HTML element in which the generated SVG code will be inserted.</td></tr>
   </table>
   </dd>
 </dl>
-<p>See svg-drawing </p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
 
 </div>
 </div>
@@ -3065,6 +3071,76 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 
 </div>
 </div>
+<a id="a6ae3c8d90f9085f15d86aae5ddc6fa7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ae3c8d90f9085f15d86aae5ddc6fa7b">&#9670;&nbsp;</a></span>svg_add_class()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::svg_add_class </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Enable / disable the generation of 'class' attribute in SVG elements.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling the generation of 'class' attributes. <span class="literal">false</span> for disabling it.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>By default, generation of 'class' attributes is disabled.</p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
+
+</div>
+</div>
+<a id="af813bf9d59ac9f48e09e91f059e3449e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af813bf9d59ac9f48e09e91f059e3449e">&#9670;&nbsp;</a></span>svg_add_id()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::svg_add_id </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Enable / disable the generation of 'id' attribute in SVG elements.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling the generation of 'id' attributes. <span class="literal">false</span> for disabling it.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>By default, generation of 'id' attributes is disabled.</p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
+
+</div>
+</div>
 <a id="a3b76dce8cfd386733b6241b7ba3b515a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3b76dce8cfd386733b6241b7ba3b515a">&#9670;&nbsp;</a></span>svg_add_newlines()</h2>
 
@@ -3088,6 +3164,41 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enable or disable the generation of a line break after each SVG element.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling the generation of line breaks. <span class="literal">false</span> for disabling it.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>By default, Lomse generates the SVG code to be as compact as possible and, thus, it does not include line breaks.</p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
+
+</div>
+</div>
+<a id="afb078f8048218a16e433ee74f5d38501"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb078f8048218a16e433ee74f5d38501">&#9670;&nbsp;</a></span>svg_indent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::svg_indent </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 <p>Set the number of spaces for indenting SVG elements.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -3095,14 +3206,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<p>By default, Lomse generates the SVG code to be as compact as possible and, thus, it does not include indentation spaces. So default value is 0.Enable or disable the generation of a line break after each SVG element.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling the generation of line breaks. <span class="literal">false</span> for disabling it.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>By default, Lomse generates the SVG code to be as compact as possible and, thus, it does not include line breaks. </p>
+<p>By default, Lomse generates the SVG code to be as compact as possible and, thus, it does not include indentation spaces. So default value is 0.</p>
+<p>See <a class="el" href="page-render-svg.html">Render in SVG format</a> </p>
 
 </div>
 </div>
@@ -3370,7 +3475,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sat Mar 12 2022 16:06:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 18 2022 10:45:31 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

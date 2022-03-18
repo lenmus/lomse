@@ -5,7 +5,6 @@ var searchData=
   ['mark_5fas_5fno_5frecordable',['mark_as_no_recordable',['../classDocCmdComposite.html#ae206817e6d052e222048133bb712ef0b',1,'DocCmdComposite']]],
   ['mark_5fas_5fno_5freversible',['mark_as_no_reversible',['../classDocCmdComposite.html#a9976bc78278fdd1741bfb42fb5f255fe',1,'DocCmdComposite']]],
   ['mark_5fas_5ftarget_5fset_5fin_5fconstructor',['mark_as_target_set_in_constructor',['../classDocCmdComposite.html#a1c0239333e2adb5f6b9dd35be595246b',1,'DocCmdComposite']]],
-  ['markervertexsource',['MarkerVertexSource',['../classMarkerVertexSource.html',1,'']]],
   ['midi_5finfo',['midi_info',['../classASoundInfo.html#ad62152be605f16d58791f993ceb655c8',1,'ASoundInfo']]],
   ['midipitch',['MidiPitch',['../classMidiPitch.html',1,'MidiPitch'],['../classMidiPitch.html#a5c7b045d52d7e7de3f844d0fb5092705',1,'MidiPitch::MidiPitch(int note)'],['../classMidiPitch.html#ab232657af2658882d2d32f40131a5d1a',1,'MidiPitch::MidiPitch(int step, int octave, int acc=0)']]],
   ['midiserverbase',['MidiServerBase',['../classMidiServerBase.html',1,'MidiServerBase'],['../classMidiServerBase.html#ac96968b04c1d60f5acad32cf9e90dd0c',1,'MidiServerBase::MidiServerBase()']]],

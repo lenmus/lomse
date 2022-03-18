@@ -1,6 +1,7 @@
 var searchData=
 [
   ['abbreviation_5fstring',['abbreviation_string',['../classAInstrument.html#ad7cbca5e1149cde13dfbc2efd722551d',1,'AInstrument::abbreviation_string()'],['../classAInstrGroup.html#a81d005d2f03ecb026d75d20c0779b837',1,'AInstrGroup::abbreviation_string()']]],
+  ['accepts_5fid_5fclass',['accepts_id_class',['../classDrawer.html#a26b7ee7adeaf2fdc384eb2c53c7a7feb',1,'Drawer']]],
   ['accidentals',['accidentals',['../classMidiPitch.html#ab5f644191143be9d52f120121ee85e02',1,'MidiPitch::accidentals()'],['../classFPitch.html#a99d08e4e6aff88379b4e38bd17c7a57c',1,'FPitch::accidentals()']]],
   ['add_5fchild_5fcommand',['add_child_command',['../classDocCmdComposite.html#aa21db253f7e9c18a136cd8f0f37170ab',1,'DocCmdComposite']]],
   ['add_5fevent_5fhandler',['add_event_handler',['../classObservable.html#aa350bb80a827421d21cb68ee3131f61f',1,'Observable::add_event_handler(int eventType, EventHandler *pHandler)'],['../classObservable.html#a9ab7b17ee247743097ba03b5b71188b9',1,'Observable::add_event_handler(int eventType, void *pThis, void(*pt2Func)(void *pObj, SpEventInfo event))'],['../classObservable.html#a0869e9051c399e3a80782dec852c5393',1,'Observable::add_event_handler(int eventType, void(*pt2Func)(SpEventInfo event))'],['../classObservable.html#a8d2baa5abf0de7c2dfe7c1df9b93ea9b',1,'Observable::add_event_handler(int childType, ImoId childId, int eventType, EventHandler *pHandler)'],['../classObservable.html#aaf457b8237c92af44e8c336cc1602e31',1,'Observable::add_event_handler(int childType, ImoId childId, int eventType, void *pThis, void(*pt2Func)(void *pObj, SpEventInfo event))'],['../classObservable.html#aef775f227ab270e6b6e4f8cec0d69243',1,'Observable::add_event_handler(int childType, ImoId childId, int eventType, void(*pt2Func)(SpEventInfo event))']]],
@@ -28,5 +29,5 @@ var searchData=
   ['ascore',['AScore',['../classAScore.html',1,'']]],
   ['asoundinfo',['ASoundInfo',['../classASoundInfo.html',1,'']]],
   ['atextitem',['ATextItem',['../classATextItem.html',1,'']]],
-  ['application_20specific_20_25drawer_20objects',['Application specific %Drawer objects',['../page-user-drawers.html',1,'page-render-overview']]]
+  ['application_20specific_20_25drawer_20objects',['Application specific %Drawer objects',['../page-user-drawers.html',1,'']]]
 ];

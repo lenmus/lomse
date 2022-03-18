@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.0</span>
+   &#160;<span id="projectnumber">0.29.1</span>
    </div>
   </td>
  </tr>
@@ -448,7 +448,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Before using the library, method <a class="el" href="classLomseDoorway.html#af65c535236e088710cf055c9180f34fa">init_library()</a> <b>must</b> be invoked for initializing the library and providing the necessary information. As Lomse renders scores and documents on a bitmap it is necessary to inform Lomse about the required bitmap properties. Also, you can set an ostream to be used by Lomse for reporting errors.</p>
+<p>Before using the library, method <a class="el" href="classLomseDoorway.html#af65c535236e088710cf055c9180f34fa">init_library()</a> should be invoked for initializing the library and providing the necessary information. As Lomse renders scores and documents on a bitmap it is necessary to inform Lomse about the required bitmap properties. Also, you can set an ostream to be used by Lomse for reporting errors.</p>
+<p>Initialization is not required if your application will not use Lomse to render scores in bitmaps, e.g.: uses it only for playback or only renders SVG code. In these cases any values for pixel format and resolution will be valid and so, default values are enough and you will not have to invoke this method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pixel_format</td><td>A value from the global enumeration type <a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
@@ -503,7 +504,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the <a class="el" href="classPresenter.html">Presenter</a> to be used for interacting with this document.</dd></dl>
 <dl class="section attention"><dt>Attention</dt><dd>As <a class="el" href="classPresenter.html">Presenter</a> ownership is transferred to user application, you have to take care of deleting the <a class="el" href="classPresenter.html">Presenter</a> when no longer needed. Deleting the <a class="el" href="classPresenter.html">Presenter</a> will automatically cause deletion of all MVC involved objects: the Document, all existing Views and Interactors, etc., as well as any passed <a class="el" href="classDrawer.html">Drawer</a> objects.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="page-render-overview.html">Rendering documents overview</a>, <a class="el" href="page-user-drawers.html">Application specific Drawer objects</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="page-render-overview.html">Rendering documents overview</a> </dd></dl>
 
 </div>
 </div>
@@ -834,7 +835,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Sat Mar 12 2022 16:06:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 18 2022 10:45:31 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>
