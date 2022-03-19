@@ -45,7 +45,7 @@ LUnits StaffSymbolEngraver::tenths_to_logical(Tenths value) const
 //---------------------------------------------------------------------------------------
 double StaffSymbolEngraver::determine_font_size()
 {
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
+    return m_pMeter->font_size_for_notation(m_iInstr, m_iStaff);
 }
 
 //=======================================================================================

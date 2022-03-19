@@ -88,6 +88,7 @@ protected:
     void add_shapes_for_accidentals_if_required();
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
     int get_glyph_for_notehead(int notehead);
+    int get_glyph_for_tablature();
     int get_glyphs_for_accidentals();
     LUnits get_pitch_shift();
     int get_pos_on_staff();
@@ -105,6 +106,7 @@ protected:
     inline bool has_flag() { return m_noteType >= k_eighth && !m_pNote->is_stem_none(); }
     inline bool is_beamed() { return m_pNote && m_pNote->is_beamed(); }
     Tenths get_glyph_offset(int iGlyph);
+    inline bool is_tablature() { return m_clefType == k_clef_TAB; }
 
 
     //overrides for Engraver

@@ -2980,6 +2980,55 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ fret & string -------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_fret_string_01)
+    {
+        //@01. minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<technical><fret>3</fret><string>4</string></technical>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            CHECK( pNote->get_num_attachments() == 1 );
+            ImoFretString* pFS = dynamic_cast<ImoFretString*>( pNote->get_attachment(0) );
+            CHECK( pFS != nullptr );
+            if (pFS)
+            {
+                CHECK( pFS->get_fret() == 3 );
+                CHECK( pFS->get_string() == 4 );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+
     //@ key ------------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_01)
@@ -6723,6 +6772,44 @@ SUITE(MxlAnalyserTest)
             CHECK( is_equal_float(pInfo->get_line_spacing(), LOMSE_STAFF_LINE_SPACING) );
             CHECK( is_equal_float(pInfo->get_line_thickness(), LOMSE_STAFF_LINE_THICKNESS) );
             CHECK( is_equal_float(pInfo->get_staff_margin(), LOMSE_STAFF_TOP_MARGIN) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_staff_details_02)
+    {
+        //@02. <staff-size> imported ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<staff-details><staff-size scaling='100'>167</staff-size></staff-details>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_staff_info() == true );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        CHECK( pInfo != nullptr );
+        if (pInfo)
+        {
+            CHECK( pInfo->get_staff_number() == 0 );
+            CHECK( pInfo->get_num_lines() == 5 );
+            CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
+            CHECK( is_equal_float(pInfo->get_line_spacing(), LOMSE_STAFF_LINE_SPACING * 1.67) );
+            CHECK( is_equal_float(pInfo->get_line_thickness(), LOMSE_STAFF_LINE_THICKNESS) );
+            CHECK( is_equal_float(pInfo->get_staff_margin(), LOMSE_STAFF_TOP_MARGIN) );
+            CHECK( is_equal_float(pInfo->get_notation_scaling(), 100.0/167.0) );
         }
 
         a.do_not_delete_instruments_in_destructor();

@@ -97,6 +97,8 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, int octaveShi
 double NoteEngraver::determine_font_size()
 {
     double fontSize = StaffSymbolEngraver::determine_font_size();
+    if (is_tablature())
+        fontSize *= 0.45;
 
     switch (m_symbolSize)
     {
@@ -152,9 +154,12 @@ void NoteEngraver::create_shape()
     //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines
     add_shapes_for_accidentals_if_required();
     add_notehead_shape();
-    add_shapes_for_dots_if_required();
-    add_stem_and_flag_if_required();
-    add_leger_lines_if_necessary();
+    if (!is_tablature())
+    {
+        add_shapes_for_dots_if_required();
+        add_stem_and_flag_if_required();
+        add_leger_lines_if_necessary();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -326,7 +331,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
 //---------------------------------------------------------------------------------------
 void NoteEngraver::add_shapes_for_accidentals_if_required()
 {
-    if (m_acc != k_no_accidentals)
+    if (!is_tablature() && m_acc != k_no_accidentals)
     {
         AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
         m_pAccidentalsShape = engrv.create_shape(m_pNote, UPoint(m_uxLeft, m_uyTop),
@@ -356,9 +361,11 @@ void NoteEngraver::add_notehead_shape()
 //---------------------------------------------------------------------------------------
 int NoteEngraver::decide_notehead_type()
 {
-    //TODO: Notehead cross
-
-    //if (! m_fCabezaX)
+    if (is_tablature())
+    {
+        return k_notehead_fret;
+    }
+    else
     {
         if (m_noteType > k_half) {
             return k_notehead_quarter;
@@ -375,13 +382,14 @@ int NoteEngraver::decide_notehead_type()
             return k_notehead_quarter;
         }
     }
-//    else
-//        return k_notehead_cross;
 }
 
 //---------------------------------------------------------------------------------------
 int NoteEngraver::get_glyph_for_notehead(int noteheadType)
 {
+    if (is_tablature())
+        return get_glyph_for_tablature();
+
     switch (noteheadType)
     {
         case k_notehead_longa:
@@ -397,7 +405,42 @@ int NoteEngraver::get_glyph_for_notehead(int noteheadType)
         case k_notehead_cross:
             return k_glyph_notehead_cross;
         default:
-            //LogMessage("NoteEngraver::get_glyph_for_notehead]", "Invalid value for notehead type");
+            return k_glyph_notehead_quarter;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int NoteEngraver::get_glyph_for_tablature()
+{
+    ImoFretString* pFS =
+        static_cast<ImoFretString*>( m_pNote->find_attachment(k_imo_fret_string) );
+
+    if (pFS == nullptr)
+        return k_glyph_notehead_quarter;
+
+    switch (pFS->get_fret())
+    {
+        case 0:
+            return k_glyph_function_0;
+        case 1:
+            return k_glyph_function_1;
+        case 2:
+            return k_glyph_function_2;
+        case 3:
+            return k_glyph_function_3;
+        case 4:
+            return k_glyph_function_4;
+        case 5:
+            return k_glyph_function_5;
+        case 6:
+            return k_glyph_function_6;
+        case 7:
+            return k_glyph_function_7;
+        case 8:
+            return k_glyph_function_8;
+        case 9:
+            return k_glyph_function_9;
+        default:
             return k_glyph_notehead_quarter;
     }
 }
@@ -405,7 +448,40 @@ int NoteEngraver::get_glyph_for_notehead(int noteheadType)
 //---------------------------------------------------------------------------------------
 int NoteEngraver::get_pos_on_staff()
 {
-    return pitch_to_pos_on_staff(m_pNote, m_clefType, m_octaveShift);
+    // Returns the position on the staff (line/space) referred to the first ledger line of
+    // the staff. It is clef independent:
+    //        0 - on first ledger line (C4 note in G2 clef, E2 note in F4 clef, etc.)
+    //        1 - on next space (D4 note in G2 clef, F2 note in F4 clef, etc.)
+    //        2 - on first line (E4 note in G2 clef, G2 note in F4 clef, etc.)
+    //        3 - on first space
+    //        4 - on second line
+    //        5 - on second space
+    //        etc.
+
+    if (is_tablature())
+    {
+        //pos.    staff   tablature
+        //staff   line    string
+        //10      5       1
+        //8       4       2
+        //6       3       3
+        //4       2       4
+        //2       1       5
+        //0       0       6
+        //
+        //Thus, we have the following relations: s+t = 6 and p=2*s
+        //Therefore, as s=6-t  then  p=2*(6-t)
+
+        ImoFretString* pFS =
+            static_cast<ImoFretString*>( m_pNote->find_attachment(k_imo_fret_string) );
+
+        if (pFS == nullptr)
+            return 0;
+
+        return 2 * (6 - pFS->get_string());
+    }
+    else
+        return pitch_to_pos_on_staff(m_pNote, m_clefType, m_octaveShift);
 }
 
 //---------------------------------------------------------------------------------------
@@ -596,12 +672,19 @@ Tenths NoteEngraver::get_standard_stem_length(int nPosOnStaff, bool fStemDown)
 //---------------------------------------------------------------------------------------
 Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 {
-    //AWARE: notehead registration is as follows:
-    // * Vertically centered on the baseline.
-    // * Noteheads should be positioned as if on the bottom line of the staff.
-    // * The leftmost point coincides with x = 0.
+    if (is_tablature())
+    {
+        return m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 53.0f;
+    }
+    else
+    {
+        //AWARE: notehead registration is as follows:
+        // * Vertically centered on the baseline.
+        // * Noteheads should be positioned as if on the bottom line of the staff.
+        // * The leftmost point coincides with x = 0.
 
-    return m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 50.0f;
+        return m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 50.0f;
+    }
 }
 
 //---------------------------------------------------------------------------------------

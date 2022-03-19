@@ -58,6 +58,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_fermata:             pObj = LOMSE_NEW ImoFermata();            break;
         case k_imo_fingering:           pObj = LOMSE_NEW ImoFingering();          break;
         case k_imo_font_style_dto:      pObj = LOMSE_NEW ImoFontStyleDto();       break;
+        case k_imo_fret_string:         pObj = LOMSE_NEW ImoFretString();         break;
         case k_imo_go_back_fwd:         pObj = LOMSE_NEW ImoGoBackFwd();          break;
         case k_imo_grace_relobj:        pObj = LOMSE_NEW ImoGraceRelObj();        break;
         case k_imo_heading:             pObj = LOMSE_NEW ImoHeading();            break;
