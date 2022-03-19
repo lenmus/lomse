@@ -5165,7 +5165,7 @@ LUnits ImoStaffInfo::get_height() const
     //When 1 line or 5 lines, height is 5 lines (4 spaces)
     //Otherwise, the height is the number of visible lines + 2 (one space above and below)
 
-    int numVisible = m_nNumLines;
+    int numVisible = (m_nNumLines < 5 ? 5 : m_nNumLines);
     if (!m_fTablature && (m_nNumLines != 1 && m_nNumLines != 5))
         numVisible = m_nNumLines + 2;
 

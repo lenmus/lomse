@@ -1,0 +1,127 @@
+<score-partwise version="4.0">
+   <part-list>
+      <score-part id="P1">
+         <part-name print-object="no">Guitar [TAB]</part-name>
+      </score-part>
+   </part-list>
+   <part id="P1">
+      <measure number="1">
+         <attributes>
+            <divisions>2</divisions>
+            <key print-object="no">
+               <fifths>0</fifths>
+               <mode>major</mode>
+            </key>
+            <time print-object="no">
+               <beats>4</beats>
+               <beat-type>4</beat-type>
+            </time>
+            <clef>
+               <sign>TAB</sign>
+               <line>5</line>
+            </clef>
+            <staff-details>
+               <staff-lines>6</staff-lines>
+               <staff-tuning line="1">
+                  <tuning-step>E</tuning-step>
+                  <tuning-octave>2</tuning-octave>
+               </staff-tuning>
+               <staff-tuning line="2">
+                  <tuning-step>A</tuning-step>
+                  <tuning-octave>2</tuning-octave>
+               </staff-tuning>
+               <staff-tuning line="3">
+                  <tuning-step>D</tuning-step>
+                  <tuning-octave>3</tuning-octave>
+               </staff-tuning>
+               <staff-tuning line="4">
+                  <tuning-step>G</tuning-step>
+                  <tuning-octave>3</tuning-octave>
+               </staff-tuning>
+               <staff-tuning line="5">
+                  <tuning-step>B</tuning-step>
+                  <tuning-octave>3</tuning-octave>
+               </staff-tuning>
+               <staff-tuning line="6">
+                  <tuning-step>E</tuning-step>
+                  <tuning-octave>4</tuning-octave>
+               </staff-tuning>
+               <staff-size scaling="100">167</staff-size>
+            </staff-details>
+         </attributes>
+          <note>
+            <pitch>
+              <step>B</step>
+              <octave>2</octave>
+            </pitch>
+            <duration>3</duration>
+            <voice>1</voice>
+            <type>eighth</type>
+            <dot/>
+            <stem>none</stem>
+            <notations>
+              <technical>
+                <string>6</string>
+                <fret>5</fret>
+              </technical>
+            </notations>
+          </note>
+          <note>
+            <chord/>
+            <pitch>
+              <step>F</step>
+              <alter>1</alter>
+              <octave>3</octave>
+            </pitch>
+            <duration>3</duration>
+            <voice>1</voice>
+            <type>eighth</type>
+            <dot/>
+            <stem>none</stem>
+            <notations>
+              <technical>
+                <string>5</string>
+                <fret>5</fret>
+              </technical>
+            </notations>
+          </note>
+          <note>
+            <chord/>
+            <pitch>
+              <step>A</step>
+              <alter>1</alter>
+              <octave>3</octave>
+            </pitch>
+            <duration>3</duration>
+            <voice>1</voice>
+            <type>eighth</type>
+            <dot/>
+            <stem>none</stem>
+            <notations>
+              <technical>
+                <string>4</string>
+                <fret>4</fret>
+              </technical>
+            </notations>
+          </note>
+          <note>
+            <chord/>
+            <pitch>
+              <step>B</step>
+              <octave>3</octave>
+            </pitch>
+            <duration>3</duration>
+            <voice>1</voice>
+            <type>eighth</type>
+            <dot/>
+            <stem>none</stem>
+            <notations>
+              <technical>
+                <string>3</string>
+                <fret>0</fret>
+              </technical>
+            </notations>
+          </note>
+      </measure>
+   </part>
+</score-partwise>

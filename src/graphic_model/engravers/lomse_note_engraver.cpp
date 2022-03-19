@@ -416,7 +416,7 @@ int NoteEngraver::get_glyph_for_tablature()
         static_cast<ImoFretString*>( m_pNote->find_attachment(k_imo_fret_string) );
 
     if (pFS == nullptr)
-        return k_glyph_notehead_quarter;
+        return k_glyph_function_0;
 
     switch (pFS->get_fret())
     {

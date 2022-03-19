@@ -803,12 +803,6 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xEA5F),  // GLYPH_FIGURED_BASS_7_STRIKED,           // 7 with overlayered /
 
 //Function theory symbols (U+EA70–U+EA9F)
-//	GlyphData(0xED10, "fingering0"),		    //Fingering 0 (open string)
-//	GlyphData(0xED11, "fingering1"),		    //Fingering 1 (thumb)
-//	GlyphData(0xED12, "fingering2"),		    //Fingering 2 (index finger)
-//	GlyphData(0xED13, "fingering3"),		    //Fingering 3 (middle finger)
-//	GlyphData(0xED14, "fingering4"),		    //Fingering 4 (ring finger)
-//	GlyphData(0xED15, "fingering5"),		    //Fingering 5 (little finger)
     GlyphData(0xEA70),  // number 0
     GlyphData(0xEA71),  // number 1
     GlyphData(0xEA72),  // number 2
