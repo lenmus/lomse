@@ -708,6 +708,7 @@ enum ETechnical
     k_technical_triple_tongue,      ///< Triple tongue
     k_technical_hole,               ///< Hole
     k_technical_handbell,           ///< Handbell
+    k_technical_fret_string,      ///< Finger & string, for tablature and chord diagrams
 
     k_max_technical,				///< Last element, for loops and checks
 };
@@ -883,6 +884,7 @@ enum EImoObjType
     k_imo_auxobj,               ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Auxiliary object. Any of the following:</b>
     k_imo_dynamics_mark,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dynamics mark
     k_imo_fermata,          ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fermata
+    k_imo_fret_string,      ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fret and string, for tablature and chord diagrams
     k_imo_metronome_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Metronome mark
     k_imo_ornament,         ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ornament
     k_imo_pedal_mark,       ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pedal mark
@@ -4723,6 +4725,31 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** %ImoFretString is a derived class from ImoTechnical to represent fret and string
+    indications attached to a note/rest or to a chord diagram.
+*/
+class ImoFretString : public ImoTechnical
+{
+protected:
+    int m_fret = 1;
+    int m_string = 1;
+
+    friend class ImFactory;
+    ImoFretString() : ImoTechnical(k_imo_fret_string)
+    {
+        m_technicalType = k_technical_fret_string;
+    }
+
+public:
+
+    inline int get_fret() const { return m_fret; }
+    inline int get_string() const { return m_string; }
+    inline void set_fret(int value) { m_fret = value; }
+    inline void set_string(int value) { m_string = value; }
+
+};
+
+//---------------------------------------------------------------------------------------
 /** Helper class for ImoFingering, with all the information for one fingering element.
 
     - 'value' is the fingering symbols, normally numbers 1 to 5 (e.g "2") but other
@@ -4755,11 +4782,11 @@ public:
 
     //helper for flags
     inline bool is_substitution() const { return (flags & k_fingering_substitution) != 0; }
-    inline void set_substitution(bool value) { value ? flags |= k_fingering_substitution
-                                                     : flags &= ~k_fingering_substitution; }
+    inline void set_substitution(bool data) { data ? flags |= k_fingering_substitution
+                                                   : flags &= ~k_fingering_substitution; }
     inline bool is_alternative() const { return (flags & k_fingering_alternative) != 0; }
-    inline void set_alternative(bool value) { value ? flags |= k_fingering_alternative
-                                                    : flags &= ~k_fingering_alternative; }
+    inline void set_alternative(bool data) { data ? flags |= k_fingering_alternative
+                                                  : flags &= ~k_fingering_alternative; }
 
 };
 
@@ -5232,6 +5259,7 @@ public:
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
     LUnits get_line_thickness_for_staff(int iStaff);
+    double get_notation_scaling_for_staff(int iStaff);
     inline const std::string& get_instr_id() const { return m_partId; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
     inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
@@ -6342,7 +6370,9 @@ protected:
     int m_staffType;
     LUnits m_uSpacing;      //between line centers
     LUnits m_uLineThickness;
-    LUnits m_uMarging;      //distance from the bottom line of the previous staff
+    LUnits m_uMarging;              //distance from the bottom line of the previous staff
+    bool m_fTablature = false;      //This staff is for tablature notation
+    double m_notationScaling = 1.0;
 
     friend class ImFactory;
     friend class ImoInstrument;
@@ -6367,28 +6397,36 @@ public:
          };
 
     //staff number
-    inline int get_staff_number() { return m_numStaff; }
+    inline int get_staff_number() const { return m_numStaff; }
     inline void set_staff_number(int num) { m_numStaff = num; }
 
     //staff type
-    inline int get_staff_type() { return m_staffType; }
+    inline int get_staff_type() const { return m_staffType; }
     inline void set_staff_type(int type) { m_staffType = type; }
 
     //margins
-    inline LUnits get_staff_margin() { return m_uMarging; }
+    inline LUnits get_staff_margin() const { return m_uMarging; }
     inline void set_staff_margin(LUnits uSpace) { m_uMarging = uSpace; }
 
     //spacing and size
-    inline LUnits get_line_spacing() { return m_uSpacing; }
+    inline LUnits get_line_spacing() const { return m_uSpacing; }
     inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
-    LUnits get_height();
+    LUnits get_height() const;
+
+    //scaling
+    inline double get_notation_scaling() const { return m_notationScaling; }
+    inline void set_notation_scaling(double value) { m_notationScaling = value; }
 
     //lines
-    inline LUnits get_line_thickness() { return m_uLineThickness; }
+    inline LUnits get_line_thickness() const { return m_uLineThickness; }
     inline void set_line_thickness(LUnits uTickness) { m_uLineThickness = uTickness; }
-    inline int get_num_lines() { return m_nNumLines; }
+    inline int get_num_lines() const { return m_nNumLines; }
     inline void set_num_lines(int nLines) { m_nNumLines = nLines; }
-    bool is_line_visible(int iLine);
+    bool is_line_visible(int iLine) const;
+
+    //tablature
+    inline int is_for_tablature() const { return m_fTablature; }
+    inline void set_tablature(bool value) { m_fTablature = value; }
 
 protected:
     friend class MxlAnalyser;

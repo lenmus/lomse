@@ -139,6 +139,7 @@ protected:
     inline ImoNote* get_max_note() { return m_notes.back()->pNote; }
 	inline ImoNote* get_base_note() { return m_pBaseNoteData->pNote; }
     inline bool is_stem_up() { return !m_fStemDown; }
+    bool is_tablature();
 
 };
 

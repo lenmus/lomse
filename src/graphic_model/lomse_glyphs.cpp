@@ -802,6 +802,18 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xEA6B),  // GLYPH_FIGURED_BASS_CLOSE_PARENTHESIS,   // )
     GlyphData(0xEA5F),  // GLYPH_FIGURED_BASS_7_STRIKED,           // 7 with overlayered /
 
+//Function theory symbols (U+EA70–U+EA9F)
+    GlyphData(0xEA70),  // number 0
+    GlyphData(0xEA71),  // number 1
+    GlyphData(0xEA72),  // number 2
+    GlyphData(0xEA73),  // number 3
+    GlyphData(0xEA74),  // number 4
+    GlyphData(0xEA75),  // number 5
+    GlyphData(0xEA76),  // number 6
+    GlyphData(0xEA77),  // number 7
+    GlyphData(0xEA78),  // number 8
+    GlyphData(0xEA79),  // number 9
+
 //Multi-segment lines (U+EAA0 - U+EB0F)
     GlyphData(0xEAA4),  // Trill wiggle segment
     GlyphData(0xEAA9),  // Arpeggiato wiggle segment, upwards

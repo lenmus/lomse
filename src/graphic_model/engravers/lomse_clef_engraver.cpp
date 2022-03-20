@@ -56,6 +56,12 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pCreatorImo, UPoint uPos, int clef
     // get the shift to the staff on which the clef must be drawn
     LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), m_iInstr, m_iStaff);
 
+//    //fix shift for TAB clef
+//    if (m_nClefType == k_clef_TAB)
+//    {
+//        y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), m_iInstr, m_iStaff);
+//    }
+
     //Add minimum space before clef change
     LUnits x = uPos.x;
     if (symbolSize == k_size_cue)
@@ -66,7 +72,7 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pCreatorImo, UPoint uPos, int clef
     //create the shape object
     ShapeId idx = 0;
     m_pClefShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(x, y),
-                                        color, m_libraryScope, fontSize);
+                                          color, m_libraryScope, fontSize);
     return m_pClefShape;
 }
 
@@ -185,7 +191,7 @@ Tenths ClefEngraver::get_glyph_offset()
             case k_clef_C5:     return yOffset - 1.0f;
 
             case k_clef_percussion:     return yOffset + 20.0f;
-            case k_clef_TAB:            return yOffset + 20.0f;
+            case k_clef_TAB:            return yOffset + 25.0f;     //assumes 6 lines
             case k_clef_none:           return yOffset + 30.0f;
             default:
             {
@@ -220,7 +226,7 @@ Tenths ClefEngraver::get_glyph_offset()
             case k_clef_C5:     return yOffset;
 
             case k_clef_percussion:     return yOffset + 20.0f;
-            case k_clef_TAB:            return yOffset + 20.0f;
+            case k_clef_TAB:            return yOffset + 25.0f;     //assumes 6 lines
             case k_clef_none:           return yOffset + 30.0f;
 
             default:

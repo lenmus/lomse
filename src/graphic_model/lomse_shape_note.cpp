@@ -470,6 +470,33 @@ void GmoShapeNotehead::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
 
 //=======================================================================================
+// GmoShapeFret implementation
+//=======================================================================================
+void GmoShapeFret::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (pDrawer->accepts_id_class())
+        pDrawer->start_composite_notation("", "fret");
+
+    Color color(255,255,255);
+    LUnits hair = m_size.width / 8.0f;      //small gap at left and right
+    LUnits x = m_origin.x - hair;
+    pDrawer->fill(color);
+    pDrawer->begin_path();
+    pDrawer->move_to(x, m_origin.y);
+    pDrawer->hline_to(x + m_size.width + hair + hair);
+    pDrawer->vline_to(m_origin.y + m_size.height);
+    pDrawer->hline_to(x);
+    pDrawer->vline_to(m_origin.y);
+    pDrawer->end_path();
+
+    GmoShapeGlyph::on_draw(pDrawer, opt);
+
+    if (pDrawer->accepts_id_class())
+        pDrawer->end_composite_notation();
+}
+
+
+//=======================================================================================
 // GmoShapeDot implementation
 //=======================================================================================
 void GmoShapeDot::on_draw(Drawer* pDrawer, RenderOptions& opt)

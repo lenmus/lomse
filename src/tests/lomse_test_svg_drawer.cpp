@@ -1008,6 +1008,26 @@ SUITE(SvgDrawerTest)
         delete pImo;
     }
 
+    TEST_FIXTURE(SvgDrawerTestFixture, shapes_1720)
+    {
+        //@1720 shape GmoShapeFret
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_note_regular, &doc, 83);
+        UPoint pos(200.0f, 500.0f);
+        GmoShapeFret shape(pImo, 0, k_glyph_function_0, pos, Color(0,0,0),
+                           m_libraryScope, 21.0);
+
+        stringstream expected;
+        expected
+            << "<g class='fret'>" << endl
+            << "   <path d=' M 170.875 -26 H 602.125 V 512 H 170.875 V -26' fill='#fff'/>" << endl
+            << "   <text x='200' y='500' fill='#000' font-family='Bravura' font-size='740.834'>&#60016;</text>" << endl
+            << "</g>" << endl;
+        run_test_for(shape, expected);
+
+        delete pImo;
+    }
+
     TEST_FIXTURE(SvgDrawerTestFixture, shapes_1800)
     {
         //@1800 shape GmoShapeGraceStroke

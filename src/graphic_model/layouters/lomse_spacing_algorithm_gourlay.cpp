@@ -526,6 +526,9 @@ void SpAlgGourlay::determine_spacing_parameters()
     ss << " values for spacing parameters: alpha=" << m_alpha << ", Fopt="
         << m_Fopt << ", Smin =" << m_uSmin;
 
+    if (m_pScoreMeter->has_tablature())
+        m_dmin = 32.0;
+
     //m_dmin==0.0 implies that value must be determined by the spacing algorithm
     if (m_dmin == 0.0f)
     {

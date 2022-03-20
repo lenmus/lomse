@@ -28,7 +28,9 @@ enum ENoteHeads
     k_notehead_whole,              //Whole note
     k_notehead_half,               //Half note
     k_notehead_quarter,            //Quarter note
+    //other noteheads
     k_notehead_cross,              //Cross (for percussion)
+    k_notehead_fret,               //fret number, for tablature
 };
 
 //---------------------------------------------------------------------------------------

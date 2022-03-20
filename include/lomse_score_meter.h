@@ -54,6 +54,7 @@ protected:
 
 	std::vector<LUnits> m_lineSpace;        //spacing for each staff
 	std::vector<LUnits> m_lineThickness;    //line thickness for each staff
+	std::vector<double> m_notationScaling;  //notation scaling factor for each staff
     std::vector<int> m_staffIndex;
     LUnits m_maxLineSpace;              //spacing for greatest staff
 
@@ -98,6 +99,8 @@ public:
     Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
     LUnits line_thickness_for_instr_staff(int iInstr, int iStaff);
+    double notation_scaling_factor(int iInstr, int iStaff);
+    double font_size_for_notation(int iInstr, int iStaff);
     inline LUnits tenths_to_logical_max(Tenths value)     //using biggest staff
     {
         return (value * m_maxLineSpace) / 10.0f;
@@ -111,6 +114,7 @@ public:
         return m_staffIndex[iInstr] + iStaff;
     }
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
+    bool has_tablature();
 
     //info about text styles
     ImoStyle* get_style_info(const string& name);

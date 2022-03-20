@@ -431,6 +431,7 @@ enum EMxlTag
     k_mxl_tag_fermata,
     k_mxl_tag_fingering,
     k_mxl_tag_forward,
+    k_mxl_tag_fret,
     k_mxl_tag_harp_pedals,
     k_mxl_tag_image,
     k_mxl_tag_key,
@@ -467,6 +468,7 @@ enum EMxlTag
     k_mxl_tag_string_mute,
     k_mxl_tag_staff_details,
     k_mxl_tag_staff_layout,
+    k_mxl_tag_string,
     k_mxl_tag_system_layout,
     k_mxl_tag_system_margins,
     k_mxl_tag_technical,
@@ -2485,7 +2487,12 @@ protected:
             static_cast<ImoStaffInfo*>(m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr));
 
         if (pInfo)
+        {
+            int iStaff = pInfo->get_staff_number();
+            ImoStaffInfo* pOldInfo = pInstr->get_staff(iStaff);
+            pInfo->set_tablature( pOldInfo->is_for_tablature() );
             pInstr->replace_staff_info(pInfo);
+        }
     }
 };
 
@@ -2823,8 +2830,8 @@ public:
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
 
         // attrib: number  CDATA  #IMPLIED
-        int nStaffNum = get_optional_int_attribute("number", 1);
-        pClef->set_staff(nStaffNum - 1);
+        int iStaffNum = get_optional_int_attribute("number", 1) - 1;
+        pClef->set_staff(iStaffNum);
 
         // attrib: additional %yes-no; #IMPLIED
         //TODO
@@ -2861,6 +2868,14 @@ public:
         pClef->set_clef(sign, m_line, m_octaveChange);
         pClef->set_visible(fVisible);
         add_to_model(pClef);
+
+        //fix staff height for tablature
+        if (sign == k_clef_sign_TAB)
+        {
+            ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+            ImoStaffInfo* pInfo = pInstr->get_staff(iStaffNum);
+            pInfo->set_tablature(true);
+        }
 
         return pClef;
     }
@@ -3885,6 +3900,129 @@ protected:
 
 };
 
+
+//@--------------------------------------------------------------------------------------
+//@ <fret> / <string>
+//@
+//@<!ELEMENT fret (#PCDATA)>
+//@<!ATTLIST fret
+//@    %font;
+//@    %color;
+//@>
+//@<!ELEMENT string (#PCDATA)>
+//@<!ATTLIST string
+//@    %print-style;
+//@    %placement;
+//@>
+//@
+class FretStringMxlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoFretString* m_pFretString = nullptr;
+
+public:
+    FretStringMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis() override
+    {
+        ImoNoteRest* pNR = get_anchor_as_note_rest();
+        if (pNR == nullptr)
+            return nullptr;
+
+        bool fHasInfo = get_fret_string(pNR);
+
+        if (m_analysedNode.name() == "fret")
+        {
+            // attrib: %font;
+            //TODO
+
+            // attrib: %color;
+            //TODO
+
+            set_fret();
+        }
+        else   //<string>
+        {
+            // attrib: %print-style
+            get_attributes_for_print_style(m_pFretString);
+
+            // attrib: %placement
+            if (has_attribute("placement"))
+                set_placement();
+
+            set_string();
+        }
+
+        if (!fHasInfo)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            pNR->add_attachment(pDoc, m_pFretString);
+        }
+
+        return nullptr;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    bool get_fret_string(ImoNoteRest* pNR)
+    {
+        //returns true if the note already has fingering information
+
+        ImoAuxObj* pAO = pNR->find_attachment(k_imo_fret_string);
+        if (pAO)
+        {
+            m_pFretString = static_cast<ImoFretString*>(pAO);
+            return true;
+        }
+        else
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            m_pFretString = static_cast<ImoFretString*>(
+                                        ImFactory::inject(k_imo_fret_string, pDoc) );
+            return false;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_placement()
+    {
+        EPlacement placement = k_placement_default;
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            placement = k_placement_above;
+        else if (value == "below")
+            placement = k_placement_below;
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+
+        if (placement != k_placement_default)
+        {
+            //TODO
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_fret()
+    {
+        int number = get_cur_node_value_as_integer(1);
+        m_pFretString->set_fret(number);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_string()
+    {
+        int number = get_cur_node_value_as_integer(1);
+        m_pFretString->set_string(number);
+    }
+
+};
+
 //@--------------------------------------------------------------------------------------
 //@ <!ELEMENT backup (duration, %editorial;)>
 //@ <!ELEMENT forward
@@ -4452,13 +4590,13 @@ public:
         {
             // (beat-unit, beat-unit-dot*, (per-minute | (beat-unit, beat-unit-dot*))
 
-            int noteType = get_beat_unit();
-            pMtr->set_left_note_type(noteType);
+            int type = get_beat_unit();
+            pMtr->set_left_note_type(type);
 
-            int dots = 0;
+            int numdots = 0;
             while (get_optional("beat-unit-dot"))
-                ++dots;
-            pMtr->set_left_dots(dots);
+                ++numdots;
+            pMtr->set_left_dots(numdots);
 
             if (get_optional("per-minute"))
             {
@@ -7201,14 +7339,22 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void set_staff_size(ImoStaffInfo* UNUSED(pInfo))
+    void set_staff_size(ImoStaffInfo* pInfo)
     {
         //@ <!ELEMENT staff-size (#PCDATA)>
         //@ <!ATTLIST staff-size
         //@     scaling CDATA #IMPLIED
         //@ >
 
-        //TODO
+        //the <staff-size> value applies to the staff lines spacing
+        int value = get_child_value_integer(100);
+        double factor = double(value) / 100.0;
+        pInfo->set_line_spacing( factor * pInfo->get_line_spacing() );
+
+        //the ‘scaling’ attribute applies to the notation on the staff
+        int scaling = get_optional_int_attribute("scaling", 100);
+        factor = double(scaling) / double(value);
+        pInfo->set_notation_scaling(factor);
     }
 };
 
@@ -7407,9 +7553,8 @@ public:
 
             //technical indications requiring additional info
             else if (analyse_optional("fingering", m_pAnchor)
-//                     || analyse_optional("harmonic", m_pAnchor)
-//                     || analyse_optional("hole", m_pAnchor)
-//                     || analyse_optional("handbell", m_pAnchor)
+                     || analyse_optional("fret", m_pAnchor)
+                     || analyse_optional("string", m_pAnchor)
                     )
             {
             }
@@ -8103,6 +8248,9 @@ public:
         if (has_attribute("symbol"))
             set_symbol(pTime);
 
+        //attrb: print-object
+        bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
+
         // <beats> (num)
         if (get_mandatory("beats"))
             pTime->set_top_number( get_child_value_integer(2) );
@@ -8112,6 +8260,7 @@ public:
              && get_mandatory("beat-type"))
             pTime->set_bottom_number( get_child_value_integer(4) );
 
+        pTime->set_visible(fVisible);
         add_to_model(pTime);
         return pTime;
     }
@@ -8959,6 +9108,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["fermata"] = k_mxl_tag_fermata;
     m_NameToEnum["fingering"] = k_mxl_tag_fingering;
     m_NameToEnum["forward"] = k_mxl_tag_forward;
+    m_NameToEnum["fret"] = k_mxl_tag_fret;
     m_NameToEnum["harp-pedals"] = k_mxl_tag_harp_pedals;
     m_NameToEnum["image"] = k_mxl_tag_image;
     m_NameToEnum["key"] = k_mxl_tag_key;
@@ -8995,6 +9145,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["string-mute"] = k_mxl_tag_string_mute;
     m_NameToEnum["staff-details"] = k_mxl_tag_staff_details;
     m_NameToEnum["staff-layout"] = k_mxl_tag_staff_layout;
+    m_NameToEnum["string"] = k_mxl_tag_string;
     m_NameToEnum["system-layout"] = k_mxl_tag_system_layout;
     m_NameToEnum["system-margins"] = k_mxl_tag_system_margins;
     m_NameToEnum["technical"] = k_mxl_tag_technical;
@@ -9858,6 +10009,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_fermata:              return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_fingering:            return LOMSE_NEW FingeringMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_fret:                 return LOMSE_NEW FretStringMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_harp_pedals:          return LOMSE_NEW HarpPedalsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_image:                return LOMSE_NEW ImageMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -9894,6 +10046,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_staff_details:        return LOMSE_NEW StaffDetailsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_staff_layout:         return LOMSE_NEW StaffLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_string:               return LOMSE_NEW FretStringMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_system_layout:        return LOMSE_NEW SystemLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_system_margins:       return LOMSE_NEW SystemMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_technical:            return LOMSE_NEW TecnicalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

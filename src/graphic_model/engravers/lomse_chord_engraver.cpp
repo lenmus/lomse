@@ -99,11 +99,20 @@ int ChordEngraver::create_shapes(Color color)
     decide_stem_direction();
     find_reference_notes();
     layout_noteheads();
-    layout_accidentals();
-    layout_arpeggio();
-    add_stem_and_flag();
+    if (!is_tablature())
+    {
+        layout_accidentals();
+        layout_arpeggio();
+        add_stem_and_flag();
+    }
     set_anchor_offset();
     return 0;
+}
+
+//---------------------------------------------------------------------------------------
+bool ChordEngraver::is_tablature()
+{
+    return (m_clefs.size() == 1 && m_clefs.front() == k_clef_TAB);
 }
 
 //---------------------------------------------------------------------------------------
@@ -334,6 +343,9 @@ bool ChordEngraver::is_chord_beamed()
 //---------------------------------------------------------------------------------------
 void ChordEngraver::layout_noteheads()
 {
+    if (is_tablature())
+        return;
+
     align_noteheads();
     arrange_notheads_to_avoid_collisions();
 }

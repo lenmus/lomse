@@ -663,6 +663,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
         m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_fingering] = "fingering";
+        m_TypeToName[k_imo_fret_string] = "fret-string";
         m_TypeToName[k_imo_line] = "line";
         m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
         m_TypeToName[k_imo_ornament] = "ornament";
@@ -1899,8 +1900,8 @@ void ImoChord::update_cross_staff_data()
 
     for (++it; it != m_relatedObjects.end(); ++it)
     {
-        ImoNote* pNote = static_cast<ImoNote*>((*it).first);
-        if ((m_fCrossStaff = (pNote->get_staff() != staff) ))
+        ImoNote* pN = static_cast<ImoNote*>((*it).first);
+        if ((m_fCrossStaff = (pN->get_staff() != staff) ))
             break;
     }
 }
@@ -2933,6 +2934,12 @@ LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
 LUnits ImoInstrument::get_line_thickness_for_staff(int iStaff)
 {
     return get_staff(iStaff)->get_line_thickness();
+}
+
+//---------------------------------------------------------------------------------------
+double ImoInstrument::get_notation_scaling_for_staff(int iStaff)
+{
+    return get_staff(iStaff)->get_notation_scaling();
 }
 
 //---------------------------------------------------------------------------------------
@@ -5150,7 +5157,7 @@ bool ImoStyle::is_default_style_with_default_values()
 //=======================================================================================
 // ImoStaffInfo implementation
 //=======================================================================================
-LUnits ImoStaffInfo::get_height()
+LUnits ImoStaffInfo::get_height() const
 {
     //Stafflines are shown in the order of middle-line of a five-line staff and add
     //lines alternating with the next line above this line and the next line below.
@@ -5158,15 +5165,15 @@ LUnits ImoStaffInfo::get_height()
     //When 1 line or 5 lines, height is 5 lines (4 spaces)
     //Otherwise, the height is the number of visible lines + 2 (one space above and below)
 
-    int numVisible = 5;
-    if (m_nNumLines != 1 && m_nNumLines != 5)
+    int numVisible = (m_nNumLines < 5 ? 5 : m_nNumLines);
+    if (!m_fTablature && (m_nNumLines != 1 && m_nNumLines != 5))
         numVisible = m_nNumLines + 2;
 
     return (numVisible - 1) * m_uSpacing + m_uLineThickness;
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoStaffInfo::is_line_visible(int iLine)
+bool ImoStaffInfo::is_line_visible(int iLine) const
 {
     //Stafflines are shown in the order of middle-line of a five-line staff and add
     //lines alternating with the next line above this line and the next line below.

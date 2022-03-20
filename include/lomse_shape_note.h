@@ -202,6 +202,19 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class GmoShapeFret : public GmoShapeNotehead
+{
+public:
+    GmoShapeFret(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
+                 Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeNotehead(pCreatorImo, idx, iGlyph, pos, color, libraryScope, fontSize)
+    {
+    }
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+};
+
+//---------------------------------------------------------------------------------------
 class GmoShapeFlag : public GmoShapeGlyph, public VoiceRelatedShape
 {
 public:

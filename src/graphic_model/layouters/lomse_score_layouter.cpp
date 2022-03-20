@@ -1167,14 +1167,21 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         }
         case k_imo_clef:
         {
-            bool fSmallClef = flags & k_flag_small_clef;
             ImoClef* pClef = static_cast<ImoClef*>(pSO);
-            int clefSize = pClef->get_symbol_size();
-            if (clefSize == k_size_default)
-                clefSize = fSmallClef ? k_size_cue : k_size_full;
-            Color color = pClef->get_color();
-            ClefEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape(pClef, pos, clefType, clefSize, color);
+            if (pClef->get_clef_type() == k_clef_none)
+            {
+                return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
+            }
+            else
+            {
+                bool fSmallClef = flags & k_flag_small_clef;
+                int clefSize = pClef->get_symbol_size();
+                if (clefSize == k_size_default)
+                    clefSize = fSmallClef ? k_size_cue : k_size_full;
+                Color color = pClef->get_color();
+                ClefEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+                return engrv.create_shape(pClef, pos, clefType, clefSize, color);
+            }
         }
         case k_imo_key_signature:
         {

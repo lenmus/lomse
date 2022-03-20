@@ -820,6 +820,18 @@ enum EGlyphIndex
     k_glyph_figured_bass_close_parenthesis,   // )
     k_glyph_figured_bass_7_striked,           // 7 with overlayered /
 
+    //Function theory symbols (U+EA70–U+EA9F)
+    k_glyph_function_0,                       //number 0
+    k_glyph_function_1,                       //number 1
+    k_glyph_function_2,                       //number 2
+    k_glyph_function_3,                       //number 3
+    k_glyph_function_4,                       //number 4
+    k_glyph_function_5,                       //number 5
+    k_glyph_function_6,                       //number 6
+    k_glyph_function_7,                       //number 7
+    k_glyph_function_8,                       //number 8
+    k_glyph_function_9,                       //number 9
+
     //Multi-segment lines (U+EAA0 - U+EB0F)
     k_glyph_trill_wiggle_segment,           // Trill wiggle segment
     k_glyph_arpeggiato_wiggle_segment_up,   // Arpeggiato wiggle segment, upwards
