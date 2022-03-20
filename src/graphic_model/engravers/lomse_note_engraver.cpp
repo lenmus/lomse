@@ -349,8 +349,13 @@ void NoteEngraver::add_notehead_shape()
     int notehead = decide_notehead_type();
     int iGlyph = get_glyph_for_notehead(notehead);
     LUnits y = m_uyTop + tenths_to_logical(get_glyph_offset(iGlyph));
-    m_pNoteheadShape = LOMSE_NEW GmoShapeNotehead(m_pNote, 0, iGlyph, UPoint(m_uxLeft, y),
-                                            m_color, m_libraryScope, m_fontSize);
+    if (is_tablature())
+        m_pNoteheadShape = LOMSE_NEW GmoShapeFret(m_pNote, 0, iGlyph, UPoint(m_uxLeft, y),
+                                          m_color, m_libraryScope, m_fontSize);
+    else
+        m_pNoteheadShape = LOMSE_NEW GmoShapeNotehead(m_pNote, 0, iGlyph,
+                                          UPoint(m_uxLeft, y), m_color, m_libraryScope,
+                                          m_fontSize);
     add_voice(m_pNoteheadShape);
     m_pNoteShape->add_notehead(m_pNoteheadShape);
     m_pNoteShape->set_anchor_offset(m_pNoteShape->get_left() - m_uxLeft);
