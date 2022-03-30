@@ -231,7 +231,7 @@ if( LOMSE_ENABLE_COMPRESSION )
 endif()
 
 # platform dependent implementation files
-if(UNIX)
+if(UNIX AND LOMSE_ENABLE_SYSTEM_FONTS)
     set(PLATFORM_FILES
         ${LOMSE_SRC_DIR}/platform/lomse_linux.cpp
     )

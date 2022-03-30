@@ -56,6 +56,8 @@
 #   By default the unit tests runner program 'testlib' is also built.
 #   You can disable building the tests with this option:
 #       cmake -DLOMSE_BUILD_TESTS:BOOL=OFF [...]
+#   When the tests are not build, the dependency from 'UnitTest++' is
+#   automatically removed.
 #
 # LOMSE_RUN_TESTS (Default: ON)
 #   When unit test runner program 'testlib' is built (enabled by default and
@@ -144,29 +146,36 @@
 # Options to reduce dependencies from other libraries (ON / OFF values):
 # --------------------------------------------------------------------------
 #
-# If your application will not deal with compressed files or with scores
-# containing png images, it is possible to reduce dependencies from third
-# party librraries by removing the code that deals with compressed files
-# or with PNG images.
-#
 # LOMSE_ENABLE_PNG   (Default value: ON)
-#	Build with support for PNG images. This requires libpng library.
-#	By setting this to OFF Lomse will ignore any png image embedded in the
-#	documents. But Lomse will not fail in those cases, just will log error
-#	messages. For instance:
+#	Build with support for PNG images. This requires the 'libpng' library.
+#	By setting this to OFF the dependency from 'libpng' is removed and
+#   Lomse will ignore any png image embedded in the documents, but will not
+#   fail if the document contains PNG images, it will just log an error
+#   message. Example for disabling:
 #		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_PNG=OFF [...]
 #
 # LOMSE_ENABLE_COMPRESSION   (Default value: ON)
-#	Build with support for compressed files. This requires zlib library.
-#	By setting this to OFF Lomse will not be able to deal with compressed files,
-#	such as MusicXML files in compressed format, or with png images embedded in
-#	the documents. But Lomse will not fail in those cases, just will log error
-#	messages. For instance:
+#	Build with support for compressed files. This requires the 'zlib' library.
+#	By setting this to OFF the dependency from 'zlib' is removed but Lomse will
+#   not be able to deal with compressed files, such as MusicXML files in
+#   compressed format, or with png images embedded in the documents. 
+#   But Lomse will not fail in those cases, just will log error
+#	messages. Example for disabling:
 #		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF [...]
 #
 #	**Important**: trying to disable compression without also disabling png
 #   has no effect because libpng depends on zlib. Therefore, when png is
-#   active (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
+#   enabled (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
+#
+# LOMSE_ENABLE_SYSTEM_FONTS   (Default value: ON)
+#   ** Only meaningfull in Linux systems **
+#	In Linux systems, build with support to look for fonts in system installed
+#   fonts. This requires the ‘fontconfig’ library.
+#	By setting this to OFF the dependency from 'fontconfig' is removed and
+#   Lomse will use only the fonts available in the path provided by the user
+#   application at Lomse initialization. Example for disabling:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_SYSTEM_FONTS=OFF [...]
+#
 #
 #
 # Other options (ON / OFF values):
@@ -279,6 +288,9 @@ option(LOMSE_ENABLE_PNG
 option(LOMSE_ENABLE_COMPRESSION
     "Enable compressed formats (requires zlib)"
     ON)
+option(LOMSE_ENABLE_SYSTEM_FONTS
+    "Enable search in system fonts (requires fontconfig)"
+    ON)
 
 # Other options
 option(LOMSE_COMPATIBILITY_LDP_1_5
@@ -326,6 +338,7 @@ message(STATUS "Download Bravura font = ${LOMSE_DOWNLOAD_BRAVURA_FONT}")
 message(STATUS "Install Bravura font = ${LOMSE_INSTALL_BRAVURA_FONT}")
 message(STATUS "Enable png format = ${LOMSE_ENABLE_PNG}")
 message(STATUS "Enable compressed formats = ${LOMSE_ENABLE_COMPRESSION}")
+message(STATUS "Enable search in system fonts = ${LOMSE_ENABLE_SYSTEM_FONTS}")
 message(STATUS "Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 
 
@@ -589,8 +602,8 @@ if (LOMSE_BUILD_TESTS)
 	endif()
 endif(LOMSE_BUILD_TESTS)
 
+# Check for zlib
 if( LOMSE_ENABLE_COMPRESSION )
-    # Check for zlib
     # libpng and freetype require zlib. So deal with zlib first.
     find_package(ZLIB REQUIRED)
     include_directories( ${ZLIB_INCLUDE_DIR} )
@@ -623,7 +636,7 @@ if( LOMSE_ENABLE_PNG )
 endif(LOMSE_ENABLE_PNG)
 
 # Check for fontconfig
-if (UNIX)  #Linux, macOS & Android
+if (UNIX AND LOMSE_ENABLE_SYSTEM_FONTS)  #UNIX = Linux, macOS & Android
     find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
     find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
     if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
@@ -645,6 +658,31 @@ if (UNIX)  #Linux, macOS & Android
         message(FATAL_ERROR "fontconfig package not found.")
     endif()
 endif()
+
+
+# Check for pthreads
+# It is required for fontconfig and for Lomse
+#
+# Under Android, there is no need for FIND_PACKAGE(Threads) because the Android
+# libc standard library (called "bionic") already includes the relevant functions
+# in threads.h and pthread.h
+# See: https://stackoverflow.com/questions/5990661/cmake-find-packagethreads-for-android-cross-compilation
+
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+    find_package(Threads REQUIRED)
+    if( Threads_FOUND )
+        message(STATUS "Found pthreads:" )
+        message(STATUS "    CMAKE_THREAD_LIBS_INIT=${CMAKE_THREAD_LIBS_INIT}")
+        message(STATUS "    CMAKE_USE_PTHREADS_INIT=${CMAKE_USE_PTHREADS_INIT}")
+        message(STATUS "    CMAKE_USE_WIN32_THREADS_INIT=${CMAKE_USE_WIN32_THREADS_INIT}")
+        message(STATUS "    CMAKE_HP_PTHREADS_INIT=${CMAKE_HP_PTHREADS_INIT}")
+    else()
+        message(FATAL_ERROR "pthreads dependency not found.")
+    endif()
+endif()
+
 
 # strip leading commas from LOMSE_REQUIRES and LOMSE_DEBIAN_DEPS
 string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
@@ -766,22 +804,27 @@ if(LOMSE_BUILD_TESTS)
     file(GLOB TESTLIB_SRC "${LOMSE_SRC_DIR}/tests/lomse_*.cpp" )
     add_executable(${TESTLIB} ${TESTLIB_SRC})
     
-    # libraries to link
+    # lomse library name
     if (LOMSE_BUILD_SHARED_LIB)
-        target_link_libraries (${TESTLIB} ${LOMSE_SHARED}
+        set(LOMSE_LIBRARY ${LOMSE_SHARED})
+    else()
+        set(LOMSE_LIBRARY ${LOMSE_STATIC})
+    endif()
+
+    # libraries to link
+    if( Threads_FOUND )
+        target_link_libraries (${TESTLIB} ${LOMSE_LIBRARY}
                 ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} 
         )
-        add_dependencies(${TESTLIB} ${LOMSE_SHARED})
+        target_link_libraries (${TESTLIB} "${CMAKE_THREAD_LIBS_INIT}")
     else()
-        # Check for pthreads
-        find_package (Threads)
-
-        target_link_libraries (${TESTLIB} ${LOMSE_STATIC}
-                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} ${CMAKE_THREAD_LIBS_INIT}
-        ) 
-        add_dependencies(${TESTLIB} ${LOMSE_STATIC})
+        target_link_libraries (${TESTLIB} ${LOMSE_LIBRARY}
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} 
+        )
     endif()
-    
+    add_dependencies(${TESTLIB} ${LOMSE_LIBRARY})
+
+    # Windows properties    
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set_target_properties(${TESTLIB} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
     endif()
@@ -846,7 +889,7 @@ if (LOMSE_BUILD_EXAMPLE)
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
         target_link_libraries ( ${EXAMPLE1} ${LOMSE_SHARED} 
-                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS}  #${CMAKE_THREAD_LIBS_INIT}
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS}
         )
         add_dependencies(${EXAMPLE1} ${LOMSE_SHARED})
     else()      

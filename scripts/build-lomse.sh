@@ -3,8 +3,81 @@
 # Building and unit testing Lomse library
 # This script MUST BE RUN from <root>/scripts/ folder
 #
-# usage: ./build-lomse.sh
+# usage: ./build-lomse.sh [options]*
+# examples:
+#    ./build-lomse.sh -n -r libpng      # do not build tests and remove support
+#                                       # for PNG images
 #------------------------------------------------------------------------------
+
+
+# script settings
+#------------------------------------------------------------------------------
+
+# exit this script when a command fails
+set -e
+
+# debug mode
+#set -x
+
+
+# colors for messages
+#------------------------------------------------------------------------------
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+LIGHTGRAY='\033[0;37m'
+DARKGRAY='\033[1;30m'
+LIGHTRED='\033[1;31m'
+LIGHTGREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+LIGHTBLUE='\033[1;34m'
+LIGHTPURPLE='\033[1;35m'
+LIGHTCYAN='\033[1;36m'
+WHITE='\033[1;37m'
+WHITEBLACK="\033[7m"        # white background, black chars
+NC='\033[0m'                # reset to default. 
+
+
+# exit codes
+#------------------------------------------------------------------------------
+E_SUCCESS=0         # success
+E_NOARGS=65         # no arguments
+E_BADPATH=66        # not running from lomse/scripts
+E_BADARGS=67        # bad arguments
+
+
+
+#==============================================================================
+# Define functions
+#==============================================================================
+
+#------------------------------------------------------------------------------
+# Display error message
+function display_error()
+{
+    local MESSAGE="$1"
+    >&2 echo -e "${RED}$MESSAGE${NC}"
+}
+
+#------------------------------------------------------------------------------
+# Display error message and terminate script
+function abort()
+{
+    display_error "$1"
+    >&2 echo ""
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Display warning message
+function warning()
+{
+    local MESSAGE="$1"
+    >&2 echo -e "${YELLOW}$MESSAGE${NC}"
+}
 
 
 #------------------------------------------------------------------------------
@@ -15,7 +88,11 @@ function DisplayHelp()
     echo ""
     echo "Options:"
     echo "    -h --help        Print this help text."
-    echo "    -n --no-tests    Do not run unit tests."
+    echo "    -n --no-tests    Do not buid unit tests."
+    echo "    -r --remove      Remove dependency. Lomse will not be linked with"
+    echo "                     the specified library and the related functionality"
+    echo "                     will not be included in Lomse. Valid values are:"
+    echo "                     {zlib | libpng | fontconfig }"
     echo "    -t --only-tests  Do not build. Only run unit tests if enabled."
     echo "    -w --web         Generate test results in local website folder."
     echo "                     If option -w is not specified, the results are"
@@ -23,18 +100,29 @@ function DisplayHelp()
     echo ""
 }
 
-
 #------------------------------------------------------------------------------
+# Check values for dependencies and save in array
+function mark_for_removing()
+{
+    #validate package and save option
+    if [ "$1" == "fontconfig" ]; then
+        OPTIONS="${OPTIONS} -DLOMSE_ENABLE_SYSTEM_FONTS:BOOL=OFF"
+    elif [ "$1" == "libpng" ]; then
+        OPTIONS="${OPTIONS} -DLOMSE_ENABLE_PNG:BOOL=OFF"
+    elif [ "$1" == "unittest++" ]; then
+        OPTIONS="${OPTIONS} -DLOMSE_BUILD_TESTS:BOOL=OFF"
+    elif [ "$1" == "zlib" ]; then
+        OPTIONS="${OPTIONS} -DLOMSE_ENABLE_COMPRESSION:BOOL=OFF"
+    else
+        display_error "Invalid package name '$1'. Valid values:"
+        abort "    { fontconfig | libpng | unittest++ | zlib }"
+    fi
+}
+
+
+#==============================================================================
 # main line starts here
-
-E_SUCCESS=0         # success
-E_NOARGS=65         # no arguments
-E_BADPATH=66        # not running from lomse/trunk/scripts
-E_BADARGS=67        # bad arguments
-
-enhanced="\e[7m"
-reset="\e[0m"
-
+#==============================================================================
 
 #get current directory and check we are running from <root>/scripts
 #For this I just check that "src" folder exists
@@ -56,6 +144,7 @@ website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
 fGenerateForWeb=0
 fRunTests=1
 fBuild=1
+OPTIONS=        #Options for building
 
 
 #parse command line parameters
@@ -72,7 +161,12 @@ do
         ;;
         -n|--no-tests)
         fRunTests=0
+        OPTIONS="${OPTIONS} -DLOMSE_BUILD_TESTS:BOOL=OFF -DLOMSE_RUN_TESTS:BOOL=OFF"
         ;;
+        -r|--remove)
+            mark_for_removing "$2"
+            shift
+            ;;
         -t|--only-tests)
         fBuild=0
         ;;
@@ -99,7 +193,7 @@ if [ ${fBuild} -eq 1 ]; then
 #create or clear build folder
     if [[ ! -e ${build_path} ]]; then
         #create build folder
-        echo -e "${enhanced}Creating build folder${reset}"
+        echo -e "${GREEN}Creating build folder${NC}"
         mkdir ${build_path}
         echo "-- Build folders created"
         echo ""
@@ -110,26 +204,23 @@ if [ ${fBuild} -eq 1 ]; then
         exit $E_BUIL_ERROR
     else
         # clear build folders
-        echo -e "${enhanced}Removing last build${reset}"
-        echo -e "${enhanced}Removing last build${reset}"
+        echo -e "${GREEN}Removing last build${NC}"
         cd "${build_path}" || exit $E_BADPATH
         rm * -rf
         echo "-- Build folders now empty"
         echo ""
     fi
 
+
     # create the makefile
     cd "${build_path}"
-    echo -e "${enhanced}Creating makefile${reset}"
-    if [ ${fRunTests} -eq 0 ]; then
-	    cmake -G "Unix Makefiles" -DLOMSE_RUN_TESTS:BOOL=OFF ${sources} || exit 1
-    else
-        cmake -G "Unix Makefiles" ${sources} || exit 1
-	    #cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
-    fi
+    echo -e "${GREEN}Creating makefile${NC}"
+#    echo "options='${OPTIONS}'"
+    cmake -G "Unix Makefiles" ${OPTIONS} ${sources} || exit 1
+    #cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
 
     # build lomse
-    echo -e "${enhanced}Building liblomse. Will use ${num_jobs} jobs.${reset}"
+    echo -e "${GREEN}Building liblomse. Will use ${num_jobs} jobs.${NC}"
     start_time=$(date -u +"%s")
     make -j$num_jobs || exit 1
     end_time=$(date -u +"%s")
