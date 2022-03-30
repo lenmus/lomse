@@ -87,6 +87,7 @@ function DisplayHelp()
     echo "Usage: ./bulid-lomse.sh [option]*"
     echo ""
     echo "Options:"
+    echo "    -c --clang       Compile with CLang. Default: use GCC."
     echo "    -h --help        Print this help text."
     echo "    -n --no-tests    Do not buid unit tests."
     echo "    -r --remove      Remove dependency. Lomse will not be linked with"
@@ -144,6 +145,7 @@ website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
 fGenerateForWeb=0
 fRunTests=1
 fBuild=1
+fUseClang=0     #use CLang or GCC
 OPTIONS=        #Options for building
 
 
@@ -155,6 +157,9 @@ do
     key="$1"
 
     case $key in
+        -c|--clang)
+        fUseClang=1
+        ;;
         -h|--help)
         DisplayHelp
         exit 1
@@ -216,8 +221,11 @@ if [ ${fBuild} -eq 1 ]; then
     cd "${build_path}"
     echo -e "${GREEN}Creating makefile${NC}"
 #    echo "options='${OPTIONS}'"
-    cmake -G "Unix Makefiles" ${OPTIONS} ${sources} || exit 1
-    #cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${sources} || exit 1
+    if [ ${fUseClang} -eq 0 ]; then
+        cmake -G "Unix Makefiles" ${OPTIONS} ${sources} || exit 1
+    else
+        cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ ${OPTIONS} ${sources} || exit 1
+    fi
 
     # build lomse
     echo -e "${GREEN}Building liblomse. Will use ${num_jobs} jobs.${NC}"
