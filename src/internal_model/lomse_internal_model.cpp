@@ -5223,10 +5223,12 @@ void ImoStyles::accept_visitor(BaseVisitor& v)
 
     vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
     if (vObj)
+    {
         vObj->start_visit(this);
+    }
 
     //visit_children
-	map<std::string, ImoStyle*>::iterator it;
+    map<std::string, ImoStyle*>::iterator it;
     for(it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
         (it->second)->accept_visitor(v);
 

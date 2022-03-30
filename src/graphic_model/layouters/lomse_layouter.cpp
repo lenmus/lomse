@@ -241,7 +241,7 @@ bool LayouterFactory::compute_value_for_add_shapes_flag(ImoContentObj* pItem,
         return false;
 
     //otherwise inherit from parent
-        return fInheritedValue;
+    return fInheritedValue;
 }
 
 

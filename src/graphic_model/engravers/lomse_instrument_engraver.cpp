@@ -609,12 +609,6 @@ int InstrumentEngraver::get_num_staves()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits InstrumentEngraver::tenths_to_logical(Tenths value, int iStaff)
-{
-    return (value * m_pInstr->get_staff(iStaff)->get_line_spacing()) / 10.0f;
-}
-
-//---------------------------------------------------------------------------------------
 void InstrumentEngraver::measure_name_and_bracket()
 {
     measure_name_abbrev();
