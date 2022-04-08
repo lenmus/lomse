@@ -190,6 +190,7 @@ public:
     LUnits get_barline_bottom();
 
     //helper
+    LUnits tenths_to_logical(Tenths value, int iStaff=0);
     inline ImoInstrument* get_instrument() { return m_pInstr; }
     int get_num_staves();
 

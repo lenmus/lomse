@@ -648,8 +648,7 @@ void InlineWrapperEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
     }
     else if (pGmo->is_box())
     {
-        GmoBox* pBox = static_cast<GmoBox*>(pGmo);
-        pBox->add_child_box(pBox);
+        pBox->add_child_box( static_cast<GmoBox*>(pGmo) );
     }
 }
 

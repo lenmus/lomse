@@ -117,9 +117,10 @@ static unsigned calc_crc32(const unsigned char* buf, unsigned size)
 {
     unsigned crc = (unsigned)~0;
     const unsigned char* p;
+    unsigned len = 0;
     unsigned nr = size;
 
-    for (p = buf; nr--; ++p)
+    for (len += nr, p = buf; nr--; ++p)
     {
         crc = (crc >> 8) ^ crc32tab[(crc ^ *p) & 0xff];
     }

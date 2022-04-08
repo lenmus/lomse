@@ -132,7 +132,6 @@ set(GUI_CONTROLS_FILES
     ${LOMSE_SRC_DIR}/gui_controls/lomse_button_ctrl.cpp
     ${LOMSE_SRC_DIR}/gui_controls/lomse_checkbox_ctrl.cpp
     ${LOMSE_SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
     ${LOMSE_SRC_DIR}/gui_controls/lomse_static_text_ctrl.cpp
     ${LOMSE_SRC_DIR}/gui_controls/lomse_progress_bar_ctrl.cpp
 )
@@ -215,12 +214,23 @@ set(SCORE_FILES
 
 set(SOUND_FILES
     ${LOMSE_SRC_DIR}/sound/lomse_midi_table.cpp
-    ${LOMSE_SRC_DIR}/sound/lomse_score_player.cpp
 )
 
 set(LOMSE_PACKAGES_FILES
     ${LOMSE_PKG_DIR}/pugixml/pugixml.cpp
 )
+
+# add sources that depend on build options
+if( LOMSE_ENABLE_PTHREADS )
+    set(SOUND_FILES
+        ${SOUND_FILES} 
+        ${LOMSE_SRC_DIR}/sound/lomse_score_player.cpp
+    )
+    set(GUI_CONTROLS_FILES
+        ${GUI_CONTROLS_FILES}
+        ${LOMSE_SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
+    )
+endif()
 
 if( LOMSE_ENABLE_COMPRESSION )
     set(LOMSE_PACKAGES_FILES

@@ -14,10 +14,36 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 
+//TODO: For now, direct invocation without enqueuing the event in the thread.
+#define LOMSE_DIRECT_INVOCATION     1       //1=do not use events thread
+
+
+#if (LOMSE_DIRECT_INVOCATION == 1)
+namespace lomse
+{
+
+//=======================================================================================
+// EventsDispatcher
+//  Class to manage the event-dispatch loop.
+//  This class is a singleton maintained in Lomse LibraryScope object
+class EventsDispatcher
+{
+public:
+    EventsDispatcher() {}
+
+    inline void start_events_loop() {}
+    inline void stop_events_loop() {}
+
+    inline void post_event(Observer* pObserver, SpEventInfo pEvent)
+    {
+        pObserver->notify(pEvent);
+    }
+};
+
+#else
 #include <thread>
 #include <mutex>
 #include <queue>
-using namespace std;
 
 namespace lomse
 {
@@ -39,14 +65,14 @@ typedef std::unique_lock<std::mutex> QueueLock;
 class EventsDispatcher
 {
 protected:
-    EventsThread* m_pThread;        //execution thread
+    EventsThread* m_pThread = nullptr;        //execution thread
     QueueMutex m_mutex;             //to control queue access
-    bool m_fStopLoop;
-    queue< pair<SpEventInfo, Observer*> > m_events;
+    bool m_fStopLoop = false;
+    std::queue< std::pair<SpEventInfo, Observer*> > m_events;
 
 public:
-    EventsDispatcher();
-    ~EventsDispatcher();
+    EventsDispatcher() {}
+;
 
     void start_events_loop();
     void stop_events_loop();
@@ -61,7 +87,7 @@ protected:
     void dispatch_next_event();
 
 };
-
+#endif
 
 }   //namespace lomse
 

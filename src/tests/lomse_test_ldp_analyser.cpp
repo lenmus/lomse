@@ -10887,6 +10887,7 @@ SUITE(LdpAnalyserTest)
 #endif
 
     // scorePlayer ----------------------------------------------------------------------
+#if (LOMSE_ENABLE_THREADS == 1)
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_Creation)
     {
@@ -10983,6 +10984,7 @@ SUITE(LdpAnalyserTest)
             //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
         }
     }
+#endif  //LOMSE_ENABLE_THREADS == 1
 
     // tableCell ------------------------------------------------------------------------
 

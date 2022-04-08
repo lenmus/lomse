@@ -93,7 +93,7 @@ function DisplayHelp()
     echo "    -r --remove      Remove dependency. Lomse will not be linked with"
     echo "                     the specified library and the related functionality"
     echo "                     will not be included in Lomse. Valid values are:"
-    echo "                     {zlib | libpng | fontconfig }"
+    echo "                     {zlib | libpng | fontconfig | threads }"
     echo "    -t --only-tests  Do not build. Only run unit tests if enabled."
     echo "    -w --web         Generate test results in local website folder."
     echo "                     If option -w is not specified, the results are"
@@ -114,6 +114,8 @@ function mark_for_removing()
         OPTIONS="${OPTIONS} -DLOMSE_BUILD_TESTS:BOOL=OFF"
     elif [ "$1" == "zlib" ]; then
         OPTIONS="${OPTIONS} -DLOMSE_ENABLE_COMPRESSION:BOOL=OFF"
+    elif [ "$1" == "threads" ]; then
+        OPTIONS="${OPTIONS} -DLOMSE_ENABLE_THREADS:BOOL=OFF"
     else
         display_error "Invalid package name '$1'. Valid values:"
         abort "    { fontconfig | libpng | unittest++ | zlib }"

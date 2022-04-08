@@ -7,6 +7,8 @@
 // See LICENSE and NOTICE.md files in the root directory of this source tree.
 //---------------------------------------------------------------------------------------
 
+#if (LOMSE_ENABLE_THREADS == 1)
+
 #include "lomse_score_player_ctrl.h"
 
 #include "lomse_score_player.h"
@@ -338,3 +340,5 @@ Metronome* ScorePlayerCtrl::get_metronome()
 
 
 }   //namespace lomse
+
+#endif  //LOMSE_ENABLE_THREADS == 1

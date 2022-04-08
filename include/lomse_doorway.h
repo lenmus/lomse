@@ -410,6 +410,7 @@ public:
 	*/
     void set_global_metronome_and_replace_local(Metronome* pMtr);
 
+#if (LOMSE_ENABLE_THREADS == 1)
 	/** Method create_score_player() informs Lomse about the MIDI server that will be
         used for scores play back.
 
@@ -420,7 +421,7 @@ public:
         @see @subpage page-sound-generation
 	*/
     ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
-
+#endif
     //@}    //Playback related methods
 
 

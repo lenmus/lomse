@@ -130,7 +130,6 @@ void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
 
     delete m_pLibraryScope;
     m_pLibraryScope = LOMSE_NEW LibraryScope(reporter, this);
-//    m_pLibraryScope->get_threads_poll();        //force to create the threads
 }
 
 //---------------------------------------------------------------------------------------
@@ -141,7 +140,6 @@ void LomseDoorway::init_library(int pixel_format, int ppi, ostream& reporter)
 
     delete m_pLibraryScope;
     m_pLibraryScope = LOMSE_NEW LibraryScope(reporter, this);
-//    m_pLibraryScope->get_threads_poll();        //force to create the threads
 }
 
 //---------------------------------------------------------------------------------------
@@ -216,11 +214,13 @@ string LomseDoorway::get_build_date()
     return m_pLibraryScope->get_build_date();
 }
 
+#if (LOMSE_ENABLE_THREADS == 1)
 //---------------------------------------------------------------------------------------
 ScorePlayer* LomseDoorway::create_score_player(MidiServerBase* pSoundServer)
 {
     return Injector::inject_ScorePlayer(*m_pLibraryScope, pSoundServer);
 }
+#endif
 
 //---------------------------------------------------------------------------------------
 void LomseDoorway::set_global_metronome_and_replace_local(Metronome* pMtr)

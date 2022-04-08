@@ -7,6 +7,8 @@
 // See LICENSE and NOTICE.md files in the root directory of this source tree.
 //---------------------------------------------------------------------------------------
 
+#if (LOMSE_ENABLE_THREADS == 1)
+
 #define LOMSE_INTERNAL_API
 #include <UnitTest++.h>
 #include <sstream>
@@ -474,3 +476,5 @@ SUITE(ScorePlayerTest)
     }
 
 }
+
+#endif  //LOMSE_ENABLE_THREADS == 1

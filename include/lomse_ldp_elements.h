@@ -341,7 +341,7 @@ class LdpObject : public LdpElement
 	public:
         //! static constructor to be used by Factory
 		static LdpElement* new_ldp_object()
-			{ LdpObject<type>* o = LOMSE_NEW LdpObject<type>; assert(o!=0); return o; }
+			{ LdpObject<type>* o = LOMSE_NEW LdpObject<type>; assert(o!=nullptr); return o; }
 
         //! implementation of Visitable interface
         void accept_visitor(BaseVisitor& v) override {

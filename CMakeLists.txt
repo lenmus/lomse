@@ -70,6 +70,14 @@
 # LOMSE_BUILD_EXAMPLE (Default: OFF)
 #   Build the tutorial_1 program that uses the library, to test it.
 #
+# LOMSE_USING_EMSCRIPTEN (Default: OFF)
+#   This option is used to inform this script that it is being run with
+#   Emscripten tools, for creating JavaScript bindings. When setting this, 
+#   all other settings, such as LOMSE_BUILD_SHARED_LIB, LOMSE_BUILD_TESTS,
+#   LOMSE_ENABLE_COMPRESSION, etc. are ignored and this script will use
+#   instead pre-defined settings, as required for JavaScript bindings.
+#   	cmake -DLOMSE_USING_EMSCRIPTEN=ON [...]
+#
 #
 # Debug options (ON / OFF values):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -167,7 +175,7 @@
 #   has no effect because libpng depends on zlib. Therefore, when png is
 #   enabled (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
 #
-# LOMSE_ENABLE_SYSTEM_FONTS   (Default value: ON)
+# LOMSE_ENABLE_FONTCONFIG   (Default value: ON)
 #   ** Only meaningfull in Linux systems **
 #	In Linux systems, build with support to look for fonts in system installed
 #   fonts. This requires the ‘fontconfig’ library.
@@ -175,6 +183,14 @@
 #   Lomse will use only the fonts available in the path provided by the user
 #   application at Lomse initialization. Example for disabling:
 #		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_SYSTEM_FONTS=OFF [...]
+#
+# LOMSE_ENABLE_THREADS   (Default value: ON)
+#	Build with support for threads. This requires the 'threads' library.
+#   Lomse uses threads for the ScorePlayer class, also used by ScorePlayerCtrl
+#   class. If your application will not use ScorePlayer, you can reduce 
+#   lomse size and avoid the pthreads dependency by disabling the use
+#   of threads. Example for disabling:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_THREADS=OFF [...]
 #
 #
 #
@@ -185,7 +201,7 @@
 #
 #-------------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 
 #Travis complains when building with clang. What is this for?
 cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
@@ -220,6 +236,9 @@ cmake_policy(SET CMP0054 NEW)   # quoted arguments will not be further dereferen
 
 # project name
 project(lomse)
+
+# uncomment for debugging
+#set(CMAKE_VERBOSE_MAKEFILE on)
 
 # main directories 
 set( LOMSE_ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -264,6 +283,9 @@ option(LOMSE_RUN_TESTS
 option(LOMSE_BUILD_EXAMPLE
     "Build the tutorial_1 program"
     OFF)
+option(LOMSE_USING_EMSCRIPTEN
+    "This is a build using Emscripten tools, for JavaScript bindings."
+    OFF)
 
 # Debug options (ON / OFF values):
 option(LOMSE_DEBUG
@@ -288,9 +310,13 @@ option(LOMSE_ENABLE_PNG
 option(LOMSE_ENABLE_COMPRESSION
     "Enable compressed formats (requires zlib)"
     ON)
-option(LOMSE_ENABLE_SYSTEM_FONTS
+option(LOMSE_ENABLE_FONTCONFIG
     "Enable search in system fonts (requires fontconfig)"
     ON)
+option(LOMSE_ENABLE_THREADS
+    "Enable to use threads (requires pthreads)"
+    ON)
+
 
 # Other options
 option(LOMSE_COMPATIBILITY_LDP_1_5
@@ -306,7 +332,26 @@ if (LOMSE_ENABLE_PNG)
         message(STATUS "**WARNING**: Enabling PNG requires enabling compression. LOMSE_ENABLE_COMPRESSION set to ON" )
     	set(LOMSE_ENABLE_COMPRESSION ON)
 	endif()
-endif()      
+endif()
+
+# when targeting Emscripten do not use external dependencies
+set(LOMSE_ENABLE_FREETYPE ON)
+if (LOMSE_USING_EMSCRIPTEN)
+    set(LOMSE_ENABLE_PNG OFF)
+    set(LOMSE_ENABLE_COMPRESSION OFF)
+    set(LOMSE_ENABLE_FONTCONFIG OFF)
+    set(LOMSE_BUILD_TESTS OFF)
+    set(LOMSE_RUN_TESTS OFF)
+    set(LOMSE_DOWNLOAD_BRAVURA_FONT OFF)
+    set(LOMSE_INSTALL_BRAVURA_FONT OFF)
+    set(LOMSE_ENABLE_FREETYPE OFF)
+    set(LOMSE_ENABLE_THREADS OFF)
+
+    #emscripten does not support dynamic linking
+    set(LOMSE_BUILD_STATIC_LIB ON)
+    set(LOMSE_BUILD_SHARED_LIB OFF)
+endif()
+     
 
 #libraries to build
 #if (WIN32)
@@ -326,20 +371,24 @@ endif()
 #endif()
 
 # display options values for building
-message(STATUS "Build monolithic library = ${LOMSE_BUILD_MONOLITHIC}")
-message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
-message(STATUS "Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
-message(STATUS "Build testlib program = ${LOMSE_BUILD_TESTS}")
-message(STATUS "Run tests after building = ${LOMSE_RUN_TESTS}")
-message(STATUS "Build tutorial_1 program = ${LOMSE_BUILD_EXAMPLE}")
-message(STATUS "Create Debug build = ${LOMSE_DEBUG}")
-message(STATUS "Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
-message(STATUS "Download Bravura font = ${LOMSE_DOWNLOAD_BRAVURA_FONT}")
-message(STATUS "Install Bravura font = ${LOMSE_INSTALL_BRAVURA_FONT}")
-message(STATUS "Enable png format = ${LOMSE_ENABLE_PNG}")
-message(STATUS "Enable compressed formats = ${LOMSE_ENABLE_COMPRESSION}")
-message(STATUS "Enable search in system fonts = ${LOMSE_ENABLE_SYSTEM_FONTS}")
-message(STATUS "Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
+message(STATUS "Build options:")
+message(STATUS "    Building with emscripten = ${LOMSE_USING_EMSCRIPTEN}")
+message(STATUS "    Build monolithic library = ${LOMSE_BUILD_MONOLITHIC}")
+message(STATUS "    Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
+message(STATUS "    Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
+message(STATUS "    Build testlib program = ${LOMSE_BUILD_TESTS}")
+message(STATUS "    Run tests after building = ${LOMSE_RUN_TESTS}")
+message(STATUS "    Build tutorial_1 program = ${LOMSE_BUILD_EXAMPLE}")
+message(STATUS "    Create Debug build = ${LOMSE_DEBUG}")
+message(STATUS "    Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
+message(STATUS "    Download Bravura font = ${LOMSE_DOWNLOAD_BRAVURA_FONT}")
+message(STATUS "    Install Bravura font = ${LOMSE_INSTALL_BRAVURA_FONT}")
+message(STATUS "    Enable libpng = ${LOMSE_ENABLE_PNG}")
+message(STATUS "    Enable zlib = ${LOMSE_ENABLE_COMPRESSION}")
+message(STATUS "    Enable fontconfig = ${LOMSE_ENABLE_FONTCONFIG}")
+message(STATUS "    Enable freetype = ${LOMSE_ENABLE_FREETYPE}")
+message(STATUS "    Enable pthreads = ${LOMSE_ENABLE_THREADS}")
+message(STATUS "    Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 
 
 
@@ -615,13 +664,15 @@ if( LOMSE_ENABLE_COMPRESSION )
 endif(LOMSE_ENABLE_COMPRESSION)
 
 # Check for FreeType
-find_package(Freetype REQUIRED)                 
-include_directories( ${FREETYPE_INCLUDE_DIRS} )
-message(STATUS "Found Freetype: ${FREETYPE_LIBRARY}" )
-message("      include= ${FREETYPE_INCLUDE_DIRS}" )
-set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
-set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, libfreetype6")
-set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FREETYPE_LIBRARY})
+if( LOMSE_ENABLE_FREETYPE )
+    find_package(Freetype REQUIRED)                 
+    include_directories( ${FREETYPE_INCLUDE_DIRS} )
+    message(STATUS "Found Freetype: ${FREETYPE_LIBRARY}" )
+    message("      include= ${FREETYPE_INCLUDE_DIRS}" )
+    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
+    set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, libfreetype6")
+    set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FREETYPE_LIBRARY})
+endif()
 
 # Check for libpng
 if( LOMSE_ENABLE_PNG )
@@ -636,7 +687,7 @@ if( LOMSE_ENABLE_PNG )
 endif(LOMSE_ENABLE_PNG)
 
 # Check for fontconfig
-if (UNIX AND LOMSE_ENABLE_SYSTEM_FONTS)  #UNIX = Linux, macOS & Android
+if (UNIX AND LOMSE_ENABLE_FONTCONFIG)  #UNIX = Linux, macOS & Android
     find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
     find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
     if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
@@ -667,26 +718,32 @@ endif()
 # libc standard library (called "bionic") already includes the relevant functions
 # in threads.h and pthread.h
 # See: https://stackoverflow.com/questions/5990661/cmake-find-packagethreads-for-android-cross-compilation
-
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-    find_package(Threads REQUIRED)
-    if( Threads_FOUND )
-        message(STATUS "Found pthreads:" )
-        message(STATUS "    CMAKE_THREAD_LIBS_INIT=${CMAKE_THREAD_LIBS_INIT}")
-        message(STATUS "    CMAKE_USE_PTHREADS_INIT=${CMAKE_USE_PTHREADS_INIT}")
-        message(STATUS "    CMAKE_USE_WIN32_THREADS_INIT=${CMAKE_USE_WIN32_THREADS_INIT}")
-        message(STATUS "    CMAKE_HP_PTHREADS_INIT=${CMAKE_HP_PTHREADS_INIT}")
-    else()
-        message(FATAL_ERROR "pthreads dependency not found.")
+#
+if( LOMSE_ENABLE_THREADS )
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+        find_package(Threads REQUIRED)
+        if( Threads_FOUND )
+            message(STATUS "Found pthreads:" )
+            message(STATUS "    CMAKE_THREAD_LIBS_INIT=${CMAKE_THREAD_LIBS_INIT}")
+            message(STATUS "    CMAKE_USE_PTHREADS_INIT=${CMAKE_USE_PTHREADS_INIT}")
+            message(STATUS "    CMAKE_USE_WIN32_THREADS_INIT=${CMAKE_USE_WIN32_THREADS_INIT}")
+            message(STATUS "    CMAKE_HP_PTHREADS_INIT=${CMAKE_HP_PTHREADS_INIT}")
+        else()
+            message(FATAL_ERROR "pthreads dependency not found.")
+        endif()
     endif()
 endif()
 
 
 # strip leading commas from LOMSE_REQUIRES and LOMSE_DEBIAN_DEPS
-string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
-string( REGEX REPLACE "^, " "" LOMSE_DEBIAN_DEPS ${LOMSE_DEBIAN_DEPS})
+if (LOMSE_REQUIRES)
+    string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
+endif()
+if (LOMSE_DEBIAN_DEPS)
+    string( REGEX REPLACE "^, " "" LOMSE_DEBIAN_DEPS ${LOMSE_DEBIAN_DEPS})
+endif()
 
 if(UNIX)
     # macros for "Print all warnings", GCC & __UNIX__
@@ -731,6 +788,12 @@ configure_file(
 if(LOMSE_BUILD_STATIC_LIB)
 
     set(LOMSE_STATIC lomse)
+
+    #When targeting emscriptem use its libraries instead of system libraries
+    if (LOMSE_USING_EMSCRIPTEN)
+        add_compile_options(-sUSE_ZLIB=1 -sUSE_LIBPNG=1 -sUSE_FREETYPE=1 -sUSE_PTHREADS=1 -pthread)
+    endif()
+
     add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
     add_dependencies(${LOMSE_STATIC} build-version)
 
@@ -750,6 +813,10 @@ if(LOMSE_BUILD_STATIC_LIB)
                 RUNTIME_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}
         )
     #endif()
+    if (LOMSE_USING_EMSCRIPTEN)
+        set_target_properties(${LOMSE_STATIC} PROPERTIES LINK_FLAGS "--bind -pthread")
+    endif()
+
 
     # Force not to link with standard MSVC libraries: /NODEFAULTLIB
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -889,7 +956,7 @@ if (LOMSE_BUILD_EXAMPLE)
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
         target_link_libraries ( ${EXAMPLE1} ${LOMSE_SHARED} 
-                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS}
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS}  #${CMAKE_THREAD_LIBS_INIT}
         )
         add_dependencies(${EXAMPLE1} ${LOMSE_SHARED})
     else()      
@@ -964,8 +1031,10 @@ install(DIRECTORY "${INCLUDES_UTFCPP}/utf8"
         DESTINATION "${LOMSE_INCLUDEDIR}/utf8"
         FILES_MATCHING PATTERN "*.h" )
 
-# copy also lomse_config.h
-install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
+# copy also lomse_config.h and lomse_version.h
+install(FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h
+            ${CMAKE_CURRENT_BINARY_DIR}/lomse_version.h
         DESTINATION "${LOMSE_INCLUDEDIR}" )
 
 

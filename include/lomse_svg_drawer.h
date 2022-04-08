@@ -26,8 +26,10 @@ class LOMSE_EXPORT SvgDrawer : public Drawer
 {
 private:
     std::ostream&       m_svg;
+    bool                m_fStartStream = true;
     std::stringstream   m_attribs;
     std::stringstream   m_path;
+    bool                m_fPathEmpty = true;
     TransAffine         m_transform;
     const SvgOptions&   m_options;
     double              m_fontSize = 10;
