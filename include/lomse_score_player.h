@@ -369,6 +369,6 @@ protected:
 
 }   //namespace lomse
 
-#enif   //LOMSE_ENABLE_THREADS == 1
+#endif   //LOMSE_ENABLE_THREADS == 1
 
 #endif  // __LOMSE_SCORE_PLAYER_H__

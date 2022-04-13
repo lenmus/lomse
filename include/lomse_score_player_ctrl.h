@@ -10,6 +10,7 @@
 #ifndef _LOMSE_SCORE_PLAYER_CTRL_H__
 #define _LOMSE_SCORE_PLAYER_CTRL_H__
 
+#include "lomse_config.h"
 #if (LOMSE_ENABLE_THREADS == 1)
 
 #include "lomse_control.h"

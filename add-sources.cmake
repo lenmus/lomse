@@ -221,7 +221,7 @@ set(LOMSE_PACKAGES_FILES
 )
 
 # add sources that depend on build options
-if( LOMSE_ENABLE_PTHREADS )
+if( LOMSE_ENABLE_THREADS )
     set(SOUND_FILES
         ${SOUND_FILES} 
         ${LOMSE_SRC_DIR}/sound/lomse_score_player.cpp
@@ -241,7 +241,7 @@ if( LOMSE_ENABLE_COMPRESSION )
 endif()
 
 # platform dependent implementation files
-if(UNIX AND LOMSE_ENABLE_SYSTEM_FONTS)
+if(UNIX AND LOMSE_ENABLE_FONTCONFIG)
     set(PLATFORM_FILES
         ${LOMSE_SRC_DIR}/platform/lomse_linux.cpp
     )
