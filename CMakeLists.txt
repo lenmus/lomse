@@ -248,12 +248,13 @@ set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR})
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
 message(STATUS "Using cmake version ${CMAKE_VERSION}")
-message(STATUS "** LOMSE_ROOT_DIR: ${LOMSE_ROOT_DIR}")
-message(STATUS "** CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-message(STATUS "** LOMSE_SRC_DIR: ${LOMSE_SRC_DIR}")
-message(STATUS "** EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
-message(STATUS "** LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
-message(STATUS "** OUTDIR: ${OUTDIR}")
+message(STATUS "    LOMSE_ROOT_DIR: ${LOMSE_ROOT_DIR}")
+message(STATUS "    CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "    LOMSE_SRC_DIR: ${LOMSE_SRC_DIR}")
+message(STATUS "    EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
+message(STATUS "    LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
+message(STATUS "    OUTDIR: ${OUTDIR}")
+message(STATUS "")
 
 # define directories to search for CMake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LOMSE_ROOT_DIR}/cmake-modules")
@@ -389,6 +390,7 @@ message(STATUS "    Enable fontconfig = ${LOMSE_ENABLE_FONTCONFIG}")
 message(STATUS "    Enable freetype = ${LOMSE_ENABLE_FREETYPE}")
 message(STATUS "    Enable pthreads = ${LOMSE_ENABLE_THREADS}")
 message(STATUS "    Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
+message(STATUS "")
 
 
 
@@ -791,7 +793,7 @@ if(LOMSE_BUILD_STATIC_LIB)
 
     #When targeting emscriptem use its libraries instead of system libraries
     if (LOMSE_USING_EMSCRIPTEN)
-        add_compile_options(-sUSE_ZLIB=1 -sUSE_LIBPNG=1 -sUSE_FREETYPE=1 -sUSE_PTHREADS=1 -pthread)
+        add_compile_options(-sUSE_ZLIB=1 -sUSE_LIBPNG=1 -sUSE_FREETYPE=1)
     endif()
 
     add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
@@ -814,7 +816,7 @@ if(LOMSE_BUILD_STATIC_LIB)
         )
     #endif()
     if (LOMSE_USING_EMSCRIPTEN)
-        set_target_properties(${LOMSE_STATIC} PROPERTIES LINK_FLAGS "--bind -pthread")
+        set_target_properties(${LOMSE_STATIC} PROPERTIES LINK_FLAGS "--bind")
     endif()
 
 
