@@ -7,6 +7,9 @@
 // See LICENSE and NOTICE.md files in the root directory of this source tree.
 //---------------------------------------------------------------------------------------
 
+#include "lomse_config.h"
+#if (LOMSE_ENABLE_THREADS == 1)
+
 #define LOMSE_INTERNAL_API
 #include "lomse_score_player.h"
 
@@ -993,3 +996,4 @@ void ScorePlayer::set_new_beat_information(SoundEvent* pEvent)
 
 }   //namespace lomse
 
+#endif   //LOMSE_ENABLE_THREADS == 1

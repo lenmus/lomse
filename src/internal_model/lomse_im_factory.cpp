@@ -98,7 +98,9 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
         case k_imo_score_line:          pObj = LOMSE_NEW ImoScoreLine();          break;
+#if (LOMSE_ENABLE_THREADS == 1)
         case k_imo_score_player:        pObj = LOMSE_NEW ImoScorePlayer();        break;
+#endif
         case k_imo_score_text:          pObj = LOMSE_NEW ImoScoreText();          break;
         case k_imo_score_title:         pObj = LOMSE_NEW ImoScoreTitle();         break;
         case k_imo_slur:                pObj = LOMSE_NEW ImoSlur();               break;

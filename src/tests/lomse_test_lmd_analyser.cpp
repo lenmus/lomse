@@ -1768,6 +1768,7 @@ SUITE(LmdAnalyserTest)
 //    // graphic line  --------------------------------------------------------------------
 
     //@ scorePlayer ---------------------------------------------------------------------
+#if (LOMSE_ENABLE_THREADS == 1)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, scorePlayer_Creation)
     {
@@ -1881,6 +1882,7 @@ SUITE(LmdAnalyserTest)
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+#endif  //LOMSE_ENABLE_THREADS == 1
 
     //@ tableCell -----------------------------------------------------------------------
 

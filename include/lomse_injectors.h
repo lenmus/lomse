@@ -18,7 +18,6 @@
 
 
 #include <iostream>
-using namespace std;
 
 namespace lomse
 {
@@ -87,10 +86,10 @@ protected:
     FontSelector* m_pFontSelector;
     Metronome* m_pGlobalMetronome;
     EventsDispatcher* m_pDispatcher;
-    string m_sMusicFontFile;
-    string m_sMusicFontName;
-    string m_sMusicFontPath;
-    string m_sFontsPath;
+    std::string m_sMusicFontFile;
+    std::string m_sMusicFontName;
+    std::string m_sMusicFontPath;
+    std::string m_sFontsPath;
     MusicGlyphs* m_pMusicGlyphs;
 
     //options
@@ -118,43 +117,43 @@ protected:
     int m_renderSpacingOpts;        //options for spacing and lines breaker algorithm
 
 public:
-    LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=nullptr);
+    LibraryScope(ostream& reporter=std::cout, LomseDoorway* pDoorway=nullptr);
     ~LibraryScope();
 
     inline ostream& default_reporter() { return m_reporter; }
     inline LomseDoorway* platform_interface() { return m_pDoorway; }
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
-    inline string& fonts_path() { return m_sFontsPath; }
+    inline std::string& fonts_path() { return m_sFontsPath; }
     EventsDispatcher* get_events_dispatcher();
     FontSelector* get_font_selector();
 
     //callbacks
     void post_event(SpEventInfo pEvent);
     void post_request(Request* pRequest);
-    std::string get_font(const string& name, bool fBold, bool fItalic);
+    std::string get_font(const std::string& name, bool fBold, bool fItalic);
 
     double get_screen_ppi() const;
     int get_pixel_format() const;
 
     //library info
-    static string get_version_string();
-    static string get_version_long_string();
+    static std::string get_version_string();
+    static std::string get_version_long_string();
     static int get_version_major();
     static int get_version_minor();
     static int get_version_patch();
-    static string get_build_date();
+    static std::string get_build_date();
 
     //fonts
     MusicGlyphs* get_glyphs_table();
-    inline void set_default_fonts_path(const string& fontsPath) {
+    inline void set_default_fonts_path(const std::string& fontsPath) {
         m_sFontsPath = fontsPath;
     }
-    void set_music_font(const string& fontFile, const string& fontName,
-                        const string& path="");
-    inline const string& get_music_font_name() { return m_sMusicFontName; }
-    inline const string& get_music_font_file() { return m_sMusicFontFile; }
-    const string& get_music_font_path();
+    void set_music_font(const std::string& fontFile, const std::string& fontName,
+                        const std::string& path="");
+    inline const std::string& get_music_font_name() { return m_sMusicFontName; }
+    inline const std::string& get_music_font_file() { return m_sMusicFontFile; }
+    const std::string& get_music_font_path();
     bool is_music_font_smufl_compliant();
 
     //global options
@@ -228,7 +227,7 @@ protected:
     IdAssigner* m_idAssigner;
 
 public:
-    DocumentScope(ostream& reporter=cout);
+    DocumentScope(ostream& reporter=std::cout);
     ~DocumentScope();
 
     ostream& default_reporter() { return m_reporter; }
@@ -269,7 +268,7 @@ public:
 
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
     static Document* inject_Document(LibraryScope& libraryScope,
-                                     ostream& reporter = cout);
+                                     ostream& reporter = std::cout);
     static BitmapDrawer* inject_BitmapDrawer(LibraryScope& libraryScope);
 
     static View* inject_View(LibraryScope& libraryScope, int viewType);
@@ -287,8 +286,10 @@ public:
                                        Drawer* screenDrawer, Drawer* printDrawer);
 
     static Task* inject_Task(int taskType, Interactor* pIntor);
+#if (LOMSE_ENABLE_THREADS == 1)
     static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope,
                                            MidiServerBase* pSoundServer);
+#endif
     static DocCursor* inject_DocCursor(Document* pDoc);
     static SelectionSet* inject_SelectionSet(Document* pDoc);
     static DocCommandExecuter* inject_DocCommandExecuter(Document* pDoc);

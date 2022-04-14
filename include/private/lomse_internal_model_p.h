@@ -5980,6 +5980,7 @@ public:
 };
 
 
+#if (LOMSE_ENABLE_THREADS == 1)
 //---------------------------------------------------------------------------------------
 // ImoScorePlayer: A control for managing score playback
 class ImoScorePlayer : public ImoControl
@@ -6015,6 +6016,7 @@ public:
     inline const std::string& get_stop_label() { return m_stopLabel; }
 
 };
+#endif  //LOMSE_ENABLE_THREADS == 1
 
 //---------------------------------------------------------------------------------------
 class ImoSizeDto : public ImoSimpleObj

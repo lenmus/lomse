@@ -10,6 +10,8 @@
 #ifndef __LOMSE_SCORE_PLAYER_H__        //to avoid nested includes
 #define __LOMSE_SCORE_PLAYER_H__
 
+#if (LOMSE_ENABLE_THREADS == 1)
+
 #include "lomse_basic.h"
 #include "lomse_internal_model.h"
 
@@ -366,5 +368,7 @@ protected:
 
 
 }   //namespace lomse
+
+#endif   //LOMSE_ENABLE_THREADS == 1
 
 #endif  // __LOMSE_SCORE_PLAYER_H__

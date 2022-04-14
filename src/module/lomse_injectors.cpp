@@ -33,7 +33,6 @@
 #include "lomse_bitmap_drawer.h"
 #include "lomse_tasks.h"
 #include "lomse_events.h"
-#include "lomse_score_player.h"
 #include "lomse_metronome.h"
 #include "lomse_id_assigner.h"
 #include "lomse_document_cursor.h"
@@ -41,6 +40,10 @@
 #include "lomse_caret_positioner.h"
 #include "lomse_glyphs.h"
 #include "lomse_engraving_options.h"
+
+#if (LOMSE_ENABLE_THREADS == 1)
+    #include "lomse_score_player.h"
+#endif
 
 #include <sstream>
 using namespace std;
@@ -422,11 +425,13 @@ Task* Injector::inject_Task(int taskType, Interactor* pIntor)
 }
 
 //---------------------------------------------------------------------------------------
+#if (LOMSE_ENABLE_THREADS == 1)
 ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope,
                                           MidiServerBase* pSoundServer)
 {
     return LOMSE_NEW ScorePlayer(libraryScope, pSoundServer);
 }
+#endif
 
 //---------------------------------------------------------------------------------------
 DocCursor* Injector::inject_DocCursor(Document* pDoc)

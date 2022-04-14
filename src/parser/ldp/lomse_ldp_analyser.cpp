@@ -4822,6 +4822,7 @@ public:
 
     void do_analysis() override
     {
+#if (LOMSE_ENABLE_THREADS == 1)
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
                     ImFactory::inject(k_imo_score_player, pDoc, get_node_id()) );
@@ -4858,6 +4859,8 @@ public:
         }
 
         add_to_model(pSP);
+
+#endif  //LOMSE_ENABLE_THREADS == 1
     }
 };
 

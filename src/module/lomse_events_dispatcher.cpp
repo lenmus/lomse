@@ -12,24 +12,11 @@
 namespace lomse
 {
 
-//TODO: For now, direct invocation without enqueuing the event in the thread.
-#define LOMSE_DIRECT_INVOCATION     1       //1=do not use events thread
+#if (LOMSE_DIRECT_INVOCATION == 0)
 
 //=======================================================================================
 // EventsDispatcher implementation
 //=======================================================================================
-EventsDispatcher::EventsDispatcher()
-    : m_pThread(nullptr)
-    , m_fStopLoop(false)
-{
-}
-
-//---------------------------------------------------------------------------------------
-EventsDispatcher::~EventsDispatcher()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void EventsDispatcher::start_events_loop()
 {
     //Create the thread. It starts inmediately to execute the events loop (method
@@ -39,10 +26,8 @@ void EventsDispatcher::start_events_loop()
     //initialized. This method only returns when the stop_events_loop() method
     //is invoked.
 
-#if (LOMSE_DIRECT_INVOCATION == 0)
     delete m_pThread;
     m_pThread = LOMSE_NEW EventsThread(&EventsDispatcher::thread_main, this);
-#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -59,22 +44,14 @@ void EventsDispatcher::stop_events_loop()
 //---------------------------------------------------------------------------------------
 void EventsDispatcher::thread_main()
 {
-#if (LOMSE_DIRECT_INVOCATION == 0)
     run_events_loop();
-#endif
 }
 
 //---------------------------------------------------------------------------------------
 void EventsDispatcher::post_event(Observer* pObserver, SpEventInfo pEvent)
 {
-#if (LOMSE_DIRECT_INVOCATION == 1)
-    pObserver->notify(pEvent);
-#else
-    {
-        QueueLock lock(m_mutex);
-        m_events.push( make_pair(pEvent, pObserver));
-    }
-#endif
+    QueueLock lock(m_mutex);
+    m_events.push( make_pair(pEvent, pObserver));
 }
 
 //---------------------------------------------------------------------------------------
@@ -110,5 +87,6 @@ void EventsDispatcher::dispatch_next_event()
     pObserver->notify(pEvent);
 }
 
+#endif
 
 }   //namespace lomse

@@ -4269,7 +4269,7 @@ void ImoScore::end_of_changes()
 //}
 
 
-
+#if (LOMSE_ENABLE_THREADS == 1)
 //=======================================================================================
 // ImoScorePlayer implementation
 //=======================================================================================
@@ -4317,6 +4317,7 @@ int ImoScorePlayer::get_metronome_mm()
     else
         return 60;
 }
+#endif  //LOMSE_ENABLE_THREADS == 1
 
 
 //=======================================================================================
@@ -5222,10 +5223,12 @@ void ImoStyles::accept_visitor(BaseVisitor& v)
 
     vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
     if (vObj)
+    {
         vObj->start_visit(this);
+    }
 
     //visit_children
-	map<std::string, ImoStyle*>::iterator it;
+    map<std::string, ImoStyle*>::iterator it;
     for(it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
         (it->second)->accept_visitor(v);
 

@@ -79,6 +79,9 @@
 // Enable png format (requires pnglib and zlib)
 #define LOMSE_ENABLE_PNG    @LOMSE_ENABLE_PNG@
 
+// Enable threads (requires pthreads). If not enabled, ScorePlayer will not be included
+#define LOMSE_ENABLE_THREADS    @LOMSE_ENABLE_THREADS@
+
 
 #endif  // __LOMSE_CONFIG_H__
 
