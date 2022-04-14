@@ -19,19 +19,14 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
     : m_pColStaffObjs( pScore->get_staffobjs_table() )
-    , m_scoreIt(m_pColStaffObjs)
-    , m_savedPos(m_scoreIt)
+    , m_it(m_pColStaffObjs->begin())
+    , m_savedPos(m_it)
     , m_numInstruments( pScore->get_num_instruments() )
-    , m_numLines( pScore->get_staffobjs_table()->num_lines() )
-    , m_fScoreIsEmpty( m_scoreIt.is_end() )
+    , m_numLines( m_pColStaffObjs->num_lines() )
+    , m_fScoreIsEmpty( is_end() )
     , m_pLastBarline(nullptr)
 {
     initialize_clefs_keys_times(pScore);
-}
-
-//---------------------------------------------------------------------------------------
-StaffObjsCursor::~StaffObjsCursor()
-{
 }
 
 //---------------------------------------------------------------------------------------
@@ -66,7 +61,7 @@ void StaffObjsCursor::move_next()
     else if (pSO->is_note_rest())
         save_octave_shift_at_end( static_cast<ImoStaffObj*>(pSO) );
 
-    ++m_scoreIt;
+    ++m_it;
 
     if (!is_end())
     {
@@ -81,7 +76,7 @@ void StaffObjsCursor::save_clef()
 {
     int iInstr = num_instrument();
     int idx = m_staffIndex[iInstr] + staff();
-    m_clefs[idx] = *m_scoreIt;
+    m_clefs[idx] = *m_it;
 }
 
 //---------------------------------------------------------------------------------------
@@ -146,7 +141,7 @@ void StaffObjsCursor::save_key_signature()
 {
     int iInstr = num_instrument();
     int idx = m_staffIndex[iInstr] + staff();
-    m_keys[idx] = *m_scoreIt;
+    m_keys[idx] = *m_it;
 }
 
 //---------------------------------------------------------------------------------------
@@ -159,7 +154,7 @@ void StaffObjsCursor::save_barline()
 void StaffObjsCursor::save_time_signature()
 {
     int iInstr = num_instrument();
-    m_times[iInstr] = *m_scoreIt;
+    m_times[iInstr] = *m_it;
 }
 
 //---------------------------------------------------------------------------------------
@@ -316,13 +311,13 @@ ColStaffObjsEntry* StaffObjsCursor::get_time_entry_for_instrument(int iInstr)
 //---------------------------------------------------------------------------------------
 void StaffObjsCursor::save_position()
 {
-    m_savedPos = m_scoreIt;
+    m_savedPos = m_it;
 }
 
 //---------------------------------------------------------------------------------------
 void StaffObjsCursor::go_back_to_saved_position()
 {
-    m_scoreIt = m_savedPos;
+    m_it = m_savedPos;
 }
 
 //---------------------------------------------------------------------------------------

@@ -10,7 +10,6 @@
 #include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_ldp_elements.h"
-#include "lomse_score_iterator.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_time.h"

@@ -20,7 +20,6 @@ namespace lomse
 //forward declarations
 class Document;
 class ImoObj;
-class StaffObjsIterator;
 class ImoScore;
 
 //---------------------------------------------------------------------------------------
