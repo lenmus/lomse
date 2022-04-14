@@ -11,11 +11,8 @@
 #define __LOMSE_DOCUMENT_CURSOR_H__
 
 #include <stack>
-#include "lomse_document_iterator.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_time.h"
-
-using namespace std;
 
 namespace lomse
 {
@@ -296,7 +293,7 @@ public:
     virtual void reset_and_point_after(ImoId id)=0;
 
     //debug
-    virtual string dump_cursor()=0;
+    virtual std::string dump_cursor()=0;
 };
 
 
@@ -463,7 +460,7 @@ public:
     void change_voice_to(int voice);
 
     //debug & unit tests
-    string dump_cursor() override;
+    std::string dump_cursor() override;
 
 protected:
     //support: related to time info
@@ -608,8 +605,8 @@ public:
     void restore_state(DocCursorState& state);
 
     //debug
-    string dump_cursor();
-    static string id_to_string(ImoId id);
+    std::string dump_cursor();
+    static std::string id_to_string(ImoId id);
 
 protected:
     void start_delegation();

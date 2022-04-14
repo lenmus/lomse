@@ -54,10 +54,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        CHECK( (*it)->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -81,10 +78,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        CHECK( (*it)->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -103,9 +97,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -130,9 +122,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -152,9 +142,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -175,9 +163,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -196,9 +182,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -219,9 +203,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -242,9 +224,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -264,9 +244,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -287,9 +265,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {
@@ -315,9 +291,7 @@ SUITE(ScoreIteratorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef F4) (n c4 q) (r q)) ))))" );
-        DocIterator it(&doc);
-        it.start_of_content();
-        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ImoScore* pScore = dynamic_cast<ImoScore*>(doc.get_first_content_item());
         CHECK( pScore != nullptr );
         if (pScore)
         {

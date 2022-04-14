@@ -26,7 +26,6 @@ set(DOCUMENT_FILES
     ${LOMSE_SRC_DIR}/document/lomse_command.cpp
     ${LOMSE_SRC_DIR}/document/lomse_document.cpp
     ${LOMSE_SRC_DIR}/document/lomse_document_cursor.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_document_iterator.cpp
     ${LOMSE_SRC_DIR}/document/lomse_id_assigner.cpp
 )
 

@@ -20,7 +20,6 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_events.h"
-#include "lomse_document_iterator.h"
 #include "lomse_im_factory.h"
 
 #include <exception>
