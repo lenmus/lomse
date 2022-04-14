@@ -121,7 +121,6 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_spacing_algorithm.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_spacing_algorithm_gourlay.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_table_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_text_splitter.cpp
@@ -147,7 +146,9 @@ set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_model_builder.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_algorithms.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_score_iterator.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_staffobjs_cursor.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_staffobjs_table.cpp
 )
 
@@ -208,10 +209,6 @@ set(RENDER_FILES
     ${LOMSE_SRC_DIR}/render/lomse_svg_drawer.cpp
 )
 
-set(SCORE_FILES
-    ${LOMSE_SRC_DIR}/score/lomse_score_iterator.cpp
-)
-
 set(SOUND_FILES
     ${LOMSE_SRC_DIR}/sound/lomse_midi_table.cpp
 )
@@ -259,9 +256,8 @@ endif()
 set(ALL_LOMSE_SOURCES 
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
     ${GRAPHIC_MODEL_FILES} ${GUI_CONTROLS_FILES} ${INTERNAL_MODEL_FILES} 
-    ${MODULE_FILES} ${MVC_FILES}
-    ${PARSER_FILES} ${PLATFORM_FILES} ${RENDER_FILES} ${SCORE_FILES} 
-    ${SOUND_FILES} ${LOMSE_PACKAGES_FILES}
+    ${MODULE_FILES} ${MVC_FILES} ${PARSER_FILES} ${PLATFORM_FILES}
+    ${RENDER_FILES} ${SOUND_FILES} ${LOMSE_PACKAGES_FILES}
 )
 
 
