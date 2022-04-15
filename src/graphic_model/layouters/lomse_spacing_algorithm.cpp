@@ -16,7 +16,6 @@
 #include "lomse_engraving_options.h"
 #include "lomse_score_meter.h"
 #include "lomse_box_slice_instr.h"
-#include "lomse_score_iterator.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_score_layouter.h"
 #include "lomse_box_slice.h"
@@ -231,18 +230,18 @@ void SpAlgColumn::set_trace_level(int iColumnToTrace, int nTraceLevel)
 // ColumnsBuilder implementation
 //=======================================================================================
 ColumnsBuilder::ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& colsData,
-                               ScoreLayouter* pScoreLyt, ImoScore* m_pScore,
+                               ScoreLayouter* pScoreLyt, ImoScore* pScore,
                                EngraversMap& engravers,
                                ShapesCreator* pShapesCreator,
                                PartsEngraver* pPartsEngraver,
                                SpAlgColumn* pSpAlgorithm)
     : m_pScoreMeter(pScoreMeter)
     , m_pScoreLyt(pScoreLyt)
-    , m_pScore(m_pScore)
+    , m_pScore(pScore)
     , m_engravers(engravers)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
-    , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
+    , m_pSysCursor( LOMSE_NEW StaffObjsCursor(pScore) )
     , m_pBreaker( LOMSE_NEW ColumnBreaker(m_pScoreMeter->num_instruments(),
                                           m_pSysCursor) )
     , m_stavesHeight(0.0f)
