@@ -100,9 +100,6 @@ protected:
 //---------------------------------------------------------------------------------------
 // ColStaffObjs: encapsulates the staff objects collection for a score
 //---------------------------------------------------------------------------------------
-
-//typedef  vector<ColStaffObjsEntry*>::iterator      ColStaffObjsIterator;
-
 class ColStaffObjs
 {
 protected:

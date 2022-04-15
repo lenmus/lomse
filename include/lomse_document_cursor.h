@@ -250,7 +250,10 @@ public:
 //=======================================================================================
 
 //---------------------------------------------------------------------------------------
-// ElementCursor: base class for any specific element cursor
+/** %ElementCursor is an abstract base class for any cursor for traversing a
+    non-terminal node of a document, such as an score or a paragraph, oriented
+    to support document edition tasks.
+*/
 class ElementCursor
 {
 protected:
@@ -297,8 +300,12 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-// DocContentCursor
-// A cursor to traverse the non-terminal nodes of a document
+/** %DocContentCursor is a cursor for traversing the non-terminal nodes of a document,
+    oriented to support document edition tasks.
+
+    %DocContentCursor can be used directly, but its main purpose is as helper class
+    for DocCursor.
+*/
 class DocContentCursor
 {
 protected:
@@ -357,7 +364,16 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// ScoreCursor: A cursor for traversing a score
+/** %ScoreCursor is a cursor for traversing a music score. It is oriented to support
+    score edition tasks. It traverses the score following the logical path that a user
+    would expect for a caret on the screen over a rendered score.
+
+    The cursor position indicates where the next insertion or other edition action will
+    take place. Its main movement methods are oriented to people interacting with a
+    visual representation of the score, and provides great flexibility for movements.
+
+    %ScoreCursor can be used directly, or can be used as part of a DocCursor.
+*/
 class ScoreCursor : public ElementCursor
 {
 protected:
@@ -547,10 +563,15 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// DocCursor
-// facade object to enclose all specific cursors for traversing a document
-//---------------------------------------------------------------------------------------
+/** %DocCursor is a cursor oriented to support document edition tasks. It is oriented
+    to traverse a document following the logical path that will follow a caret on a
+    document rendered on a screen. The cursor position indicates where the next insertion
+    or other edition action will take place. Its main movement methods are suited to
+    user needs and visual logical expectations.
 
+    %DocCursor is a facade object enclosing all specific cursors required to traverse the
+    document and tye current content element (e.g. an score) being traversed.
+*/
 class DocCursor
 {
 protected:
