@@ -7,23 +7,54 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  unix:
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+        compiler: [g++, clang++]
+        exclude:
+          - os: macos
+            compiler: g++
 
+    name: ${{matrix.os}} (${{matrix.compiler}})
+
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
-            sudo apt-get update
-            sudo apt-get install --yes cmake gcc
-            sudo apt-get install --yes libfreetype6-dev libpng++-dev zlib1g-dev libunittest++-dev libfontconfig1-dev
+            if [ "$RUNNER_OS" == "Linux" ]; then
+                sudo apt-get update
+                sudo apt-get install --yes cmake gcc
+                sudo apt-get install --yes libfreetype6-dev libpng++-dev zlib1g-dev libunittest++-dev libfontconfig1-dev
+            elif [ "$RUNNER_OS" == "macOS" ]; then
+                brew install cmake
+                brew install fontconfig
+                brew install libpng
+                brew install zlib
+                brew install freetype
+                brew install unittest-cpp
+            else
+                echo "$RUNNER_OS not supported"
+                exit 1
+            fi
+        shell: bash
 
       - name: Build
         run: |
-            export CXX=g++
+            export CXX=${{matrix.compiler}}
             $CXX --version
             mkdir build && cd build
             cmake -G "Unix Makefiles" ..
             make
             ./testlib
+        shell: bash
+
+#      - name: Upload logs on fail
+#        if: ${{ failure() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: Build failure logs
+#          path: ${{ runner.temp }}/lomse_logs
+
