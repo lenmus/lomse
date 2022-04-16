@@ -9,9 +9,9 @@
 
 #include "lomse_spacing_algorithm_gourlay.h"
 
-#include "lomse_score_iterator.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_staffobjs_table.h"
 #include "lomse_engraving_options.h"
 #include "lomse_score_meter.h"
 #include "lomse_box_slice_instr.h"

@@ -11,7 +11,7 @@
 #define __LOMSE_SYSTEM_CURSOR_H__
 
 #include "lomse_basic.h"
-#include "lomse_score_iterator.h"
+#include "lomse_staffobjs_table.h"
 
 namespace lomse
 {
@@ -37,8 +37,8 @@ class StaffObjsCursor
 {
 private:
     ColStaffObjs* m_pColStaffObjs;
-    StaffObjsIterator m_scoreIt;
-    StaffObjsIterator m_savedPos;
+    ColStaffObjsIterator m_it;
+    ColStaffObjsIterator m_savedPos;
     int m_numInstruments;
     int m_numLines;
     int m_numStaves;
@@ -52,13 +52,12 @@ private:
 
 public:
     StaffObjsCursor(ImoScore* pScore);
-    ~StaffObjsCursor();
 
     //positioning
     void move_next();
 
     //position info
-    inline bool is_end() { return m_scoreIt.is_end(); }
+    inline bool is_end() { return m_it == m_pColStaffObjs->end(); }
     //bool change_of_measure();
 
     //access to info
@@ -73,19 +72,19 @@ public:
     TimeUnits score_total_duration();
 
     //access to current pointed object
-    inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
-    inline int staff() { return (*m_scoreIt)->staff(); }
-    inline int line() { return (*m_scoreIt)->line(); }
-    inline int measure() { return (*m_scoreIt)->measure(); }
-    inline TimeUnits time() { return (*m_scoreIt)->time(); }
-    inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
+    inline int num_instrument() { return (*m_it)->num_instrument(); }
+    inline int staff() { return (*m_it)->staff(); }
+    inline int line() { return (*m_it)->line(); }
+    inline int measure() { return (*m_it)->measure(); }
+    inline TimeUnits time() { return (*m_it)->time(); }
+    inline ImoObj* imo_object() { return (*m_it)->imo_object(); }
     ImoStaffObj* get_staffobj();
-    inline ColStaffObjsEntry* cur_entry() { return *m_scoreIt; }
+    inline ColStaffObjsEntry* cur_entry() { return *m_it; }
     int staff_index() { return staff_index_for(num_instrument(), staff()); }
 
     //access next/prev object without moving cursor position
-    inline ColStaffObjsEntry* next_entry() { return m_scoreIt.next(); }
-    inline ColStaffObjsEntry* prev_entry() { return m_scoreIt.prev(); }
+    inline ColStaffObjsEntry* next_entry() { return m_it.next(); }
+    inline ColStaffObjsEntry* prev_entry() { return m_it.prev(); }
     TimeUnits next_staffobj_timepos();
 
     //context
