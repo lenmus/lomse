@@ -21,9 +21,7 @@ jobs:
 
       - name: Build
         run: |
-            export CC=$COMPILER
-            export CXX=${CC/gcc/g++}
-            export CXX=${CXX/clang/clang++}
+            export CXX=g++
             $CXX --version
             mkdir build && cd build
             cmake -G "Unix Makefiles" ..
