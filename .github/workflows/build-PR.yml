@@ -18,8 +18,9 @@ jobs:
 
     name: ${{matrix.os}} (${{matrix.compiler}})
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{matrix.os}}-latest
     steps:
+      - name: Checkout repository
       - uses: actions/checkout@v3
 
       - name: Install dependencies
@@ -56,5 +57,5 @@ jobs:
 #        uses: actions/upload-artifact@v3
 #        with:
 #          name: Build failure logs
-#          path: ${{ runner.temp }}/lomse_logs
+#          path: ${{ runner.temp }}/build_logs
 
