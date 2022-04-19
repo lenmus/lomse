@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
             cd build
-            ./testlib -v; if [ $? -ne 0 ]; then ./testlib -v; exit 1; fi
+            ./testlib
 
 #      - name: Upload logs on fail
 #        if: ${{ failure() }}

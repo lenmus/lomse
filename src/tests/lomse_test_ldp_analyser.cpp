@@ -10636,8 +10636,8 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, m_scores_path);
 
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
+        cout << "[" << errormsg.str() << "]" << endl;
+        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         ImoImage* pImg = dynamic_cast<ImoImage*>( pRoot );
