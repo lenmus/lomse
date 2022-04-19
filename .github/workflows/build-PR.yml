@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{matrix.os}}-latest
     steps:
       - name: Checkout repository
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
