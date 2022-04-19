@@ -28,16 +28,9 @@ jobs:
         run: |
             if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get update
-#                sudo apt-get install --yes cmake gcc
-#                sudo apt-get install --yes libfreetype6-dev libfontconfig1-dev zlib1g-dev
                 sudo apt-get install --yes libpng++-dev libunittest++-dev
                 sudo apt-get install --yes fonts-noto-cjk
             elif [ "$RUNNER_OS" == "macOS" ]; then
-#                brew install cmake
-#                brew install fontconfig
-#                brew install libpng
-#                brew install zlib
-#                brew install freetype
                 brew install unittest-cpp
             else
                 echo "$RUNNER_OS not supported"
