@@ -353,7 +353,7 @@ SUITE(ChineseTextSplitterTest)
         ChineseTextSplitter splitter(pText, m_libraryScope);
 
         Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f, false);
-        CHECK( splitter.more_text() == true );
+
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
@@ -362,18 +362,21 @@ SUITE(ChineseTextSplitterTest)
             cout << "Test ChineseTextSplitterTest " << test_name()
                  << " skipped. Needed font not installed." << endl;
         }
-        delete pEngr;
-
-        pEngr = splitter.get_next_text_engrouter(10000.0f, false);
-        CHECK( pEngr != nullptr );
-        pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != nullptr );
-        if (pEngrouter)
+        else
         {
-            CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
-            //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
-            //cout << "size = " << pEngrouter->get_width() << endl;
-            CHECK( splitter.more_text() == false );
+            CHECK( splitter.more_text() == true );
+
+            pEngr = splitter.get_next_text_engrouter(10000.0f, false);
+            CHECK( pEngr != nullptr );
+            pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
+            CHECK( pEngrouter != nullptr );
+            if (pEngrouter)
+            {
+                CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
+                //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+                //cout << "size = " << pEngrouter->get_width() << endl;
+                CHECK( splitter.more_text() == false );
+            }
         }
         delete pEngr;
     }
