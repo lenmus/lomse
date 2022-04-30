@@ -571,6 +571,8 @@ set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
 # Check for needed libraries and set all related includes, flags, etc. 
 #----------------------------------------------------------------------------
 
+set(CMAKE_FIND_FRAMEWORK LAST)      #to avoid problems in macOS with Mono and other frameworks
+
 #dependencies for building and for pkg-config file (intitially empty)
 set(LOMSE_REQUIRES "")
 set(LOMSE_DEBIAN_DEPS "")   #Build deps: Debian "Build-Depends:" string

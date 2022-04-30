@@ -34,8 +34,6 @@ jobs:
                 brew install unittest-cpp
                 brew tap homebrew/cask-fonts
                 brew install --cask font-noto-sans-cjk 
-                rm -r /Library/Frameworks/Mono.framework
-                rm -r /Library/Receipts/MonoFramework-*
             else
                 echo "$RUNNER_OS not supported"
                 exit 1
