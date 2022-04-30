@@ -1,6 +1,6 @@
 # Lomse: A free open source library for rendering music scores
 
-[![Travis CI](https://travis-ci.org/lenmus/lomse.svg)](https://travis-ci.org/lenmus/lomse)
+[![Build and Test](https://github.com/lenmus/lomse/actions/workflows/build-PR.yml/badge.svg)](https://github.com/lenmus/lomse/actions/workflows/build-PR.yml)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/m0sbs3tkwvnih9bl/branch/master?svg=true)](https://ci.appveyor.com/project/cecilios/lomse-aai68/branch/master)
 [![Coverity Scan](https://img.shields.io/coverity/scan/16694.svg)](https://scan.coverity.com/projects/lenmus-lomse)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://lenmus.github.io/lomse/page-library-license.html)
