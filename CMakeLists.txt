@@ -499,6 +499,11 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
         message(FATAL_ERROR "Clang version must be at least 3.4!")
     endif()
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    # require at least clang 3.4
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
+        message(FATAL_ERROR "AppleClang version must be at least 3.4!")
+    endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # require at least msvc 15 (Visual Studio 2008 version 9.0)
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
@@ -570,6 +575,8 @@ set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
 # Dependencies
 # Check for needed libraries and set all related includes, flags, etc. 
 #----------------------------------------------------------------------------
+
+set(CMAKE_FIND_FRAMEWORK LAST)      #to avoid problems in macOS with Mono and other frameworks
 
 #dependencies for building and for pkg-config file (intitially empty)
 set(LOMSE_REQUIRES "")
