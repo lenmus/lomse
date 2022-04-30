@@ -10,7 +10,7 @@ jobs:
   unix:
     strategy:
       matrix:
-        os: [macos]
+        os: [ubuntu, macos]
         compiler: [g++, clang++]
         exclude:
           - os: macos
