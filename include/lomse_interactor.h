@@ -320,6 +320,22 @@ public:
     //@}    //operating modes
 
 
+    //information about mouse clicked point
+    /** @name Information about mouse clicked point    */
+    //@{
+
+    /** Returns a ClickedDataInfo struct with information about object at x,y position
+        on current bitmap rendition.
+        @param x  The x coorditane (pixels) of the point.
+        @param y  The y coorditane (pixels) of the point.
+    */
+    ClickPointData find_click_info_at(Pixels x, Pixels y);
+
+    //@}    //access to collaborators
+
+
+
+
     //access to collaborators
     /** @name Access to collaborators in MVC model    */
     //@{

@@ -36,6 +36,7 @@ public:
     ~GmoBoxSlice();
 
     GmoBoxSliceInstr* add_box_for_instrument(ImoInstrument* pInstr, int idxStaff);
+    GmoBoxSliceInstr* find_instr_slice_at(LUnits x, LUnits y);
     GmoBoxSystem* get_system_box();
     GmoBoxSliceInstr* get_instr_slice(int iInstr);
 

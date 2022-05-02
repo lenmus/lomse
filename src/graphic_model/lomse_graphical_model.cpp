@@ -12,6 +12,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_im_measures_table.h"
 #include "lomse_drawer.h"
 #include "lomse_selections.h"
 #include "lomse_time.h"
@@ -22,6 +23,8 @@
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_system.h"
 #include "lomse_box_slice.h"
+#include "lomse_timegrid_table.h"
+#include "lomse_score_algorithms.h"
 #include "lomse_logger.h"
 
 #include <cstdlib>      //abs
@@ -428,7 +431,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
             {
                 GmoBoxSystem* pBSYS =
                     GModelAlgorithms::get_box_system_for(m_areaInfo.pBSI, y);
-                int absStaff = pBSYS->nearest_staff_to_point(y);
+                int absStaff = pBSYS->staff_at(y);
                 m_areaInfo.pShapeStaff = pBSYS->get_staff_shape(absStaff);
             }
         }
@@ -447,7 +450,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
                     //determine staff
                     GmoBoxSystem* pBSYS =
                         GModelAlgorithms::get_box_system_for(m_areaInfo.pBSI, y);
-                    int absStaff = pBSYS->nearest_staff_to_point(y);
+                    int absStaff = pBSYS->staff_at(y);
                     m_areaInfo.pShapeStaff = pBSYS->get_staff_shape(absStaff);
 ////                    if (m_pLastBSI != m_areaInfo.pBSI)
 ////                    {
@@ -530,6 +533,128 @@ GmoBoxSystem* GModelAlgorithms::get_box_system_for(GmoObj* pGmo, LUnits y)
         }
     }
     return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ClickPointData GModelAlgorithms::find_info_for_point(LUnits x, LUnits y, GmoObj* pGmo)
+{
+    ClickPointData data;
+
+    //get clicked IM object
+    if (!pGmo)
+        return data;
+    ImoObj* pImo = pGmo->get_creator_imo();
+    if (!pImo)
+        return data;
+    data.pImo = pImo;
+
+    if (pImo->is_scoreobj())
+    {
+        //click point is a StaffObj, a AuxObj or a RelObj
+        ImoStaffObj* pSO = nullptr;
+
+        if (pImo->is_staffobj())
+        {
+            //click on a staff object
+            pSO = static_cast<ImoStaffObj*>(pImo);
+        }
+        else if (pImo->is_auxobj())
+        {
+            //click on AuxObj. Get parent StaffObj
+            ImoAuxObj* pAO = static_cast<ImoAuxObj*>(pImo);
+            pSO = pAO->get_parent_staffobj();
+        }
+        else
+        {
+            //click on RelObj. Get parent StaffObj
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(pImo);
+            pSO = pRO->get_start_object();
+        }
+
+        if (pSO)
+        {
+            //get staff and timepos
+            data.iStaff = pSO->get_staff();
+            data.ml.location = pSO->get_time();
+
+            //get instrument number
+            ImoInstrument* pInstr = pSO->get_instrument();
+            ImoScore* pScore = pInstr->get_score();
+            data.ml.iInstr = pScore->get_instr_number_for(pInstr);
+
+            //get measure number
+            data.ml = ScoreAlgorithms::get_locator_for(pScore, data.ml.location,
+                                                       data.ml.iInstr);
+
+            //TODO: Fix staff for barlines (?)
+            //if clicked object is a barline staff will be always 0. To avoid this,
+            //staff must be deduced from y position
+        }
+        return data;
+    }
+    else if (pImo->is_instrument())
+    {
+        //click on a staff, bracket/brace, instr. name/abbrev
+        if (pGmo->is_shape_staff())
+        {
+            GmoShapeStaff* pStaff = static_cast<GmoShapeStaff*>(pGmo);
+            data.iStaff = pStaff->get_num_staff();
+
+            //determine time and instrument number
+            GmoBoxSystem* pBSYS = GModelAlgorithms::get_box_system_for(pGmo, y);
+            if (pBSYS)
+            {
+                //determine time
+                TimeGridTable* pTimeGrid = pBSYS->get_time_grid_table();
+                data.ml.location = pTimeGrid->get_time_for_position(x);
+                //LOMSE_LOG_INFO( pTimeGrid->dump() );
+
+                //determine instrument
+                int absStaff = pBSYS->staff_at(y);
+                data.ml.iInstr = pBSYS->instr_number_for_staff(absStaff);
+
+                //find nearest previous object in this staff
+                GmoBoxSliceInstr* pSlice = pBSYS->find_instr_slice_at(x, y);
+                if (pSlice)
+                {
+                    GmoShape* pShape = pSlice->find_staffobj_shape_before(x);
+                    if (pShape)
+                    {
+                        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pShape->get_creator_imo());
+                        //LOMSE_LOG_INFO(pSO->to_string());
+
+                        LUnits xPos = pShape->get_left();
+                        TimeUnits location = pTimeGrid->get_time_for_position(xPos);
+
+                        //get instrument number
+                        ImoInstrument* pInstr = pSO->get_instrument();
+                        ImoScore* pScore = pInstr->get_score();
+
+                        //get measure number
+                        data.ml = ScoreAlgorithms::get_locator_for(pScore, location,
+                                                                   data.ml.iInstr);
+                        return data;
+                    }
+                }
+            }
+
+            //get measure number
+            ImoScore* pScore = static_cast<ImoScore*>(pBSYS->get_creator_imo());
+            data.ml = ScoreAlgorithms::get_locator_for(pScore, data.ml.location,
+                                                       data.ml.iInstr);
+
+            //TODO:  Fix measure number when click after last measure (?)
+            //When click point is after last barline but on a staff, returned measure
+            //is always the last measure and the locator points to the last barline.
+            //Question: Should instead return measure+1 as point is after the barline?
+            //But then the returned measure number will be grater than the number of
+            //measures and could cause problems (?)
+        }
+        return data;
+    }
+
+    //other cases: out of score or on empty space out of staff
+    return data;
 }
 
 

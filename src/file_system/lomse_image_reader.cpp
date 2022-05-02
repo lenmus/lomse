@@ -167,12 +167,12 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     if (!pInfoStruct)
     {
         pImage->set_error_msg("[PngImageDecoder::decode_file] out of memory creating info struct");
-        png_destroy_read_struct(&pReadStruct, 0, 0);
+        png_destroy_read_struct(&pReadStruct, nullptr, nullptr);
         return SpImage(pImage );
     }
 
 
-    png_set_error_fn(pReadStruct, 0, error_callback, warning_callback);
+    png_set_error_fn(pReadStruct, nullptr, error_callback, warning_callback);
 
 
     png_uint_32 width, height;
@@ -263,7 +263,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     pImage = LOMSE_NEW Image(imgbuf, bmpSize, format, imgSize);
 
     //delete helper structs
-    png_destroy_read_struct(&pReadStruct, &pInfoStruct, 0);
+    png_destroy_read_struct(&pReadStruct, &pInfoStruct, nullptr);
 
     //done!
     return SpImage(pImage);

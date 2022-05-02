@@ -56,6 +56,26 @@ void GmoBoxSliceInstr::add_shape(GmoShape* pShape, int layer, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+GmoShape* GmoBoxSliceInstr::find_staffobj_shape_before(LUnits x)
+{
+    vector<GmoBox*>::iterator it;
+    GmoShape* pShape = nullptr;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSliceStaff* pSlice = static_cast<GmoBoxSliceStaff*>(*it);
+        GmoShape* pS = pSlice->find_staffobj_shape_before(x);
+        if (pS)
+        {
+            if (!pShape)
+                pShape = pS;
+            else if (pShape->get_right() < pS->get_right())
+                pShape = pS;
+        }
+    }
+    return pShape;
+}
+
+//---------------------------------------------------------------------------------------
 void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
                                                     const vector<LUnits>& heights,
                                                     LUnits barlinesHeight,
@@ -193,6 +213,22 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
             }
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GmoBoxSliceStaff::find_staffobj_shape_before(LUnits x)
+{
+    list<GmoShape*>::reverse_iterator it;
+    for (it=m_shapes.rbegin(); it != m_shapes.rend(); ++it)
+    {
+        ImoObj* pImo = (*it)->get_creator_imo();
+        if (pImo && pImo->is_staffobj())
+        {
+            if ((*it)->get_right() <= x)
+                return *it;
+        }
+    }
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

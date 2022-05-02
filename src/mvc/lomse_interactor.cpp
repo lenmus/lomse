@@ -730,6 +730,33 @@ GmoObj* Interactor::find_object_at(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
+ClickPointData Interactor::find_click_info_at(Pixels x, Pixels y)
+{
+    //get graphic view
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView == nullptr)
+    {
+        LOMSE_LOG_ERROR("Invoking Interactor::find_click_info_at() but no graphic view!");
+        return ClickPointData();
+    }
+
+    //get document page
+    double xPos = double(x);
+    double yPos = double(y);
+    int iPage = page_at_screen_point(xPos, yPos);
+    if (iPage == -1)
+        return ClickPointData();
+
+    //get graphic model clicked object
+    screen_point_to_page_point(&xPos, &yPos);
+    GraphicModel* pGM = get_graphic_model();
+    GmoObj* pGmo = pGM->hit_test(iPage, LUnits(xPos), LUnits(yPos));
+
+    //get clicked point info
+    return GModelAlgorithms::find_info_for_point(xPos, yPos, pGmo);
+}
+
+//---------------------------------------------------------------------------------------
 GmoBox* Interactor::find_box_at(Pixels x, Pixels y)
 {
     double xPos = double(x);

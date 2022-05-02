@@ -116,7 +116,7 @@ ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
 {
     //Binary search in table for measure containing the requested timepos.
     //Returns nullptr if no measures or negative timepos.
-    //If timepos > las measure time, always returns last measure.
+    //If timepos > last measure time, always returns last measure.
 
     if (m_theTable.size() == 0 || timepos < 0.0)
         return nullptr;

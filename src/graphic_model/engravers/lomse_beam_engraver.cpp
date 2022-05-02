@@ -1769,41 +1769,41 @@ void BeamEngraver::position_segments(std::vector<SegmentData>* pSegs)
     //create secondary beam segments
     for (size_t i = 1; i < pSegs->size(); ++i)
     {
-        SegmentData& sg = pSegs->at(i);
+        SegmentData& sgd = pSegs->at(i);
 
-        LUnits yShift = sg.iLevel * uBeamSpacing;
-        if (sg.position == k_beam_above)
+        LUnits yShift = sgd.iLevel * uBeamSpacing;
+        if (sgd.position == k_beam_above)
             yShift = - yShift;
 
-        LUnits yStart = sg.yStart + yShift;
-        LUnits yEnd = sg.yEnd + yShift;
-        add_segment(sg.xStart, yStart, sg.xEnd, yEnd);
+        LUnits yStart = sgd.yStart + yShift;
+        LUnits yEnd = sgd.yEnd + yShift;
+        add_segment(sgd.xStart, yStart, sgd.xEnd, yEnd);
 
         //increment stem lenght of start note
-        if (sg.pStartNote)
+        if (sgd.pStartNote)
         {
-            if  (sg.position == k_beam_above)
+            if  (sgd.position == k_beam_above)
             {
-                if (sg.pStartNote->is_up())
-                    sg.pStartNote->increment_stem_length(-yShift);
+                if (sgd.pStartNote->is_up())
+                    sgd.pStartNote->increment_stem_length(-yShift);
             }
             else
             {
-                if (!sg.pStartNote->is_up())
-                    sg.pStartNote->increment_stem_length(yShift);
+                if (!sgd.pStartNote->is_up())
+                    sgd.pStartNote->increment_stem_length(yShift);
             }
         }
 
         //increment stem lenght of end note
-        if  (sg.position == k_beam_above)
+        if  (sgd.position == k_beam_above)
         {
-            if (sg.pEndNote->is_up())
-                sg.pEndNote->increment_stem_length(-yShift);
+            if (sgd.pEndNote->is_up())
+                sgd.pEndNote->increment_stem_length(-yShift);
         }
         else
         {
-            if (!sg.pEndNote->is_up())
-                sg.pEndNote->increment_stem_length(yShift);
+            if (!sgd.pEndNote->is_up())
+                sgd.pEndNote->increment_stem_length(yShift);
         }
     }
 

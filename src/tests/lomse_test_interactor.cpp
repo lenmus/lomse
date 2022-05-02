@@ -150,9 +150,11 @@ class InteractorTestFixture
 {
 public:
     LibraryScope m_libraryScope;
+    std::string m_scores_path;
 
     InteractorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_scores_path(TESTLIB_SCORES_PATH)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -489,6 +491,48 @@ SUITE(InteractorTest)
         CHECK( pIntor->select_object_invoked() == true );
         CHECK( pIntor->sel_point_is(10, 33) == true );
     }
+
+
+    // find_click_info_at()
+
+    TEST_FIXTURE(InteractorTestFixture, click_info_01)
+    {
+        //@01 - beamed chord invokes compute_stems_directions()
+        //       chord: d4,g4 - f4,c5
+
+        LomseDoorway doorway;
+        doorway.init_library(k_pix_format_rgb24, 82);
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        Presenter* pPresenter = doorway.open_document(k_view_vertical_book,
+            m_scores_path + "00205-multimetric.lmd");
+        Document* pDoc = pPresenter->get_document_raw_ptr();
+        Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
+        pIntor->get_graphic_model();        //force to engrave the score
+
+        //pIntor->get_graphic_model()->dump_page(0, cout);
+
+        double x = 12600.0;
+        double y = 5200.0;
+        pIntor->model_point_to_device(&x, &y, 0);
+        cout << "x=" << x << ", y=" << y << endl;
+
+//        ClickPointData data = pIntor->find_click_info_at(Pixels(x), Pixels(y)); //588, 255);
+        ClickPointData data = pIntor->find_click_info_at(728, 335);
+
+        cout << "instr=" << data.ml.iInstr << ", staff=" << data.iStaff
+            << ", measure=" << data.ml.iMeasure << ", location=" << data.ml.location
+            << ", pImo is " << (data.pImo ? data.pImo->get_name() : "nullptr") << endl;
+        CHECK( data.ml.iInstr == 1 );
+        CHECK( data.iStaff == 0 );
+        CHECK( data.ml.iMeasure == 3 );
+        CHECK( is_equal_time(data.ml.location, 32.0) );
+        CHECK( data.pImo && data.pImo->is_instrument() );
+    }
+
+
+
+
 
     //TEST_FIXTURE(InteractorTestFixture, NotificationReceived)
     //{

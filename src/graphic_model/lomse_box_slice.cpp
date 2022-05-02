@@ -84,6 +84,20 @@ GmoBoxSliceInstr* GmoBoxSlice::get_instr_slice(int iInstr)
 }
 
 //---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* GmoBoxSlice::find_instr_slice_at(LUnits x, LUnits y)
+{
+    vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSliceInstr* pISlice = static_cast<GmoBoxSliceInstr*>(*it);
+        URect bbox = pISlice->get_bounds();
+        if (bbox.contains(x, y))
+            return pISlice;
+    }
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 GmoBoxSliceStaff* GmoBoxSlice::get_slice_staff_for(int iInstr, int iStaff)
 {
     GmoBoxSliceInstr* pSlice = static_cast<GmoBoxSliceInstr*>(m_childBoxes[iInstr]);

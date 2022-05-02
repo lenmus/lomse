@@ -1051,6 +1051,19 @@ Color ImoObj::get_color_attribute(TIntAttribute idx)
 
 
 //=======================================================================================
+// ImoAuxObj implementation
+//=======================================================================================
+ImoStaffObj* ImoAuxObj::get_parent_staffobj()
+{
+    ImoObj* pImo = get_parent_imo();
+    while (pImo && !pImo->is_staffobj())
+        pImo = pImo->get_parent_imo();
+
+    return (pImo && pImo->is_staffobj() ? static_cast<ImoStaffObj*>(pImo) : nullptr);
+}
+
+
+//=======================================================================================
 // ImoAuxRelObj implementation
 //=======================================================================================
 ImoAuxRelObj::~ImoAuxRelObj()

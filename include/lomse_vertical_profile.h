@@ -42,7 +42,7 @@ public:
 };
 
 //to simplify writing code
-typedef list<VProfilePoint>::iterator  PointsIterator;
+typedef std::list<VProfilePoint>::iterator  PointsIterator;
 
 //---------------------------------------------------------------------------------------
 /**	VerticalProfile is responsible for maintaining and managing the information about
@@ -108,7 +108,7 @@ public:
     std::string dump_min(int idxStaff);
 
 protected:
-    void update_profile(list<VProfilePoint>* pPoints, LUnits yPos, bool fMax,
+    void update_profile(std::list<VProfilePoint>* pPoints, LUnits yPos, bool fMax,
                         LUnits xLeft, LUnits xRight, GmoShape* pShape);
     PointsIterator locate_insertion_point(std::list<VProfilePoint>* pPoints, LUnits xLeft);
     void update_point(std::list<VProfilePoint>* pPointsMin, LUnits xPos,
@@ -119,7 +119,7 @@ protected:
 
     //debug
     GmoShape* dbg_generate_shape(bool fMax, int idxStaff);
-    std::string dump(list<VProfilePoint>* pPoints);
+    std::string dump(std::list<VProfilePoint>* pPoints);
 
 };
 

@@ -139,6 +139,20 @@ GmoBoxSliceInstr* GmoBoxSystem::get_first_instr_slice(int iInstr)
 }
 
 //---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* GmoBoxSystem::find_instr_slice_at(LUnits x, LUnits y)
+{
+    vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
+        URect bbox = pSlice->get_bounds();
+        if (bbox.contains(x, y))
+            return pSlice->find_instr_slice_at(x, y);
+    }
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 GmoBoxSliceStaff* GmoBoxSystem::get_first_slice_staff_for(int iInstr, int iStaff)
 {
     GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(m_childBoxes[0]);
@@ -183,7 +197,7 @@ int GmoBoxSystem::staff_number_for(int absStaff, int UNUSED(iInstr))
 }
 
 //---------------------------------------------------------------------------------------
-int GmoBoxSystem::nearest_staff_to_point(LUnits y)
+int GmoBoxSystem::staff_at(LUnits y)
 {
     //The y coordinate should be within system box limits.
 

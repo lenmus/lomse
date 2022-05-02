@@ -190,17 +190,21 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-// Algorithms for finding info in the graphical model
+/** Algorithms for finding info in the graphical model
+*/
 class GModelAlgorithms
 {
 protected:
 
 public:
     GModelAlgorithms() {}
-    ~GModelAlgorithms() {}
 
     ///mouse point is over inner box pGmo. Find box system
     static GmoBoxSystem* get_box_system_for(GmoObj* pGmo, LUnits y);
+
+    ///Get info about a clicked point
+    static ClickPointData find_info_for_point(LUnits x, LUnits y, GmoObj* pGmo);
+
 
 };
 

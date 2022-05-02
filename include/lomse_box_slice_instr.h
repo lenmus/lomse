@@ -37,6 +37,7 @@ public:
     GmoBoxSystem* get_system_box();
 
     void add_shape(GmoShape* pShape, int layer, int iStaff);
+    GmoShape* find_staffobj_shape_before(LUnits x);
 
     //helpers for layout
     /**  Move boxes and shapes to theirs final 'y' positions. */
@@ -65,6 +66,8 @@ private:
 public:
     GmoBoxSliceStaff(ImoInstrument* pInstr, int idxStaff);
     ~GmoBoxSliceStaff();
+
+    GmoShape* find_staffobj_shape_before(LUnits x);
 
     //helpers for layout
     /**  Move shapes to theirs final 'y' positions and increment barlines height. */

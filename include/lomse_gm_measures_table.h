@@ -29,10 +29,10 @@ class GmoBoxSystem;
 class GmMeasuresTable
 {
 protected:
-    typedef vector<GmoShapeBarline*> BarlinesVector;    //barlines for one instrument
+    typedef std::vector<GmoShapeBarline*> BarlinesVector;    //barlines for one instrument
 
-    vector<BarlinesVector*> m_instrument;       //pointers to each instrument barlines
-    vector<int> m_numBarlines;                  //num.added barlines in each instrument
+    std::vector<BarlinesVector*> m_instrument;       //pointers to each instrument barlines
+    std::vector<int> m_numBarlines;                  //num.added barlines in each instrument
 
 public:
     GmMeasuresTable(ImoScore* pScore);
