@@ -326,8 +326,8 @@ public:
 
     /** Returns a ClickedDataInfo struct with information about object at x,y position
         on current bitmap rendition.
-        @param x  The x coorditane (pixels) of the point.
-        @param y  The y coorditane (pixels) of the point.
+        @param x  The x coordinate (pixels) of the point.
+        @param y  The y coordinate (pixels) of the point.
     */
     ClickPointData find_click_info_at(Pixels x, Pixels y);
 

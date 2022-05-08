@@ -327,7 +327,7 @@ typedef double TimeUnits;           //time units (TU). Relative, depends on metr
     to which the measure number refers.
 
     The first measure (anacruxis or not) is always measure 0.
-    The firts instrument is always instrument 0.
+    The first instrument is always instrument 0.
 */
 struct MeasureLocator
 {
@@ -335,8 +335,10 @@ struct MeasureLocator
     int iMeasure;           ///measure number (0..m), for the instrument
     TimeUnits location;     ///TimeUnits from start of measure
 
-    MeasureLocator() : iInstr(0), iMeasure(0), location(0.0) {}
+    MeasureLocator() : iInstr(-1), iMeasure(-1), location(0.0) {}
     MeasureLocator(int i, int m, TimeUnits l) : iInstr(i), iMeasure(m), location(l) {}
+
+    bool is_valid() const { return iInstr >=0 && iMeasure >= 0; }
 
 };
 
@@ -347,19 +349,23 @@ class ImoObj;
 /** Struct that describes the content of a point on current bitmap rendition
     (e.g. a mouse click)
 
-    The struct provides a ptr. to the clicked object, and if the clicked point is on
-    a score, it also provides:
+    The struct provides a ptr. to the clicked object. In addition, if the clicked point
+    is on a score, it also provides:
     - A MeasureLocator struct with information about measure, instrument, and time
       position.
     - The staff index, relative to instrument staves.
+
+    Otherwise, if clicked point is not on a score, the MeasureLocator is invalid
+    and the staff index is -1.
+
 */
 struct ClickPointData
 {
     ImoObj* pImo;           //clicked object or nullptr if out of document
-    MeasureLocator ml;      //locator when clicked point is on a score; otherwise locator to 0
-    int iStaff;             //staff index, relative to instrument, or 0 when clicked point is not on a score
+    MeasureLocator ml;      //locator when clicked point is on a score; otherwise invalid locator
+    int iStaff;             //staff index, relative to instrument, or -1 when clicked point is not on a score
 
-    ClickPointData() : pImo(nullptr), ml(), iStaff(0) {}
+    ClickPointData() : pImo(nullptr), ml(-1, -1, 0.0), iStaff(-1) {}
 
 };
 

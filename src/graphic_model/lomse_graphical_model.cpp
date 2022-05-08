@@ -538,25 +538,46 @@ GmoBoxSystem* GModelAlgorithms::get_box_system_for(GmoObj* pGmo, LUnits y)
 //---------------------------------------------------------------------------------------
 ClickPointData GModelAlgorithms::find_info_for_point(LUnits x, LUnits y, GmoObj* pGmo)
 {
-    ClickPointData data;
+//    //Debug: to collect info for unit tests
+//    {
+//        stringstream ss;
+//        ss << endl << "        LUnits x = " << x << ";" << endl;
+//        ss << "        LUnits y = " << y << ";" << endl;
+//        LOMSE_LOG_INFO(ss.str());
+//    }
 
     //get clicked IM object
     if (!pGmo)
-        return data;
+        return ClickPointData();
+
+    //get associated IM object
     ImoObj* pImo = pGmo->get_creator_imo();
     if (!pImo)
-        return data;
+    {
+        stringstream ss;
+        ss << "Invalid case? Click on a Gmo but there is no creator Imo.";
+        LOMSE_LOG_ERROR(ss.str());
+        return ClickPointData();
+    }
+
+    ClickPointData data;
     data.pImo = pImo;
 
     if (pImo->is_scoreobj())
     {
-        //click point is a StaffObj, a AuxObj or a RelObj
+        //click point is a StaffObj, an AuxObj or a RelObj
+
         ImoStaffObj* pSO = nullptr;
+        bool fPrologShape = false;
 
         if (pImo->is_staffobj())
         {
             //click on a staff object
             pSO = static_cast<ImoStaffObj*>(pImo);
+
+            fPrologShape = (pSO->is_clef() || pSO->is_time_signature())
+                           && static_cast<GmoShape*>(pGmo)->get_shape_id() != 0;
+
         }
         else if (pImo->is_auxobj())
         {
@@ -564,97 +585,192 @@ ClickPointData GModelAlgorithms::find_info_for_point(LUnits x, LUnits y, GmoObj*
             ImoAuxObj* pAO = static_cast<ImoAuxObj*>(pImo);
             pSO = pAO->get_parent_staffobj();
         }
-        else
+        else if (pImo->is_relobj())
         {
             //click on RelObj. Get parent StaffObj
             ImoRelObj* pRO = static_cast<ImoRelObj*>(pImo);
             pSO = pRO->get_start_object();
         }
-
-        if (pSO)
+        else
         {
-            //get staff and timepos
-            data.iStaff = pSO->get_staff();
-            data.ml.location = pSO->get_time();
-
-            //get instrument number
-            ImoInstrument* pInstr = pSO->get_instrument();
-            ImoScore* pScore = pInstr->get_score();
-            data.ml.iInstr = pScore->get_instr_number_for(pInstr);
-
-            //get measure number
-            data.ml = ScoreAlgorithms::get_locator_for(pScore, data.ml.location,
-                                                       data.ml.iInstr);
-
-            //TODO: Fix staff for barlines (?)
-            //if clicked object is a barline staff will be always 0. To avoid this,
-            //staff must be deduced from y position
+            stringstream ss;
+            ss << "Invalid case. Click on ScoreObj but it is not StaffObj, AuxObj or "
+                << "RelObj. It is '" << pImo->get_name() << "'. Lomse maintenance error?";
+            LOMSE_LOG_ERROR(ss.str());
+            return data;
         }
+
+        if (!pSO)
+        {
+            stringstream ss;
+            ss << "Invalid case? Click on ScoreObj of type '"
+                << pImo->get_name() << "', but no associated StaffObj.";
+            LOMSE_LOG_ERROR(ss.str());
+            return data;
+        }
+
+        //get staff and timepos
+        int iStaff = pSO->get_staff();
+        TimeUnits timepos = pSO->get_time();
+
+        //get instrument number
+        ImoInstrument* pInstr = pSO->get_instrument();
+        ImoScore* pScore = pInstr->get_score();
+        int iInstr = pScore->get_instr_number_for(pInstr);
+
+        //get measure number
+        if (!fPrologShape)
+        {
+            data.ml = ScoreAlgorithms::get_locator_for(pScore, timepos, iInstr);
+            data.iStaff = iStaff;
+        }
+        else
+        {
+            //prolog gosht shape. Deduce measure and time from box system
+            GmoBoxSliceStaff* pSliceStaff = dynamic_cast<GmoBoxSliceStaff*>(pGmo->get_owner_box());
+            if (!pSliceStaff)
+            {
+                stringstream ss;
+                ss << "Invalid GM. No parent BoxSliceStaff for prolog shape";
+                LOMSE_LOG_ERROR(ss.str());
+                return data;
+            }
+            GmoBoxSliceInstr* pSliceInstr = dynamic_cast<GmoBoxSliceInstr*>(pSliceStaff->get_owner_box());
+            if (!pSliceInstr)
+            {
+                stringstream ss;
+                ss << "Invalid GM. No parent BoxSliceInstr for BoxSliceStaff";
+                LOMSE_LOG_ERROR(ss.str());
+                return data;
+            }
+            GmoBoxSlice* pSlice = dynamic_cast<GmoBoxSlice*>(pSliceInstr->get_owner_box());
+            if (!pSlice)
+            {
+                stringstream ss;
+                ss << "Invalid GM. No parent BoxSlice for BoxSliceInstr";
+                LOMSE_LOG_ERROR(ss.str());
+                return data;
+            }
+            GmoBoxSystem* pBSYS = dynamic_cast<GmoBoxSystem*>(pSlice->get_owner_box());
+            if (!pBSYS)
+            {
+                stringstream ss;
+                ss << "Invalid GM. No parent BoxSystem for BoxSlice";
+                LOMSE_LOG_ERROR(ss.str());
+                return data;
+            }
+
+            //get start time and measure number
+            TimeUnits time = pBSYS->start_time();
+            data.ml = ScoreAlgorithms::get_locator_for(pScore, time, iInstr);
+            data.iStaff = iStaff;
+        }
+
+        //TODO: (?) Fix staff for barlines
+        //if clicked object is a barline staff will be always 0. To avoid this,
+        //staff must be deduced from y position
+
         return data;
     }
+
     else if (pImo->is_instrument())
     {
         //click on a staff, bracket/brace, instr. name/abbrev
-        if (pGmo->is_shape_staff())
+        if (!pGmo->is_shape_staff())
         {
-            GmoShapeStaff* pStaff = static_cast<GmoShapeStaff*>(pGmo);
-            data.iStaff = pStaff->get_num_staff();
+            //out of score or on empty space out of staff (e.g. just inmediatelly
+            //above/below an staff, on space before system, bracket/brace, instrument or
+            //group name/abbrev)
+            return data;
+        }
 
-            //determine time and instrument number
-            GmoBoxSystem* pBSYS = GModelAlgorithms::get_box_system_for(pGmo, y);
-            if (pBSYS)
-            {
-                //determine time
-                TimeGridTable* pTimeGrid = pBSYS->get_time_grid_table();
-                data.ml.location = pTimeGrid->get_time_for_position(x);
-                //LOMSE_LOG_INFO( pTimeGrid->dump() );
+        //click on a staff
+        GmoShapeStaff* pStaff = static_cast<GmoShapeStaff*>(pGmo);
+        int iStaff = pStaff->get_num_staff();
 
-                //determine instrument
-                int absStaff = pBSYS->staff_at(y);
-                data.ml.iInstr = pBSYS->instr_number_for_staff(absStaff);
+        //determine time and instrument number
+        GmoBoxSystem* pBSYS = GModelAlgorithms::get_box_system_for(pGmo, y);
+        if (!pBSYS)  //Must always exist!
+        {
+            stringstream ss;
+            ss << "Invalid case? Click on a Staff but no parent BoxSystem.";
+            LOMSE_LOG_ERROR(ss.str());
+            return data;
+        }
 
-                //find nearest previous object in this staff
-                GmoBoxSliceInstr* pSlice = pBSYS->find_instr_slice_at(x, y);
-                if (pSlice)
-                {
-                    GmoShape* pShape = pSlice->find_staffobj_shape_before(x);
-                    if (pShape)
-                    {
-                        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pShape->get_creator_imo());
-                        //LOMSE_LOG_INFO(pSO->to_string());
+        //determine time
+        TimeGridTable* pTimeGrid = pBSYS->get_time_grid_table();
+        TimeUnits timepos = pTimeGrid->get_time_for_position(x);
+        //LOMSE_LOG_INFO( pTimeGrid->dump() );
 
-                        LUnits xPos = pShape->get_left();
-                        TimeUnits location = pTimeGrid->get_time_for_position(xPos);
+        //determine instrument
+        int absStaff = pBSYS->staff_at(y);
+        int iInstr = pBSYS->instr_number_for_staff(absStaff);
 
-                        //get instrument number
-                        ImoInstrument* pInstr = pSO->get_instrument();
-                        ImoScore* pScore = pInstr->get_score();
-
-                        //get measure number
-                        data.ml = ScoreAlgorithms::get_locator_for(pScore, location,
-                                                                   data.ml.iInstr);
-                        return data;
-                    }
-                }
-            }
+        //find nearest previous object in this staff
+        GmoBoxSliceInstr* pSlice = pBSYS->find_instr_slice_at(x, y);
+        if (!pSlice)
+        {
+            //click on staff after final barline
 
             //get measure number
             ImoScore* pScore = static_cast<ImoScore*>(pBSYS->get_creator_imo());
-            data.ml = ScoreAlgorithms::get_locator_for(pScore, data.ml.location,
-                                                       data.ml.iInstr);
+            data.ml = ScoreAlgorithms::get_locator_for(pScore, timepos, iInstr);
+            data.iStaff = iStaff;
 
-            //TODO:  Fix measure number when click after last measure (?)
+            //TODO: (?) Fix measure number when click after last measure
             //When click point is after last barline but on a staff, returned measure
             //is always the last measure and the locator points to the last barline.
             //Question: Should instead return measure+1 as point is after the barline?
             //But then the returned measure number will be grater than the number of
             //measures and could cause problems (?)
+
+            return data;
         }
+
+        //click on staff, on a slice containing stafobjs
+        GmoShape* pShape = pSlice->find_staffobj_shape_before(x);
+        if (!pShape)
+        {
+            //click on a BoxSliceInstrument, on the staff, but there are no StaffObjs
+            //before click point. Must be just after measure start barline
+            pShape = pSlice->find_staffobj_shape_after(x);
+            if (!pShape)
+            {
+                stringstream ss;
+                ss << "Invalid case? Click on a BoxSliceInstrument, on the staff, "
+                    << "but there are no StaffObjs on it.";
+                LOMSE_LOG_ERROR(ss.str());
+                return data;
+            }
+        }
+
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pShape->get_creator_imo());
+        //LOMSE_LOG_INFO(pSO->to_string());
+
+        LUnits xPos = pShape->get_left();
+        TimeUnits prevTimepos = pTimeGrid->get_time_for_position(xPos);
+
+        //get instrument number
+        ImoInstrument* pInstr = pSO->get_instrument();
+        ImoScore* pScore = pInstr->get_score();
+
+        //get locator
+        data.ml = ScoreAlgorithms::get_locator_for(pScore, prevTimepos, iInstr);
+        data.ml.location += (timepos - prevTimepos);
+        data.iStaff = iStaff;
+
         return data;
     }
 
-    //other cases: out of score or on empty space out of staff
-    return data;
+    else
+    {
+        //other cases:
+        //- after last barline, empty space between staves: Click on box-system, Imo is score
+        //- after last barline, empty space inmediately above/below the staff: Click on box-system, Imo is score
+        //- empty space above/below the score: Click on box-doc-page, Imo is lenmusdoc
+        return data;
+    }
 }
 
 
