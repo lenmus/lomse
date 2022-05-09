@@ -775,7 +775,7 @@ set( TESTLIB_FONTS_PATH      "\"${LOMSE_ROOT_DIR}/fonts/\"" )
 
 # path to fonts (will be hardcoded in lomse library, so *MUST* be the
 # path in which Lomse standard fonts will be installed)
-set( LOMSE_FONTS_PATH   "\"${BRAVURA_FONT_PATH}\"" )
+set( LOMSE_FONTS_PATH   "\"${BRAVURA_FONT_PATH}/\"" )
 
 
 #define a header file to pass CMake settings to source code
