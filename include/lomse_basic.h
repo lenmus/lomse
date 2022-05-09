@@ -16,7 +16,6 @@
 #include <vector>
 #include <memory>
 #include <algorithm>   //min
-using namespace std;
 
 
 
@@ -53,6 +52,7 @@ using namespace std;
 #endif
 
 
+///@cond INTERNALS
 namespace lomse
 {
 
@@ -214,10 +214,10 @@ struct Rectangle
         }
         else if ( rect.width && rect.height )
         {
-            T x1 = min(x, rect.x);
-            T y1 = min(y, rect.y);
-            T y2 = max(y + height, rect.height + rect.y);
-            T x2 = max(x + width, rect.width + rect.x);
+            T x1 = std::min(x, rect.x);
+            T y1 = std::min(y, rect.y);
+            T y2 = std::max(y + height, rect.height + rect.y);
+            T x2 = std::max(x + width, rect.width + rect.x);
 
             x = x1;
             y = y1;
@@ -305,24 +305,72 @@ typedef int_least32_t ImoId;        //identifier for ImoObj objects
 const ImoId k_no_imoid = -1;        //value for undefined imo id (MUST BE -1. See Cursor)
 
 typedef std::pair<ImoId, ImoId> GmoRef;        //identifier for GmoObj objects
-const GmoRef k_no_gmo_ref = make_pair(-1, -1);
+const GmoRef k_no_gmo_ref = std::make_pair(-1, -1);
 
 typedef double TimeUnits;           //time units (TU). Relative, depends on metronome speed
 
+///@endcond
 
-//---------------------------------------------------------------------------------------
-// For describing the measure location of a musical event or other.
+//=======================================================================================
+/** Struct describing the measure location of a musical event or other.
+
+    There are a variety of situations in which the position of an object needs to be
+    described not by its absolute timepos but referencing the measure number.
+
+    But although for most common scores just providing the measure number does the job,
+    it is necessary to take into account that for polymetric music (music in which not
+    all instruments have the same time signature), the measure number is not an absolute
+    value, common to all score instruments (score parts), but it is relative to
+    each instrument.
+
+    Due to this, the measure location struct also needs a reference to the instrument
+    to which the measure number refers.
+
+    The first measure (anacruxis or not) is always measure 0.
+    The first instrument is always instrument 0.
+*/
 struct MeasureLocator
 {
-    int iInstr;             //instrument number (0..n)
-    int iMeasure;           //measure number (0..m), for the instrument
-    TimeUnits location;     //TimeUnits from start of measure
+    int iInstr;             ///instrument number (0..n)
+    int iMeasure;           ///measure number (0..m), for the instrument
+    TimeUnits location;     ///TimeUnits from start of measure
 
-    MeasureLocator() : iInstr(0), iMeasure(0), location(0.0) {}
+    MeasureLocator() : iInstr(-1), iMeasure(-1), location(0.0) {}
     MeasureLocator(int i, int m, TimeUnits l) : iInstr(i), iMeasure(m), location(l) {}
+
+    bool is_valid() const { return iInstr >=0 && iMeasure >= 0; }
 
 };
 
+//forward declarations
+class ImoObj;
+
+//=======================================================================================
+/** Struct that describes the content of a point on current bitmap rendition
+    (e.g. a mouse click)
+
+    The struct provides a ptr. to the clicked object. In addition, if the clicked point
+    is on a score, it also provides:
+    - A MeasureLocator struct with information about measure, instrument, and time
+      position.
+    - The staff index, relative to instrument staves.
+
+    Otherwise, if clicked point is not on a score, the MeasureLocator is invalid
+    and the staff index is -1.
+
+*/
+struct ClickPointData
+{
+    ImoObj* pImo;           //clicked object or nullptr if out of document
+    MeasureLocator ml;      //locator when clicked point is on a score; otherwise invalid locator
+    int iStaff;             //staff index, relative to instrument, or -1 when clicked point is not on a score
+
+    ClickPointData() : pImo(nullptr), ml(-1, -1, 0.0), iStaff(-1) {}
+
+};
+
+
+///@cond INTERNALS
 
 //---------------------------------------------------------------------------------------
 // Logical Units comparison (LUnits, Tenths)
@@ -443,6 +491,7 @@ inline bool is_different(Color c1, Color c2) {
 
 
 
+///@endcond
 
 
 }   //namespace lomse

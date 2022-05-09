@@ -2987,6 +2987,7 @@ public:
     ImoAuxObj(ImoAuxObj&&) = delete;
     ImoAuxObj& operator= (ImoAuxObj&&) = delete;
 
+    ImoStaffObj* get_parent_staffobj();
 };
 
 //---------------------------------------------------------------------------------------

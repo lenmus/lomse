@@ -104,7 +104,9 @@ int main(int argc, char** argv)
          << ". Library tests runner." << endl << endl;
 
     cout << "Lomse build date: " << LibraryScope::get_build_date() << endl;
-    cout << "Path for tests scores: '" << TESTLIB_SCORES_PATH << "'" << endl << endl;
+    cout << "Path for tests scores: '" << TESTLIB_SCORES_PATH << "'" << endl;
+    cout << "Tests fonts path: '" << TESTLIB_FONTS_PATH << "'" << endl;
+    cout << "Lomse fonts path: '" << LOMSE_FONTS_PATH << "'" << endl << endl;
 
     bool verbose = argc > 1 && (!strcmp(argv[1], "--verbose") || !strcmp(argv[1], "-v"));
     int nextArg = verbose ? 2 : 1;

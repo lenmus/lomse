@@ -750,6 +750,15 @@ void MeasuresTableBuilder::build(ImoScore* pScore)
         //advance to next entry
         ++it;
     }
+
+//    //debug
+//    int maxInstr = pScore->get_num_instruments();
+//    for (int i=0; i < maxInstr; ++i)
+//    {
+//        ImoInstrument* pInstr = pScore->get_instrument(i);
+//        ImMeasuresTable* pTable = pInstr->get_measures_table();
+//        LOMSE_LOG_INFO(pTable->dump());
+//    }
 }
 
 //---------------------------------------------------------------------------------------

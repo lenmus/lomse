@@ -32,7 +32,8 @@ extern bool is_greater_time(TimeUnits t1, TimeUnits t2);
 
 TimeUnits round_half_up(TimeUnits num);
 
-string to_simple_string(chrono::time_point<chrono::system_clock> time, bool microsec = false);
+std::string to_simple_string(std::chrono::time_point<std::chrono::system_clock> time,
+                             bool microsec = false);
 
 }   //namespace lomse
 

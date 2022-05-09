@@ -502,7 +502,7 @@ SpElementCursorState ScoreCaretPositioner::click_point_to_cursor_state(int iPage
             time = pTimeGrid->get_time_for_position(x);
 
             //determine instrument & staff
-            int absStaff = pBSYS->nearest_staff_to_point(y);
+            int absStaff = pBSYS->staff_at(y);
             instr = pBSYS->instr_number_for_staff(absStaff);
             staff = pBSYS->staff_number_for(absStaff, instr);
             //AWARE: only instr, staff & time are relevant (id == k_no_imoid)

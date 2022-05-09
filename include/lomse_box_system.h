@@ -69,6 +69,7 @@ public:
 	inline int get_num_slices() const { return (int)m_childBoxes.size(); }
     inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
     GmoBoxSliceInstr* get_first_instr_slice(int iInstr);
+    GmoBoxSliceInstr* find_instr_slice_at(LUnits x, LUnits y);
     GmoBoxSliceStaff* get_first_slice_staff_for(int iInstr, int iStaff);
     void reposition_slices(USize shift);
     void remove_free_space_at_bottom_and_adjust_slices();
@@ -112,7 +113,7 @@ public:
     inline vector<GmoShapeStaff*>& get_staff_shapes() { return m_staffShapes; }
 
     //hit tests related
-    int nearest_staff_to_point(LUnits y);
+    int staff_at(LUnits y);
 
     //helper. User API related
     int get_num_instruments();

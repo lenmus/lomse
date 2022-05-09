@@ -449,16 +449,6 @@ else()
 endif()
 
 
-# other variables needed by lomse_config.h
-
-# paths for tests
-set( TESTLIB_SCORES_PATH     "\"${LOMSE_ROOT_DIR}/test-scores/\"" )
-set( TESTLIB_FONTS_PATH      "\"${LOMSE_ROOT_DIR}/fonts/\"" )
-
-# path to fonts (will be hardcoded in lomse library, so *MUST* be the
-# path in which Lomse standard fonts will be installed)
-set( LOMSE_FONTS_PATH   "\"${FONTS_PATH}/\"" )
-
 
 
 # Build environtment checks and settings
@@ -776,6 +766,16 @@ if (LOMSE_BUILD_MONOLITHIC)
     set(LOMSE_DEBIAN_DEPS "")
 endif()
 
+
+# set other variables needed by lomse_config.h
+
+# paths for tests
+set( TESTLIB_SCORES_PATH     "\"${LOMSE_ROOT_DIR}/test-scores/\"" )
+set( TESTLIB_FONTS_PATH      "\"${LOMSE_ROOT_DIR}/fonts/\"" )
+
+# path to fonts (will be hardcoded in lomse library, so *MUST* be the
+# path in which Lomse standard fonts will be installed)
+set( LOMSE_FONTS_PATH   "\"${BRAVURA_FONT_PATH}/\"" )
 
 
 #define a header file to pass CMake settings to source code

@@ -54,15 +54,13 @@ TimeGridTableEntry;
 class TimeGridTable
 {
 protected:
-    vector<TimeGridTableEntry> m_PosTimes;         //the table
+    std::vector<TimeGridTableEntry> m_PosTimes;         //the table
 
 public:
     TimeGridTable();
-    ///Destructor
-    ~TimeGridTable();
 
     //creation
-    void add_entries(vector<TimeGridTableEntry>& entries);
+    void add_entries(std::vector<TimeGridTableEntry>& entries);
     void add_entry(TimeGridTableEntry& entry);
 
     //info
@@ -75,7 +73,7 @@ public:
     inline TimeUnits get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
     inline LUnits get_x_pos(int iItem) { return m_PosTimes[iItem].uxPos; }
     inline TimeGridTableEntry& get_entry(int iItem) { return m_PosTimes[iItem]; }
-    inline vector<TimeGridTableEntry>& get_entries() { return m_PosTimes; }
+    inline std::vector<TimeGridTableEntry>& get_entries() { return m_PosTimes; }
 
     //access by position
     TimeUnits get_time_for_position(LUnits uxPos);
@@ -102,7 +100,7 @@ public:
     LUnits get_x_for_barline_at_time(TimeUnits timepos);
 
     //debug
-    string dump();
+    std::string dump();
 
 protected:
 

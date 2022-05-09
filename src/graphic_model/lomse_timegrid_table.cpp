@@ -33,11 +33,6 @@ TimeGridTable::TimeGridTable()
 }
 
 //---------------------------------------------------------------------------------------
-TimeGridTable::~TimeGridTable()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void TimeGridTable::add_entries(vector<TimeGridTableEntry>& entries)
 {
     int iMax = int(entries.size());

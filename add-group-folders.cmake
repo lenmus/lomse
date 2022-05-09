@@ -19,7 +19,6 @@ source_group( "${LOMSE_GROUP_FOLDER}mvc"             FILES ${MVC_FILES} )
 source_group( "${LOMSE_GROUP_FOLDER}parser"          FILES ${PARSER_FILES} )
 source_group( "${LOMSE_GROUP_FOLDER}parser/lmd"      FILES ${LMD_FILES} )
 source_group( "${LOMSE_GROUP_FOLDER}render"          FILES ${RENDER_FILES} )
-source_group( "${LOMSE_GROUP_FOLDER}score"           FILES ${SCORE_FILES} )
 source_group( "${LOMSE_GROUP_FOLDER}sound"           FILES ${SOUND_FILES} )
 source_group( "${LOMSE_GROUP_FOLDER}packages"        FILES ${LOMSE_PACKAGES_FILES} )
 

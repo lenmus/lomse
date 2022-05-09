@@ -317,7 +317,7 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int i
 //---------------------------------------------------------------------------------------
 TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, const MeasureLocator& ml)
 {
-    if (ml.iInstr < 0 || ml.iInstr >= pScore->get_num_instruments())
+    if (!ml.is_valid() || ml.iInstr >= pScore->get_num_instruments())
         return 0.0;
 
     ImoInstrument* pInstr = pScore->get_instrument(ml.iInstr);
