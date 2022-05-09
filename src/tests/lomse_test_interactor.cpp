@@ -596,8 +596,6 @@ SUITE(InteractorTest)
 
         LomseDoorway doorway;
         doorway.init_library(k_pix_format_rgb24, 82);
-        lomse::get_global_logger().deinit();
-        lomse::get_global_logger().init(&std::cout, &std::cerr);
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Presenter* pPresenter = doorway.open_document(k_view_vertical_book,
@@ -614,7 +612,6 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 1, 1, 0.0, "instrument", test_name()) );
-        dump_gmodel(pIntor);
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_202)
