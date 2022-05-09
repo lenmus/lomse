@@ -195,6 +195,22 @@ public:
         }
         return fTestOk;
     }
+
+    //-----------------------------------------------------------------------------------
+    void dump_gmodel(Interactor* pIntor)
+    {
+        GraphicModel* pGM = pIntor->get_graphic_model();
+        int pages = pGM->get_num_pages();
+        cout << test_name() << ". Dump of graphic model:" << endl;
+        for (int i=0; i < pages; ++i)
+        {
+            cout << "Page " << i
+                 << " ==================================================================="
+                 << endl;
+            pGM->dump_page(i, cout);
+        }
+        cout << endl << endl;
+    }
 };
 
 
@@ -596,6 +612,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 1, 1, 0.0, "instrument", test_name()) );
+        dump_gmodel(pIntor);
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_202)
