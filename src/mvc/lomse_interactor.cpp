@@ -2246,6 +2246,26 @@ void Interactor::remove_mark(ApplicationMark* mark)
     pGView->remove_mark(mark);
 }
 
+//---------------------------------------------------------------------------------------
+MeasureHighlight* Interactor::add_measure_highlight(ImoId scoreId, const MeasureLocator& ml)
+{
+    MeasureHighlight* pMark = nullptr;
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoScore* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = dynamic_cast<ImoScore*>(spDoc->get_pointer_to_imo(scoreId));
+
+        if (pScore)
+        {
+            pMark = pGView->add_measure_highlight(pScore, ml);
+            request_window_update();
+        }
+    }
+    return pMark;
+}
+
 
 
 }  //namespace lomse

@@ -30,6 +30,9 @@
 #include "lomse_half_page_view.h"
 #include "lomse_renderer.h"
 #include "lomse_svg_drawer.h"
+#include "lomse_measure_highlight.h"
+#include "lomse_score_algorithms.h"
+#include "lomse_gm_measures_table.h"
 
 using namespace std;
 
@@ -1836,6 +1839,31 @@ void GraphicView::remove_mark(VisualEffect* mark)
 {
     m_pOverlaysGenerator->remove_visual_effect(mark);
 }
+
+//---------------------------------------------------------------------------------------
+MeasureHighlight* GraphicView::add_measure_highlight(ImoScore* pScore,
+                                                     const MeasureLocator& ml)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return nullptr;
+
+    GmoBoxSystem* pBoxSystem = pGModel->get_system_for(pScore, ml);
+    if (!pBoxSystem)
+        return nullptr;
+
+    GmMeasuresTable* measures = pGModel->get_measures_table(pScore->get_id());
+    LUnits xLeft = measures->get_start_barline_right(ml.iInstr, ml.iMeasure, pBoxSystem);
+    LUnits xRight = measures->get_end_barline_left(ml.iInstr, ml.iMeasure, pBoxSystem);
+
+    MeasureHighlight* pMarker = LOMSE_NEW MeasureHighlight(this, m_libraryScope);
+    pMarker->initialize(xLeft, xRight, pBoxSystem);
+    pMarker->set_visible(true);
+
+    add_visual_effect(pMarker);
+    return pMarker;
+}
+
 
 ////---------------------------------------------------------------------------------------
 //void GraphicView::caret_right()
