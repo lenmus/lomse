@@ -15,11 +15,9 @@ var searchData=
   ['_7eeventplayback',['~EventPlayback',['../classEventPlayback.html#ad09dcb7b8c4d0ec4001533e8c8386a20',1,'EventPlayback']]],
   ['_7eeventupdateviewport',['~EventUpdateViewport',['../classEventUpdateViewport.html#ae899f66b38f5be080cf98f1b2c746a20',1,'EventUpdateViewport']]],
   ['_7efpitch',['~FPitch',['../classFPitch.html#a93bb53fb5d0c74eca93e16cbbfc5d680',1,'FPitch']]],
-  ['_7emidiserverbase',['~MidiServerBase',['../classMidiServerBase.html#a40ed046f472382c79fe398735f7918e0',1,'MidiServerBase']]],
   ['_7eobservable',['~Observable',['../classObservable.html#a42f551d4d64ffa48a2ea8d7f0a4e42d4',1,'Observable']]],
   ['_7eobserver',['~Observer',['../classObserver.html#afcc6b67be6c386f2f3d2c363aa59cb47',1,'Observer']]],
   ['_7epresenter',['~Presenter',['../classPresenter.html#a07b9bfdb69702b53e0797001e242fa9f',1,'Presenter']]],
   ['_7erequest',['~Request',['../classRequest.html#a45cc5d15eb7b9c9e97bd7328c9a90d3f',1,'Request']]],
-  ['_7escoreplayer',['~ScorePlayer',['../classScorePlayer.html#af49944a8a16d360b82e01d39e571bc2a',1,'ScorePlayer']]],
   ['_7eundoelement',['~UndoElement',['../classUndoElement.html#ab8df4a206cb81676c4b28d86e485ef0c',1,'UndoElement']]]
 ];

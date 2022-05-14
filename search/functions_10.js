@@ -63,7 +63,6 @@ var searchData=
   ['start_5fcomposite_5fnotation',['start_composite_notation',['../classDrawer.html#a7450b593a4e0b214414c59cf134f145d',1,'Drawer']]],
   ['start_5fsimple_5fnotation',['start_simple_notation',['../classDrawer.html#ae84fa3c07092923c73cf60c5f55837b9',1,'Drawer']]],
   ['step',['step',['../classDiatonicPitch.html#a470c4c777e7fae4a1af057df12a808bf',1,'DiatonicPitch::step()'],['../classMidiPitch.html#ae2f5b6a3bb9f9569c5f27d26a09e2a37',1,'MidiPitch::step()'],['../classFPitch.html#a1096be9af9f02019e9585ac613d05bdb',1,'FPitch::step()']]],
-  ['stop',['stop',['../classScorePlayer.html#a483c27df7c046f56517f6b610576636d',1,'ScorePlayer']]],
   ['stroke',['stroke',['../classDrawer.html#ab36eebcb9de8562cbd5b7d09747978ad',1,'Drawer']]],
   ['stroke_5fnone',['stroke_none',['../classDrawer.html#a7eda2ffe8865e51530a0035e219f4c43',1,'Drawer']]],
   ['stroke_5fwidth',['stroke_width',['../classDrawer.html#a10286704e69a18b06ccad40abcd5c065',1,'Drawer']]],

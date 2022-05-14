@@ -9,7 +9,6 @@ var searchData=
   ['line_5fto_5frel',['line_to_rel',['../classDrawer.html#a765c0cd66515162ec3448ab4e88cdac3',1,'Drawer']]],
   ['line_5fwith_5fmarkers',['line_with_markers',['../classDrawer.html#a1905bdfb3918e02b35f8ee9395692d0e',1,'Drawer']]],
   ['lmd_5fversion',['lmd_version',['../classADocument.html#a59775d9e872f12a8d799ee7cb9ec15d6',1,'ADocument']]],
-  ['load_5fscore',['load_score',['../classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6',1,'ScorePlayer']]],
   ['locator_5ffor',['locator_for',['../classAScore.html#aa60fbd53aafd6d5c61cee16dfa3ada48',1,'AScore']]],
   ['lomsedoorway',['LomseDoorway',['../classLomseDoorway.html#a11e5e5ecf94ab8913c0e7e211c1748de',1,'LomseDoorway']]]
 ];

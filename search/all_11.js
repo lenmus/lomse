@@ -1,7 +1,6 @@
 var searchData=
 [
   ['scores_20playback_20overview',['Scores playback overview',['../page-sound-generation.html',1,'index']]],
-  ['scoreplayer',['ScorePlayer',['../classScorePlayer.html',1,'']]],
   ['screen_5fpoint_5fto_5fmodel_5fpoint',['screen_point_to_model_point',['../classInteractor.html#a986167b680f97ad5914c69343a7d15c5',1,'Interactor']]],
   ['screen_5fpoint_5fto_5fpage_5fpoint',['screen_point_to_page_point',['../classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff',1,'Interactor']]],
   ['scroll_5fto_5fmeasure',['scroll_to_measure',['../classInteractor.html#a5b6951dee5875a88b3e4b4a7be666ccd',1,'Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0)'],['../classInteractor.html#a639f66bc540bcf59c9df2d872ef11bbb',1,'Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, TimeUnits location=0.0, int iInstr=0)']]],
@@ -81,7 +80,6 @@ var searchData=
   ['start_5fcomposite_5fnotation',['start_composite_notation',['../classDrawer.html#a7450b593a4e0b214414c59cf134f145d',1,'Drawer']]],
   ['start_5fsimple_5fnotation',['start_simple_notation',['../classDrawer.html#ae84fa3c07092923c73cf60c5f55837b9',1,'Drawer']]],
   ['step',['step',['../classDiatonicPitch.html#a470c4c777e7fae4a1af057df12a808bf',1,'DiatonicPitch::step()'],['../classMidiPitch.html#ae2f5b6a3bb9f9569c5f27d26a09e2a37',1,'MidiPitch::step()'],['../classFPitch.html#a1096be9af9f02019e9585ac613d05bdb',1,'FPitch::step()']]],
-  ['stop',['stop',['../classScorePlayer.html#a483c27df7c046f56517f6b610576636d',1,'ScorePlayer']]],
   ['stroke',['stroke',['../classDrawer.html#ab36eebcb9de8562cbd5b7d09747978ad',1,'Drawer']]],
   ['stroke_5fnone',['stroke_none',['../classDrawer.html#a7eda2ffe8865e51530a0035e219f4c43',1,'Drawer']]],
   ['stroke_5fwidth',['stroke_width',['../classDrawer.html#a10286704e69a18b06ccad40abcd5c065',1,'Drawer']]],

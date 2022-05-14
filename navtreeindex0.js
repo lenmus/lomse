@@ -246,8 +246,6 @@ var NAVTREEINDEX0 =
 "page-tasks.html#task-selection-rectangle":[0,6,1,3],
 "page-tasks.html#tasks-overview":[0,6,1],
 "page-tutorials-license.html":[5],
-"page-user-drawers.html":[6],
-"page-user-drawers.html#page-user-drawers-overview":[6,0],
-"page-user-drawers.html#page-user-drawers-use":[6,1],
-"pages.html":[]
+"pages.html":[],
+"todo.html":[6]
 };

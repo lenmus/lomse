@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.1</span>
+   &#160;<span id="projectnumber">0.29.2</span>
    </div>
   </td>
  </tr>
@@ -135,6 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3e96befa4410ffe879ed55fc09d6c62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task</a> (int taskType)</td></tr>
 <tr class="separator:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Information about mouse clicked point</div></td></tr>
+<tr class="memitem:a8f462da16ebfaa3bad6632061879101d"><td class="memItemLeft" align="right" valign="top">ClickPointData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8f462da16ebfaa3bad6632061879101d">find_click_info_at</a> (Pixels x, Pixels y)</td></tr>
+<tr class="separator:a8f462da16ebfaa3bad6632061879101d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Access to collaborators in MVC model</div></td></tr>
 <tr class="memitem:ab5192c9307818200f5b08e93892c61ed"><td class="memItemLeft" align="right" valign="top">GraphicModel *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">get_graphic_model</a> ()</td></tr>
 <tr class="separator:ab5192c9307818200f5b08e93892c61ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -244,6 +247,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr class="separator:a24ebcfe1d73339556ba2e0c603a62c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fb7bc98e594befe94fe19f67ffc06a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classFragmentMark.html">FragmentMark</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a4fb7bc98e594befe94fe19f67ffc06a1">add_fragment_mark_at_staffobj</a> (ImoStaffObj *pSO)</td></tr>
 <tr class="separator:a4fb7bc98e594befe94fe19f67ffc06a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add8f800d6e000146c0888b5c1160fe7e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeasureHighlight.html">MeasureHighlight</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#add8f800d6e000146c0888b5c1160fe7e">add_measure_highlight</a> (ImoId scoreId, const MeasureLocator &amp;ml)</td></tr>
+<tr class="separator:add8f800d6e000146c0888b5c1160fe7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25f951a55f2a66e66aef7575507a4593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">remove_mark</a> (<a class="el" href="classApplicationMark.html">ApplicationMark</a> *mark)</td></tr>
 <tr class="separator:a25f951a55f2a66e66aef7575507a4593"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Print related</div></td></tr>
@@ -497,7 +502,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </ul>
 <p>The mark properties (type, color, position, length, etc.) can later be changed. See methods: <a class="el" href="classFragmentMark.html#ab0773a8ef433eb2267d3fa17ad258a14">FragmentMark::type()</a>, <a class="el" href="classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455">FragmentMark::color()</a>, <a class="el" href="classFragmentMark.html#a58b09f7dc4d4e89fc1acaa4375b640bd">FragmentMark::top()</a>, <a class="el" href="classFragmentMark.html#a53614be18461de853522bb864d33a6c1">FragmentMark::bottom()</a>, <a class="el" href="classFragmentMark.html#a43651ecc05dd42e4271f0eb39fa6db0e">FragmentMark::x_shift()</a>, <a class="el" href="classFragmentMark.html">FragmentMark</a>:: line_style() and <a class="el" href="classFragmentMark.html#ac771774a9507bef093e82ded5c58d3a9">FragmentMark::extra_height()</a>.</p>
 <p><b>Example of use:</b></p>
-<div class="fragment"><div class="line">ImoId scoreId = ...</div><div class="line">TimeUnits timepos = ...</div><div class="line">FragmentMark* mark = pInteractor-&gt;add_fragment_mark(scoreId, timepos);</div><div class="line"></div><div class="line"><span class="comment">//customize the mark: magenta solid color, covering second and third instruments</span></div><div class="line">mark-&gt;<a class="code" href="classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455">color</a>(Color(255,0,255))-&gt;<a class="code" href="classFragmentMark.html#aabaec0d2044ac088a1387530166af875">thickness</a>(5)-&gt;<a class="code" href="classFragmentMark.html#a58b09f7dc4d4e89fc1acaa4375b640bd">top</a>(1)-&gt;<a class="code" href="classFragmentMark.html#a53614be18461de853522bb864d33a6c1">bottom</a>(2);</div><div class="line">    ...</div><div class="line"></div><div class="line"><span class="comment">//change its appearance: rounded open bracket, cyan transparent color</span></div><div class="line">mark-&gt;<a class="code" href="classFragmentMark.html#ab0773a8ef433eb2267d3fa17ad258a14">type</a>(<a class="code" href="group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1ab34b9b99388af4925ea055a35216866c">k_mark_open_rounded</a>)-&gt;<a class="code" href="classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455">color</a>(Color(0,255,255,128));</div><div class="line">    ...</div><div class="line"></div><div class="line"><span class="comment">//when no longer needed remove it</span></div><div class="line">pInteractor-&gt;remove_mark(mark);</div><div class="line"></div><div class="line">Marks cannot be repositioned. If <span class="keyword">this</span> is needed, just <span class="keyword">delete</span> current mark and</div><div class="line">create a <span class="keyword">new</span> one at the desired <span class="keyword">new</span> position.</div></div><!-- fragment --> 
+<div class="fragment"><div class="line">ImoId scoreId = ...</div><div class="line">TimeUnits timepos = ...</div><div class="line">FragmentMark* mark = pInteractor-&gt;add_fragment_mark(scoreId, timepos);</div><div class="line"></div><div class="line"><span class="comment">//customize the mark: magenta solid color, covering second and third instruments</span></div><div class="line">mark-&gt;<a class="code" href="classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455">color</a>(Color(255,0,255))-&gt;<a class="code" href="classFragmentMark.html#aabaec0d2044ac088a1387530166af875">thickness</a>(5)-&gt;<a class="code" href="classFragmentMark.html#a58b09f7dc4d4e89fc1acaa4375b640bd">top</a>(1)-&gt;<a class="code" href="classFragmentMark.html#a53614be18461de853522bb864d33a6c1">bottom</a>(2);</div><div class="line">    ...</div><div class="line"></div><div class="line"><span class="comment">//change its appearance: rounded open bracket, cyan transparent color</span></div><div class="line">mark-&gt;<a class="code" href="classFragmentMark.html#ab0773a8ef433eb2267d3fa17ad258a14">type</a>(<a class="code" href="group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1ab34b9b99388af4925ea055a35216866c">k_mark_open_rounded</a>)-&gt;<a class="code" href="classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455">color</a>(Color(0,255,255,128));</div><div class="line">    ...</div><div class="line"></div><div class="line"><span class="comment">//when no longer needed remove it</span></div><div class="line">pInteractor-&gt;remove_mark(mark);</div><div class="line"></div><div class="line">Lomse will retain the ownership of returned pointer to the marker, and will be</div><div class="line">automatically deleted when the score model is deleted. Nevertheless you can</div><div class="line"><span class="keyword">remove</span> a marker at any moment by invoking <a class="code" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">Interactor::remove_mark</a>() and passing</div><div class="line">the marker to remove.</div><div class="line"></div><div class="line">Markers cannot be repositioned. If this is needed, just remove current mark (by</div><div class="line">invoking <a class="code" href="classInteractor.html">Interactor</a>::<a class="code" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">remove_mark</a>() ) and create a new one at the new desired</div><div class="line">position.</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a4fb7bc98e594befe94fe19f67ffc06a1"></a>
@@ -522,6 +527,43 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </dd>
 </dl>
 <p>See <a class="el" href="classInteractor.html#a4099d4b3b952a28142fd50e58809615e">add_fragment_mark_at_note_rest()</a> for more details. </p>
+
+</div>
+</div>
+<a id="add8f800d6e000146c0888b5c1160fe7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add8f800d6e000146c0888b5c1160fe7e">&#9670;&nbsp;</a></span>add_measure_highlight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeasureHighlight.html">MeasureHighlight</a>* Interactor::add_measure_highlight </td>
+          <td>(</td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>scoreId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MeasureLocator &amp;&#160;</td>
+          <td class="paramname"><em>ml</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a new <a class="el" href="classMeasureHighlight.html">MeasureHighlight</a> on the score at the barline at the given time position. Take into account that barlines have the same timepos than the first note/rest after the barline. If there is no a barline at the given timepos, this method will place the mark on the note/rest position for the passed timepos. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">scoreId</td><td>Id. of the score on which the mark will be added. </td></tr>
+    <tr><td class="paramname">ml</td><td>The position for the mark. Only measure and instrument will be used.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Lomse will retain the ownership of returned pointer to the marker, and will be automatically deleted when the score model is deleted. Nevertheless you can remove a marker at any moment by invoking <a class="el" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">Interactor::remove_mark()</a> and passing the marker to remove.</p>
+<p>Markers cannot be repositioned. If this is needed, just remove current mark (by invoking <a class="el" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">Interactor::remove_mark()</a> ) and create a new one at the new desired position. </p>
 
 </div>
 </div>
@@ -735,6 +777,41 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::on_edit_undo()</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">        spInteractor-&gt;exec_undo();</div><div class="line">}</div></div><!-- fragment --><p>See <a class="el" href="page-edit-overview.html#edit-overview">How to modify a document</a></p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a>, <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo()</a> </dd></dl>
+
+</div>
+</div>
+<a id="a8f462da16ebfaa3bad6632061879101d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f462da16ebfaa3bad6632061879101d">&#9670;&nbsp;</a></span>find_click_info_at()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ClickPointData Interactor::find_click_info_at </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns a ClickedDataInfo struct with information about object at x,y position on current bitmap rendition. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The x coordinate (pixels) of the point. </td></tr>
+    <tr><td class="paramname">y</td><td>The y coordinate (pixels) of the point. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2138,9 +2215,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Hide the mark and delete it. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Hide a marker and delete it. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mark</td><td>Pointer to the mark to remove. After executing this method the pointer will no longer be valid. </td></tr>
+    <tr><td class="paramname">mark</td><td>Pointer to the marker to remove. After executing this method the pointer will no longer be valid. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2600,7 +2677,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </div><div class="memdoc">
 <p>Set current operation mode. An operation mode defines valid actions and commands on the Document. For instance, in 'read only' mode all actions that could alter Document content will be ignored. Valid operation modes are defined by enum <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a>. Look there for an explanation of the different operating modes.</p>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(SpEventInfo pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(SpEventInfo pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        ScorePlayer* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;load_score(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;play(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a36d4801019bbf55a77b616d53680f7a2"></a>
@@ -3475,7 +3552,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Fri Mar 18 2022 10:45:31 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat May 14 2022 16:53:10 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

@@ -12,18 +12,13 @@ var NAVTREE =
     ] ],
     [ "Library license", "page-library-license.html", null ],
     [ "License for tutorials and samples", "page-tutorials-license.html", null ],
-    [ "Application specific Drawer objects", "page-user-drawers.html", [
-      [ "The Drawer object", "page-user-drawers.html#page-user-drawers-overview", null ],
-      [ "Using application specific drawers", "page-user-drawers.html#page-user-drawers-use", null ]
-    ] ],
     [ "Todo List", "todo.html", null ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"classes.html",
-"todo.html"
+"classes.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

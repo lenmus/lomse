@@ -28,7 +28,6 @@ var searchData=
   ['is_5fmusic_5fdata',['is_music_data',['../classAObject.html#ab8b6034d731ad0b2d58fb23518af1acd',1,'AObject']]],
   ['is_5fnatural_5fnote_5ffor',['is_natural_note_for',['../classMidiPitch.html#ab883bf5b7182b75b78980b7db0d79f5c',1,'MidiPitch::is_natural_note_for()'],['../classFPitch.html#a187fe6a750dabc9dd1e824b6a00790e6',1,'FPitch::is_natural_note_for()']]],
   ['is_5fparagraph',['is_paragraph',['../classAObject.html#aeb83071b2e5dd49bbcec89c2378b1f50',1,'AObject']]],
-  ['is_5fplaying',['is_playing',['../classScorePlayer.html#ae0cce1824911d20d139117ea0f685a13',1,'ScorePlayer']]],
   ['is_5fready',['is_ready',['../classDrawer.html#a12dbac4eff7ef28898ba9a9f643434ba',1,'Drawer']]],
   ['is_5frecordable',['is_recordable',['../classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf',1,'DocCommand']]],
   ['is_5fredo_5fpossible',['is_redo_possible',['../classDocCommandExecuter.html#a4b0e2a24ffe21e2b4ec5440543d10127',1,'DocCommandExecuter']]],

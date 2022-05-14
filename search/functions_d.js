@@ -14,15 +14,9 @@ var searchData=
   ['page_5ftop_5fmargin_5fodd',['page_top_margin_odd',['../classADocument.html#a382f9c46b05770d7afb78e2310f4c01a',1,'ADocument']]],
   ['page_5fwidth',['page_width',['../classADocument.html#a3c9c16964ec416ee0ab720337a6b80be',1,'ADocument']]],
   ['pan',['pan',['../classAMidiInfo.html#aee954195e2a3902fc71b8e842bcc4a5e',1,'AMidiInfo']]],
-  ['pause',['pause',['../classScorePlayer.html#ae619442884736eafe2734dcf0301875b',1,'ScorePlayer']]],
-  ['play',['play',['../classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f',1,'ScorePlayer']]],
-  ['play_5ffrom_5fmeasure',['play_from_measure',['../classScorePlayer.html#a7eebc1f8428946be58ecb719557048d0',1,'ScorePlayer']]],
-  ['play_5fmeasure',['play_measure',['../classScorePlayer.html#a2926281a3853a0daca442395073981e5',1,'ScorePlayer']]],
-  ['play_5fmeasures',['play_measures',['../classScorePlayer.html#a990b8950855e69a7902609c9c0a7108a',1,'ScorePlayer']]],
   ['polygon',['polygon',['../classDrawer.html#a8ff8f96c3d76751fd140d374ac48413b',1,'Drawer']]],
   ['port',['port',['../classAMidiInfo.html#a1f39e1fa88e061ddd4dc15a3be1a0450',1,'AMidiInfo']]],
   ['print_5fpage',['print_page',['../classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d',1,'Interactor']]],
   ['program',['program',['../classAMidiInfo.html#a62ba47043223363e75f306bcb11347ac',1,'AMidiInfo']]],
-  ['program_5fchange',['program_change',['../classMidiServerBase.html#a10fbaf6f8a6704bafbc0a2ce317f5218',1,'MidiServerBase']]],
   ['program_5fname',['program_name',['../classAMidiInfo.html#a4fbbf9d24d656165149ff6dbf45e74e5',1,'AMidiInfo']]]
 ];

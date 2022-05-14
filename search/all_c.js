@@ -6,8 +6,6 @@ var searchData=
   ['new_5fviewport_5forigin',['new_viewport_origin',['../classDrawer.html#a82b53f6a2a4d75b3993b30318c40ca33',1,'Drawer']]],
   ['new_5fviewport_5fsize',['new_viewport_size',['../classDrawer.html#aba6e374f64b50deec90c7b0e13ee024a',1,'Drawer']]],
   ['notated_5faccidentals_5ffor',['notated_accidentals_for',['../classFPitch.html#a917d10be06d698863d4b2332d8d3f3d5',1,'FPitch']]],
-  ['note_5foff',['note_off',['../classMidiServerBase.html#a67b42d5394adde88fd7aac2f779bed04',1,'MidiServerBase']]],
-  ['note_5fon',['note_on',['../classMidiServerBase.html#a0ccd958292bf0153bfc5ef80e9671d51',1,'MidiServerBase']]],
   ['notify',['notify',['../classObserver.html#a4835f8e1467d41d585c864cd189f3e64',1,'Observer']]],
   ['notify_5fobservers',['notify_observers',['../classEventNotifier.html#aa4e1b9225b3ea84cb88cef2aa468ea09',1,'EventNotifier']]],
   ['num_5faccidentals',['num_accidentals',['../classFPitch.html#a69af4ef82925c858b0de75a0d0c0d92c',1,'FPitch']]],

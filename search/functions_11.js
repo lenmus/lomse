@@ -9,6 +9,6 @@ var searchData=
   ['to_5ffpitch',['to_FPitch',['../classDiatonicPitch.html#a92263ee165c1f3851c543bc065368e08',1,'DiatonicPitch']]],
   ['to_5fmidi_5fpitch',['to_midi_pitch',['../classDiatonicPitch.html#ab9b2e382b33cd2a7de35b9e84f9cda20',1,'DiatonicPitch::to_midi_pitch()'],['../classFPitch.html#a8c3421bda2d8a9f6097a598b7bc61750',1,'FPitch::to_midi_pitch()']]],
   ['to_5frel_5fldp_5fname',['to_rel_ldp_name',['../classFPitch.html#ad4cc0023028f9d821276f6f4dc096dbb',1,'FPitch']]],
-  ['top',['top',['../classFragmentMark.html#a58b09f7dc4d4e89fc1acaa4375b640bd',1,'FragmentMark']]],
+  ['top',['top',['../classFragmentMark.html#a58b09f7dc4d4e89fc1acaa4375b640bd',1,'FragmentMark::top()'],['../classMeasureHighlight.html#a78be195f6826f95d029977c8f5957bf6',1,'MeasureHighlight::top()']]],
   ['type',['type',['../classFragmentMark.html#ab0773a8ef433eb2267d3fa17ad258a14',1,'FragmentMark']]]
 ];
