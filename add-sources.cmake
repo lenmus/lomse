@@ -52,9 +52,10 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_fragment_mark.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_basic.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_measures_table.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_graphical_model.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_handler.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_measures_table.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_measure_highlight.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_overlays_generator.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_selections.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_barline.cpp

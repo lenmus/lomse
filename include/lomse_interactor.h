@@ -30,21 +30,22 @@ namespace lomse
 ///@endcond
 
 //forward declarations
+class ApplicationMark;
 class CaretPositioner;
 class DocCommandExecuter;
 class DocCommand;
 class DocCursor;
+class FragmentMark;
 class GmoObj;
 class GmoBox;
 class GraphicModel;
 class Handler;
 class ImoScore;
 class ImoStaffObj;
+class MeasureHighlight;
 class PlayerGui;
 class Task;
 class VisualEffect;
-class FragmentMark;
-class ApplicationMark;
 
 class Document;
 typedef std::shared_ptr<Document>     SpDocument;
@@ -1092,8 +1093,14 @@ public:
         //when no longer needed remove it
         pInteractor->remove_mark(mark);
 
-        Marks cannot be repositioned. If this is needed, just delete current mark and
-        create a new one at the desired new position.
+        Lomse will retain the ownership of returned pointer to the marker, and will be
+        automatically deleted when the score model is deleted. Nevertheless you can
+        remove a marker at any moment by invoking Interactor::remove_mark() and passing
+        the marker to remove.
+
+        Markers cannot be repositioned. If this is needed, just remove current mark (by
+        invoking Interactor::remove_mark() ) and create a new one at the new desired
+        position.
 
         @endcode
     */
@@ -1118,11 +1125,30 @@ public:
     */
     FragmentMark* add_fragment_mark_at_staffobj(ImoStaffObj* pSO);
 
-    /** Hide the mark and delete it.
-        @param mark  Pointer to the mark to remove. After executing this method the
+    /** Create a new MeasureHighlight on the score at the barline at the given time position.
+        Take into account that barlines have the same timepos than the first
+        note/rest after the barline. If there is no a barline at the given timepos, this
+        method will place the mark on the note/rest position for the passed timepos.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param ml The position for the mark. Only measure and instrument will be used.
+
+        Lomse will retain the ownership of returned pointer to the marker, and will be
+        automatically deleted when the score model is deleted. Nevertheless you can
+        remove a marker at any moment by invoking Interactor::remove_mark() and passing
+        the marker to remove.
+
+        Markers cannot be repositioned. If this is needed, just remove current mark (by
+        invoking Interactor::remove_mark() ) and create a new one at the new desired
+        position.
+    */
+    MeasureHighlight* add_measure_highlight(ImoId scoreId, const MeasureLocator& ml);
+
+    /** Hide a marker and delete it.
+        @param mark  Pointer to the marker to remove. After executing this method the
             pointer will no longer be valid.
     */
     void remove_mark(ApplicationMark* mark);
+
 
     //@}    //Application markings on the score
 

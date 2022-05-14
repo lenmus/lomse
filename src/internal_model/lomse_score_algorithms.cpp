@@ -302,7 +302,7 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int i
     ImoInstrument* pInstr = pScore->get_instrument(iInstr);
     ImMeasuresTable* pTable = pInstr->get_measures_table();
     ImMeasuresTableEntry* measure = pTable->get_measure(iMeasure);
-    TimeUnits timepos = 0.0f;
+    TimeUnits timepos = 0.0;
     if (measure)
     {
         timepos = measure->get_timepos();
@@ -323,7 +323,7 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, const MeasureLocato
     ImoInstrument* pInstr = pScore->get_instrument(ml.iInstr);
     ImMeasuresTable* pTable = pInstr->get_measures_table();
     ImMeasuresTableEntry* measure = pTable->get_measure(ml.iMeasure);
-    TimeUnits timepos = 0.0f;
+    TimeUnits timepos = 0.0;
     if (measure)
     {
         timepos = measure->get_timepos() + ml.location;

@@ -58,7 +58,6 @@ protected:
 
 public:
     ScoreAlgorithms() {}
-    ~ScoreAlgorithms() {}
 
     /** Look for a note that can be tied (as end of tie) with pStartNote     */
     static ImoNote* find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,

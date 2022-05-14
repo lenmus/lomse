@@ -176,6 +176,7 @@ public:
     */
     GmoBoxSystem* get_system_for(ImoId scoreId, TimeUnits timepos);
     GmoBoxSystem* get_system_box(int iSystem);
+    GmoBoxSystem* get_system_for(ImoScore* pScore, const MeasureLocator& ml);
 
     GmoBoxSystem* get_system_for_staffobj(ImoId id);
 
@@ -205,6 +206,7 @@ public:
     ///Get info about a clicked point
     static ClickPointData find_info_for_point(LUnits x, LUnits y, GmoObj* pGmo);
 
+//    static GmoBoxSystem* get_system_for(const MeasureLocator& ml);
 
 };
 

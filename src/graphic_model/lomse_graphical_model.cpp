@@ -325,6 +325,13 @@ GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos)
 }
 
 //---------------------------------------------------------------------------------------
+GmoBoxSystem* GraphicModel::get_system_for(ImoScore* pScore, const MeasureLocator& ml)
+{
+    TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, ml);
+    return get_system_for(pScore->get_id(), timepos);
+}
+
+//---------------------------------------------------------------------------------------
 GmoBoxSystem* GraphicModel::get_system_for_staffobj(ImoId id)
 {
     GmoShape* pShape = get_main_shape_for_imo(id);
@@ -772,6 +779,52 @@ ClickPointData GModelAlgorithms::find_info_for_point(LUnits x, LUnits y, GmoObj*
         return data;
     }
 }
+
+////---------------------------------------------------------------------------------------
+//GmoBoxSystem* GModelAlgorithms::get_system_for(const ImoScore* pScore, const MeasureLocator& ml)
+//{
+//    //if not found returns nullptr
+//
+//    TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, ml);
+//    ScoreStub* pStub = get_stub_for(pScore->get_id());
+//    GmoBoxScorePage* pPage = pStub->get_page_for(timepos);
+//    if (pPage)
+//    {
+//        //find system in this page
+//        GmoBoxSystem* pSystem = nullptr;
+//        int i = pPage->get_num_first_system();
+//        int maxSystem = pPage->get_num_systems() + i;
+//        LOMSE_LOG_DEBUG(Logger::k_events, "get_system_for(%f), i=%d, maxSystem=%d",
+//                        timepos, i, maxSystem);
+//        for (; i < maxSystem; ++i)
+//        {
+//            pSystem = pPage->get_system(i);
+//            LOMSE_LOG_DEBUG(Logger::k_events, "system %d. End time = %f",
+//                            i, pSystem->end_time());
+//            if (is_lower_time(timepos, pSystem->end_time()))
+//                break;
+//            else if(is_equal_time(timepos, pSystem->end_time()))
+//            {
+//                //look in next system
+//                int iNext = i + 1;
+//                if (iNext < maxSystem)
+//                {
+//                    GmoBoxSystem* pNextSystem = pPage->get_system(iNext);
+//                    if (is_equal_time(timepos, pNextSystem->start_time()))
+//                    {
+//                        i = iNext;
+//                        pSystem = pNextSystem;
+//                    }
+//                }
+//                break;
+//            }
+//        }
+//
+//        if (i < maxSystem)
+//            return pSystem;
+//    }
+//    return nullptr;
+//}
 
 
 }  //namespace lomse

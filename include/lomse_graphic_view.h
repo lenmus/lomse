@@ -30,27 +30,28 @@ namespace lomse
 ///@endcond
 
 //forward declarations
+class AreaInfo;
 class BitmapDrawer;
-class SvgDrawer;
-class Drawer;
-class Interactor;
-class GraphicModel;
-class Document;
-class ImoStaffObj;
 class Caret;
 class DocCursor;
-class OverlaysGenerator;
-class VisualEffect;
+class Document;
 class DraggedImage;
-class SelectionRectangle;
-class PlaybackHighlight;
-class TimeGrid;
-class TempoLine;
-class Handler;
-class SelectionHighlight;
-class SelectionSet;
-class AreaInfo;
+class Drawer;
 class FragmentMark;
+class GraphicModel;
+class Handler;
+class ImoStaffObj;
+class Interactor;
+class MeasureHighlight;
+class OverlaysGenerator;
+class PlaybackHighlight;
+class SelectionHighlight;
+class SelectionRectangle;
+class SelectionSet;
+class SvgDrawer;
+class TempoLine;
+class TimeGrid;
+class VisualEffect;
 
 typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
@@ -334,6 +335,11 @@ public:
             pointer will no longer be valid.
     */
     virtual void remove_mark(VisualEffect* mark);
+
+    /** Create a new MeasureHighlight on the score at the given measure.
+        @param ml MeasureLocator pointing to the measure to highlight.
+    */
+    MeasureHighlight* add_measure_highlight(ImoScore* pScore, const MeasureLocator& ml);
 
     ///@}    //Application markings on the score
 
