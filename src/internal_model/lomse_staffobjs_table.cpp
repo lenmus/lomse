@@ -18,10 +18,116 @@
 
 
 #include <sstream>
+#include <cmath>
 using namespace std;
 
 namespace lomse
 {
+
+//=======================================================================================
+// Helper class implementing the algorithm to compute MusicXML divisions
+//=======================================================================================
+class DivisionsComputer
+{
+private:
+    std::list<TimeUnits> m_durations;
+    std::list<int> m_multipliers;
+    int m_maxDots = 0;
+
+public:
+    DivisionsComputer() {}
+
+    //-----------------------------------------------------------------------------------
+    void add_note_rest(ImoNoteRest* pNR)
+    {
+        m_maxDots = max(m_maxDots, pNR->get_dots());
+        save_duration(pNR->get_duration());
+        int num = pNR->get_time_modifier_bottom();
+        if (num != 1)
+            save_multiplier(num);
+    }
+
+    //-----------------------------------------------------------------------------------
+    int compute_divisions()
+    {
+        m_durations.push_back(TimeUnits(k_duration_quarter));
+
+        float factor = 1.0f;
+        for (auto m : m_multipliers)
+        {
+            factor *= float(m);
+        }
+
+        if (m_maxDots > 0)
+        {
+            for (int i=m_maxDots; i > 0; --i)
+                factor *= 2.0f;
+        }
+
+        std::list<int> durations;
+        bool fEven = true;
+        for (auto d : m_durations)
+        {
+            int dur = int(round(d * factor));
+            fEven &= (dur % 2 == 0);
+            durations.push_back(dur);
+        }
+
+        //simplify durations
+        while (fEven)
+        {
+            for (auto &d : durations)
+            {
+                d /= 2;
+                fEven &= (d % 2 == 0);
+            }
+        }
+
+        return durations.back();
+    }
+
+    //-----------------------------------------------------------------------------------
+    string dump_divisions_data()
+    {
+        stringstream ss;
+        ss << "Durations: ";
+        for (auto d : m_durations)
+        {
+            ss << d << ", ";
+        }
+        ss << endl << "Multipliers: ";
+        for (auto m : m_multipliers)
+        {
+            ss << m << ", ";
+        }
+        ss << endl << "maxDots: " << m_maxDots << endl;
+        return ss.str();
+    }
+
+private:
+    //-----------------------------------------------------------------------------------
+    void save_duration(TimeUnits duration)
+    {
+        for (auto d : m_durations)
+        {
+            if (is_equal_time(duration, d))
+                return;
+        }
+        m_durations.push_back(duration);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void save_multiplier(int multiplier)
+    {
+        for (auto m : m_multipliers)
+        {
+            if (is_equal_time(multiplier, m))
+                return;
+        }
+        m_multipliers.push_back(multiplier);
+    }
+
+};
 
 //=======================================================================================
 // ColStaffObjsEntry implementation
@@ -105,8 +211,9 @@ ColStaffObjsEntry* ColStaffObjs::add_entry(int measure, int instr, int voice, in
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::count_noterest(int type)
+void ColStaffObjs::count_noterest(ImoNoteRest* pNR)
 {
+    int type = pNR->get_note_type();
     if (type <= k_half)
         ++m_numHalf;
     else if (type == k_quarter)
@@ -388,6 +495,19 @@ ColStaffObjsBuilderEngine* ColStaffObjsBuilder::create_builder_engine(ImoScore* 
 //=======================================================================================
 // ColStaffObjsBuilderEngine
 //=======================================================================================
+ColStaffObjsBuilderEngine::ColStaffObjsBuilderEngine(ImoScore* pScore)
+    : m_pImScore(pScore)
+    , m_pDivComputer(LOMSE_NEW DivisionsComputer())
+{
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsBuilderEngine::~ColStaffObjsBuilderEngine()
+{
+    delete m_pDivComputer;
+}
+
+//---------------------------------------------------------------------------------------
 ColStaffObjs* ColStaffObjsBuilderEngine::do_build()
 {
     create_table();
@@ -409,6 +529,7 @@ void ColStaffObjsBuilderEngine::create_table()
     compute_grace_notes_playback_time();
     collect_anacrusis_info();
     compute_arpeggiated_chords_playback_time();
+    compute_divisions();
 }
 
 //---------------------------------------------------------------------------------------
@@ -478,6 +599,13 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
     }
     if (anacrusis > 0.0)
         m_pColStaffObjs->set_anacrusis_missing_time(max(0.0, measureTime - anacrusis));
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::collect_note_rest_info(ImoNoteRest* pNR)
+{
+    m_pColStaffObjs->count_noterest(pNR);
+    m_pDivComputer->add_note_rest(pNR);
 }
 
 //---------------------------------------------------------------------------------------
@@ -662,8 +790,8 @@ void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
                     list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
                     for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
                     {
-                        ImoNote* pNote = static_cast<ImoNote*>((*itC).first);
-                        pNote->set_playback_duration(newTargetDur);
+                        ImoNote* pN = static_cast<ImoNote*>((*itC).first);
+                        pN->set_playback_duration(newTargetDur);
                     }
                 }
             }
@@ -700,8 +828,8 @@ void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
                         list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
                         for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
                         {
-                            ImoNote* pNote = static_cast<ImoNote*>((*itC).first);
-                            pNote->set_playback_time(newPlaytime);
+                            ImoNote* pN = static_cast<ImoNote*>((*itC).first);
+                            pN->set_playback_time(newPlaytime);
                         }
                     }
                 }
@@ -814,6 +942,18 @@ void ColStaffObjsBuilderEngine::fix_negative_playback_times()
     }
 }
 
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::compute_divisions()
+{
+    m_pColStaffObjs->set_divisions( m_pDivComputer->compute_divisions() );
+}
+
+//---------------------------------------------------------------------------------------
+string ColStaffObjsBuilderEngine::dump_divisions_data() const
+{
+    return m_pDivComputer->dump_divisions_data();
+}
+
 
 //=======================================================================================
 // ColStaffObjsBuilderEngine1x implementation: algorithm to create a ColStaffObjs
@@ -880,7 +1020,7 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         nVoice = pNR->get_voice();
         if (!pNR->is_grace_note())
         {
-            m_pColStaffObjs->count_noterest(pNR->get_note_type());
+            collect_note_rest_info(pNR);
             m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
         }
 
@@ -1053,7 +1193,7 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
         m_curVoice = nVoice;
 
         if (!pNR->is_grace_note())
-            m_pColStaffObjs->count_noterest(pNR->get_note_type());
+            collect_note_rest_info(pNR);
 
         if (pNR->is_note())
         {
