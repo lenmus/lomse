@@ -520,6 +520,7 @@ SUITE(MxlAnalyserTest)
                 CHECK( pInstr != nullptr );
                 if (pInstr)
                 {
+                    CHECK( pInstr->get_instr_id() == "P1" );
                     ImoMusicData* pMD = pInstr->get_musicdata();
                     CHECK( pMD != nullptr );
                     if (pMD)
@@ -532,6 +533,8 @@ SUITE(MxlAnalyserTest)
                         CHECK( pMD->get_num_items() == 0 );
                     }
                 }
+                pInstr = pScore->get_instrument(1);
+                CHECK( pInstr != nullptr && pInstr->get_instr_id() == "P2" );
             }
         }
 
