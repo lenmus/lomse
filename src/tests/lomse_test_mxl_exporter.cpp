@@ -152,7 +152,7 @@ SUITE(MxlExporterTest)
 //        //doc.from_file(m_scores_path + "unit-tests/xml-export/45e-Repeats-Nested-Alternatives.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "unit-tests/xml-export/MozartTrio.xml", Document::k_format_mxl);
 //        doc.from_file(m_scores_path + "unit-tests/xml-export/BeetAnGeSample.xml", Document::k_format_mxl);
-//        //doc.from_file(m_scores_path + "unit-tests/xml-export/001-slur.xml", Document::k_format_mxl);
+//        //doc.from_file(m_scores_path + "unit-tests/xml-export/003-slur.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "00205-multimetric.lmd", Document::k_format_lmd );
 //        //doc.from_file(m_scores_path + "00023-spacing-in-prolog-two-instr.lms" );
 ////        doc.from_file(m_scores_path + "50120-fermatas.lms" );
@@ -1290,7 +1290,7 @@ SUITE(MxlExporterTest)
         //@02. several slurs
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/xml-export/001-slur.xml", Document::k_format_mxl);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/003-slur.xml", Document::k_format_mxl);
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
