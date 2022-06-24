@@ -15,12 +15,13 @@
 #include "lomse_internal_model.h"
 
 #include <sstream>
+#include <array>
 
 namespace lomse
 {
 
 //forward declarations
-class BarlineData;
+struct BarlineData;
 class ImoInstrument;
 class ImoObj;
 class MxlGenerator;
