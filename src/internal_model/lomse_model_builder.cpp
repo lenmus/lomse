@@ -614,10 +614,10 @@ void PartIdAssigner::assign_parts_id(ImoScore* pScore)
         pI = static_cast<ImoInstrument*>(pI->get_next_sibling());
     }
 
+    long number = 1L;
     list<ImoInstrument*>::iterator it;
     for (it=instrs.begin(); it != instrs.end(); ++it)
     {
-        long number = long( pScore->get_num_instruments() );
         bool found = (std::find(ids.begin(), ids.end(), number) != ids.end());
         while (found)
         {
@@ -625,7 +625,7 @@ void PartIdAssigner::assign_parts_id(ImoScore* pScore)
             found = (std::find(ids.begin(), ids.end(), number) != ids.end());
         }
         stringstream ss;
-        ss << "P" << number;
+        ss << "P" << number++;
         (*it)->set_instr_id(ss.str());
     }
 }

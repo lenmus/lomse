@@ -3423,9 +3423,6 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <dynamics> = (fermata [<type>* | <other-dynamics>])
-//@ <placement> = { above | below }
-//<!--
 //  Dynamics can be associated either with a note or a general
 //  musical direction. To avoid inconsistencies between and
 //  amongst the letter abbreviations for dynamics (what is sf

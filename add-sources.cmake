@@ -33,6 +33,7 @@ set(EXPORTERS_FILES
     ${LOMSE_SRC_DIR}/exporters/lomse_ldp_exporter.cpp
     ${LOMSE_SRC_DIR}/exporters/lomse_lmd_exporter.cpp
     ${LOMSE_SRC_DIR}/exporters/lomse_mnx_exporter.cpp
+    ${LOMSE_SRC_DIR}/exporters/lomse_mxl_exporter.cpp
 )
 
 set(FILE_SYSTEM_FILES

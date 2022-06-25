@@ -197,6 +197,16 @@ public:
         }
     }
 
+    bool check_divisions(ColStaffObjs* pTable, int expected)
+    {
+        bool fOK = pTable->get_divisions()== expected;
+        if (!fOK)
+        {
+            cout << "Computed divisions=" << pTable->get_divisions();
+        }
+        return fOK;
+    }
+
 };
 
 
@@ -1411,6 +1421,64 @@ SUITE(ColStaffObjsBuilderTest)
         check_note(__LINE__, *it, k_imo_note_regular, 0, 5.33, 58.67);
         ++it;       //(n#49 b4 q v1 p1 (stem up)))
         check_note(__LINE__, *it, k_imo_note_regular, 0, 0.00, 64.00);
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, divisions_401)
+    {
+        //@401. compute divisions. triplet
+
+        create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q)(n e4 e t3)(n e4 e)(n e4 e t-)(n g4 e)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(m_pScore);
+
+        CHECK( check_divisions(pColStaffObjs, 6) );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, divisions_402)
+    {
+        //@402. compute divisions. double dots
+
+        create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q.)(n e4 e..)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(m_pScore);
+
+        CHECK( check_divisions(pColStaffObjs, 8) );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, divisions_403)
+    {
+        //@403. compute divisions. complex tuplet. Bad divisions in source file
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/001-divisions.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+
+        CHECK( check_divisions(pColStaffObjs, 7296) );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, divisions_404)
+    {
+        //@404. compute divisions. complex tuplet
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/002-divisions.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+
+        CHECK( check_divisions(pColStaffObjs, 57) );
     }
 
 

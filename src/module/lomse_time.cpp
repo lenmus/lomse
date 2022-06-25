@@ -46,6 +46,7 @@ TimeUnits round_half_up(TimeUnits num)
     return floor(num * 100.0 + 0.5) / 100.0;
 }
 
+//---------------------------------------------------------------------------------------
 string to_simple_string(chrono::time_point<chrono::system_clock> time, bool microsec)
 {
     time_t time_sec = chrono::system_clock::to_time_t(time);
@@ -76,5 +77,6 @@ string to_simple_string(chrono::time_point<chrono::system_clock> time, bool micr
 
     return ss.str();
 }
+
 
 }   //namespace lomse

@@ -24,6 +24,7 @@ namespace lomse
 #define LOMSE_NO_NOTE_DURATION  100000000.0f    //any too high value for note/rest
 
 //forward declarations
+class DivisionsComputer;
 class ImoAuxObj;
 class ImoDirection;
 class ImoGoBackFwd;
@@ -112,6 +113,7 @@ protected:
     int m_numQuarter;
     int m_numEighth;
     int m_num16th;
+    int m_divisions = 480;
 
     ColStaffObjsEntry* m_pFirst;
     ColStaffObjsEntry* m_pLast;
@@ -121,16 +123,17 @@ public:
     ~ColStaffObjs();
 
     //table info
-    inline int num_entries() { return m_numEntries; }
-    inline int num_lines() { return m_numLines; }
-    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
-    inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
-    inline TimeUnits anacrusis_extra_time() { return m_rAnacrusisExtraTime; }
-    inline TimeUnits min_note_duration() { return m_minNoteDuration; }
-    inline int num_half_noterests() { return m_numHalf; }
-    inline int num_quarter_noterests() { return m_numQuarter; }
-    inline int num_eighth_noterests() { return m_numEighth; }
-    inline int num_16th_noterests() { return m_num16th; }
+    inline int num_entries() const { return m_numEntries; }
+    inline int num_lines() const { return m_numLines; }
+    inline bool is_anacrusis_start() const { return is_greater_time(m_rMissingTime, 0.0); }
+    inline TimeUnits anacrusis_missing_time() const { return m_rMissingTime; }
+    inline TimeUnits anacrusis_extra_time() const { return m_rAnacrusisExtraTime; }
+    inline TimeUnits min_note_duration() const { return m_minNoteDuration; }
+    inline int num_half_noterests() const { return m_numHalf; }
+    inline int num_quarter_noterests() const { return m_numQuarter; }
+    inline int num_eighth_noterests() const { return m_numEighth; }
+    inline int num_16th_noterests() const { return m_num16th; }
+    inline int get_divisions() const { return m_divisions; }
 
     //table management
     ColStaffObjsEntry* add_entry(int measure, int instr, int voice, int staff,
@@ -222,7 +225,8 @@ protected:
     void sort_table();
     static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
     inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
-    void count_noterest(int type);
+    void count_noterest(ImoNoteRest* pNR);
+    inline void set_divisions(int div) { m_divisions = div; }
 
     void add_entry_to_list(ColStaffObjsEntry* pEntry);
     ColStaffObjsEntry* find_entry_for(ImoStaffObj* pSO);
@@ -266,6 +270,7 @@ private:
 //---------------------------------------------------------------------------------------
 class ColStaffObjsBuilderEngine;
 
+
 class ColStaffObjsBuilder
 {
 public:
@@ -285,33 +290,33 @@ protected:
 class ColStaffObjsBuilderEngine
 {
 protected:
-    ColStaffObjs* m_pColStaffObjs;
-    ImoScore* m_pImScore;
+    ColStaffObjs* m_pColStaffObjs = nullptr;
+    ImoScore* m_pImScore = nullptr;
+    DivisionsComputer* m_pDivComputer = nullptr;    //for computing MusicXML divisions
 
-    int         m_nCurMeasure;
-    TimeUnits   m_rMaxSegmentTime;
-    TimeUnits   m_rStartSegmentTime;
-    TimeUnits   m_minNoteDuration;
-    TimeUnits   m_gracesAnacrusisTime;
+    int         m_nCurMeasure = 0;
+    TimeUnits   m_rMaxSegmentTime = 0.0;
+    TimeUnits   m_rStartSegmentTime = 0.0;
+    TimeUnits   m_minNoteDuration = LOMSE_NO_NOTE_DURATION;
+    TimeUnits   m_gracesAnacrusisTime = 0.0;
     StaffVoiceLineTable  m_lines;
     std::vector<ColStaffObjsEntry*> m_graces;   //entries for grace notes
     std::vector<ImoNote*> m_arpeggios;          //chord base notes for arpeggiated chords
 
 
-    ColStaffObjsBuilderEngine(ImoScore* pScore)
-        : m_pColStaffObjs(nullptr)
-        , m_pImScore(pScore)
-        , m_nCurMeasure(0)
-        , m_rMaxSegmentTime(0.0)
-        , m_rStartSegmentTime(0.0)
-        , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
-        , m_gracesAnacrusisTime(0.0)
-    {}
+    ColStaffObjsBuilderEngine(ImoScore* pScore);
 
 public:
-    virtual ~ColStaffObjsBuilderEngine() {}
+    virtual ~ColStaffObjsBuilderEngine();
+    ColStaffObjsBuilderEngine(const ColStaffObjsBuilderEngine&) = delete;               //copy constructor
+    ColStaffObjsBuilderEngine& operator= (const ColStaffObjsBuilderEngine&) = delete;   //copy assignment
+    ColStaffObjsBuilderEngine(ColStaffObjsBuilderEngine&&) = delete;                    //move constructor
+    ColStaffObjsBuilderEngine& operator= (ColStaffObjsBuilderEngine&&) = delete;        //move assignment
 
     ColStaffObjs* do_build();
+
+    //debug
+    std::string dump_divisions_data() const;
 
 protected:
     virtual void initializations()=0;
@@ -321,6 +326,7 @@ protected:
 
     void create_table();
     void collect_anacrusis_info();
+    void collect_note_rest_info(ImoNoteRest* pNR);
     int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
@@ -332,6 +338,7 @@ protected:
     ImoNote* locate_grace_previous_note(ColStaffObjsEntry* pEntry);
     void fix_negative_playback_times();
     void compute_arpeggiated_chords_playback_time();
+    void compute_divisions();
 
     static void save_arpeggiated_note(ImoNote* pNote, bool fBottomUp,
                                       list<ImoNote*>& chordNotes);

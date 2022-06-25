@@ -1621,6 +1621,7 @@ public:
     inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
     inline bool is_fingering() { return m_objtype == k_imo_fingering; }
     inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
+    inline bool is_fret_string() { return m_objtype == k_imo_fret_string; }
     inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
     bool is_gap();      ///a rest representing a goFwd element
     inline bool is_grace_relobj() { return m_objtype == k_imo_grace_relobj; }
@@ -1684,7 +1685,9 @@ public:
     inline bool is_table_body() { return m_objtype == k_imo_table_body; }
     inline bool is_table_head() { return m_objtype == k_imo_table_head; }
     inline bool is_table_row() { return m_objtype == k_imo_table_row; }
-    inline bool is_technical() { return m_objtype == k_imo_technical || m_objtype == k_imo_fingering; }
+    inline bool is_technical() { return m_objtype == k_imo_technical
+                                        || m_objtype == k_imo_fingering
+                                        || m_objtype == k_imo_fret_string; }
     inline bool is_text_item() { return m_objtype == k_imo_text_item; }
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
     inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
@@ -2380,6 +2383,7 @@ protected:
     friend class DefineStyleLmdGenerator;
     friend class DefineStyleLdpGenerator;
     friend class DefineStyleMnxGenerator;
+    friend class DefineStyleMxlGenerator;
 
     //getters non-inheriting from parent. Returns true if property exists
     bool get_float_property(int prop, float* value)
@@ -5491,6 +5495,7 @@ public:
     //information and getters
     int get_key_type() const;
     inline int get_fifths() const { return m_fifths; }
+    inline int get_mode() const { return m_keyMode; }
     inline bool is_standard() const { return m_fStandard; }
     inline KeyAccidental& get_accidental(int i) { return m_accidentals[i]; }
     bool has_accidentals();
@@ -6472,6 +6477,7 @@ protected:
 
     friend class StylesLmdGenerator;
     friend class StylesMnxGenerator;
+    friend class StylesMxlGenerator;
     inline std::map<std::string, ImoStyle*>& get_styles_collection()
     {
         return m_nameToStyle;
