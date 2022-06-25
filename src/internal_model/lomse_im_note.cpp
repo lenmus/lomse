@@ -254,6 +254,18 @@ bool ImoNote::is_cross_staff_chord()
 }
 
 //---------------------------------------------------------------------------------------
+void ImoNote::mute(EMuteType value)
+{
+    m_fMute = (value != k_mute_off);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoNote::is_muted()
+{
+    return m_fMute != k_mute_off;
+}
+
+//---------------------------------------------------------------------------------------
 bool ImoNote::has_beam()
 {
     ImoChord* pChord = get_chord();

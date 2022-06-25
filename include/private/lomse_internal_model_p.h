@@ -814,6 +814,7 @@ enum EImoObjType
     k_imo_lyrics_text_info,
     k_imo_midi_info,
     k_imo_page_info,
+//    k_imo_play_info,
     k_imo_sound_info,
     k_imo_staff_info,
     k_imo_system_info,
@@ -1657,6 +1658,7 @@ public:
     inline bool is_pedal_mark() const { return m_objtype == k_imo_pedal_mark; }
     inline bool is_pedal_line() const { return m_objtype == k_imo_pedal_line; }
     inline bool is_pedal_dto() const { return m_objtype == k_imo_pedal_line_dto; }
+//    inline bool is_play_info() const { return m_objtype == k_imo_play_info; }
     inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
     inline bool is_relations() { return m_objtype == k_imo_relations; }
@@ -7425,6 +7427,32 @@ public:
     bool is_end_of_relation() const { return m_fEnd; }
     ImoDirection* get_staffobj() const { return m_pDirection; }
 };
+
+
+//---------------------------------------------------------------------------------------
+// AWARE: ImoPlayInfo object is not required until playback techniques are implemented.
+////ImoPlayInfo specifies the playback technique to use.
+//// - when attached to ImoSoundInfo it applies to all notes after the ImoSoundInfo.
+//// - When attached to ImoNote, it applies only to that note.
+//
+//class ImoPlayInfo : public ImoSimpleObj
+//{
+//protected:
+//    EMuteType m_mute = k_mute_off;
+//
+//    friend class ImFactory;
+//    ImoPlayInfo() : ImoSimpleObj(k_imo_play_info) {}
+//
+//public:
+//    ImoPlayInfo(const ImoPlayInfo&) = delete;
+//    ImoPlayInfo& operator= (const ImoPlayInfo&) = delete;
+//    ImoPlayInfo(ImoPlayInfo&&) = delete;
+//    ImoPlayInfo& operator= (ImoPlayInfo&&) = delete;
+//
+//    //setters
+//
+//    //getters
+//};
 
 
 //---------------------------------------------------------------------------------------

@@ -124,6 +124,37 @@ enum EDocObject
 };
 
 
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+    This enum describes the valid values for muting playback for different instruments.
+    A mute is a device attached to a musical instrument which changes the instrument's
+    tone quality (timbre) or lowers its volume. Mutes are commonly used on string and
+    brass instruments, especially the trumpet and trombone, and are occasionally used
+    on woodwinds. Muting can also be done by hand, as in the case of palm muting a
+    guitar or grasping a triangle to dampen its sound.
+    The on value is used to totally remove playback.
+    See: https://en.wikipedia.org/wiki/Mute_(music)
+*/
+enum EMuteType
+{
+    k_mute_off = 0,     ///< Not muted
+    k_mute_on,          ///< Total mute. No playback
+    k_mute_bucket,      ///< Bucket mute, also known as the velvetone or velvet-tone.
+    k_mute_cup,         ///< Cup mute. Similar to strait but includes an extra inverted cone.
+    k_mute_echo,            ///< Mute echo not main sound.
+    k_mute_harmon_no_stem,  ///< Harmon mute, also known as the wa-wa, wow-wow, or wah-wah mute .
+    k_mute_harmon_stem,     ///< Harmon mute, with a small tube inserted into the mute.
+    k_mute_hat,             ///< Derby or hat mute is done with a bowler hat or similar object.
+    k_mute_palm,        ///< Palm mute, a playing technique for guitar and bass guitar,
+    k_mute_plunger,     ///< Muted with a plunger held in front of the bell.
+    k_mute_practice,    ///< Muted with absorbent material. Used during practice to prevent bothering others.
+    k_mute_solotone,    ///< Solotone mute (two telescoping cones and a small tube in the center).
+    k_mute_stop_hand,   ///< Stop mute using the hand.
+    k_mute_stop_mute,   ///< Stop mute using a physical stop mute.
+    k_mute_straight,    ///< Strait mute using a truncated cone.
+};
+
+
 //=======================================================================================
 // Classes defined in this module
 //=======================================================================================

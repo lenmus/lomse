@@ -224,6 +224,10 @@ protected:
     int get_int_attribute(TIntAttribute attrib) override;
     list<TIntAttribute> get_supported_attributes() override;
 
+    //play techniques. AWARE: In future, when play techniques are implemented, these
+    //variables must be replaced by a ImoPlayInfo child
+    bool m_fMute = false;       //true: mute in playback, do not generate MIDI events
+
 public:
     virtual ~ImoNote();
     ImoNote(const ImoNote&) = delete;
@@ -242,6 +246,10 @@ public:
         k_non_standard  = 0x0020, ///< Use non-standard acc. if necessary
     };
 
+
+    /** For muting playback and determining mute state */
+    void mute(EMuteType value);
+    bool is_muted();
 
     //pitch
     inline float get_actual_accidentals() { return m_actual_acc; }
