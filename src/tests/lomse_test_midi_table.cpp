@@ -16,7 +16,7 @@
 #include "lomse_midi_table.h"
 #include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
-//#include "lomse_staffobjs_table.h"
+#include "lomse_im_note.h"
 
 
 using namespace UnitTest;
@@ -151,6 +151,16 @@ public:
             cout << "      " << it->dump_entry();
     }
 
+    bool check_num_events(int events, int expected)
+    {
+        if (events != expected)
+        {
+            cout << "The table has " << events << " events but should have " << expected << endl;
+            return false;
+        }
+        return true;
+    }
+
 };
 
 SUITE(MidiTableTest)
@@ -167,8 +177,7 @@ SUITE(MidiTableTest)
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
 
-        //cout << "num.events = " << table.num_events() << endl;
-        CHECK( table.num_events() == 1 );
+        CHECK( check_num_events(table.num_events(), 1) );
         std::vector<SoundEvent*>& events = table.get_events();
         SoundEvent* ev = events.front();
         CHECK( ev->Channel == 0 );
@@ -187,8 +196,7 @@ SUITE(MidiTableTest)
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
 
-        //cout << "num.events = " << table.num_events() << endl;
-        CHECK( table.num_events() == 1 );
+        CHECK( check_num_events(table.num_events(), 1) );
         std::vector<SoundEvent*>& events = table.get_events();
         SoundEvent* ev = events.front();
         CHECK( ev->Channel == 0 );
@@ -208,7 +216,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        CHECK( table.num_events() == 3 );
+        CHECK( check_num_events(table.num_events(), 3) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -230,8 +238,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        //cout << "num.events = " << table.num_events() << endl;
-        CHECK( table.num_events() == 3 );
+        CHECK( check_num_events(table.num_events(), 3) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -253,8 +260,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        //cout << "num.events = " << table.num_events() << endl;
-        CHECK( table.num_events() == 3 );
+        CHECK( check_num_events(table.num_events(), 3) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -276,7 +282,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        CHECK( table.num_events() == 5 );
+        CHECK( check_num_events(table.num_events(), 5) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -286,6 +292,37 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_visual_off );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_visual_on );
+        ++it;
+        CHECK( (*it)->EventType == SoundEvent::k_note_off );
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, midi_table_014)
+    {
+        //@014. Muted note. Do not create events.
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q)(n d4 q)"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it2 = pMD->begin();    //clef G
+        ++it2;   //note c4
+        ++it2;   //note d4
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it2 );
+        pNote->mute(k_mute_on);
+
+        MySoundEventsTable table(pScore);
+        table.my_program_sounds_for_instruments();
+        table.my_create_events();
+
+        CHECK( check_num_events(table.num_events(), 3) );
+        std::vector<SoundEvent*>& events = table.get_events();
+        std::vector<SoundEvent*>::iterator it = events.begin();
+        CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
+        ++it;
+        CHECK( (*it)->EventType == SoundEvent::k_note_on );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_note_off );
     }
@@ -329,7 +366,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        CHECK( table.num_events() == 2 );
+        CHECK( check_num_events(table.num_events(), 2) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -354,7 +391,7 @@ SUITE(MidiTableTest)
         table.my_program_sounds_for_instruments();
         table.my_create_events();
 
-        CHECK( table.num_events() == 2 );
+        CHECK( check_num_events(table.num_events(), 2) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -378,7 +415,7 @@ SUITE(MidiTableTest)
         MySoundEventsTable table(pScore);
         table.my_close_table();
 
-        CHECK( table.num_events() == 1 );
+        CHECK( check_num_events(table.num_events(), 1) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_end_of_score );
@@ -398,7 +435,7 @@ SUITE(MidiTableTest)
         table.my_create_events();
         table.my_close_table();
 
-        CHECK( table.num_events() == 4 );
+        CHECK( check_num_events(table.num_events(), 4) );
         std::vector<SoundEvent*>& events = table.get_events();
         std::vector<SoundEvent*>::iterator it = events.begin();
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
@@ -842,9 +879,7 @@ SUITE(MidiTableTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         SoundEventsTable* pTable = pScore->get_midi_table();
 
-//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
-//        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 12 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 12) );
         CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[1]->EventType == SoundEvent::k_note_on );
@@ -879,7 +914,7 @@ SUITE(MidiTableTest)
 
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 11 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 11) );
         CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
@@ -909,9 +944,8 @@ SUITE(MidiTableTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         SoundEventsTable* pTable = pScore->get_midi_table();
 
-//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 13 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 13) );
         CHECK( is_equal_time(pTable->get_anacrusis_missing_time(), 128.0 ) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
@@ -961,9 +995,8 @@ SUITE(MidiTableTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         SoundEventsTable* pTable = pScore->get_midi_table();
 
-//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 5 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 5) );
         CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[0]->EventType == SoundEvent::k_prog_instr );
@@ -985,9 +1018,8 @@ SUITE(MidiTableTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         SoundEventsTable* pTable = pScore->get_midi_table();
 
-//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 13 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 13) );
         CHECK( pTable && is_equal_time(pTable->get_anacrusis_missing_time(), 192.0) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[6]->EventType == SoundEvent::k_note_on );
@@ -1011,9 +1043,8 @@ SUITE(MidiTableTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         SoundEventsTable* pTable = pScore->get_midi_table();
 
-//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable && pTable->num_events() == 17 );
+        CHECK( pTable && check_num_events(pTable->num_events(), 17) );
         CHECK( pTable && is_equal_time(pTable->get_anacrusis_missing_time(), 0.0) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[8]->EventType == SoundEvent::k_note_on );

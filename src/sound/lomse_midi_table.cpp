@@ -297,9 +297,9 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
 
                         //jumps for the other voltas in this set
                         int numVoltas = pVB->get_total_voltas();
-                        for (int i=2; i <= numVoltas; ++i)
+                        for (int j=2; j <= numVoltas; ++j)
                         {
-                            int times = (i == numVoltas ? 0 : 1);
+                            times = (j == numVoltas ? 0 : 1);
                             pJump = create_jump(measure, 0, times);
                             add_jump(cursor, measure, pJump);
                             m_pending.push_back(pJump);
@@ -372,21 +372,24 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int measure)
     TimeUnits rTime = pNR->get_playback_time();
     if (pNR->is_note())
     {
-        //It is a note. Generate Note On event
-        if (!pNote->is_tied_prev())
+        //It is a note. Generate Note On event if not muted.
+        if (!pNote->is_muted())
         {
-            //It is not tied to the previous one. Generate NoteOn event to
-            //start the sound and highlight the note
-            int volume = compute_volume(rTime, pTS, cursor.anacrusis_missing_time());
-            store_event(rTime, SoundEvent::k_note_on, channel, pitch,
-                        volume, step, pNR, measure);
-        }
-        else
-        {
-            //This note is tied to the previous one. Generate only a VisualOn event as the
-            //sound is already started by the previous note.
-            store_event(rTime, SoundEvent::k_visual_on, channel, pitch,
-                        0, step, pNR, measure);
+            if (!pNote->is_tied_prev())
+            {
+                //It is not tied to the previous one. Generate NoteOn event to
+                //start the sound and highlight the note
+                int volume = compute_volume(rTime, pTS, cursor.anacrusis_missing_time());
+                store_event(rTime, SoundEvent::k_note_on, channel, pitch,
+                            volume, step, pNR, measure);
+            }
+            else
+            {
+                //This note is tied to the previous one. Generate only a VisualOn event as the
+                //sound is already started by the previous note.
+                store_event(rTime, SoundEvent::k_visual_on, channel, pitch,
+                            0, step, pNR, measure);
+            }
         }
     }
     else
@@ -400,20 +403,23 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int measure)
     rTime += pNR->get_playback_duration();
     if (pNR->is_note())
     {
-        //It is a note
-        if (!pNote->is_tied_next())
+        //It is a note. Generate events if not muted.
+        if (!pNote->is_muted())
         {
-            //It is not tied to next note. Generate NoteOff event to stop the sound and
-            //un-highlight the note
-            store_event(rTime, SoundEvent::k_note_off, channel, pitch,
-                        0, step, pNR, measure);
-        }
-        else
-        {
-            //This note is tied to the next one. Generate only a VisualOff event so that
-            //the note will be un-highlighted but the sound will not be stopped.
-            store_event(rTime, SoundEvent::k_visual_off, channel, pitch,
-                        0, step, pNR, measure);
+            if (!pNote->is_tied_next())
+            {
+                //It is not tied to next note. Generate NoteOff event to stop the sound and
+                //un-highlight the note
+                store_event(rTime, SoundEvent::k_note_off, channel, pitch,
+                            0, step, pNR, measure);
+            }
+            else
+            {
+                //This note is tied to the next one. Generate only a VisualOff event so that
+                //the note will be un-highlighted but the sound will not be stopped.
+                store_event(rTime, SoundEvent::k_visual_off, channel, pitch,
+                            0, step, pNR, measure);
+            }
         }
     }
     else
