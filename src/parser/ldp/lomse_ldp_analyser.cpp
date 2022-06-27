@@ -3452,8 +3452,9 @@ public:
 
         if (pNote)
         {
-            m_pAnalyser->add_lyric(pNote, pImo);
+            m_pAnalyser->add_lyric(pNote, pImo);        //this links this lyric to previous one
             add_to_model(pImo);
+            fix_syllable_types(pImo);
         }
         else if (!m_libraryScope.is_unit_test())
         {
@@ -3461,11 +3462,15 @@ public:
             delete pImo;
         }
         else
+        {
+            //unit_test and no NoteRest
             m_pAnalysedNode->set_imo(pImo);
+        }
     }
 
 protected:
 
+    //-----------------------------------------------------------------------------------
     ImoLyricsTextInfo* add_syllable(ImoLyric* pImo, const string& text)
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -3474,6 +3479,30 @@ protected:
         pImo->add_text_item(pText);
         pText->set_syllable_text(text);
         return pText;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void fix_syllable_types(ImoLyric* pImo)
+    {
+        //syllable type is implicit in LDP and must be deduced from context (prev and
+        //this lyrics) depending on hyphenation
+
+        ImoLyricsTextInfo* pText = pImo->get_text_item( pImo->get_num_text_items() - 1);
+        ImoLyric* pPrev = pImo->get_prev_lyric();
+        if (pImo->has_hyphenation())
+        {
+            if (pPrev)
+            {
+                if (pPrev->has_hyphenation())
+                    pText->set_syllable_type(ImoLyricsTextInfo::k_middle);
+                else
+                    pText->set_syllable_type(ImoLyricsTextInfo::k_begin);
+            }
+            else
+                pText->set_syllable_type(ImoLyricsTextInfo::k_begin);
+        }
+        else if (pPrev && pPrev->has_hyphenation())
+            pText->set_syllable_type(ImoLyricsTextInfo::k_end);
     }
 
 };
