@@ -3379,7 +3379,8 @@ public:
 
             while (get_optional(k_string))
             {
-                pSyl->set_elision_text(".");    //undertie U+203F
+                pSyl->set_elision_text(".");
+                //pSyl->set_elision_text("‿");    //undertie U+203F
                 //pSyl->set_elision_text("\xE2\x80\xBF");   //undertie U+203F in utf-8
                 //pSyl->set_elision_text("0x203F");         //undertie U+203F
                 //undertie is not supported in LiberationSerif font
@@ -3435,7 +3436,7 @@ public:
             // [<placement>]
             if (get_optional(k_label))
             {
-                int placement = get_placement(k_placement_below);
+                int placement = get_placement(k_placement_default);
                 m_pAnalyser->set_lyrics_placement(line, placement);
                 pImo->set_placement(placement);
                 fPlacement = true;
@@ -6615,7 +6616,7 @@ void LdpAnalyser::set_lyrics_placement(int line, int placement)
 int LdpAnalyser::get_lyrics_placement(int line)
 {
     if (m_lyricsPlacement.size() < size_t(line))
-        return k_placement_below;
+        return k_placement_default;
     else
         return m_lyricsPlacement[line-1];
 }
