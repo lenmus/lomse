@@ -6966,7 +6966,8 @@ public:
         // <part>*
         while (more_children_to_analyse())
         {
-            analyse_mandatory("part", pScore);
+            if (!analyse_mandatory("part", pScore))
+                break;
         }
         error_if_more_elements();
 
@@ -8219,13 +8220,16 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <!ELEMENT time ((beats, beat-type)+ | senza-misura)>
+//@ <!ELEMENT time
+//@ 	(((beats, beat-type)+, interchangeable?) | senza-misura)>
 //@ <!ATTLIST time
-//@         symbol (common | cut | single-number | normal) #IMPLIED
+//@     number CDATA #IMPLIED
+//@     %time-symbol;
+//@     %time-separator;
+//@     %print-style-align;
+//@     %print-object;
+//@     %optional-unique-id;
 //@ >
-//@ <!ELEMENT beats (#PCDATA)>
-//@ <!ELEMENT beat-type (#PCDATA)>
-//@ <!ELEMENT senza-misura EMPTY>
 
 class TimeMxlAnalyser : public MxlElementAnalyser
 {
@@ -8241,12 +8245,19 @@ public:
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
                                     ImFactory::inject(k_imo_time_signature, pDoc) );
 
+        //TODO  attrib: number
+
         // attrib: symbol (common | cut | single-number | normal)
         if (has_attribute("symbol"))
             set_symbol(pTime);
 
-        //attrb: print-object
+        //TODO  attrib: %time-separator;
+        //TODO  attrib: %print-style-align;
+
+        //attrb: %print-object;
         bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
+
+        //TODO  attrib: %optional-unique-id;
 
         // <beats> (num)
         if (get_mandatory("beats"))
@@ -9669,8 +9680,13 @@ void MxlAnalyser::attach_pending_dynamics_marks(ImoNoteRest* pNR)
         ImoContentObj* pOldParent = pDynamics->get_contentobj_parent();
 
         if (pOldParent)
+        {
             pOldParent->remove_but_not_delete_attachment(pDynamics);
+            if (pOldParent->is_direction())
+                static_cast<ImoDirection*>(pOldParent)->mark_as_dynamics_removed(pNR);
+        }
 
+        pDynamics->mark_as_moved();
         pNR->add_attachment(m_pDoc, pDynamics);
     }
 

@@ -59,6 +59,17 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
+    bool check_result(const string& ss, const string& expected)
+    {
+        if (ss != expected)
+        {
+            cout << "  result=[" << ss << "]" << endl;
+            cout << "expected=[" << expected << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -203,7 +214,7 @@ SUITE(LdpExporterTest)
         string expected =
             "(musicData (clef G p1)(n g5 s v1 p1 (beam 106 ++))"
             "(n f5 s v1 p1 (beam 106 =-))(n g5 e v1 p1 (beam 106 -))(barline simple))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_1)
@@ -226,7 +237,7 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (clef G p1)"
             "(chord (n e4 e. v1 p1 (stem up)(beam 111 +))(n g4 e. v1 p1))"
             "(chord (n d4 s v1 p1 (stem up)(beam 111 -b))(n f4 s v1 p1)))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_2)
@@ -251,7 +262,7 @@ SUITE(LdpExporterTest)
             "(n c4 q v1 p1)(n e4 q v1 p1)(goFwd 64 v2 p1)"
             "(chord (n e4 e. v2 p1 (stem up)(beam 114 +))(n g4 e. v2 p1))"
             "(chord (n d4 s v2 p1 (stem up)(beam 114 -b))(n f4 s v2 p1)))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_3)
@@ -274,7 +285,7 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (clef F4 p1)"
             "(n e3 e v1 p1 (beam 106 +))(n c2 w v3 p1)(n g3 e v1 p1 (beam 106 =))"
             "(n c4 e v1 p1 (beam 106 -))(barline simple))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     //@ clef ----------------------------------------------------------------------------
@@ -431,7 +442,7 @@ SUITE(LdpExporterTest)
             "(n g4 q v1 p1 (dyn \"sfz\" above))"
             "(n g4 q v1 p1 (dyn \"sfz\" above (color #ff0000ff)(dx 50)(dy -70)))"
             ")))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
 
@@ -477,7 +488,7 @@ SUITE(LdpExporterTest)
         string expected = "(instrument P1 (staves 1)(staff 1 (staffType ossia)"
             "(staffLines 5)(staffSpacing 250)(staffDistance 2000)"
             "(lineThickness 15))(musicData))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_2)
@@ -531,7 +542,7 @@ SUITE(LdpExporterTest)
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(instrument P1 (name \"Guitar\" (style \"Best1\"))"
             "(abbrev \"G.\" (style \"Best2\"))(staves 1)(musicData))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     //@ key -----------------------------------------------------------------------------
@@ -598,9 +609,9 @@ SUITE(LdpExporterTest)
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (clef G)"
             "(n c4 q (lyric 1 \"This\")(lyric 2 \"A\"))"
-            "(n d4 q (lyric 1 \"is\")(lyric 2 \"se\" -))"
+            "(n d4 q (lyric 1 \"is\" \"a\")(lyric 2 \"se\" -))"
             "(n e4 q (lyric 1 \"line\")(lyric 2 \"cond\"))"
-            "(n f4 q (lyric 1 \"one.\")(lyric 2 \"line.\"))"
+            "(n f4 q (lyric 1 \"one.\" above)(lyric 2 \"line.\" below))"
             "(barline))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        dump_colection(pScore);
@@ -613,10 +624,10 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         CHECK( source == "(musicData (clef G p1)"
-            "(n c4 q v1 p1 (lyric 1 \"This\" below)(lyric 2 \"A\" below))"
-            "(n d4 q v1 p1 (lyric 1 \"is\" below)(lyric 2 \"se\" - below))"
-            "(n e4 q v1 p1 (lyric 1 \"line\" below)(lyric 2 \"cond\" below))"
-            "(n f4 q v1 p1 (lyric 1 \"one.\" below)(lyric 2 \"line.\" below))"
+            "(n c4 q v1 p1 (lyric 1 \"This\")(lyric 2 \"A\"))"
+            "(n d4 q v1 p1 (lyric 1 \"is\" \"a\")(lyric 2 \"se\" -))"
+            "(n e4 q v1 p1 (lyric 1 \"line\")(lyric 2 \"cond\"))"
+            "(n f4 q v1 p1 (lyric 1 \"one.\" above)(lyric 2 \"line.\" below))"
             "(barline simple))" );
     }
 
@@ -806,7 +817,7 @@ SUITE(LdpExporterTest)
             "(musicData "
             "(clef G p1)(clef F4 p2)(key C)(time 2 4)(n c4 e v1 p1)"
             "(n g2 e v3 p2)(n c3 e v3 p2)(n e3 e v3 p2)(n g3 e v3 p2)(barline simple))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_5)
@@ -828,7 +839,7 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (clef G p1)"
             "(n c5 q v1 p1)"
             "(chord (n c4 e v1 p1)(n e4 e v1 p1)(n g4 e v1 p1)))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_6)
@@ -851,7 +862,7 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (clef G p1)"
             "(goFwd 64 v1 p1)"
             "(chord (n c4 e v1 p1)(n e4 e v1 p1)(n g4 e v1 p1)))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_7)
@@ -885,7 +896,7 @@ SUITE(LdpExporterTest)
             "(n g5 e v1 p1 (beam 115 -))(barline simple)"
             "(chord (n a4 q v1 p1)(n e5 q v1 p1))(r q v1 p1)"
             "(chord (n d4 q v1 p1)(n g4 q v1 p1)(n f5 q v1 p1))(barline simple))";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     //@ note ----------------------------------------------------------------------------
@@ -911,7 +922,7 @@ SUITE(LdpExporterTest)
             "(n g4 e v1 p1 (tm 2 3)(t 106 -))"
             ")))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, note_1)
@@ -954,7 +965,7 @@ SUITE(LdpExporterTest)
         string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(n c4 e v1 p1)(goFwd e v1 p1)(n e4 e v1 p1))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     // ScoreLdpGenerator ----------------------------------------------------------------
@@ -979,7 +990,7 @@ SUITE(LdpExporterTest)
         string expected = "(score (vers 2.0)(style \"Score1\")"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, score_1)
@@ -1002,7 +1013,7 @@ SUITE(LdpExporterTest)
             "(font-style normal)(font-weight bold)(color #00fe0f7f))"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, score_2)
@@ -1025,7 +1036,7 @@ SUITE(LdpExporterTest)
             "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, score_3)
@@ -1050,7 +1061,7 @@ SUITE(LdpExporterTest)
             "(systemLayout other (systemMargins 0 0 1800 2000))"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, score_4)
@@ -1077,7 +1088,7 @@ SUITE(LdpExporterTest)
             "(opt StaffLines.Truncate 0)"
             "(instrument P1 (staves 1)(musicData)))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     // ScoreLineLdpGenerator ------------------------------------------------------------
@@ -1108,7 +1119,7 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (clef G p1)"
             "(dir 0 p1 (text \"Largo\" (style \"Notations\")(dx -20)(dy -45))))";
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 #endif
 
@@ -1136,7 +1147,7 @@ SUITE(LdpExporterTest)
 //        cout << test_name() << endl;
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     // StaffObjLdpGenerator -------------------------------------------------------------
@@ -1165,7 +1176,7 @@ SUITE(LdpExporterTest)
 
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     //@ time signature ------------------------------------------------------------------
@@ -1336,7 +1347,7 @@ SUITE(LdpExporterTest)
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
             "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
             ")";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, tuplet_1)
@@ -1366,7 +1377,7 @@ SUITE(LdpExporterTest)
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
             "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
             ")";
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
     //@ Order of elements in the score --------------------------------------------------
@@ -1393,13 +1404,13 @@ SUITE(LdpExporterTest)
         string expected = "(musicData (n c4 q v1 p1 (stem down))"
             "(n c4 q v1 p1 (slur 1 start))(n e4 q v1 p1 (slur 1 stop))"
             "(n c4 q v1 p1 (tie 2 start))(n c4 q v1 p1 (tie 2 stop))"
-            "(n c4 q v1 p1 (lyric 1 \"This\" below)(lyric 2 \"A\" below))"
+            "(n c4 q v1 p1 (lyric 1 \"This\")(lyric 2 \"A\"))"
             "(n g5 s v1 p1 (beam 126 ++))(n f5 s v1 p1 (beam 126 =-))"
             "(n g5 e v1 p1 (beam 126 -)))";
 
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
 
-        CHECK( source == expected );
+        CHECK( check_result(source, expected) );
     }
 
 };

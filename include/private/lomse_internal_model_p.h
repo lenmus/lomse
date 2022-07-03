@@ -98,7 +98,7 @@ class ImoLineStyle;
 class ImoLink;
 class ImoList;
 class ImoListItem;
-class ImoLyrics;
+class ImoLyric;
 class ImoLyricsTextInfo;
 class ImoMultiColumn;
 class ImoMusicData;
@@ -3522,13 +3522,45 @@ protected:
                             //     90 = directly above
                             //    -90 = directly below.
 
+    //to control if variables contain inherited/default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_port =       0x00000001,
+        k_modified_bank =       0x00000002,
+        k_modified_channel =    0x00000004,
+        k_modified_program =    0x00000008,
+        k_modified_unpitched =  0x00000010,
+        k_modified_volume =     0x00000020,
+        k_modified_pan =        0x00000040,
+        k_modified_elevation =  0x00000080,
+        k_modified_name =       0x00000100,
+    };
+
     friend class ImFactory;
     friend class ImoInstrument;
     ImoMidiInfo() : ImoSimpleObj(k_imo_midi_info) {}
 
 public:
+    ImoMidiInfo& operator= (const ImoMidiInfo& info)
+    {
+        if (&info == this)
+            return *this;
+
+        m_port = info.m_port;
+        m_midiDeviceName = info.m_midiDeviceName;
+        m_midiName = info.m_midiName;
+        m_bank = info.m_bank;
+        m_channel = info.m_channel;
+        m_program = info.m_program;
+        m_unpitched = info.m_unpitched;
+        m_volume = info.m_volume;
+        m_pan = info.m_pan;
+        m_elevation = info.m_elevation;
+
+        m_modified = 0L;
+        return *this;
+    }
 //    ImoMidiInfo(const ImoMidiInfo&) = delete;
-//    ImoMidiInfo& operator= (const ImoMidiInfo&) = delete;
 //    ImoMidiInfo(ImoMidiInfo&&) = delete;
 //    ImoMidiInfo& operator= (ImoMidiInfo&&) = delete;
 
@@ -3545,19 +3577,37 @@ public:
     inline int get_midi_pan() { return m_pan; }
     inline int get_midi_elevation() { return m_elevation; }
 
+    //check if contains inherited/default values or a new value has been set
+    inline bool only_contains_default_values()  { return m_modified == 0L; }
+    inline bool is_port_modified() { return m_modified & k_modified_port; }
+    inline bool is_name_modified() { return m_modified & k_modified_name; }
+    inline bool is_bank_modified() { return m_modified & k_modified_bank; }
+    inline bool is_channel_modified() { return m_modified & k_modified_channel; }
+    inline bool is_program_modified() { return m_modified & k_modified_program; }
+    inline bool is_unpitched_modified() { return m_modified & k_modified_unpitched; }
+    inline bool is_volume_modified() { return m_modified & k_modified_volume; }
+    inline bool is_pan_modified() { return m_modified & k_modified_pan; }
+    inline bool is_elevation_modified() { return m_modified & k_modified_elevation; }
+
     //setters
     inline void set_score_instr_id(const std::string& value) { m_soundId = value; }
-    inline void set_midi_port(int value) { m_port = value; }
+    inline void set_midi_port(int value) { m_port = value; m_modified |= k_modified_port; }
     inline void set_midi_device_name(const std::string& value) { m_midiDeviceName = value; }
-    inline void set_midi_name(const std::string& value) { m_midiName = value; }
-    inline void set_midi_bank(int value) { m_bank = value; }
-    inline void set_midi_channel(int value) { m_channel = value; }
-    inline void set_midi_program(int value) { m_program = value; }
-    inline void set_midi_unpitched(int value) { m_unpitched = value; }
-    inline void set_midi_volume(float value) { m_volume = value; }
-    inline void set_midi_pan(int value) { m_pan = value; }
-    inline void set_midi_elevation(int value) { m_elevation = value; }
+    inline void set_midi_name(const std::string& value) { m_midiName = value; m_modified |= k_modified_name; }
+    inline void set_midi_bank(int value) { m_bank = value; m_modified |= k_modified_bank; }
+    inline void set_midi_channel(int value) { m_channel = value; m_modified |= k_modified_channel; }
+    inline void set_midi_program(int value) { m_program = value; m_modified |= k_modified_program; }
+    inline void set_midi_unpitched(int value) { m_unpitched = value; m_modified |= k_modified_unpitched; }
+    inline void set_midi_volume(float value) { m_volume = value; m_modified |= k_modified_volume; }
+    inline void set_midi_pan(int value) { m_pan = value; m_modified |= k_modified_pan; }
+    inline void set_midi_elevation(int value) { m_elevation = value; m_modified |= k_modified_elevation; }
 
+protected:
+
+    //used by MidiAssigner to assing values when info is not present in source file
+    friend class MidiAssigner;
+    inline void init_midi_port(int value) { m_port = value; }
+    inline void init_midi_channel(int value) { m_channel = value; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -4146,6 +4196,10 @@ protected:
     int	    m_displayRepeat = k_repeat_none;
     int     m_soundRepeat = k_repeat_none;
 
+    //to identify dynamics moved to notes (MusicXML import) so that they can be properly
+    //exported
+    ImoNoteRest* m_pNR = nullptr;
+
 
     friend class ImFactory;
     ImoDirection() : ImoStaffObj(k_imo_direction) {}
@@ -4173,6 +4227,13 @@ public:
     //info
     inline bool is_display_repeat() { return m_displayRepeat != k_repeat_none; }
     inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
+
+    //in MusicXML, when importing a <direction> of type dynamics mark, the dynamics
+    //mark is attached to next note. These cases are marked so that they can be
+    //properly moved again when exporting to MusicXML
+    inline void mark_as_dynamics_removed(ImoNoteRest* pNR) { m_pNR = pNR; }
+    inline ImoNoteRest* get_noterest_for_transferred_dynamics() { return m_pNR; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -4602,18 +4663,14 @@ class ImoDynamicsMark : public ImoAuxObj
 {
 protected:
     std::string m_markType;
-    int m_placement;
+    int m_placement = k_placement_default;
+    bool m_moved = false;       //to identify dynamics moved to notes (MusicXML import)
 //TODO
 //    %text-decoration;
 //    %enclosure;
 
     friend class ImFactory;
-    ImoDynamicsMark()
-        : ImoAuxObj(k_imo_dynamics_mark)
-        , m_markType("")
-        , m_placement(k_placement_default)
-    {
-    }
+    ImoDynamicsMark() : ImoAuxObj(k_imo_dynamics_mark) {}
 
 public:
     ImoDynamicsMark(const ImoDynamicsMark&) = delete;
@@ -4622,25 +4679,18 @@ public:
     ImoDynamicsMark& operator= (ImoDynamicsMark&&) = delete;
 
     //getters
-    inline int get_placement()
-    {
-        return m_placement;
-    }
-    inline std::string get_mark_type()
-    {
-        return m_markType;
-    }
+    inline int get_placement() { return m_placement; }
+    inline std::string get_mark_type() { return m_markType; }
 
     //setters
-    inline void set_placement(int placement)
-    {
-        m_placement = placement;
-    }
-    inline void set_mark_type(const std::string& markType)
-    {
-        m_markType = markType;
-    }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_mark_type(const std::string& markType) { m_markType = markType; }
 
+    //in MusicXML, when importing a <direction> of type dynamics mark, the dynamics
+    //mark is attached to next note. These cases are marked so that they can be
+    //properly moved again when exporting to MusicXML
+    inline void mark_as_moved() { m_moved = true; }
+    inline bool is_transferred_from_direction() { return m_moved; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -5506,9 +5556,6 @@ public:
 
     //operations
     void transpose(const int semitones);
-
-//    //overrides: key signatures always in staff 0
-//    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
 
     //properties
     bool can_generate_secondary_shapes() override { return true; }
@@ -7197,7 +7244,7 @@ protected:
     int m_syllableType = k_single;
     TypeTextInfo m_text;
     ImoStyle* m_pStyle = nullptr;
-    std::string m_elision;       //before this syllable
+    std::string m_elision;       //after this syllable
 //    std::string m_elisionFont;
 //    Color m_elisionColor;
 

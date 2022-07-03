@@ -113,6 +113,16 @@ public:
         return true;
     }
 
+    bool check_errormsg_empty(const string& msg)
+    {
+        if (!msg.empty())
+        {
+            cout << "Expected empty erro msg. but msg=[" << msg << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -152,6 +162,7 @@ SUITE(MxlExporterTest)
 //        //doc.from_file(m_scores_path + "unit-tests/xml-export/45e-Repeats-Nested-Alternatives.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "unit-tests/xml-export/MozartTrio.xml", Document::k_format_mxl);
 //        doc.from_file(m_scores_path + "unit-tests/xml-export/BeetAnGeSample.xml", Document::k_format_mxl);
+//        //doc.from_file(m_scores_path + "unit-tests/xml-export/61k-Lyrics.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "unit-tests/xml-export/003-slur.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "00205-multimetric.lmd", Document::k_format_lmd );
 //        //doc.from_file(m_scores_path + "00023-spacing-in-prolog-two-instr.lms" );
@@ -257,7 +268,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
@@ -574,9 +585,9 @@ SUITE(MxlExporterTest)
 
     //@ clef ----------------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlExporterTestFixture, clef_00)
+    TEST_FIXTURE(MxlExporterTestFixture, clef_01)
     {
-        //@00 clef, minimal test. sign and line
+        //@01 clef, minimal test. sign and line
 
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
@@ -584,14 +595,14 @@ SUITE(MxlExporterTest)
         MxlExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pClef);
-        string expected = "<clef><sign>F</sign><line>4</line></clef>";
+        string expected = "<attributes><clef><sign>F</sign><line>4</line></clef>";
         CHECK( check_result(source, expected) );
         delete pClef;
     }
 
-    TEST_FIXTURE(MxlExporterTestFixture, clef_01)
+    TEST_FIXTURE(MxlExporterTestFixture, clef_02)
     {
-        //@01. staff added when instrument has more than one
+        //@02. staff added when instrument has more than one
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument (staves 2)"
@@ -605,12 +616,64 @@ SUITE(MxlExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_current_instrument(pInstr);
         string source = exporter.get_source(*it);
-        string expected = "<clef number=\"1\"><sign>G</sign><line>2</line></clef>";
+        string expected = "<attributes><clef number=\"1\"><sign>G</sign><line>2</line></clef>";
         CHECK( check_result(source, expected) );
 
         ++it;   //clef F4
         source = exporter.get_source(*it);
         expected = "<clef number=\"2\"><sign>F</sign><line>4</line></clef>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, clef_03)
+    {
+        //@03. intermediate clef
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData"
+                "(clef G)(n c4 q)(clef F4)(n d3 q) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type></note>"
+            "<attributes><clef><sign>F</sign><line>4</line></clef></attributes>"
+            "<note><pitch><step>D</step><octave>3</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, clef_04)
+    {
+        //@04. clef: print-style, print-object
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData"
+                "(clef G (visible no)(dx 10)) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<attributes><clef relative-x=\"10\" print-object=\"no\">"
+            "<sign>G</sign><line>2</line></clef>";
         CHECK( check_result(source, expected) );
     }
 
@@ -633,7 +696,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pImo = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pImo != nullptr );
@@ -764,7 +827,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pImo = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pImo != nullptr );
@@ -824,53 +887,359 @@ SUITE(MxlExporterTest)
         CHECK( check_result(source, expected) );
     }
 
-//    TEST_FIXTURE(MxlExporterTestFixture, direction_08)
-//    {
-//        //@08. direction: pedal line
-//
-//        Document doc(m_libraryScope);
-//        doc.from_string("<score-partwise version='3.0'><part-list>"
-//            "<score-part id='P1'><part-name>Music</part-name></score-part>"
-//            "</part-list><part id='P1'>"
-//            "<measure number='1'>"
-//            "<direction><direction-type>"
-//                "<pedal type='start' line='yes' sign='yes'/>"
-//            "</direction-type></direction>"
-//            "<note><pitch><step>G</step><octave>5</octave></pitch>"
-//                "<duration>4</duration><type>16th</type>"
-//            "</note>"
-//            "<direction><direction-type>"
-//                "<pedal type='stop' line='yes' sign='yes'/>"
-//            "</direction-type></direction>"
-//            "</measure>"
-//            "</part></score-partwise>", Document::k_format_mxl );
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        ImoInstrument* pInstr = pScore->get_instrument(0);
-//        ImoMusicData* pMD = pInstr->get_musicdata();
-//        ImoObj::children_iterator it = pMD->begin();    //clef (implicit)
-//        ++it;   //pedal line start
-//
-//        MxlExporter exporter(m_libraryScope);
-//        exporter.set_remove_newlines(true);
-//        exporter.set_current_instrument(pInstr);
-//        string source = exporter.get_source(*it);
-//        string expected = "<direction><direction-type>"
-//            "<pedal type='start' line='yes' sign='yes'/></direction-type></direction>";
-//        CHECK( check_result(source, expected) );
-//
-//        ++it;   //note
-//        ++it;   //pedal line stop
-//        source = exporter.get_source(*it);
-//        expected = "<direction><direction-type>"
-//            "<pedal type='stop' line='yes' sign='yes'/></direction-type></direction>";
-//        CHECK( check_result(source, expected) );
-//    }
+    TEST_FIXTURE(MxlExporterTestFixture, direction_08)
+    {
+        //@08. direction: octave-shift
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/005-octave-shift.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //rest with attached octave-shif start
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction><direction-type>"
+            "<octave-shift type=\"down\" size=\"8\" number=\"1\"/>"
+            "</direction-type></direction>"
+            "<note><rest/><duration>480</duration><voice>1</voice><type>quarter</type></note>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note F5
+        ++it;   //note E5
+        ++it;   //note D5 with attached octave-shif stop
+        source = exporter.get_source(*it);
+        expected = "<note><pitch><step>D</step><octave>5</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type><stem>up</stem></note>"
+            "<direction><direction-type>"
+            "<octave-shift type=\"stop\" size=\"8\" number=\"1\"/>"
+            "</direction-type></direction>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_09)
+    {
+        //@09. direction: pedal mark
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<direction placement=\"below\"><direction-type>"
+                "<pedal line=\"no\" type=\"start\"/>"
+            "</direction-type></direction>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pImo = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pImo != nullptr );
+        if (pImo)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pImo);
+            string expected = "<direction placement=\"below\"><direction-type>"
+            "<pedal type=\"start\" line=\"no\"/>"
+            "</direction-type></direction>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_10)
+    {
+        //@10. direction: pedal lines: types start & stop
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/008-pedal-line.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //pedal line start
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction><direction-type>"
+            "<pedal type=\"start\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note
+        ++it;   //pedal line stop
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"stop\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_11)
+    {
+        //@11. direction: pedal marks with line
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/009-pedal-line-marks.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //pedal line start
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction><direction-type>"
+            "<pedal type=\"start\" line=\"yes\" sign=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note
+        ++it;   //pedal line stop
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"stop\" line=\"yes\" sign=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_12)
+    {
+        //@12. direction: pedal lines: types change, discontinue & resume
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/010-pedal-lines.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //key
+        ++it;   //time
+        ++it;   //pedal line start
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction><direction-type>"
+            "<pedal type=\"start\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note 1
+        ++it;   //note 2
+        ++it;   //note 3
+        ++it;   //pedal line change
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"change\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note 4
+        ++it;   //note 5
+        ++it;   //pedal line discontinue
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"discontinue\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note 6
+        ++it;   //barline
+        ++it;   //note 7
+        ++it;   //note 8
+        ++it;   //pedal line resume
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"resume\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note 9
+        ++it;   //pedal line change
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"change\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note 10
+        ++it;   //note 11
+        ++it;   //pedal line stop
+        source = exporter.get_source(*it);
+        expected = "<direction><direction-type>"
+            "<pedal type=\"stop\" line=\"yes\"/></direction-type></direction>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_13)
+    {
+        //@13. direction: pedal lines: type sostenuto
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<direction placement=\"below\"><direction-type>"
+                "<pedal line=\"no\" type=\"sostenuto\"/>"
+            "</direction-type></direction>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pImo = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pImo != nullptr );
+        if (pImo)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pImo);
+            string expected = "<direction placement=\"below\"><direction-type>"
+            "<pedal type=\"sostenuto\" line=\"no\"/>"
+            "</direction-type></direction>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_14)
+    {
+        //@14. direction: sound, only attribs
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text("<direction placement=\"below\">"
+            "<direction-type><dynamics><p/></dynamics></direction-type>"
+            "<sound dynamics=\"54\"/>"
+            "</direction>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pImo = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pImo != nullptr );
+        if (pImo)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pImo);
+            string expected = "<direction placement=\"below\">"
+                "<direction-type><dynamics><p/></dynamics></direction-type>"
+                "<sound dynamics=\"54\"/>"
+                "</direction>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_15)
+    {
+        //@15. direction: sound, midi content
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/011-sound-midi-info.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef (implicit)
+        ++it;   //direction
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction placement=\"above\">"
+            "<direction-type><words>pizz.</words></direction-type>"
+            "<sound><midi-instrument id=\"P3-I4\"><midi-program>46</midi-program>"
+                "</midi-instrument></sound>"
+            "</direction>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_16)
+    {
+        //@16. sound as child of <measure>
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<sound tempo=\"84\"/>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //sound
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<sound tempo=\"84\"/>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_17)
+    {
+        //@17. dynamics moved to <note> in importer is restored in exporter
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/012-directive-moved-to-note.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        ++it;   //direction
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<direction placement=\"below\">"
+            "<direction-type><dynamics><p/></dynamics></direction-type>"
+            "<sound dynamics=\"54\"/>"
+            "</direction>";
+        CHECK( check_result(source, expected) );
+
+        ++it;   //note
+        source = exporter.get_source(*it);
+        expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type></note>";
+        CHECK( check_result(source, expected) );
+    }
 
     //@ key -----------------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlExporterTestFixture, key_00)
+    TEST_FIXTURE(MxlExporterTestFixture, key_01)
     {
-        //@00 key. minimal test
+        //@01 key. minimal test
 
         Document doc(m_libraryScope);
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
@@ -879,40 +1248,341 @@ SUITE(MxlExporterTest)
         MxlExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        CHECK( check_result(source, "<key><fifths>3</fifths><mode>major</mode></key>") );
+        string expected = "<attributes><key><fifths>3</fifths><mode>major</mode></key>";
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
-//
-//    //@ Lyric ---------------------------------------------------------------------------
-//
-//    TEST_FIXTURE(MxlExporterTestFixture, lyric_0)
+    TEST_FIXTURE(MxlExporterTestFixture, key_02)
+    {
+        //@02 non-standard key. Several accidentals.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<key>"
+                "<key-step>G</key-step>"
+                "<key-alter>-1.5</key-alter>"
+                "<key-step>A</key-step>"
+                "<key-alter>1.5</key-alter>"
+                "<key-step>B</key-step>"
+                "<key-alter>-0.5</key-alter>"
+            "</key>"
+        );
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
+        CHECK( pKey != nullptr );
+        if (pKey)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pKey);
+            string expected = "<attributes><key><key-step>G</key-step>"
+                "<key-alter>-1.5</key-alter>"
+                "<key-accidental>three-quarters-flat</key-accidental>"
+                "<key-step>A</key-step><key-alter>1.5</key-alter>"
+                "<key-accidental>three-quarters-sharp</key-accidental>"
+                "<key-step>B</key-step><key-alter>-0.5</key-alter>"
+                "<key-accidental>quarter-flat</key-accidental></key>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, key_03)
+    {
+        //@03. key: number
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/013-key-number.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected =
+            "<attributes><divisions>1</divisions>"
+                "<key number=\"1\"><fifths>1</fifths><mode>major</mode></key>"
+                "<key number=\"2\"><fifths>3</fifths><mode>major</mode></key>"
+                "<staves>2</staves>"
+                "<clef number=\"1\"><sign>G</sign><line>2</line></clef>"
+                "<clef number=\"2\"><sign>F</sign><line>4</line></clef>"
+            "</attributes>";
+        CHECK( check_result_contains(source, expected, "attributes") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, key_04)
+    {
+        //@04. key: print-style, print-object
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData"
+                "(key A (visible no)(dx 10)) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<attributes><key relative-x=\"10\" print-object=\"no\">"
+            "<fifths>3</fifths><mode>major</mode></key>";
+        CHECK( check_result(source, expected) );
+    }
+
+    //@ lyric ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_01)
+    {
+        //@01. lyric. minimal test
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n c4 q (lyric 1 \"This\"))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+        ++it;   //note c4
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type>"
+            "<lyric number=\"1\"><syllabic>single</syllabic><text>This</text></lyric></note>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_02)
+    {
+        //@02. lyric. two lines
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n c4 q (lyric 1 \"This\")(lyric 2 \"A\"))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+        ++it;   //note c4
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type>"
+            "<lyric number=\"1\"><syllabic>single</syllabic><text>This</text></lyric>"
+            "<lyric number=\"2\"><syllabic>single</syllabic><text>A</text></lyric></note>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_03)
+    {
+        //@03. lyric. begin, middle and end. hyphenation
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n d4 q (lyric 1 \"to\" -))"
+            "(n e4 q (lyric 1 \"ma\" -))"
+            "(n f4 q (lyric 1 \"te.\"))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><pitch><step>D</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+                "<lyric number=\"1\"><syllabic>begin</syllabic><text>to</text></lyric></note>"
+            "<note><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+                "<lyric number=\"1\"><syllabic>middle</syllabic><text>ma</text></lyric></note>"
+            "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+                "<lyric number=\"1\"><syllabic>end</syllabic><text>te.</text></lyric></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_04)
+    {
+        //@04. lyric. melisma line
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n c4 q (lyric \"Ah\" (melisma)))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+        ++it;   //note c4
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type>"
+            "<lyric number=\"1\"><syllabic>single</syllabic><text>Ah</text>"
+            "<extend/></lyric></note>";
+        CHECK( check_result(source, expected) );
+    }
+
+//    TEST_FIXTURE(MxlExporterTestFixture, lyric_05)
 //    {
+//        //@05. lyric. implicit end of melisma line. lyric exists
+//
 //        Document doc(m_libraryScope);
 //        doc.from_string("(score (vers 2.0)"
 //            "(instrument (musicData (clef G)"
-//            "(n c4 q (lyric 1 \"This\")(lyric 2 \"A\"))"
-//            "(n d4 q (lyric 1 \"is\")(lyric 2 \"se\" -))"
-//            "(n e4 q (lyric 1 \"line\")(lyric 2 \"cond\"))"
-//            "(n f4 q (lyric 1 \"one.\")(lyric 2 \"line.\"))"
-//            "(barline))))" );
+//            "(n c4 q (lyric \"Ah\" (melisma)))"
+//            "(n e4 q (lyric \"Son\"))"
+//            ")))" );
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-////        dump_colection(pScore);
 //        ImoInstrument* pInstr = pScore->get_instrument(0);
 //        ImoMusicData* pMD = pInstr->get_musicdata();
 //
 //        MxlExporter exporter(m_libraryScope);
-//        exporter.set_current_score(pScore);
 //        exporter.set_remove_newlines(true);
+//        exporter.set_current_score(pScore);
+//        exporter.set_current_instrument(pInstr);
+//        exporter.set_remove_separator_lines(true);
 //        string source = exporter.get_source(pMD);
-//        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-//        CHECK( source == "(musicData (clef G p1)"
-//            "(n c4 q v1 p1 (lyric 1 \"This\" below)(lyric 2 \"A\" below))"
-//            "(n d4 q v1 p1 (lyric 1 \"is\" below)(lyric 2 \"se\" - below))"
-//            "(n e4 q v1 p1 (lyric 1 \"line\" below)(lyric 2 \"cond\" below))"
-//            "(n f4 q v1 p1 (lyric 1 \"one.\" below)(lyric 2 \"line.\" below))"
-//            "(barline simple))" );
+//        string expected =
+//            "<measure number=\"1\">"
+//            "<attributes><divisions>480</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef>"
+//            "</attributes>"
+//            "<note><pitch><step>C</step><octave>4</octave></pitch>"
+//                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+//                "<lyric number=\"1\"><syllabic>single</syllabic><text>Ah</text>"
+//                "<extend type=\"start\"/></lyric></note>"
+//            "<note><pitch><step>E</step><octave>4</octave></pitch>"
+//                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+//                "<lyric number=\"1\"><syllabic>single</syllabic><text>Son</text>"
+//                "<extend type=\"stop\"/></lyric></note>"
+//            "</measure>";
+//        CHECK( check_result(source, expected) );
 //    }
+
+//    TEST_FIXTURE(MxlExporterTestFixture, lyric_06)
+//    {
+//        //@06. lyric. implicit end of melisma line. no lyric
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)"
+//            "(instrument (musicData (clef G)"
+//            "(n c4 q (lyric \"Ah\" (melisma)))"
+//            "(n e4 q)"
+//            ")))" );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ImoInstrument* pInstr = pScore->get_instrument(0);
+//        ImoMusicData* pMD = pInstr->get_musicdata();
+//
+//        MxlExporter exporter(m_libraryScope);
+//        exporter.set_remove_newlines(true);
+//        exporter.set_current_score(pScore);
+//        exporter.set_current_instrument(pInstr);
+//        exporter.set_remove_separator_lines(true);
+//        string source = exporter.get_source(pMD);
+//        string expected =
+//            "<measure number=\"1\">"
+//            "<attributes><divisions>480</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef>"
+//            "</attributes>"
+//            "<note><pitch><step>C</step><octave>4</octave></pitch>"
+//                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+//                "<lyric number=\"1\"><syllabic>single</syllabic><text>Ah</text>"
+//                "<extend type=\"start\"/></lyric></note>"
+//            "<note><pitch><step>E</step><octave>4</octave></pitch>"
+//                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+//                "<lyric number=\"1\"><extend type=\"stop\"/></lyric></note>"
+//            "</measure>";
+//        CHECK( check_result(source, expected) );
+//    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_07)
+    {
+        //@07. lyric. two syllables. elision
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n c4 q (lyric 1 \"This\" \"is\"))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+        ++it;   //note c4
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type>"
+            "<lyric number=\"1\"><syllabic>single</syllabic><text>This</text>"
+            "<elision>‿</elision><syllabic>single</syllabic><text>is</text></lyric></note>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, lyric_08)
+    {
+        //@08. lyric. placement
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)"
+            "(n c4 q (lyric 2 \"This\" below))"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
+        ++it;   //note c4
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>480</duration><voice>1</voice><type>quarter</type>"
+            "<lyric number=\"2\" placement=\"below\"><syllabic>single</syllabic>"
+            "<text>This</text></lyric></note>";
+        CHECK( check_result(source, expected) );
+    }
 
     //@ notations -----------------------------------------------------------------------
 
@@ -991,37 +1661,6 @@ SUITE(MxlExporterTest)
             "</note>";
         CHECK( check_result(source, expected) );
     }
-
-//    //@ dynamics marks -------------------------------------------------------------
-//
-//    TEST_FIXTURE(MxlExporterTestFixture, dyn_01)
-//    {
-//        //@01. dynamics marks
-//
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument (musicData "
-//            "(clef G)(key C)"
-//            "(n g4  q (dyn \"fff\" below))"
-//            "(n g4  q (dyn \"ppp\"))"
-//            "(n g4  q (dyn \"sfz\" above))"
-//            "(n g4  q (dyn \"sfz\" above (dx 50)(dy -70)(color #ff0000)))"
-//            ")))");
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//
-//        MxlExporter exporter(m_libraryScope);
-//        exporter.set_current_score(pScore);
-//        exporter.set_remove_newlines(true);
-//        string source = exporter.get_source(pScore);
-//        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-//        string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
-//            "(clef G p1)(key C)"
-//            "(n g4 q v1 p1 (dyn \"fff\" below))"
-//            "(n g4 q v1 p1 (dyn \"ppp\"))"
-//            "(n g4 q v1 p1 (dyn \"sfz\" above))"
-//            "(n g4 q v1 p1 (dyn \"sfz\" above (color #ff0000ff)(dx 50)(dy -70)))"
-//            ")))";
-//        CHECK( source == expected );
-//    }
 
     //@ note ----------------------------------------------------------------------------
 
@@ -1110,6 +1749,129 @@ SUITE(MxlExporterTest)
         CHECK( check_result(source, expected) );
     }
 
+    TEST_FIXTURE(MxlExporterTestFixture, note_04)
+    {
+        //@04. grace note. steal-time-previous
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/210-grace-note.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><grace steal-time-previous=\"20\"/>"
+                "<pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type><stem>up</stem></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch><duration>960</duration>"
+                "<voice>1</voice><type>half</type><stem>down</stem></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, note_05)
+    {
+        //@05. grace note. steal-time-previous
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/211-graces-chord.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><grace steal-time-following=\"20\"/>"
+                "<pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type><stem>up</stem></note>"
+            "<note><grace/><chord/>"
+                "<pitch><step>F</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type><stem>up</stem></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch><duration>480</duration>"
+                "<voice>1</voice><type>quarter</type><stem>down</stem></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, note_06)
+    {
+        //@06. grace note. slash
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/228-grace-slash.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><grace steal-time-previous=\"20\" slash=\"yes\"/>"
+                "<pitch><step>E</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type><stem>up</stem></note>"
+            "<note><pitch><step>E</step><octave>5</octave></pitch><duration>960</duration>"
+                "<voice>1</voice><type>half</type><stem>up</stem></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, note_07)
+    {
+        //@07. cue note
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/004-cue-note.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+            "<key><fifths>0</fifths><mode>major</mode></key>"
+            "<time><beats>3</beats><beat-type>4</beat-type></time>"
+            "<clef><sign>percussion</sign></clef>"
+            "</attributes>"
+            "<note><cue/><unpitched><display-step>E</display-step>"
+                "<display-octave>5</display-octave></unpitched><duration>1440</duration>"
+                "<voice>1</voice><type>half</type><dot/><stem>down</stem></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+    }
+
     //@ ornaments -----------------------------------------------------------------------
 
     TEST_FIXTURE(MxlExporterTestFixture, ornaments_01)
@@ -1132,7 +1894,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
@@ -1222,6 +1984,83 @@ SUITE(MxlExporterTest)
             "<part-group number=\"1\" type=\"stop\"/>"
             "<score-part id=\"P1\"><part-name>Piano</part-name><part-abbreviation>P</part-abbreviation></score-part>"
             "</part-list>";
+        CHECK( check_result_contains(source, expected, "part-list") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, part_list_03)
+    {
+        //@03. part-list. score-instrument
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id=\"P1\">"
+                "<part-name>Voice</part-name>"
+                "<score-instrument id=\"P1-I1\">"
+                    "<instrument-name>Acoustic Guitar (steel)</instrument-name>"
+                    "<instrument-sound>pluck.guitar</instrument-sound>"
+                "</score-instrument>"
+            "</score-part></part-list>"
+            "<part id=\"P1\"><measure number='1'>"
+            "</measure></part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<part-list><score-part id=\"P1\">"
+            "<part-name>Voice</part-name><score-instrument id=\"P1-I1\">"
+            "<instrument-name>Acoustic Guitar (steel)</instrument-name>"
+            "<instrument-sound>pluck.guitar</instrument-sound><solo/>"
+            "</score-instrument></score-part></part-list>";
+        CHECK( check_result_contains(source, expected, "part-list") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, part_list_04)
+    {
+        //@04. part-list. midi-instrument
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id=\"P2\">"
+               "<part-name>Horn in F</part-name>"
+               "<part-abbreviation>Hn.</part-abbreviation>"
+               "<score-instrument id=\"P2-I2\">"
+                  "<instrument-name>Horn</instrument-name>"
+                  "<instrument-abbreviation>Hn</instrument-abbreviation>"
+                  "<instrument-sound>brass.french-horn</instrument-sound>"
+                  "<virtual-instrument>"
+                     "<virtual-library>Garritan Instruments for Finale</virtual-library>"
+                     "<virtual-name>002. Brass/1. French horns/French horn Plr1</virtual-name>"
+                  "</virtual-instrument>"
+               "</score-instrument>"
+               "<midi-device>ARIA Player</midi-device>"
+               "<midi-instrument id=\"P2-I2\">"
+                  "<midi-channel>2</midi-channel>"
+                  "<midi-program>1</midi-program>"
+                  "<volume>80</volume>"
+                  "<pan>4</pan>"
+               "</midi-instrument>"
+            "</score-part></part-list>"
+            "<part id=\"P2\"><measure number='1'>"
+            "</measure></part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<part-list><score-part id=\"P2\">"
+            "<part-name>Horn in F</part-name><part-abbreviation>Hn.</part-abbreviation>"
+            "<score-instrument id=\"P2-I2\"><instrument-name>Horn</instrument-name>"
+            "<instrument-abbreviation>Hn</instrument-abbreviation>"
+            "<instrument-sound>brass.french-horn</instrument-sound><solo/>"
+            "<virtual-instrument><virtual-library>Garritan Instruments for Finale</virtual-library>"
+            "<virtual-name>002. Brass/1. French horns/French horn Plr1</virtual-name>"
+            "</virtual-instrument></score-instrument><midi-device>ARIA Player</midi-device>"
+            "<midi-instrument id=\"P2-I2\"><midi-channel>2</midi-channel>"
+            "<midi-program>1</midi-program><volume>80</volume><pan>4</pan>"
+            "</midi-instrument></score-part></part-list>";
         CHECK( check_result_contains(source, expected, "part-list") );
     }
 
@@ -1369,7 +2208,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
@@ -1409,7 +2248,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
@@ -1449,7 +2288,7 @@ SUITE(MxlExporterTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str().empty() );
+        CHECK( check_errormsg_empty(errormsg.str()) );
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
@@ -1505,9 +2344,9 @@ SUITE(MxlExporterTest)
 
     //@ time signature ------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlExporterTestFixture, time_signature_0)
+    TEST_FIXTURE(MxlExporterTestFixture, time_signature_01)
     {
-        //@00. minimal test. beats and beat type
+        //@01. minimal test. beats and beat type
 
         Document doc(m_libraryScope);
         ImoTimeSignature* pImo =
@@ -1517,66 +2356,64 @@ SUITE(MxlExporterTest)
         MxlExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        CHECK( check_result(source, "<time><beats>6</beats><beat-type>8</beat-type></time>") );
+        string expected = "<attributes><time><beats>6</beats><beat-type>8</beat-type></time>";
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
-//    TEST_FIXTURE(MxlExporterTestFixture, time_signature_0)
-//    {
-//        //@00. time, type
-//
-//        Document doc(m_libraryScope);
-//        ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
-//                            ImFactory::inject(k_imo_time_signature, &doc));
-//        pImo->set_type(ImoTimeSignature::k_single_number);
-//        pImo->set_top_number(10);
-//        MxlExporter exporter(m_libraryScope);
-//        exporter.set_remove_newlines(true);
-//        string source = exporter.get_source(pImo);
-//        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-//        CHECK( source == "(time single-number 10)" );
-//        delete pImo;
-//    }
+    TEST_FIXTURE(MxlExporterTestFixture, time_signature_02)
+    {
+        //@02. time signature: print-style, print-object
 
-//    TEST_FIXTURE(MxlExporterTestFixture, time_signature_1)
-//    {
-//        //@01. time id
-//
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0) (instrument#100"
-//                "(musicData (time#123 5 4) )))");
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        ImoInstrument* pInstr = pScore->get_instrument(0);
-//        ImoMusicData* pMD = pInstr->get_musicdata();
-//        ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
-//                                        pMD->get_child_of_type(k_imo_time_signature) );
-//
-//        MxlExporter exporter(m_libraryScope);
-//        exporter.set_remove_newlines(true);
-//        exporter.set_add_id(true);
-//        string source = exporter.get_source(pImo);
-//        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-//        CHECK( source == "(time#123 5 4)" );
-//        CHECK( check_result(source, "<key><fifths>3</fifths><mode>major</mode></key>") );
-//    }
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData"
+                "(time 3 4 (visible no)(dx 52.6)) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();    //clef G
 
-//    TEST_FIXTURE(MxlExporterTestFixture, time_signature_2)
-//    {
-//        //@02. time. Attachments
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0) (instrument#100"
-//                "(musicData (time common (text \"Hello\")) )))");
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        ImoInstrument* pInstr = pScore->get_instrument(0);
-//        ImoMusicData* pMD = pInstr->get_musicdata();
-//        ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
-//                                        pMD->get_child_of_type(k_imo_time_signature) );
-//        MxlExporter exporter(m_libraryScope);
-//        exporter.set_remove_newlines(true);
-//        string source = exporter.get_source(pImo);
-//        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-//        CHECK( source == "(time common (text \"Hello\"))" );
-//    }
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_current_instrument(pInstr);
+        string source = exporter.get_source(*it);
+        string expected = "<attributes><time relative-x=\"52.6\" print-object=\"no\">"
+            "<beats>3</beats><beat-type>4</beat-type></time>";
+        CHECK( check_result(source, expected) );
+    }
+
+    //@ transpose -----------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlExporterTestFixture, transpose_01)
+    {
+        //@01. transpose. minimal test
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text("<transpose><diatonic>-2</diatonic><chromatic>-3</chromatic>"
+            "</transpose>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_transpose() == true );
+        ImoTranspose* pImo = dynamic_cast<ImoTranspose*>( pRoot );
+        CHECK( pImo != nullptr );
+        if (pImo)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pImo);
+            string expected = "<attributes><transpose>"
+                "<diatonic>-2</diatonic><chromatic>-3</chromatic></transpose>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
 
     //@ tuplet --------------------------------------------------------------------------
 

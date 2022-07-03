@@ -58,8 +58,6 @@ protected:
     static const int k_max_tuplet_number = 16;
     std::array<ImoId, k_max_tuplet_number> m_tuplets;
 
-
-
 public:
     MxlExporter(LibraryScope& libScope);
     virtual ~MxlExporter();
@@ -72,7 +70,6 @@ public:
     inline void set_remove_newlines(bool value) { m_fRemoveNewlines = value; }
     inline void set_remove_separator_lines(bool value) { m_fRemoveSeparators = value; }
     inline void save_divisions(int value) { m_divisions = value; }
-
 
     //getters for settings
     inline int get_indent() const { return m_nIndent; }
@@ -134,6 +131,7 @@ public:
     }
     inline void push_tag(const std::string& tag) { m_openTags.push(tag); }
     inline void pop_tag() { m_openTags.pop(); }
+
 
 protected:
     MxlGenerator* new_generator(ImoObj* pImo);

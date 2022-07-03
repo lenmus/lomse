@@ -3612,7 +3612,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo && pImo->get_number() == 1 );
-        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
         CHECK( pImo && pImo->is_laughing() == false );
         CHECK( pImo && pImo->is_humming() == false );
         CHECK( pImo && pImo->is_end_line() == false );
@@ -3686,7 +3686,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo && pImo->get_number() == 1 );
-        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
         CHECK( pImo && pImo->is_laughing() == false );
         CHECK( pImo && pImo->is_humming() == false );
         CHECK( pImo && pImo->is_end_line() == false );
@@ -3763,7 +3763,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo && pImo->get_number() == 1 );
-        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
         CHECK( pImo && pImo->is_laughing() == false );
         CHECK( pImo && pImo->is_humming() == false );
         CHECK( pImo && pImo->is_end_line() == false );
@@ -3810,7 +3810,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo && pImo->get_number() == 1 );
-        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
         CHECK( pImo && pImo->is_laughing() == false );
         CHECK( pImo && pImo->is_humming() == false );
         CHECK( pImo && pImo->is_end_line() == false );
@@ -3857,7 +3857,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo && pImo->get_number() == 1 );
-        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
         CHECK( pImo && pImo->is_laughing() == false );
         CHECK( pImo && pImo->is_humming() == false );
         CHECK( pImo && pImo->is_end_line() == false );
@@ -4066,6 +4066,147 @@ SUITE(LdpAnalyserTest)
         CHECK( pLyric22->get_next_lyric() == pLyric32 );
         CHECK( pLyric32->get_prev_lyric() == pLyric22 );
         CHECK( pLyric32->get_next_lyric() == nullptr );
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_11)
+    {
+        //@ 11. lyrics. Syllable type correctly inferred
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric \"vic\" -))"
+            "(n d4 e (lyric \"to\" -))"
+            "(n e4 e (lyric \"ri\" -))"
+            "(n e4 e (lyric \"ous\"))"
+            ")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric1 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric1 && pLyric1->get_number() == 1 );
+        ImoLyricsTextInfo* pTxt1 = pLyric1->get_text_item(0);
+        CHECK( pTxt1 && pTxt1->get_syllable_type() == ImoLyricsTextInfo::k_begin );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 1);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric2 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric2 && pLyric2->get_number() == 1 );
+        ImoLyricsTextInfo* pTxt2 = pLyric2->get_text_item(0);
+        CHECK( pTxt2 && pTxt2->get_syllable_type() == ImoLyricsTextInfo::k_middle );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 2);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric3 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric3 && pLyric3->get_number() == 1 );
+        ImoLyricsTextInfo* pTxt3 = pLyric3->get_text_item(0);
+        CHECK( pTxt3 && pTxt3->get_syllable_type() == ImoLyricsTextInfo::k_middle );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 2);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric4 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric4 && pLyric4->get_number() == 1 );
+        ImoLyricsTextInfo* pTxt4 = pLyric4->get_text_item(0);
+        CHECK( pTxt4 && pTxt4->get_syllable_type() == ImoLyricsTextInfo::k_end );
+
+        CHECK( pLyric1->get_prev_lyric() == nullptr );
+        CHECK( pLyric1->get_next_lyric() == pLyric2 );
+        CHECK( pLyric2->get_prev_lyric() == pLyric1 );
+        CHECK( pLyric2->get_next_lyric() == pLyric3 );
+        CHECK( pLyric3->get_prev_lyric() == pLyric2 );
+        CHECK( pLyric3->get_next_lyric() == pLyric4 );
+        CHECK( pLyric4->get_prev_lyric() == pLyric3 );
+        CHECK( pLyric4->get_next_lyric() == nullptr );
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_12)
+    {
+        //@ 12. lyrics. placement
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric \"Ah\"))"
+            "(n d4 e (lyric \"Be\" above))"
+            "(n e4 e (lyric \"Ce\" below))"
+            ")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric && pLyric->get_placement() == k_placement_default );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 1);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        pLyric = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric && pLyric->get_placement() == k_placement_above );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 2);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
+        pLyric = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric && pLyric->get_placement() == k_placement_below );
 
         delete tree->get_root();
         // coverity[check_after_deref]
