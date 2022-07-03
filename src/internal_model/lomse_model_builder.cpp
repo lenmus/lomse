@@ -525,7 +525,7 @@ void MidiAssigner::assign_port_and_channel()
             {
                 if (m_assigned[i] == nullptr)
                 {
-                    pMidi->set_midi_port(i / 16);
+                    pMidi->init_midi_port(i / 16);
                     m_assigned[i] = *it;
                     break;
                 }
@@ -544,7 +544,7 @@ void MidiAssigner::assign_port_and_channel()
                 int i = p*16 + ch;
                 if (m_assigned[i] == nullptr)
                 {
-                    pMidi->set_midi_channel(i % 16);
+                    pMidi->init_midi_channel(i % 16);
                     m_assigned[i] = *it;
                     fAssigned = true;
                     break;
@@ -561,8 +561,8 @@ void MidiAssigner::assign_port_and_channel()
             {
                 if (m_assigned[idx] == nullptr)
                 {
-                    pMidi->set_midi_port(idx / 16);
-                    pMidi->set_midi_channel(idx % 16);
+                    pMidi->init_midi_port(idx / 16);
+                    pMidi->init_midi_channel(idx % 16);
                     m_assigned[idx] = *it;
                     ++idx;
                     break;

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.0">
+  <part-list>
+    <score-part id="P3">
+      <part-name>violino II</part-name>
+      <score-instrument id="P3-I4">
+        <instrument-name>Violin II</instrument-name>
+        <instrument-sound>strings.violin</instrument-sound>
+        <solo/>
+      </score-instrument>
+      <midi-instrument id="P3-I4">
+        <midi-channel>4</midi-channel>
+        <midi-program>41</midi-program>
+        <volume>80</volume>
+        <pan>0</pan>
+      </midi-instrument>
+    </score-part>
+  </part-list>
+  <!--=========================================================-->
+   <part id="P3">
+    <measure number="1">
+      <direction placement="above">
+        <direction-type>
+          <words>pizz.</words>
+        </direction-type>
+        <sound>
+          <midi-instrument id="P3-I4">
+            <midi-program>46</midi-program>
+          </midi-instrument>
+        </sound>
+      </direction>
+      <note>
+         <pitch><step>G</step><octave>5</octave></pitch>
+         <duration>4</duration><type>16th</type>
+         </note>
+      </measure>
+   </part>
+</score-partwise>
+
