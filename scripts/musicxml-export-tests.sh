@@ -1,8 +1,8 @@
 #! /bin/bash
 #------------------------------------------------------------------------------
-# Lomse library visual regression test
+# Lomse library visual tests for MusicXML exporter
 # This script MUST BE RUN from 'lomse/scripts/' folder
-# It creates a folder 'zz_regression/' at the same level than lomse root folder
+# It creates a folder 'zz_musicxml/' at the same level than lomse root folder
 # with the following content:
 #
 #  lomse-project
@@ -12,19 +12,19 @@
 #       │     ├── scripts/
 #       │     ┆
 #       │
-#       └── zz_regression/
+#       └── zz_musicxml/
 #               ├── generated/
 #               ├── failures/
-#               ├── regression.htm
-#               └── regression.css
+#               ├── musicxml.htm
+#               └── musicxml.css
 #
-# - Folder 'generated' contains the images for the rendered scores
+# - Folder 'generated' contains the images for the exported scores
 # - Folder 'failures' contains the GIF images for the test failures
-# - File 'regression.htm' is the report
-# - File 'regression.css' is a style sheet for the report.
+# - File 'musicxml.htm' is the report
+# - File 'musicxml.css' is a style sheet for the report.
 #
 #
-# usage: ./regression.sh [options]
+# usage: ./musicxml-export-tests.sh [options]
 #------------------------------------------------------------------------------
 
 
@@ -32,7 +32,7 @@
 # Display the help message
 function DisplayHelp()
 {
-    echo "Usage: regression.sh [option]*"
+    echo "Usage: musicxml-export-tests.sh [option]*"
     echo ""
     echo "Options:"
     echo "    -h --help        Print this help text."
@@ -53,7 +53,7 @@ function GenerateImages()
         fi
         testfile="${testfile%.*}"
         IMAGE="${generated_path}${testfile}"
-        msg=$(lclt -import "$f" -jpg "${IMAGE}") || {
+        msg=$(lclt -import "$f" -musicxml "z_${f}.xml" -import "z_${f}.xml" -jpg "${IMAGE}") || {
             echo "crash in $f"
             cp "$scripts_path/crash.jpg" "${IMAGE}-1.jpg"
         }
@@ -61,6 +61,7 @@ function GenerateImages()
             echo -e "\n${testfile}"
             echo -e "${msg}" | sed 's/^/     /'
         fi
+        rm "z_${f}.xml"
     done
 }
 
@@ -77,30 +78,25 @@ function AddTargetImagesFor()
         testname="${f%-*}"
 
         #determine if failure
-        fTestFailed=0
         if [[ " ${failures[@]} " =~ " ${imagename} " ]]; then
             #echo "Failure in ${testname}"
-            fTestFailed=1
-        fi
+ 
+            # add test name if new test
+            if [ "${prev_test}" != "${testname}" ]; then
+                prev_test="${testname}"
+                test_id="${testname%%-*}"
+                echo "<a name='${test_id}'> </a>" >> "${html_page}"
+                echo "<h4>${testname}<a class='gotop' href='#top'>[Go to top]</a></h4>" >> "${html_page}"
+            fi
 
-        # add test name if new test
-        if [ "${prev_test}" != "${testname}" ]; then
-            prev_test="${testname}"
-            test_id="${testname%%-*}"
-            echo "<a name='${test_id}'> </a>" >> "${html_page}"
-            echo "<h4>${testname}<a class='gotop' href='#top'>[Go to top]</a></h4>" >> "${html_page}"
-        fi
+            # determine full path for image in webpage
+            expected_img="${target_path}${f}"
+            flicker_img="${results_path}${imagename}.gif"
 
-        # determine full path for image in webpage
-        expected_img="${target_path}${f}"
-        flicker_img="${results_path}${imagename}.gif"
-
-        # add images to webpage
-        if [ ${fTestFailed} -eq 1 ]; then
+            # add images to webpage
             echo "<img src='${expected_img}' />" >> "${html_page}"
             echo "<div style='display:inline-block'><img src='${flicker_img}' style='border:1px solid red' /><br /><span style='color:red'>Test failed: images comparison</span></div>" >> "${html_page}"
-        else
-            echo "<img src='${expected_img}' />" >> "${html_page}"
+
         fi
 
     done
@@ -129,7 +125,7 @@ scores_path="${root_path}/test-scores/"
 extra_scores_path="${vregress_path}/scores"
 css_path="${vregress_path}"
 target_path="${vregress_path}/target/"
-outpath="${root_parent_path}/zz_regression"
+outpath="${root_parent_path}/zz_musicxml"
 generated_path="${outpath}/generated/"
 results_path="${outpath}/failures/"
 
@@ -174,7 +170,7 @@ do
 done
 
 
-echo "Lomse library visual regression tests"
+echo "Lomse library regression tests for MusicXML exporter"
 
 FAILURES=0
 SUCCESS=0
@@ -207,17 +203,22 @@ rm * -f
 
 # generate images
 shopt -s nullglob
+if [ 1 -eq 0 ]; then    #===== Commented out =====================
 cd "${scores_path}"
 GenerateImages "0*"
 GenerateImages "5*"
+fi    #===== End of commented out block =====================
+
 cd "${extra_scores_path}/lilypond"
 GenerateImages "*.xml"
+
+if [ 1 -eq 0 ]; then    #===== Commented out =====================
 cd "${extra_scores_path}/recordare"
 GenerateImages "*.musicxml"
 cd "${scores_path}"
 cd "./mnx"
 GenerateImages "*.mnx"
-
+fi    #===== End of commented out block =====================
 
 # trim images
 cd "${generated_path}" || exit $E_BADPATH
@@ -283,14 +284,14 @@ done
 #-------------------------------------------------------------------
 
 #set output page filename
-html_page="${outpath}/regression.htm"
+html_page="${outpath}/musicxml.htm"
 
 #create page from template
 cd "${scripts_path}"
 sed -e "s/\${today}/`date +%Y-%m-%d`/"                  \
     -e "s/\${lomse-version}/${lomse}/"                  \
     -e "s/\${date-time}/`date +%Y-%m-%d_%H:%M:%S`/"     \
-    regression-template.txt > "${html_page}"
+    musicxml-template.txt > "${html_page}"
 
 #add results statistics
 tests="test"
@@ -329,100 +330,58 @@ echo "</ul>" >> "${html_page}"
 echo "<h2>Generated images</h2>" >> "${html_page}"
 echo "<p>For each test, the first image is the expected result. If the test has failed, the test title is displayed in red and an additional flicker image is added. This image flips between the expected one and the generated one, so that any differences are easily spotted.</p>" >> "${html_page}"
 
-echo "<h2>Scores. Basic layout<a name='00000'></a></h2>" >> "${html_page}"
-echo "<h3>Empty scores<a name='0001x'></a></h3>" >> "${html_page}"
+echo "<h2>Failures</h2>" >> "${html_page}"
 AddTargetImagesFor "0001*.jpg"
-echo "<h3>Score prolog<a name='0002x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0002*.jpg"
-echo "<h3>Notes<a name='0003x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0003*.jpg"
 AddTargetImagesFor "0004*.jpg"
-echo "<h3>Accidentals<a name='0005x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0005*.jpg"
-echo "<h3>Rests<a name='0006x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0006*.jpg"
-echo "<h3>Chords<a name='0007x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0007*.jpg"
-echo "<h3>Chords<a name='0008x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0008*.jpg"
-echo "<h3>Spacing non-timed objs.<a name='0009x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0009*.jpg"
-echo "<h3>Clefs<a name='0010x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0010*.jpg"
-echo "<h3>Key signatures<a name='0011x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0011*.jpg"
-echo "<h3>Time signatures<a name='0012x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0012*.jpg"
-echo "<h3>Vertical alignment<a name='0013x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0013*.jpg"
 AddTargetImagesFor "0014*.jpg"
-echo "<h3>Instructions<a name='0018x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0018*.jpg"
-echo "<h3>Barlines / measures<a name='0019x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0019*.jpg"
-echo "<h3>Systems justification<a name='0020x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0020*.jpg"
-echo "<h3>Instruments<a name='0021x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0021*.jpg"
 AddTargetImagesFor "0022*.jpg"
-echo "<h3>Staves spacing<a name='0023x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0023*.jpg"
-echo "<h3>justification/truncation<a name='0024x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0024*.jpg"
 AddTargetImagesFor "0025*.jpg"
-echo "<h3>Spacing algorithm<a name='006xx'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "006*.jpg"
 
-echo "<h2>Relations<a name='01xxx'></a></h2>" >> "${html_page}"
-echo "<h3>Tuplets<a name='0101x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0101*.jpg"
-echo "<h3>Beams<a name='0102x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0102*.jpg"
-echo "<h3>Ties<a name='0103x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0103*.jpg"
-echo "<h3>Slurs<a name='0104x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0104*.jpg"
 
-echo "<h2>Attachments<a name='02xxx'></a></h2>" >> "${html_page}"
-echo "<h3>Lines<a name='0201x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0201*.jpg"
-echo "<h3>Fermatas<a name='0202x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0202*.jpg"
-echo "<h3>Metronome marks<a name='0203x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0203*.jpg"
-echo "<h3>Attached texts<a name='0204x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0204*.jpg"
-#echo "<h3>Text boxes<a name='0205x'></a></h3>" >> "${html_page}"
 #AddTargetImagesFor "0205*.jpg"
-#echo "<h3>Figured bass<a name='0206x'></a></h3>" >> "${html_page}"
 #AddTargetImagesFor "0206*.jpg"
-echo "<h3>Dynamics<a name='0207x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0207*.jpg"
-echo "<h3>Articulations<a name='0208x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0208*.jpg"
-echo "<h3>Lyrics<a name='0209x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0209*.jpg"
 
-echo "<h2>TimeGrid<a name='070xx'></a></h2>" >> "${html_page}"
 AddTargetImagesFor "070*.jpg"
 
-echo "<h2>Other top level objects<a name='080xx'></a></h2>" >> "${html_page}"
-echo "<h3>Paragraphs<a name='0801x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0801*.jpg"
-echo "<h3>Tables<a name='0802x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0802*.jpg"
-echo "<h3>Widgets<a name='0803x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0803*.jpg"
-echo "<h3>Images<a name='0804x'></a></h3>" >> "${html_page}"
 AddTargetImagesFor "0804*.jpg"
 
-echo "<h2>Full documents<a name='090xx'></a></h2>" >> "${html_page}"
 AddTargetImagesFor "090*.jpg"
 
-echo "<h2>MusicXML importer<a name='5xxxx'></a></h2>" >> "${html_page}"
-echo "<h3>Lomse tests<a name='lomse'></a></h2>" >> "${html_page}"
 AddTargetImagesFor "50*.jpg"
-echo "<h3>Lilypond tests<a name='lilypond'></a></h2>" >> "${html_page}"
+
+# Lilypond tests
 AddTargetImagesFor "01a*.jpg"
 AddTargetImagesFor "01b*.jpg"
 AddTargetImagesFor "01c*.jpg"
@@ -448,7 +407,8 @@ AddTargetImagesFor "6*.jpg"
 AddTargetImagesFor "7*.jpg"
 AddTargetImagesFor "8*.jpg"
 AddTargetImagesFor "9*.jpg"
-echo "<h3>Recordare tests<a name='recordare'></a></h2>" >> "${html_page}"
+
+# Recordare tests
 AddTargetImagesFor "A*.jpg"
 AddTargetImagesFor "B*.jpg"
 AddTargetImagesFor "C*.jpg"
@@ -459,7 +419,7 @@ AddTargetImagesFor "M*.jpg"
 AddTargetImagesFor "S*.jpg"
 AddTargetImagesFor "T*.jpg"
 
-echo "<h2>MNX importer<a name='mnx'></a></h2>" >> "${html_page}"
+# MNX importer tests
 AddTargetImagesFor "mnx*.jpg"
 
 
@@ -469,7 +429,7 @@ echo "</html>" >> "${html_page}"
 
 
 #copy the css file
-cp "${css_path}/regression.css" "${outpath}/regression.css"
+cp "${css_path}/musicxml.css" "${outpath}/musicxml.css"
 
 # upload the html page and the folder with the images to the server
 #echo "Uploading results to local server"
@@ -491,6 +451,6 @@ else
 fi
 
 #echo "Results at http://localhost/en/lomse/regression"
-echo "Results at file://${html_path}/regression.htm"
+echo "Results at file://${html_path}/musicxml.htm"
 
 exit $E_SUCCESS
