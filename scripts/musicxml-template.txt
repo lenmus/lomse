@@ -1,0 +1,25 @@
+<html>
+<!-- $Updated: ${today} -->
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Lomse. MusicXML exporter visual regression tests</title>
+<link rel="stylesheet" media="all" href="musicxml.css" type="text/css" />
+</head>
+<body>
+
+
+<div id="main">
+<a name='top'> </a>
+
+<h1>Lomse. MusicXML exporter visual regression tests</h1>
+<!--====================================================-->
+
+<p>Be aware a <b>'test passed' does not mean that the rendered image is correct</b>. It only means
+that the rendered image using the exported MusicXML file is not different from the result obtained
+using the original file or, being different, it has been accepted as correct, by a human reviewer.
+</p>
+<ul>
+<li>Lomse version used: ${lomse-version}</li>
+<li>Test date: ${date-time}</li>
+
