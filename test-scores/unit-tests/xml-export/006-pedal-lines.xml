@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="4.0">
+  <part-list>
+    <score-part id="P1">
+      <part-name/>
+      </score-part>
+    </part-list>
+  <part id="P1">
+   <measure number="1">
+      <attributes>
+         <divisions>8</divisions>
+         <key>
+            <fifths>0</fifths>
+            <mode>major</mode>
+         </key>
+         <time>
+            <beats>6</beats>
+            <beat-type>8</beat-type>
+         </time>
+         <clef>
+            <sign>F</sign>
+            <line>4</line>
+         </clef>
+      </attributes>
+      <direction>
+         <direction-type>
+            <pedal line="yes" type="start"/>
+         </direction-type>
+      </direction>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">begin</beam>
+      </note>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">continue</beam>
+      </note>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">end</beam>
+      </note>
+      <direction>
+         <direction-type>
+            <pedal line="yes" type="change"/>
+         </direction-type>
+      </direction>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">begin</beam>
+      </note>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">continue</beam>
+      </note>
+      <direction>
+         <direction-type>
+            <pedal line="yes" type="discontinue"/>
+         </direction-type>
+         <direction-type>
+            <words default-y="-79" font-size="7.2" font-style="italic">simile</words>
+         </direction-type>
+      </direction>
+      <note>
+         <pitch>
+            <step>D</step>
+            <octave>3</octave>
+         </pitch>
+         <duration>4</duration>
+         <voice>3</voice>
+         <type>eighth</type>
+         <stem>down</stem>
+         <beam number="1">end</beam>
+      </note>
+   </measure>
+    </part>
+  </score-partwise>

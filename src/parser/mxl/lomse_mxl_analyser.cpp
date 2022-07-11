@@ -3762,16 +3762,34 @@ protected:
     void set_shape_type(ImoFermata* pImo)
     {
         //text content (optional) indicates the shape of the
-        //fermata sign and may be normal, angled, or square.
-        //If not present, normal is implied.
+        //fermata sign and may be normal, angled, square, double-angled,
+	    //double-square, double-dot, half-curve, curlew, or an empty
+	    //string. An empty fermata element represents a normal
+	    //fermata.
 
         string shape = m_analysedNode.value();
-        if (shape == "angled")
+        if (shape.empty() || shape == "normal")
+            pImo->set_symbol(ImoFermata::k_normal);
+        else if (shape == "angled")
             pImo->set_symbol(ImoFermata::k_short);
         else if (shape == "square")
             pImo->set_symbol(ImoFermata::k_long);
+        else if (shape == "double-angled")
+            pImo->set_symbol(ImoFermata::k_very_short);
+        else if (shape == "double-square")
+            pImo->set_symbol(ImoFermata::k_very_long);
+        else if (shape == "double-dot")
+            pImo->set_symbol(ImoFermata::k_henze_long);
+        else if (shape == "half-curve")
+            pImo->set_symbol(ImoFermata::k_henze_short);
+        //TODO: curlew fermata is not yet supported in Lomse
+//        else if (shape == "curlew")
+//            pImo->set_symbol(ImoFermata::k_curlew);
         else
+        {
+            error_msg("Fermata '" + shape + "' is not supported. Replaced by 'normal'");
             pImo->set_symbol(ImoFermata::k_normal);
+        }
     }
 
 };
@@ -7005,6 +7023,7 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(200);   //use version 2.0 as <backup> elements have been removed
+        pScore->set_source_format(ImoScore::k_musicxml);
         pScore->add_required_text_styles();
 
         return pScore;
@@ -7225,18 +7244,36 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <staff-details>
-//@ <!ELEMENT staff-details
-//@     (staff-type?, (staff-lines, line-detail*)?, staff-tuning*,
-//@      capo?, staff-size?)>
-//@ <!ATTLIST staff-details
-//@     number         CDATA                #IMPLIED
-//@     show-frets     (numbers | letters)  #IMPLIED
-//@     %print-object;
-//@     %print-spacing;
-//@ >
-//@ <!ELEMENT staff-type (#PCDATA)>
-//@ <!ELEMENT staff-lines (#PCDATA)>
+//@<!ELEMENT staff-details
+//@    (staff-type?, (staff-lines, line-detail*)?, staff-tuning*,
+//@    capo?, staff-size?)>
+//@<!ATTLIST staff-details
+//@    number         CDATA                #IMPLIED
+//@    show-frets     (numbers | letters)  #IMPLIED
+//@    %print-object;
+//@    %print-spacing;
+//@>
+//@<!ELEMENT staff-type (#PCDATA)>
+//@<!ELEMENT staff-lines (#PCDATA)>
 //@
+//@<!ELEMENT line-detail EMPTY>
+//@<!ATTLIST line-detail
+//@    line    CDATA       #REQUIRED
+//@    width   %tenths;    #IMPLIED
+//@    %color;
+//@    %line-type;
+//@    %print-object;
+//@>
+//@<!ELEMENT staff-tuning
+//@	(tuning-step, tuning-alter?, tuning-octave)>
+//@<!ATTLIST staff-tuning
+//@    line CDATA #REQUIRED
+//@>
+//@<!ELEMENT capo (#PCDATA)>
+//@<!ELEMENT staff-size (#PCDATA)>
+//@<!ATTLIST staff-size
+//@    scaling CDATA #IMPLIED
+//@>
 //
 class StaffDetailsMxlAnalyser : public MxlElementAnalyser
 {
@@ -7301,12 +7338,28 @@ public:
 protected:
 
     //-----------------------------------------------------------------------------------
-    void set_staff_type(ImoStaffInfo* UNUSED(pInfo))
+    void set_staff_type(ImoStaffInfo* pInfo)
     {
         //@ <!ELEMENT staff-type (#PCDATA)>
         //@ valid values: ossia, editorial, cue, alternate, or regular
 
-        //TODO: Lomse accepts this but doesn't use it
+        string value = get_child_value_string();
+        if (value == "ossia")
+            pInfo->set_staff_type(ImoStaffInfo::k_staff_ossia);
+        else if (value == "cue")
+            pInfo->set_staff_type(ImoStaffInfo::k_staff_cue);
+        else if (value == "editorial")
+            pInfo->set_staff_type(ImoStaffInfo::k_staff_editorial);
+        else if (value == "alternate")
+            pInfo->set_staff_type(ImoStaffInfo::k_staff_alternate);
+        else if (value == "regular")
+            pInfo->set_staff_type(ImoStaffInfo::k_staff_regular);
+        else
+        {
+            stringstream msg;
+            msg << "Invalid staff type '" << value << "' ignored.";
+            LOMSE_LOG_ERROR(msg.str());
+        }
     }
 
     //-----------------------------------------------------------------------------------

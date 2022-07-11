@@ -102,7 +102,7 @@ public:
     int close_slur_and_get_number(ImoId slurId);
 
     //the main method
-    std::string get_source(ImoObj* pImo);
+    std::string get_source(ImoObj* pImo, ImoObj* pParent=nullptr);
     std::string get_source(AScore score);
 
     //auxiliary
@@ -134,7 +134,7 @@ public:
 
 
 protected:
-    MxlGenerator* new_generator(ImoObj* pImo);
+    MxlGenerator* new_generator(ImoObj* pImo, ImoObj* pParent);
 
 };
 

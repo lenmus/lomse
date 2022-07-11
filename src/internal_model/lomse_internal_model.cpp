@@ -3781,7 +3781,10 @@ void ImoScore::set_staffobjs_table(ColStaffObjs* pColStaffObjs)
 void ImoScore::set_global_scaling(float millimeters, float tenths)
 {
     if (millimeters > 0.0f && tenths > 0.0f)
+    {
         m_scaling = (millimeters * 100.0f) / tenths;
+        m_modified |= k_modified_scaling;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -5200,6 +5203,22 @@ bool ImoStaffInfo::is_line_visible(int iLine) const
         case 4:     return iLine <= 3;
         default:    return true;
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStaffInfo::has_default_values() const
+{
+    return (m_nNumLines == 5
+            && m_staffType == k_staff_regular
+            && m_uSpacing == LOMSE_STAFF_LINE_SPACING
+            && m_uLineThickness == LOMSE_STAFF_LINE_THICKNESS
+            && m_uMarging == LOMSE_STAFF_TOP_MARGIN );
+}
+
+//---------------------------------------------------------------------------------------
+double ImoStaffInfo::get_applied_spacing_factor() const
+{
+    return double(m_uSpacing) / double(LOMSE_STAFF_LINE_SPACING);
 }
 
 

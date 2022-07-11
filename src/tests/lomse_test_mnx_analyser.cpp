@@ -95,6 +95,23 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
+    inline void failure_header()
+    {
+        cout << endl << "*** Failure in " << test_name() << ":" << endl;
+    }
+
+    bool check_errormsg(const stringstream& msg, const stringstream& expected)
+    {
+        if (msg.str() != expected.str())
+        {
+            failure_header();
+            cout << "     msg=[" << msg.str() << "]" << endl;
+            cout << "expected=[" << expected.str() << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
 };
 
 
@@ -132,11 +149,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -214,11 +227,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -315,11 +324,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -416,11 +421,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -503,11 +504,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -565,11 +562,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -631,11 +624,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -695,11 +684,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -734,7 +719,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -765,7 +750,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
 
@@ -799,7 +784,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
 
@@ -842,7 +827,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
 
@@ -909,11 +894,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -999,7 +980,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        if (pDoc)
@@ -1077,7 +1058,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1128,7 +1109,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1179,7 +1160,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1230,7 +1211,7 @@ SUITE(MnxAnalyserTest)
 //////        cout << test_name() << endl;
 //////        cout << "[" << errormsg.str() << "]" << endl;
 //////        cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
+////        CHECK( check_errormsg(errormsg, expected) );
 ////        CHECK( pRoot != nullptr);
 ////        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 ////        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1281,7 +1262,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1332,7 +1313,7 @@ SUITE(MnxAnalyserTest)
 ////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1395,11 +1376,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -1494,11 +1471,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1567,10 +1540,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1660,10 +1630,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1719,11 +1686,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1787,11 +1750,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1843,11 +1802,8 @@ SUITE(MnxAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 //
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( doc.is_dirty() == true );
 //        CHECK( pRoot != nullptr );
 //        CHECK( pRoot && pRoot->is_document() == true );
@@ -1930,11 +1886,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -1967,6 +1919,52 @@ SUITE(MnxAnalyserTest)
 //                pScore->end_of_changes();
 //                cout << test_name() << endl << pScore->to_string_with_ids() << endl;
             }
+        }
+
+        delete pRoot;
+    }
+
+
+    //@ score ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, score_001)
+    {
+        //@001. score. source format is mnx
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<mnx>"
+                "<global><measure>"
+                    "<directions><time signature='4/4'/><repeat type='end'/></directions>"
+                "</measure></global>"
+                "<part><part-name/>"
+                    "<measure>"
+                        "<directions><clef sign='G' line='2'/></directions>"
+                        "<sequence>"
+                            "<event value='/1'><note pitch='G4'/></event>"
+                        "</sequence>"
+                    "</measure>"
+                "</part>"
+            "</mnx>"
+        );
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore && pScore->was_created_from_mnx() );
         }
 
         delete pRoot;
@@ -2010,11 +2008,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -2104,11 +2098,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -2175,9 +2165,7 @@ SUITE(MnxAnalyserTest)
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
 //        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //
 //        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
 //        CHECK( pMusic != nullptr );
@@ -2212,9 +2200,7 @@ SUITE(MnxAnalyserTest)
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
 //        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 //
 //        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
 //        CHECK( pMusic != nullptr );
@@ -2271,11 +2257,7 @@ SUITE(MnxAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( doc.is_dirty() == true );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
