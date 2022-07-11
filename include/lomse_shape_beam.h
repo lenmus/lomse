@@ -49,12 +49,12 @@ public:
     UPoint get_outer_right_reference_point();
 
     //layout
-    inline bool is_cross_staff() { return (m_BeamFlags & k_cross_staff) != 0; }
-    inline bool has_chords() { return (m_BeamFlags & k_has_chords) != 0; }
-    inline bool get_staff() { return m_staff; }
-    inline bool is_beam_below() { return (m_BeamFlags & k_beam_below) != 0; }
-    inline bool is_beam_above() { return (m_BeamFlags & k_beam_above) != 0; }
-    inline bool is_double_stemmed_beam() { return (m_BeamFlags & k_beam_double_stemmed) != 0; }
+    inline bool is_cross_staff() const { return (m_BeamFlags & k_cross_staff) != 0; }
+    inline bool has_chords() const { return (m_BeamFlags & k_has_chords) != 0; }
+    inline int get_staff() const { return m_staff; }
+    inline bool is_beam_below() const { return (m_BeamFlags & k_beam_below) != 0; }
+    inline bool is_beam_above() const { return (m_BeamFlags & k_beam_above) != 0; }
+    inline bool is_double_stemmed_beam() const { return (m_BeamFlags & k_beam_double_stemmed) != 0; }
 
 
 protected:

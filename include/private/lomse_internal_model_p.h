@@ -1596,6 +1596,7 @@ public:
 
     //items
     inline bool is_anonymous_block() { return m_objtype == k_imo_anonymous_block; }
+    inline bool is_arpeggio() { return m_objtype == k_imo_arpeggio; }
     inline bool is_articulation_symbol() { return m_objtype == k_imo_articulation_symbol; }
     inline bool is_articulation_line() { return m_objtype == k_imo_articulation_line; }
     inline bool is_attachments() { return m_objtype == k_imo_attachments; }
@@ -3579,15 +3580,15 @@ public:
 
     //check if contains inherited/default values or a new value has been set
     inline bool only_contains_default_values()  { return m_modified == 0L; }
-    inline bool is_port_modified() { return m_modified & k_modified_port; }
-    inline bool is_name_modified() { return m_modified & k_modified_name; }
-    inline bool is_bank_modified() { return m_modified & k_modified_bank; }
-    inline bool is_channel_modified() { return m_modified & k_modified_channel; }
-    inline bool is_program_modified() { return m_modified & k_modified_program; }
-    inline bool is_unpitched_modified() { return m_modified & k_modified_unpitched; }
-    inline bool is_volume_modified() { return m_modified & k_modified_volume; }
-    inline bool is_pan_modified() { return m_modified & k_modified_pan; }
-    inline bool is_elevation_modified() { return m_modified & k_modified_elevation; }
+    inline bool is_port_modified() { return (m_modified & k_modified_port) != 0; }
+    inline bool is_name_modified() { return (m_modified & k_modified_name) != 0; }
+    inline bool is_bank_modified() { return (m_modified & k_modified_bank) != 0; }
+    inline bool is_channel_modified() { return (m_modified & k_modified_channel) != 0; }
+    inline bool is_program_modified() { return (m_modified & k_modified_program) != 0; }
+    inline bool is_unpitched_modified() { return (m_modified & k_modified_unpitched) != 0; }
+    inline bool is_volume_modified() { return (m_modified & k_modified_volume) != 0; }
+    inline bool is_pan_modified() { return (m_modified & k_modified_pan) != 0; }
+    inline bool is_elevation_modified() { return (m_modified & k_modified_elevation) != 0; }
 
     //setters
     inline void set_score_instr_id(const std::string& value) { m_soundId = value; }
@@ -3779,6 +3780,20 @@ protected:
     USize   m_uPageSize;
     bool    m_fPortrait;
 
+    //to control if variables contain inherited/default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_left_margin_odd =    0x00000001,
+        k_modified_left_margin_even =   0x00000002,
+        k_modified_top_margin_odd =     0x00000004,
+        k_modified_top_margin_even =    0x00000008,
+        k_modified_right_margin_odd =   0x00000010,
+        k_modified_right_margin_even =  0x00000020,
+        k_modified_bottom_margin_odd =  0x00000040,
+        k_modified_bottom_margin_even = 0x00000080,
+        k_modified_page_size =          0x00000100,
+    };
+
     friend class ImFactory;
     friend class ImoDocument;
     friend class ImoScore;
@@ -3786,33 +3801,55 @@ protected:
 
 public:
 
+    //info about modified values (values imported from source file or modified by the user)
+    inline bool is_page_layout_modified() { return m_modified != 0L; }
+    inline bool is_left_margin_odd_modified() { return (m_modified & k_modified_left_margin_odd) != 0; }
+    inline bool is_left_margin_even_modified() { return (m_modified & k_modified_left_margin_even) != 0; }
+    inline bool is_top_margin_odd_modified() { return (m_modified & k_modified_top_margin_odd) != 0; }
+    inline bool is_top_margin_even_modified() { return (m_modified & k_modified_top_margin_even) != 0; }
+    inline bool is_right_margin_odd_modified() { return (m_modified & k_modified_right_margin_odd) != 0; }
+    inline bool is_right_margin_even_modified() { return (m_modified & k_modified_right_margin_even) != 0; }
+    inline bool is_bottom_margin_odd_modified() { return (m_modified & k_modified_bottom_margin_odd) != 0; }
+    inline bool is_bottom_margin_even_modified() { return (m_modified & k_modified_bottom_margin_even) != 0; }
+    inline bool is_page_size_modified() { return (m_modified & k_modified_page_size) != 0; }
+    inline bool are_odd_page_margins_modified() { return (m_modified & k_modified_left_margin_odd) != 0
+                                                         || (m_modified & k_modified_top_margin_odd) != 0
+                                                         || (m_modified & k_modified_right_margin_odd) != 0
+                                                         || (m_modified & k_modified_bottom_margin_odd) != 0; }
+    inline bool are_even_page_margins_modified() { return (m_modified & k_modified_left_margin_even) != 0
+                                                          || (m_modified & k_modified_top_margin_even) != 0
+                                                          || (m_modified & k_modified_right_margin_even) != 0
+                                                          || (m_modified & k_modified_bottom_margin_even) != 0; }
+    inline bool are_page_margins_modified() { return are_odd_page_margins_modified()
+                                                     || are_even_page_margins_modified(); }
+
     //margins, odd pages
     inline LUnits get_left_margin_odd() { return m_uLeftMarginOdd; }
     inline LUnits get_right_margin_odd() { return m_uRightMarginOdd; }
     inline LUnits get_top_margin_odd() { return m_uTopMarginOdd; }
     inline LUnits get_bottom_margin_odd() { return m_uBottomMarginOdd; }
-    inline void set_left_margin_odd(LUnits value) { m_uLeftMarginOdd = value; }
-    inline void set_right_margin_odd(LUnits value) { m_uRightMarginOdd = value; }
-    inline void set_top_margin_odd(LUnits value) { m_uTopMarginOdd = value; }
-    inline void set_bottom_margin_odd(LUnits value) { m_uBottomMarginOdd = value; }
+    inline void set_left_margin_odd(LUnits value) { m_uLeftMarginOdd = value; m_modified |= k_modified_left_margin_odd; }
+    inline void set_right_margin_odd(LUnits value) { m_uRightMarginOdd = value; m_modified |= k_modified_right_margin_odd; }
+    inline void set_top_margin_odd(LUnits value) { m_uTopMarginOdd = value; m_modified |= k_modified_top_margin_odd; }
+    inline void set_bottom_margin_odd(LUnits value) { m_uBottomMarginOdd = value; m_modified |= k_modified_bottom_margin_odd; }
 
     //margins, even pages
     inline LUnits get_left_margin_even() { return m_uLeftMarginEven; }
     inline LUnits get_right_margin_even() { return m_uRightMarginEven; }
     inline LUnits get_top_margin_even() { return m_uTopMarginEven; }
     inline LUnits get_bottom_margin_even() { return m_uBottomMarginEven; }
-    inline void set_left_margin_even(LUnits value) { m_uLeftMarginEven = value; }
-    inline void set_right_margin_even(LUnits value) { m_uRightMarginEven = value; }
-    inline void set_top_margin_even(LUnits value) { m_uTopMarginEven = value; }
-    inline void set_bottom_margin_even(LUnits value) { m_uBottomMarginEven = value; }
+    inline void set_left_margin_even(LUnits value) { m_uLeftMarginEven = value; m_modified |= k_modified_left_margin_even; }
+    inline void set_right_margin_even(LUnits value) { m_uRightMarginEven = value; m_modified |= k_modified_right_margin_even; }
+    inline void set_top_margin_even(LUnits value) { m_uTopMarginEven = value; m_modified |= k_modified_top_margin_even; }
+    inline void set_bottom_margin_even(LUnits value) { m_uBottomMarginEven = value; m_modified |= k_modified_bottom_margin_even; }
 
     //page size
     inline USize get_page_size() { return m_uPageSize; }
     inline LUnits get_page_width() { return m_uPageSize.width; }
     inline LUnits get_page_height() { return m_uPageSize.height; }
-    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
-    inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
-    inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
+    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; m_modified |= k_modified_page_size; }
+    inline void set_page_width(LUnits value) { m_uPageSize.width = value; m_modified |= k_modified_page_size; }
+    inline void set_page_height(LUnits value) { m_uPageSize.height = value; m_modified |= k_modified_page_size; }
 
     //page orientation
     inline bool is_portrait() { return m_fPortrait; }
@@ -4456,7 +4493,7 @@ public:
     ImoFermata& operator= (ImoFermata&&) = delete;
 
     enum { k_normal, k_short, k_long, k_henze_short, k_henze_long,
-           k_very_short, k_very_long,
+           k_very_short, k_very_long, k_curlew,
          };
 
     //getters
@@ -6107,11 +6144,27 @@ protected:
     LUnits   m_systemDistance;
     LUnits   m_topSystemDistance;
 
+    //to control if variables contain inherited/default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_left_margin =    0x00000001,
+        k_modified_right_margin =   0x00000002,
+        k_modified_distance =       0x00000004,
+        k_modified_top_distance =   0x00000008,
+    };
+
     friend class ImFactory;
     friend class ImoScore;
     ImoSystemInfo();
 
 public:
+
+    //info about values modified (values imported from source file or modified by the user)
+    inline bool is_system_layout_modified() { return m_modified != 0L; }
+    inline bool is_left_margin_modified() { return (m_modified & k_modified_left_margin) != 0; }
+    inline bool is_right_margin_modified() { return (m_modified & k_modified_right_margin) != 0; }
+    inline bool is_system_distance_modified() { return (m_modified & k_modified_distance) != 0; }
+    inline bool is_top_system_distance_modified() { return (m_modified & k_modified_top_distance) != 0; }
 
     //getters
     inline bool is_first() { return m_fFirst; }
@@ -6122,17 +6175,18 @@ public:
 
     //setters
     inline void set_first(bool fValue) { m_fFirst = fValue; }
-    inline void set_left_margin(LUnits rValue) { m_leftMargin = rValue; }
-    inline void set_right_margin(LUnits rValue) { m_rightMargin = rValue; }
-    inline void set_system_distance(LUnits rValue) { m_systemDistance = rValue; }
-    inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; }
+    inline void set_left_margin(LUnits rValue) { m_leftMargin = rValue; m_modified |= k_modified_left_margin; }
+    inline void set_right_margin(LUnits rValue) { m_rightMargin = rValue; m_modified |= k_modified_right_margin; }
+    inline void set_system_distance(LUnits rValue) { m_systemDistance = rValue; m_modified |= k_modified_distance; }
+    inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; m_modified |= k_modified_top_distance; }
 };
 
 //---------------------------------------------------------------------------------------
 class ImoScore : public ImoBlockLevelObj      //ImoBlocksContainer
 {
 protected:
-    int m_version = 0;                      //LDP source file version
+    int m_version = 0;          //LDP source file version
+    int m_sourceFormat = 0;     //original source file format ; value from  enum
     int m_accidentalsModel = k_only_notation_provided;  //how pitch//accidentals are initialized
     ColStaffObjs* m_pColStaffObjs = nullptr;
     SoundEventsTable* m_pMidiTable = nullptr;
@@ -6142,6 +6196,12 @@ protected:
     std::list<ImoScoreTitle*> m_titles;     //titles are added as children nodes. This list is
                                             //  kept for quick access. Do not delete in destructor.
     std::map<string, ImoStyle*> m_nameToStyle;
+
+    //to control if variables contain inherited/default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_scaling =    0x00000001,     //global scaling has been modified
+    };
 
     friend class ImFactory;
     ImoScore(Document* pDoc);
@@ -6167,16 +6227,29 @@ public:
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     void set_global_scaling(float millimeters, float tenths);
     inline void set_accidentals_model(int value) { m_accidentalsModel = value; }
+    inline void set_source_format(int format) { m_sourceFormat = format; }
+
+    enum { k_empty=0, k_ldp, k_musicxml, k_mnx, };
 
     //getters and info
     std::string get_version_string();
-    inline int get_version_major() { return m_version/100; }
-    inline int get_version_minor() { return m_version % 100; }
-    inline int get_version_number() { return m_version; }
-    inline int get_accidentals_model() { return m_accidentalsModel; }
-    inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
+    inline int get_version_major() const { return m_version/100; }
+    inline int get_version_minor() const { return m_version % 100; }
+    inline int get_version_number() const { return m_version; }
+    inline int get_accidentals_model() const { return m_accidentalsModel; }
+    inline ColStaffObjs* get_staffobjs_table() const { return m_pColStaffObjs; }
     SoundEventsTable* get_midi_table();
-    inline LUnits tenths_to_logical(Tenths value) { return m_scaling * value; }
+    inline bool was_created_from_musicxml() const { return m_sourceFormat == k_musicxml; }
+    inline bool was_created_from_ldp() const { return m_sourceFormat == k_ldp; }
+    inline bool was_created_from_mnx() const { return m_sourceFormat == k_mnx; }
+    inline bool was_created_from_scratch() const { return m_sourceFormat == k_empty; }
+
+    //scaling
+    inline LUnits tenths_to_logical(Tenths value) const { return value * m_scaling; }
+    inline Tenths logical_to_tenths(LUnits value) const { return value / m_scaling; }
+    inline float get_global_scaling() const { return m_scaling; }
+    inline bool is_global_scaling_modified() { return (m_modified & k_modified_scaling) != 0; }
+
 
     //required by Visitable parent class
     void accept_visitor(BaseVisitor& v) override;
@@ -6431,6 +6504,7 @@ protected:
     bool m_fTablature = false;      //This staff is for tablature notation
     double m_notationScaling = 1.0;
 
+
     friend class ImFactory;
     friend class ImoInstrument;
     ImoStaffInfo(int numStaff=0, int lines=5, int type=k_staff_regular,
@@ -6453,11 +6527,16 @@ public:
            k_staff_alternate,
          };
 
+
+    bool has_default_values() const;
+    bool is_staff_size_modified() const { return m_uSpacing != LOMSE_STAFF_LINE_SPACING; }
+
     //staff number
     inline int get_staff_number() const { return m_numStaff; }
     inline void set_staff_number(int num) { m_numStaff = num; }
 
     //staff type
+    //TODO: Lomse accepts this but doesn't use it. Only for MusicXML import/export
     inline int get_staff_type() const { return m_staffType; }
     inline void set_staff_type(int type) { m_staffType = type; }
 
@@ -6469,6 +6548,7 @@ public:
     inline LUnits get_line_spacing() const { return m_uSpacing; }
     inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
     LUnits get_height() const;
+    double get_applied_spacing_factor() const;
 
     //scaling
     inline double get_notation_scaling() const { return m_notationScaling; }

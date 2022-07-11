@@ -4832,6 +4832,8 @@ protected:
         {
             //vers. 1.5, 1.6, 1.7, 2.0. Default values are ok
         }
+
+        pScore->set_source_format(ImoScore::k_ldp);
     }
 
 };

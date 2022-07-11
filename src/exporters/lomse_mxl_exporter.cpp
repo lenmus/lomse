@@ -36,7 +36,10 @@ struct BarlineData
 {
     int times = 0;
     int winged = k_wings_none;
-    bool fForward = true;
+    bool fRepeat = false;
+    bool fEnding = false;
+    ImoVoltaBracket* pVoltaBracket = nullptr;   //start volta for left, or end volta for right
+    ImoBarline* pVoltaParent = nullptr;
     string style;
     string location;
 };
@@ -79,7 +82,7 @@ protected:
     void new_line();
     void start_element_if_not_started(const std::string& tag);
     void end_element_if_started(const std::string& tag);
-    void add_source_for(ImoObj* pImo);
+    void add_source_for(ImoObj* pImo, ImoObj* pParent=nullptr);
     void increment_indent();
     void decrement_indent();
 
@@ -90,10 +93,14 @@ protected:
     //generators for common attributes
     void add_attributes_for_print_style_align(ImoObj* pImo);
     void add_attributes_for_print_style(ImoObj* pImo);
+    void add_attributes_for_printout(ImoObj* pImo);
     void add_attributes_for_position(ImoObj* pObj);
+    void add_attibutes_for_text_formatting(ImoObj* pObj);
     void add_attributes_for_font(ImoObj* pObj);
     void add_attribute_color(ImoObj* pImo);
     void add_attribute_print_object(ImoObj* pObj);
+    void add_attribute_optional_unique_id(ImoObj* pObj);
+
 
 };
 
@@ -106,6 +113,54 @@ const int k_indent_step = 3;
 //=======================================================================================
 
 //---------------------------------------------------------------------------------------
+class ArpeggioMxlGenerator : public MxlGenerator
+{
+protected:
+    ImoArpeggio* m_pImo;
+    ImoNote* m_pNote;
+
+public:
+    ArpeggioMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pImo( static_cast<ImoArpeggio*>(pImo) )
+        , m_pNote( static_cast<ImoNote*>(pParent) )
+    {
+    }
+
+    string generate_source() override
+    {
+//        if (m_pNote == m_pImo->get_start_object())
+//        {
+            start_element_if_not_started("notations");
+            start_element("arpeggiate");
+
+            //TODO
+            //attrib: number %number-level; #IMPLIED
+
+            //attrib: direction
+            if (m_pImo->get_type() != k_arpeggio_standard)
+                add_attribute("direction", m_pImo->get_type() == k_arpeggio_arrow_up ? "up" : "down") ;
+
+            //attrib: unbroken %yes-no; #IMPLIED
+
+            add_attributes_for_position(m_pImo);
+            //%placement;
+            //%color;
+            add_attribute_optional_unique_id(m_pImo);
+
+            end_element(false, false);  //arpeggiate
+//        }
+//        else if (m_pNote == m_pImo->get_end_object())
+//        {
+//            start_element_if_not_started("notations");
+//            empty_element("arpeggiate");
+//        }
+        return m_source.str();
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class BarlineMxlGenerator : public MxlGenerator
 {
 protected:
@@ -114,27 +169,30 @@ protected:
     BarlineData  m_left;        //data for left barline in next measure
 
 public:
-    BarlineMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    BarlineMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoBarline*>(pImo);
     }
 
     string generate_source() override
     {
-        m_right.style = determine_right_barline_style(m_pObj->get_type());
-        m_right.times = m_pObj->get_num_repeats();
-        m_right.fForward = false;
-        m_right.winged = m_pObj->get_winged();
-        m_right.location = m_pObj->is_middle() ? "middle" : "right";
+        //When an ImoBarline is processed it must be split into data for that barline
+        //(right data) and data for a possible barline at start of next measure (left data)
 
+        split_barline();
+        determine_volta_brackets();
         generate_source_for_barline(m_right);
-        prepare_left_barline();
+        save_data_for_left_barline();
 
         return m_source.str();
     }
 
     string generate_left_barline()
     {
+        //When starting a measure this method is invoked to add, if necessary, a left
+        //barline
+
         BarlineData data = m_pExporter->get_data_for_left_barline();
         m_pExporter->clear_data_for_left_barline();
         return generate_source_for_barline(data);
@@ -144,12 +202,84 @@ public:
 protected:
 
     //-----------------------------------------------------------------------------------
+    void split_barline()
+    {
+        m_left.fRepeat = false;
+        m_left.times = 0;
+        m_left.location = "left";
+
+        m_right.fRepeat = false;
+        m_right.times = m_pObj->get_num_repeats();
+        m_right.location = m_pObj->is_middle() ? "middle" : "right";
+        m_right.winged = m_pObj->get_winged();
+
+        if (!m_pObj->is_visible())
+        {
+            m_right.style = "none";
+            return;
+        }
+
+        switch (m_pObj->get_type())
+        {
+            case k_barline_simple:
+                m_right.style = "";
+                return;
+
+            case k_barline_none:
+                m_right.style = "none";
+                return;
+
+            case k_barline_double:
+                m_right.style = "light-light";
+                return;
+
+            case k_barline_end:
+                m_right.style = "light-heavy";
+                return;
+
+//            case k_barline_start:
+            case k_barline_start_repetition:
+                m_right.style = "";
+                m_left.style = "heavy-light";
+                m_left.fRepeat = true;
+                m_left.location = "left";
+                //TODO: in current IM times is only save on end of repetition barline.
+                //Need to find next barline to get this information !
+                m_left.times = 1;
+                m_left.winged = m_right.winged;
+                return;
+
+            case k_barline_end_repetition:
+                m_right.fRepeat = true;
+                m_right.style = "light-heavy";
+                return;
+
+            case k_barline_double_repetition:
+            case k_barline_double_repetition_alt:
+                m_right.style = "light-heavy";
+                m_right.fRepeat = true;
+                m_left.style = "heavy-light";
+                m_left.fRepeat = true;
+                m_left.location = "left";
+                //TODO: in current IM times is only save on end of repetition barline.
+                //Need to find next barline to get this information !
+                m_left.times = 1;
+                m_left.winged = m_right.winged;
+                return;
+
+            default:
+                m_right.style = "";
+                return;
+        }
+//                return "dashed";
+//                return "dotted";
+//                return "heavy";
+    }
+
+    //-----------------------------------------------------------------------------------
     string generate_source_for_barline(const BarlineData& data)
     {
-        //@ <!ELEMENT barline (bar-style?, %editorial;, wavy-line?,
-        //@     segno?, coda?, (fermata, fermata?)?, ending?, repeat?)>
-
-        if (data.style.empty())
+        if (data.style.empty() && data.times == 0 && data.pVoltaBracket == nullptr)
             return "";
 
         start_element("barline", m_pObj);
@@ -157,21 +287,21 @@ protected:
         close_start_tag();
 
         //bar-style?
-        create_element("bar-style", data.style);
+        if (!data.style.empty())
+            create_element("bar-style", data.style);
 
-        if (data.style != "none")
-        {
-            //TODO
-            //%editorial;
-            //wavy-line?,
-            //segno?
-            //coda?
-            //(fermata, fermata?)?
-            //ending?
+        //TODO: Not yet imported children
+        //%editorial;
+        //wavy-line?,
+        //segno?
+        //coda?
+        //(fermata, fermata?)?
 
-            //repeat?
-            add_repeat(data.fForward, data.winged, data.times);
-        }
+        //ending
+        add_ending(data);
+
+        //repeat
+        add_repeat(data);
 
         end_element();  //barline
 
@@ -181,93 +311,68 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_attributes(const BarlineData& data)
     {
-        //location (right | left | middle) "right"
+        //attrib: location
         if (data.location != "right")
             add_attribute("location", data.location);
 
         //TODO
-        //segno CDATA #IMPLIED
-        //coda CDATA #IMPLIED
-        //divisions CDATA #IMPLIED
+        //attrib: segno CDATA #IMPLIED      <-- Not yet imported
+        //attrib: coda CDATA #IMPLIED       <-- Not yet imported
+        //attrib: divisions CDATA #IMPLIED  <-- Not yet imported
     }
 
     //-----------------------------------------------------------------------------------
-    string determine_right_barline_style(int type)
+    void determine_volta_brackets()
     {
-        if (!m_pObj->is_visible())
-                return "none";
-
-        switch (type)
+        if (m_pObj->get_num_relations() > 0)
         {
-            case k_barline_simple:
-                return "";
-            case k_barline_none:
-                return "none";
-            case k_barline_double:
-                return "light-light";
-            case k_barline_end:
-                return "light-heavy";
-//            case k_barline_start:
-            case k_barline_start_repetition:
-                m_left.style = "heavy-light";
-                m_left.fForward = true;
-                m_left.location = "left";
-                //TODO: in current IM times is only on right barline, end_repetion / double_repetition
-                m_left.times = 1;
-                m_left.winged = m_right.winged;
-                return "";
-            case k_barline_end_repetition:
-                return "light-heavy";
-            case k_barline_double_repetition:
-            case k_barline_double_repetition_alt:
-                m_left.style = "heavy-light";
-                m_left.fForward = true;
-                m_left.location = "left";
-                //TODO: in current IM times is only on right barline, end_repetion / double_repetition
-                m_left.times = 1;
-                m_left.winged = m_right.winged;
-                return "light-heavy";
-            default:
-                return "";
+            ImoRelations* pRelObjs = m_pObj->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                if (pRO->is_volta_bracket() )
+                {
+                    ImoVoltaBracket* pVolta = static_cast<ImoVoltaBracket*>(pRO);
+                    if (pVolta->get_start_barline() == m_pObj)
+                    {
+                        m_left.pVoltaBracket = pVolta;
+                        m_left.pVoltaParent = m_pObj;
+                    }
+                    else
+                    {
+                        m_right.pVoltaBracket = pVolta;
+                        m_right.pVoltaParent = m_pObj;
+                    }
+                }
+            }
         }
-//                return "dashed";
-//                return "dotted";
-//                return "heavy";
     }
 
     //-----------------------------------------------------------------------------------
-    void prepare_left_barline()
+    void save_data_for_left_barline()
     {
-        if (m_left.style.empty())
-            return;
-
         m_pExporter->save_data_for_left_barline(m_left);
     }
 
     //-----------------------------------------------------------------------------------
-    void add_repeat(bool fForward, int winged, int times)
+    void add_repeat(const BarlineData& data)
     {
-        //@ <repeat>
-        //@ <!ELEMENT repeat EMPTY>
-        //@ <!ATTLIST repeat
-        //@     direction (backward | forward) #REQUIRED
-        //@     times CDATA #IMPLIED
-        //@     winged (none | straight | curved |
-        //@         double-straight | double-curved) #IMPLIED
-        //@ >
-
-        if (times == 0)
+        if (!data.fRepeat)
             return;
 
         start_element("repeat");
 
-        add_attribute("direction", fForward ? "forward" : "backward");
+        //attrib: direction
+        add_attribute("direction", data.location == "left" ? "forward" : "backward");
 
-        if (times > 1)
-            add_attribute("times", times);
+        //attrib: times
+        if (data.times > 1)
+            add_attribute("times", data.times);
 
+        //attrib: winged
         string w;
-        switch(winged)
+        switch(data.winged)
         {
             case k_wings_none:              w="none";               break;
             case k_wings_straight:          w="straight";           break;
@@ -275,10 +380,17 @@ protected:
             case k_wings_double_straight:   w="double-straight";    break;
             case k_wings_double_curved:     w="double-curved";      break;
         }
-        if (winged != k_wings_none)
+        if (data.winged != k_wings_none)
             add_attribute("winged", w);
 
         end_element(false, false);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_ending(const BarlineData& data)
+    {
+        if (data.pVoltaBracket)
+            add_source_for(data.pVoltaBracket, data.pVoltaParent);
     }
 
 };
@@ -292,7 +404,7 @@ protected:
     ImoBeam* m_pBeam;
 
 public:
-    BeamMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    BeamMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pNR = static_cast<ImoNoteRest*>(pImo);
@@ -345,9 +457,9 @@ protected:
         //    repeater %yes-no; #IMPLIED
         //    fan (accel | rit | none) #IMPLIED
         //    %color;
-        //    %optional-unique-id;
-        //>
+        add_attribute_optional_unique_id(m_pBeam);
         close_start_tag();
+
         m_source << value;
         end_element(k_in_same_line);
     }
@@ -362,7 +474,8 @@ protected:
     ImoClef* m_pObj;
 
 public:
-    ClefMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    ClefMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoClef*>(pImo);
     }
@@ -433,7 +546,8 @@ protected:
     ImoStyle* m_pObj;
 
 public:
-    DefineStyleMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    DefineStyleMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStyle*>(pImo);
     }
@@ -726,41 +840,48 @@ protected:
     ImoDirection* m_pObj;
 
 public:
-    DirectionMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    DirectionMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoDirection*>(pImo);
     }
 
     string generate_source() override
     {
-        //<!ELEMENT direction (direction-type+, offset?,
-        //    %editorial-voice;, staff?, sound?)>
-        //<!ATTLIST direction
-        //    %placement;
-        //    %directive;
-        //>
 
         if (!is_empty_direction())
         {
             end_element_if_started("attributes");
+
+            //attrib: %placement;
+            bool fHasAttributes = false;
             if (m_pObj->get_placement() != k_placement_default)
             {
                 start_element("direction", m_pObj);
                 add_attribute("placement", m_pObj->get_placement() == k_placement_above ?
                                            "above" : "below");
-                close_start_tag();
+                fHasAttributes = true;
             }
-            else
-            {
-                start_element_no_attribs("direction", m_pObj);
-            }
-            add_direction_type();
 
-            //TODO
-            // offset?
-            // %editorial-voice;
-            // staff
-            // sound
+            //TODO attrib: %directive;
+//            if (m_pObj->???????????)
+//            {
+//                start_element_if_not_started("direction");
+//                add_attribute("", "");
+//                fHasAttributes = true;
+//            }
+
+            if (fHasAttributes)
+                close_start_tag();
+            else
+                start_element_no_attribs("direction", m_pObj);
+
+            //content
+            add_direction_type();
+            add_offset();
+            add_editorial_voice();
+            add_staff_number();
+            add_sound();
 
             end_element();
         }
@@ -778,7 +899,8 @@ protected:
                                     m_pObj->get_child_of_type(k_imo_sound_change) );
         return ((pAuxObjs == nullptr || (pAuxObjs && pAuxObjs->get_num_items() == 0))
                 && pSound == nullptr
-                && m_pObj->get_num_relations() == 0);
+                && m_pObj->get_num_relations() == 0
+                && m_pObj->get_noterest_for_transferred_dynamics() == nullptr);
     }
 
     //-----------------------------------------------------------------------------------
@@ -788,7 +910,6 @@ protected:
         add_transferred_dynamics();
         add_auxobj_directions();
         add_relobj_directions();
-        add_sound();
     }
 
     //-----------------------------------------------------------------------------------
@@ -833,7 +954,7 @@ protected:
     void add_coda_segno(ImoSymbolRepetitionMark* pImo)
     {
 //    %print-style-align;
-//    %optional-unique-id;
+//    add_attribute_optional_unique_id(pImo);
 //    %smufl;
             start_element_no_attribs("direction-type");
         if (pImo->get_symbol() == ImoSymbolRepetitionMark::k_coda)
@@ -847,14 +968,11 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_words(ImoScoreText* pImo)
     {
-        //<!ELEMENT words (#PCDATA)>
-        //<!ATTLIST words
-        //    %text-formatting;
-        //>
-
         start_element_no_attribs("direction-type");
 
-        start_element_no_attribs("words", pImo);
+        start_element("words", pImo);
+        add_attibutes_for_text_formatting(pImo);
+        close_start_tag();
         m_source << pImo->get_text();
         end_element(k_in_same_line);
 
@@ -871,7 +989,7 @@ protected:
 //    %placement;
 //    %text-decoration;
 //    %enclosure;
-//    %optional-unique-id;
+//    add_attribute_optional_unique_id(pImo);
 //>
         start_element_no_attribs("dynamics", pImo);
         m_source << "<" << pImo->get_mark_type() << "/>";
@@ -888,7 +1006,7 @@ protected:
 //    %print-object;
 //    %justify;
 //    parentheses %yes-no; #IMPLIED
-//    %optional-unique-id;
+//    add_attribute_optional_unique_id(pImo);
 //>
         start_element_no_attribs("direction-type");
         start_element_no_attribs("metronome");
@@ -932,7 +1050,7 @@ protected:
         //    sign %yes-no; #IMPLIED
         //    abbreviated %yes-no; #IMPLIED
         //    %print-style-align;
-        //    %optional-unique-id;
+        //    add_attribute_optional_unique_id(pMark);
         //>
 
         //look for a ImoPedalMark
@@ -1070,11 +1188,34 @@ protected:
         //    %dashed-formatting;
         add_attributes_for_position(pImo);
         //    %color;
-        //    %optional-unique-id;
+        add_attribute_optional_unique_id(pImo);
 
         end_element(false, false);    //wedge
 
         end_element();  //direction-type
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_offset()
+    {
+        //TODO   Not yet imported
+        // offset?
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_editorial_voice()
+    {
+        //TODO   Not yet imported
+        // %editorial-voice; = (footnote?, level?, voice?)
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_staff_number()
+    {
+        ImoInstrument* pInstr = m_pExporter->get_current_instrument();
+        //AWARE in some unit test instrument does not exist
+        if (pInstr && pInstr->get_num_staves() > 1)
+            create_element("staff", m_pObj->get_staff() + 1);
     }
 
     //-----------------------------------------------------------------------------------
@@ -1096,7 +1237,7 @@ protected:
     ImoObj* m_pImo;
 
 public:
-    ErrorMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    ErrorMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo(pImo)
     {
@@ -1123,7 +1264,7 @@ protected:
     ImoFermata* m_pImo;
 
 public:
-    FermataMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    FermataMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo(static_cast<ImoFermata*>(pImo))
     {
@@ -1132,9 +1273,39 @@ public:
     string generate_source() override
     {
         start_element("fermata");
+
+        //attrib: type
         if (m_pImo->get_placement() == k_placement_below)
             add_attribute("type", "inverted");
-        end_element(false, false);
+        else if (m_pImo->get_placement() == k_placement_above)
+            add_attribute("type", "upright");
+
+        if (m_pImo->get_symbol() == ImoFermata::k_normal)
+            end_element(false, false);
+        else
+        {
+            close_start_tag();
+
+            switch (m_pImo->get_symbol())
+            {
+                case ImoFermata::k_short:       m_source << "angled";           break;
+                case  ImoFermata::k_long:       m_source << "square";           break;
+                case ImoFermata::k_very_short:  m_source << "double-angled";    break;
+                case ImoFermata::k_very_long:   m_source << "double-square";    break;
+                case ImoFermata::k_henze_long:  m_source << "double-dot";       break;
+                case ImoFermata::k_henze_short: m_source << "half-curve";       break;
+                case ImoFermata::k_curlew:      m_source << "curlew";           break;
+                default:
+                {
+                    stringstream msg;
+                    msg << "Fermata symbol " << m_pImo->get_symbol()
+                        << " is not supported. Program maintenance error?";
+                    LOMSE_LOG_ERROR(msg.str());
+                    m_source << "normal";
+                }
+            }
+            end_element(k_in_same_line);
+        }
         return m_source.str();
     }
 };
@@ -1147,7 +1318,8 @@ protected:
     ImoInstrument* m_pObj;
 
 public:
-    InstrumentMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    InstrumentMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoInstrument*>(pImo);
         m_pExporter->set_current_instrument(m_pObj);
@@ -1188,6 +1360,13 @@ public:
     {
     }
 
+    KeySignatureMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pObj(static_cast<ImoKeySignature*>(pImo))
+        , m_fExportNumber(false)
+    {
+    }
+
     string generate_source() override
     {
         start_element_if_not_started("attributes");
@@ -1197,8 +1376,7 @@ public:
             add_staff_number();
         add_attributes_for_print_style(m_pObj);
         add_attribute_print_object(m_pObj);
-        //TODO
-        //attrb: %optional-unique-id;
+        add_attribute_optional_unique_id(m_pObj);
         close_start_tag();
 
         add_content();
@@ -1259,6 +1437,17 @@ protected:
                                    MxlExporter::accidentals_to_mxl_name(acc.accidental));
                 }
             }
+            for (size_t i=0; i < 7; ++i)
+            {
+                if (m_pObj->get_octave(i) != -1)
+                {
+                    start_element("key-octave");
+                    add_attribute("number", int(i+1));
+                    close_start_tag();
+                    m_source << m_pObj->get_octave(i);
+                    end_element(k_in_same_line);
+                }
+            }
         }
     }
 
@@ -1272,7 +1461,8 @@ protected:
     ImoDocument* m_pObj;
 
 public:
-    LenmusdocMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    LenmusdocMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoDocument*>(pImo);
     }
@@ -1333,8 +1523,7 @@ public:
         //    %color;
         //    %print-object;
         //    %time-only;
-        //    %optional-unique-id;
-        //>
+        add_attribute_optional_unique_id(m_pObj);
 
         int numSyllables = m_pObj->get_num_text_items();
         for (int i=0; i < numSyllables; ++i)
@@ -1430,7 +1619,7 @@ protected:
     ImoMidiInfo* m_pImo;
 
 public:
-    MidiInfoMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    MidiInfoMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoMidiInfo*>(pImo))
     {
@@ -1498,6 +1687,13 @@ public:
     {
     }
 
+    TimeSignatureMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pObj(static_cast<ImoTimeSignature*>(pImo))
+        , m_fExportNumber(false)
+    {
+    }
+
     string generate_source() override
     {
         start_element_if_not_started("attributes");
@@ -1509,7 +1705,7 @@ public:
         //TODO  attrb: %time-separator;
         add_attributes_for_print_style_align(m_pObj);
         add_attribute_print_object(m_pObj);
-        //TODO  attrb: %optional-unique-id;
+        add_attribute_optional_unique_id(m_pObj);
         close_start_tag();
 
         add_beats_type();
@@ -1571,7 +1767,8 @@ protected:
     ImoScore* m_pScore;
 
 public:
-    MusicDataMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    MusicDataMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoMusicData*>(pImo);
         m_pScore = m_pExporter->get_current_score();
@@ -1579,7 +1776,7 @@ public:
 
     string generate_source() override
     {
-        add_staffobjs();
+        add_measures();
         return m_source.str();
     }
 
@@ -1587,16 +1784,16 @@ protected:
 
     int m_curMeasure;
     int m_iInstr;
-    vector<int> m_lines;
+    list<int> m_lines;
     ColStaffObjs* m_pColStaffObjs;
-    ColStaffObjsIterator m_itStartOfMeasure;
-    ColStaffObjsIterator m_itEndOfMeasure;
+    ColStaffObjsIterator m_itStartOfMeasure;    //first object or current position
+    ColStaffObjsIterator m_itEndOfMeasure;      //barline for instr,measure or end pos.
+    ColStaffObjsIterator m_itStartOfNextMeasure;    //could be before m_itEndOfMeasure as
+                                                    //ColStaffObjs is not ordered by measure
     bool m_fDivisionsAdded = false;
 
-    const int k_max_num_lines = 16;
-
     //-----------------------------------------------------------------------------------
-    void add_staffobjs()
+    void add_measures()
     {
         ImoInstrument* pInstr = m_pExporter->get_current_instrument();
         m_iInstr = m_pScore->get_instr_number_for(pInstr);
@@ -1605,25 +1802,180 @@ protected:
         if (m_pColStaffObjs->num_entries() < 1)
             return;
 
-        m_lines.reserve(k_max_num_lines);
-        ColStaffObjsIterator it = m_pColStaffObjs->begin();
-        m_curMeasure = (*it)->measure();
+        m_itStartOfNextMeasure = m_pColStaffObjs->begin();
+        advance_to_right_instrument();
+
+        ColStaffObjsIterator it = m_itStartOfMeasure;
         while (it != m_pColStaffObjs->end())
         {
-            m_itStartOfMeasure = it;
-            determine_how_many_lines_in_current_measure();
-            add_measure_element(m_curMeasure+1);
-            add_attributes_at_start_of_measure();
-            add_source_for_this_measure();
-            add_source_for_barline();
-            it = m_itEndOfMeasure;
-            end_element();  //measure
+///*DBG*/            cout << endl << "measure start: " << (*it)->imo_object()->get_id() <<endl;
+            add_measure();
+
+            find_start_of_next_measure();
+            it = m_itStartOfMeasure;
+///*DBG*/     cout << "measure ended: ";
+//            if (m_itStartOfMeasure != m_pColStaffObjs->end())
+//                cout << "next measure starts at " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
+//            else
+//                cout << "end of score" << endl;
         }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_measure()
+    {
+        //measure starts at m_itStartOfMeasure
+
+///*DBG*/            cout << endl << "measure start: " << (*it)->imo_object()->get_id() <<endl;
+//        cout << "    add_measure(). m_curMeasure = " << m_curMeasure
+//            << ", m_iInstr = " << m_iInstr << endl;
+        count_lines_in_measure();
+
+        start_measure_element();
+
+        add_attributes_at_start_of_measure();
+        add_source_for_this_measure();
+        add_source_for_barline();
+
+        end_element();  //measure
+    }
+
+    //-----------------------------------------------------------------------------------
+    void count_lines_in_measure()
+    {
+        //measure starts at m_itStartOfMeasure. Identify existing lines in this measure
+        //and locate end of measure (its barline). While traversing, identify first
+        //object for next measure, if exist
+
+        m_lines.clear();
+        ColStaffObjsIterator it = m_itStartOfMeasure;
+        if (it != m_pColStaffObjs->end())
+        {
+///*DBG*/     cout << "    count_lines_in_measure(). start: " << (*it)->imo_object()->get_id() <<endl;
+            while (it != m_pColStaffObjs->end())
+            {
+                if ((*it)->measure() == m_curMeasure)
+                {
+                    if (!(*it)->imo_object()->is_barline())
+                    {
+                        if ((*it)->num_instrument() == m_iInstr)
+                            m_lines.push_back( (*it)->line() );
+                    }
+                    else /* barline for this measure */
+                    {
+                        if ((*it)->num_instrument() == m_iInstr)
+                            break;
+                    }
+                }
+                else if (m_itStartOfNextMeasure == m_pColStaffObjs->end()
+                         && (*it)->measure() > m_curMeasure)
+                {
+///*DBG*/                cout << "    count_lines_in_measure(). StartOfNextMeasure is empty. Assigning: " << (*it)->imo_object()->get_id() <<endl;
+                    m_itStartOfNextMeasure = it;
+                }
+
+                ++it;
+            }
+            m_lines.sort();
+            m_lines.unique();
+        }
+
+        m_itEndOfMeasure = it;
+///*DBG*/        if (it != m_pColStaffObjs->end())
+//            cout << "    count_lines_in_measure(). end for this measure: " << (*it)->imo_object()->get_id() <<endl;
+//        else
+//            cout << "    count_lines_in_measure(). end for this measure is end of StaffObjsCol." << endl;
+
+        //if start of next measure not set, use end of this measure as next start point
+        if (m_itStartOfNextMeasure == m_pColStaffObjs->end())
+        {
+///*DBG*/            cout << "    count_lines_in_measure(). StartOfNextMeasure is empty. Assigning end of previous." <<endl;
+            m_itStartOfNextMeasure = m_itEndOfMeasure;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_this_measure()
+    {
+        bool fFirstLine = true;
+        for (auto i : m_lines)
+        {
+            if (!fFirstLine)
+                add_backup();
+            add_source_for_line(i);
+            fFirstLine = false;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_barline()
+    {
+        ColStaffObjsIterator it = m_itEndOfMeasure;
+        if (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline()
+            && (*it)->num_instrument() == m_iInstr && (*it)->measure() == m_curMeasure)
+        {
+            add_source_for((*it)->imo_object());
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void find_start_of_next_measure()
+    {
+        //measure is finished and m_itStartOfNextMeasure points to end barline or to
+        //a previous object for next measure. If points to barline, advance to first
+        //object for next measure
+
+        ColStaffObjsIterator it = m_itStartOfNextMeasure;
+        if (it != m_pColStaffObjs->end())
+///*DBG*/            cout << "    find_start_of_next_measure(). StartOfNextMeasure: " << (*it)->imo_object()->get_id() <<endl;
+        while (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline())
+        {
+            ++it;
+///*DBG*/            if (it != m_pColStaffObjs->end())
+//                cout << "    find_start_of_next_measure(). incrementing to " << (*it)->imo_object()->get_id() <<endl;
+//            else
+//                cout << "    find_start_of_next_measure(). incrementing to end of collection." <<endl;
+        }
+        m_itStartOfNextMeasure = it;
+///*DBG*/        if (it != m_pColStaffObjs->end())
+//            cout << "    find_start_of_next_measure(). StartOfNextMeasure: " << (*it)->imo_object()->get_id() <<endl;
+//        else
+//            cout << "    find_start_of_next_measure(). StartOfNextMeasure is end of collection." <<endl;
+
+        advance_to_right_instrument();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void advance_to_right_instrument()
+    {
+        //sets m_itStartOfMeasure and avances it if not in right instrument. Also
+        //sets m_curMeasure
+
+        m_itStartOfMeasure = m_itStartOfNextMeasure;
+        m_itStartOfNextMeasure = m_pColStaffObjs->end();
+
+        ColStaffObjsIterator it = m_itStartOfMeasure;
+///*DBG*/        if (it != m_pColStaffObjs->end())
+//            cout << "    advance_to_right_instrument(). StartOfMeasure: " << (*it)->imo_object()->get_id() <<endl;
+        if (it != m_pColStaffObjs->end())
+        {
+            while (it != m_pColStaffObjs->end() && (*it)->num_instrument() != m_iInstr)
+                ++it;
+            m_itStartOfMeasure = it;
+
+            if (it != m_pColStaffObjs->end())
+                m_curMeasure = (*it)->measure();
+        }
+///*DBG*/        if (it != m_pColStaffObjs->end())
+//            cout << "                                   StartOfMeasure: " << (*it)->imo_object()->get_id() <<endl;
     }
 
     //-----------------------------------------------------------------------------------
     void add_attributes_at_start_of_measure()
     {
+///*DBG*/        if (m_itStartOfMeasure != m_pColStaffObjs->end())
+//            cout << "    add_attributes_at_start_of_measure(). m_itStartOfMeasure: " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
+
         ColStaffObjsIterator it;
         for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
         {
@@ -1648,24 +2000,22 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void add_measure_element(int nMeasure)
+    void start_measure_element()
     {
         add_separator_line();
         start_element("measure");
         start_attrib("number");
-        m_source << nMeasure;
+        m_source << m_curMeasure+1;
         end_attrib();
         close_start_tag();
         m_pExporter->set_current_timepos(0);
-
-        if (m_pExporter->left_barline_required())
-            add_left_barline();
+        add_left_barline();
     }
 
     //-----------------------------------------------------------------------------------
     void add_left_barline()
     {
-        BarlineMxlGenerator exporter(nullptr, m_pExporter);
+        BarlineMxlGenerator exporter(nullptr, nullptr, m_pExporter);
         m_source << exporter.generate_left_barline();
     }
 
@@ -1753,80 +2103,106 @@ protected:
                 add_source_for(obj);
         }
 
-        //TODO: add staff-details*, transpose*, directive*, measure-style*
+        add_staff_details();
+        //TODO: transpose*
+        //TODO: directive*
+        //TODO: measure-style*
     }
 
     //-----------------------------------------------------------------------------------
-    void determine_how_many_lines_in_current_measure()
+    void add_staff_details()
     {
-        m_lines.assign(k_max_num_lines, 0);
-        ColStaffObjsIterator it = m_itStartOfMeasure;
-        if (it != m_pColStaffObjs->end())
+        ImoInstrument* pInstr = m_pObj->get_instrument();
+        if (pInstr == nullptr)
+            return;
+
+        for (int i=0; i < pInstr->get_num_staves(); ++i)
         {
-            while (it != m_pColStaffObjs->end() && (*it)->num_instrument() != m_iInstr)
-                ++it;
-            m_itStartOfMeasure = it;
-
-            if (it != m_pColStaffObjs->end())
-                m_curMeasure = (*it)->measure();
-
-            while (it != m_pColStaffObjs->end()
-                   && !(*it)->imo_object()->is_barline()
-                   && (*it)->measure() == m_curMeasure)
+            ImoStaffInfo* pInfo = pInstr->get_staff(i);
+            if (pInfo && !pInfo->has_default_values())
             {
-                if ((*it)->num_instrument() == m_iInstr)
-                    m_lines[ (*it)->line() ] = 1;
+                start_element_if_not_started("attributes");
+                start_element("staff-details");
+                if (pInstr->get_num_staves() > 1)
+                    add_attribute("number", i+1);
+                //TODO
+                //attrib: show-frets     (numbers | letters)  #IMPLIED
+                //attrib: %print-object;
+                //attrib: %print-spacing;
+                close_start_tag();
 
-                ++it;
+                //staff-type
+                switch(pInfo->get_staff_type())
+                {
+                    case ImoStaffInfo::k_staff_alternate:
+                        create_element("staff-type", "alternate");  break;
+                    case ImoStaffInfo::k_staff_cue:
+                        create_element("staff-type", "cue");        break;
+                    case ImoStaffInfo::k_staff_editorial:
+                        create_element("staff-type", "editorial");  break;
+                    case ImoStaffInfo::k_staff_ossia:
+                        create_element("staff-type", "ossia");      break;
+                    default:
+                        ;
+                }
+
+                //staff-lines
+                if (pInfo->get_num_lines() != 5)
+                    create_element("staff-lines", pInfo->get_num_lines());
+
+                //TODO: Not yet supported/imported. ImoStaffInfo not yet support this
+                //line-detail*
+                //<!ELEMENT line-detail EMPTY>
+                //<!ATTLIST line-detail
+                //    line    CDATA       #REQUIRED
+                //    width   %tenths;    #IMPLIED
+                //    %color;
+                //    %line-type;
+                //    %print-object;
+                //>
+
+                //TODO: Not yet supported/imported. For tablature
+                //staff-tuning*
+                    //<!ELEMENT staff-tuning
+                    //	(tuning-step, tuning-alter?, tuning-octave)>
+                    //<!ATTLIST staff-tuning
+                    //    line CDATA #REQUIRED
+                    //>
+
+                //TODO: Not yet supported/imported. For tablature
+                //capo?
+                    //<!ELEMENT capo (#PCDATA)>
+
+                //staff-size
+                if (pInfo->is_staff_size_modified())
+                {
+                    start_element("staff-size");
+                    add_attribute("scaling", 100);
+                    close_start_tag();
+                    m_source << (100.0 * pInfo->get_applied_spacing_factor());
+                    end_element(k_in_same_line);
+                }
+                end_element();  //staff-details
             }
         }
-
-        m_itEndOfMeasure = it;
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_source_for_this_measure()
-    {
-        bool fFirstLine = true;
-        for (int i=0; i < k_max_num_lines; ++i)
-        {
-            if (m_lines[i] != 0)
-            {
-                if (!fFirstLine)
-                    add_backup();
-                add_source_for_line(i);
-                fFirstLine = false;
-            }
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_source_for_barline()
-    {
-        ColStaffObjsIterator it = m_itEndOfMeasure;
-        if (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline()
-            && (*it)->num_instrument() == m_iInstr)
-        {
-            add_source_for((*it)->imo_object());
-        }
-
-        //advance to start of next measure
-        while (it != m_pColStaffObjs->end() && (*it)->measure() == m_curMeasure)
-        {
-            ++it;
-        }
-        m_itEndOfMeasure = it;
     }
 
     //-----------------------------------------------------------------------------------
     void add_source_for_line(int line)
     {
+///*DBG*/        if (m_itStartOfMeasure != m_pColStaffObjs->end())
+//            cout << "    add_source_for_line(). first no attribe obj: " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
+
+
         ColStaffObjsIterator it;
         for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
         {
             ColStaffObjsEntry* pEntry = *it;
             if (pEntry->num_instrument() == m_iInstr && pEntry->line() == line)
-                add_source_for( pEntry->imo_object() );
+            {
+                if (pEntry->measure() == m_curMeasure)
+                    add_source_for( pEntry->imo_object() );
+            }
         }
     }
 
@@ -1858,15 +2234,6 @@ public:
 
     string generate_source() override
     {
-        //TODO
-        //<!ATTLIST octave-shift
-        //    type (up | down | stop | continue) #REQUIRED
-        //    number %number-level; #IMPLIED
-        //    size CDATA "8"
-        //    %dashed-formatting;
-        //    %print-style;
-        //    %optional-unique-id;
-        //>
         start_element_no_attribs("direction", m_pObj);
         add_octave_shift();
         end_element();
@@ -1882,6 +2249,7 @@ protected:
         start_element_no_attribs("direction-type");
 
         start_element("octave-shift", m_pObj);
+
         int size = m_pObj->get_shift_steps();
         if (m_type == "start")
             add_attribute("type", size > 0 ? "up" : "down");
@@ -1889,145 +2257,15 @@ protected:
             add_attribute("type", m_type);
         add_attribute("size", abs(size) + 1);
         add_attribute("number", m_pObj->get_octave_shift_number());
+        //TODO
+        //    %dashed-formatting;
+        add_attributes_for_print_style(m_pObj);
+        //add_attribute_optional_unique_id(m_pObj);
         end_element(false, false);    //octave-shift
 
         end_element();  //direction-type
     }
 
-};
-
-
-//---------------------------------------------------------------------------------------
-class SlurMxlGenerator : public MxlGenerator
-{
-protected:
-    ImoSlur* m_pSlur;
-    ImoNote* m_pNote;
-
-public:
-    SlurMxlGenerator(ImoObj* pSlur, ImoNote* pNote, MxlExporter* pExporter)
-        : MxlGenerator(pExporter)
-        , m_pNote(pNote)
-    {
-        m_pSlur = static_cast<ImoSlur*>(pSlur);
-    }
-
-    string generate_source() override
-    {
-        if (m_pNote == m_pSlur->get_start_object())
-        {
-            start_element_if_not_started("notations");
-            start_element("slur");
-            add_attribute("number", m_pExporter->start_slur_and_get_number(m_pSlur->get_id()));
-            add_attribute("type", "start");
-
-            //TODO
-            //%line-type;
-            //%dashed-formatting;
-            //%position;
-
-            //%placement;
-            //%orientation;
-//            //TODO: placement is not correctly imported and interferes with orientation
-//            if (pSlur->get_orientation() != k_orientation_default)
-//            {
-//                add_attribute("orientation",
-//                    pSlur->get_orientation() == k_orientation_over ? "over" : "under");
-//            }
-
-            //TODO
-            //%bezier;
-            //%color;
-            //%optional-unique-id;
-
-            end_element(false, false);  //slur
-        }
-        else if (m_pNote == m_pSlur->get_end_object())
-        {
-            start_element_if_not_started("notations");
-            start_element("slur");
-            add_attribute("number", m_pExporter->close_slur_and_get_number(m_pSlur->get_id()));
-            add_attribute("type", "stop");
-            end_element(false, false);  //slur
-        }
-        return m_source.str();
-    }
-};
-
-
-//---------------------------------------------------------------------------------------
-class TupletMxlGenerator : public MxlGenerator
-{
-protected:
-    ImoTuplet* m_pTuplet;
-    ImoNoteRest* m_pNR;
-
-public:
-    TupletMxlGenerator(ImoObj* pTuplet, ImoNoteRest* pNR, MxlExporter* pExporter)
-        : MxlGenerator(pExporter)
-        , m_pNR(pNR)
-    {
-        m_pTuplet = static_cast<ImoTuplet*>(pTuplet);
-    }
-
-    string generate_source() override
-    {
-        //TODO  attributes
-        //    %line-shape;
-        //    %position;
-        //    %placement;
-        //    %optional-unique-id;
-        if (m_pNR == m_pTuplet->get_start_object())
-        {
-            start_element_if_not_started("notations");
-            start_element("tuplet");
-            add_attribute("type", "start");
-            add_attribute("number", m_pExporter->start_tuplet_and_get_number(m_pTuplet->get_id()));
-
-            if (m_pTuplet->get_show_bracket() != k_yesno_default)
-            {
-                add_attribute("bracket",
-                    m_pTuplet->get_show_bracket() == k_yesno_yes ? "yes" : "no");
-            }
-
-            if (m_pTuplet->get_placement() != k_placement_default)
-            {
-                add_attribute("placement",
-                    m_pTuplet->get_placement() == k_placement_above ? "above" : "below");
-            }
-
-            if (m_pTuplet->get_show_number() == ImoTuplet::k_number_none)
-            {
-                add_attribute("show-number", "none");
-                end_element(false, false);  //tuplet
-            }
-            else
-            {
-                if (m_pTuplet->get_show_number() == ImoTuplet::k_number_both)
-                    add_attribute("show-number", "both");
-                else
-                    add_attribute("show-number", "actual");
-
-                close_start_tag();
-                start_element_no_attribs("tuplet-actual");
-                create_element("tuplet-number", m_pTuplet->get_actual_number());
-                end_element();    //tuplet-actual
-                start_element_no_attribs("tuplet-normal");
-                create_element("tuplet-number", m_pTuplet->get_normal_number());
-                end_element();    //tuplet-normal
-                end_element();    //tuplet
-            }
-        }
-        else if (m_pNR == m_pTuplet->get_end_object())
-        {
-            start_element_if_not_started("notations");
-            start_element("tuplet");
-            add_attribute("type", "stop");
-            add_attribute("number", m_pExporter->close_tuplet_and_get_number(m_pTuplet->get_id()));
-            end_element(false, false);  //tuplet
-        }
-        return m_source.str();
-    }
 };
 
 
@@ -2040,7 +2278,8 @@ protected:
     ImoRest* m_pRest = nullptr;
 
 public:
-    NoteRestMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    NoteRestMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pNR = static_cast<ImoNoteRest*>(pImo);
         if (pImo->is_rest())
@@ -2068,20 +2307,7 @@ public:
 
 
         start_element("note", m_pNR);
-        //add_attributes();
-        //TODO
-        //<!ATTLIST note
-        //    %print-style;
-        //    %printout;
-        //    print-leger %yes-no; #IMPLIED
-        //    dynamics CDATA #IMPLIED
-        //    end-dynamics CDATA #IMPLIED
-        //    attack CDATA #IMPLIED
-        //    release CDATA #IMPLIED
-        //    %time-only;
-        //    pizzicato %yes-no; #IMPLIED
-        //    %optional-unique-id;
-        //>
+        add_attributes();
         close_start_tag();
 
         if (m_pNote)
@@ -2093,10 +2319,7 @@ public:
         }
         else
         {
-            empty_element("rest");
-            //TODO
-            //optional content: display-step, display-octave
-            //attrib: measure
+            add_rest();
         }
 
         add_duration();
@@ -2107,12 +2330,14 @@ public:
         add_accidental();
         add_time_modification();
         add_stem();
+        //TODO
         //add_notehead();
         //add_notehead_text();
         add_staff(m_pNR);
         add_beam();
         add_notations();
         add_lyrics();
+        //TODO
         //add_play();
 
         end_element();   //note
@@ -2126,6 +2351,22 @@ public:
     }
 
 protected:
+
+    //-----------------------------------------------------------------------------------
+    void add_attributes()
+    {
+        //TODO
+        add_attributes_for_print_style(m_pNR);
+        add_attributes_for_printout(m_pNR);
+        //    print-leger %yes-no; #IMPLIED
+        //    dynamics CDATA #IMPLIED
+        //    end-dynamics CDATA #IMPLIED
+        //    attack CDATA #IMPLIED
+        //    release CDATA #IMPLIED
+        //    %time-only;
+        //    pizzicato %yes-no; #IMPLIED
+        add_attribute_optional_unique_id(m_pNR);
+    }
 
     //-----------------------------------------------------------------------------------
     void add_forward()
@@ -2177,6 +2418,27 @@ protected:
     {
         if (m_pNote->is_cue_note())
             empty_element("cue");
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_rest()
+    {
+        static const string sStep[7] = { "C",  "D", "E", "F", "G", "A", "B" };
+        static const string sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
+                                            "7", "8", "9", "10", "11", "12"  };
+        start_element("rest");
+        if (m_pRest->is_full_measure())
+            add_attribute("measure", "yes");
+
+        if (m_pRest->get_step() != k_step_undefined)
+        {
+            close_start_tag();
+            create_element("display-step", sStep[m_pRest->get_step()] );
+            create_element("display-octave", sOctave[m_pRest->get_octave()] );
+            end_element();
+        }
+        else
+            end_element(false, false);
     }
 
     //-----------------------------------------------------------------------------------
@@ -2372,7 +2634,7 @@ protected:
     {
         if (m_pNote && m_pNote->is_beamed())
         {
-            BeamMxlGenerator gen(m_pNote, m_pExporter);
+            BeamMxlGenerator gen(m_pNote, nullptr, m_pExporter);
             m_source << gen.generate_source();
         }
     }
@@ -2391,7 +2653,7 @@ protected:
         //    %orientation;
         //    %bezier;
         //    %color;
-        //    %optional-unique-id;
+        //    add_attribute_optional_unique_id(m_pObj);
         //>
         if (m_pNote)
         {
@@ -2462,14 +2724,23 @@ protected:
                 ImoRelObj* pRO = pRelObjs->get_item(i);
                 if (pRO->is_tuplet() )
                 {
-                    TupletMxlGenerator exporter(pRO, m_pNR, m_pExporter);
-                    m_source << exporter.generate_source();
+                    add_source_for(pRO, m_pNote);
+//                    TupletMxlGenerator exporter(pRO, m_pNR, m_pExporter);
+//                    m_source << exporter.generate_source();
                 }
                 else if (pRO->is_slur() )
                 {
-                    SlurMxlGenerator exporter(pRO, m_pNote, m_pExporter);
-                    m_source << exporter.generate_source();
+                    add_source_for(pRO, m_pNote);
+//                    SlurMxlGenerator exporter(pRO, m_pNote, m_pExporter);
+//                    m_source << exporter.generate_source();
                 }
+                else if (pRO->is_arpeggio() )
+                {
+                    add_source_for(pRO, m_pNote);
+//                    SlurMxlGenerator exporter(pRO, m_pNote, m_pExporter);
+//                    m_source << exporter.generate_source();
+                }
+
             }
         }
     }
@@ -2493,7 +2764,7 @@ protected:
             if (pAO->is_fermata() )
             {
                 start_element_if_not_started("notations");
-                FermataMxlGenerator exporter(pAO, m_pExporter);
+                FermataMxlGenerator exporter(pAO, nullptr, m_pExporter);
                 m_source << exporter.generate_source();
             }
             else if (pAO->is_articulation() )
@@ -2579,14 +2850,14 @@ protected:
         {
             //accents
             case k_articulation_accent:             type = "accent";          break;
-            case k_articulation_strong_accent:      type = "strong-accent";   break;
-            case k_articulation_detached_legato:    type = "detached-legato"; break;
+//            case k_articulation_strong_accent:      type = "strong-accent";   break;
+//            case k_articulation_detached_legato:    type = "detached-legato"; break;
 //            case k_articulation_legato_duro:     type = "legato-duro
-//            case k_articulation_marccato,				///< Marccato
+            case k_articulation_marccato:			type = "strong-accent";   break;
 //            case k_articulation_marccato_legato,			///< Marccato-legato
 //            case k_articulation_marccato_staccato,		///< Marccato-staccato
 //            case k_articulation_marccato_staccatissimo,	///< Marccato-staccatissimo
-//            case k_articulation_mezzo_staccato,			///< Mezzo-staccato
+            case k_articulation_mezzo_staccato:     type = "detached-legato"; break;
 //            case k_articulation_mezzo_staccatissimo,		///< Mezzo-staccatissimo
             case k_articulation_staccato:           type = "staccato";        break;
 //            case k_articulation_staccato_duro,			///< Staccato-duro
@@ -2903,7 +3174,10 @@ protected:
             ImoRelations* pRelObjs = m_pNR->get_relations();
             ImoOctaveShift* pImo = static_cast<ImoOctaveShift*>(
                                         pRelObjs->find_item_of_type(k_imo_octave_shift) );
-            if (pImo && pImo->get_start_object() != m_pNR )
+
+            //AWARE: For octave shift affecting only to one note, start and end notes are
+            //the same one.
+            if (pImo && (pImo->get_end_object() == m_pNR || pImo->get_start_object() != m_pNR))
             {
                 string type = pImo->get_end_object() == m_pNR ? "stop" : "continue";
                 OctaveShiftMxlGenerator exporter(pImo, type, m_pExporter);
@@ -2921,7 +3195,7 @@ protected:
     ImoScore* m_pObj;
 
 public:
-    PartListMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    PartListMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoScore*>(pImo);
@@ -3167,15 +3441,16 @@ protected:
 class ScoreMxlGenerator : public MxlGenerator
 {
 protected:
-    ImoScore* m_pObj;
+    ImoScore* m_pScore;
 
 public:
-    ScoreMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    ScoreMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
-        m_pObj = static_cast<ImoScore*>(pImo);
-        m_pExporter->set_current_score(m_pObj);
+        m_pScore = static_cast<ImoScore*>(pImo);
+        m_pExporter->set_current_score(m_pScore);
 
-        ColStaffObjs* pTable = m_pObj->get_staffobjs_table();
+        ColStaffObjs* pTable = m_pScore->get_staffobjs_table();
         if (pTable)
             m_pExporter->save_divisions( pTable->get_divisions() );
     }
@@ -3183,11 +3458,16 @@ public:
     string generate_source() override
     {
         add_header();
-        start_element("score-partwise", m_pObj);
+        start_element("score-partwise", m_pScore);
         add_attribute("version", "4.0");
         close_start_tag();
 
+        add_work();
+        add_movement_number();
+        add_movement_title();
         add_identification();
+        add_defaults();
+        add_credits();
         add_part_list();
         add_parts();
 
@@ -3197,6 +3477,7 @@ public:
 
 protected:
 
+    //-----------------------------------------------------------------------------------
     void add_header()
     {
         m_source << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
@@ -3212,6 +3493,25 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
+	void add_work()
+	{
+	    //TODO
+	}
+
+    //-----------------------------------------------------------------------------------
+	void add_movement_number()
+	{
+	    //TODO
+	}
+
+    //-----------------------------------------------------------------------------------
+	void add_movement_title()
+	{
+	    //TODO
+	}
+
+    //-----------------------------------------------------------------------------------
     void add_identification()
     {
         start_element_no_attribs("identification");
@@ -3245,64 +3545,325 @@ protected:
         end_element();    //identification
     }
 
-//    void add_styles()
-//    {
-////    //styles
-////    m_source << m_TextStyles.SourceMNX(1, fUndoData);
-//    }
-//
-//    void add_titles()
-//    {
-////    //titles and other attached auxobjs
-////    if (m_pAuxObjs)
-////    {
-////	    for (int i=0; i < (int)m_pAuxObjs->size(); i++)
-////	    {
-////		    m_source << (*m_pAuxObjs)[i]->SourceMNX(1, fUndoData);
-////	    }
-////    }
-//    }
-//
-//    void add_page_layout()
-//    {
-////    //first section layout info
-////    //TODO: sections
-////    //int nSection = 0;
-////    {
-////        //page layout info
-////#if 0
-////		std::list<lmPageInfo*>::iterator it;
-////		for (it = m_PagesInfo.begin(); it != m_PagesInfo.end(); ++it)
-////            m_source << (*it)->SourceMNX(1, fUndoData);
-////#else
-////        lmPageInfo* pPageInfo = m_PagesInfo.front();
-////        m_source << pPageInfo->SourceMNX(1, fUndoData);
-////#endif
-////        //first system and other systems layout info
-////        m_source << m_SystemsInfo.front()->SourceMNX(1, true, fUndoData);
-////        m_source << m_SystemsInfo.back()->SourceMNX(1, false, fUndoData);
-////    }
-//    }
-//
-//    void add_system_layout()
-//    {
-//    }
+    //-----------------------------------------------------------------------------------
+	void add_defaults()
+	{
+	    if (m_pScore->is_global_scaling_modified())
+	    {
+            start_element_no_attribs("defaults");
 
+            add_scaling();
+            add_concert_score();
+
+            //common-layout = (page-layout?, system-layout?, staff-layout*)
+            add_page_layout();
+            add_system_layout();
+            add_staff_layout();
+
+            add_appearance();
+            add_music_font();
+            add_word_font();
+            add_lyric_font();
+            add_lyric_language();
+
+            end_element();  //defaults
+	    }
+	}
+
+    //-----------------------------------------------------------------------------------
+	void add_credits()
+	{
+	    //TODO
+	}
+
+    //-----------------------------------------------------------------------------------
     void add_part_list()
     {
-        PartListMxlGenerator exporter(m_pObj, m_pExporter);
+        PartListMxlGenerator exporter(m_pScore, nullptr, m_pExporter);
         m_source << exporter.generate_source();
     }
 
+    //-----------------------------------------------------------------------------------
     void add_parts()
     {
-        int numInstr = m_pObj->get_num_instruments();
+        int numInstr = m_pScore->get_num_instruments();
         for (int i=0; i < numInstr; ++i)
         {
-            add_source_for(m_pObj->get_instrument(i));
+            add_source_for(m_pScore->get_instrument(i));
         }
     }
 
+    //-----------------------------------------------------------------------------------
+    void add_scaling()
+    {
+        start_element_no_attribs("scaling");
+
+        float millimeters = m_pScore->tenths_to_logical(40) / 100.0f;
+        create_element("millimeters", millimeters);
+        create_element("tenths", 40);
+
+        end_element();  //scaling
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_concert_score()
+    {
+        //TODO: Not yet supported in IM. DTD score
+        //<!ELEMENT concert-score EMPTY>
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_page_layout()
+    {
+        ImoDocument* pDoc = m_pScore->get_document();
+        ImoPageInfo* pInfo = pDoc->get_page_info();
+
+	    if (!pInfo->is_page_layout_modified())
+	        return;
+
+        start_element_no_attribs("page-layout");
+
+	    if (pInfo->is_page_size_modified())
+	    {
+            float value = m_pScore->logical_to_tenths( pInfo->get_page_height() );
+            create_element("page-height", value);
+
+            value = m_pScore->logical_to_tenths( pInfo->get_page_width() );
+            create_element("page-width", value);
+	    }
+
+        if (pInfo->are_page_margins_modified())
+        {
+            bool fBoth = pInfo->get_left_margin_odd() == pInfo->get_left_margin_even()
+                        && pInfo->get_right_margin_odd() == pInfo->get_right_margin_even()
+                        && pInfo->get_top_margin_odd() == pInfo->get_top_margin_even()
+                        && pInfo->get_bottom_margin_odd() == pInfo->get_bottom_margin_even();
+
+            if (fBoth)
+            {
+                start_element("page-margins");
+                add_attribute("type", "both");
+                close_start_tag();
+                create_element("left-margin", m_pScore->logical_to_tenths(pInfo->get_left_margin_odd()));
+                create_element("right-margin", m_pScore->logical_to_tenths(pInfo->get_right_margin_odd()));
+                create_element("top-margin", m_pScore->logical_to_tenths(pInfo->get_top_margin_odd()));
+                create_element("bottom-margin", m_pScore->logical_to_tenths(pInfo->get_bottom_margin_odd()));
+                end_element();  //page-margins
+            }
+            else
+            {
+                if (pInfo->are_even_page_margins_modified())
+                {
+                    start_element("page-margins");
+                    add_attribute("type", "even");
+                    close_start_tag();
+                    create_element("left-margin", m_pScore->logical_to_tenths(pInfo->get_left_margin_even()));
+                    create_element("right-margin", m_pScore->logical_to_tenths(pInfo->get_right_margin_even()));
+                    create_element("top-margin", m_pScore->logical_to_tenths(pInfo->get_top_margin_even()));
+                    create_element("bottom-margin", m_pScore->logical_to_tenths(pInfo->get_bottom_margin_even()));
+                    end_element();  //page-margins
+                }
+                if (pInfo->are_odd_page_margins_modified())
+                {
+                    start_element("page-margins");
+                    add_attribute("type", "odd");
+                    create_element("left-margin", m_pScore->logical_to_tenths(pInfo->get_left_margin_odd()));
+                    create_element("right-margin", m_pScore->logical_to_tenths(pInfo->get_right_margin_odd()));
+                    create_element("top-margin", m_pScore->logical_to_tenths(pInfo->get_top_margin_odd()));
+                    create_element("bottom-margin", m_pScore->logical_to_tenths(pInfo->get_bottom_margin_odd()));
+                    end_element();  //page-margins
+                }
+            }
+        }
+
+        end_element();  //page-layout
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_system_layout()
+    {
+        ImoSystemInfo* pInfo = m_pScore->get_first_system_info();
+	    if (pInfo->is_system_layout_modified())
+	    {
+            start_element_no_attribs("system-layout");
+
+            //system-margins
+            if (pInfo->is_left_margin_modified() || pInfo->is_right_margin_modified())
+            {
+                start_element_no_attribs("system-margins");
+                create_element("left-margin", m_pScore->logical_to_tenths(pInfo->get_left_margin()));
+                create_element("right-margin", m_pScore->logical_to_tenths(pInfo->get_right_margin()));
+                end_element();  //sytem-margins
+            }
+
+            //system-distance
+            if (pInfo->is_system_distance_modified())
+                create_element("system-distance", m_pScore->logical_to_tenths(pInfo->get_system_distance()));
+
+            //top-system-distance
+            if (pInfo->is_top_system_distance_modified())
+                create_element("top-system-distance", m_pScore->logical_to_tenths(pInfo->get_top_system_distance()));
+
+            //system-dividers
+            //TODO: Not yet imported. Not supported in IM
+
+            end_element();  //system-layout
+	    }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_staff_layout()
+    {
+        //TODO
+        //All found examples are just
+        //    <staff-layout>
+        //      <staff-distance>93</staff-distance>
+        //    </staff-layout>
+        //
+        //the <staff-distance> is use to initialize the staff margin of all staves:
+        //    pInstr->set_staff_margin(iStaff, m_pAnalyser->get_default_staff_distance(iStaff));
+        //But in Lomse, this distance can be different for each staff and will be adjusted
+        //dynamically by the vertical spacing algorithm. It is non-sense to export this
+        //default staff value unless the exported score has been imported from MusicXML
+        //or has been created from scratch and this value explicitly set
+
+//        if (!m_pScore->created_by_musicxml())
+//            return;
+//
+//        start_element_no_attribs("staff-layout");
+//
+//        end_element();  //staff-layout
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_appearance()
+    {
+        //TODO dtd layout
+        //<!ELEMENT appearance
+        //	(line-width*, note-size*, distance*, glyph*,
+        //	 other-appearance*)>
+
+        //Example: (MozartTrio.musicxml)
+        //    <appearance>
+        //      <line-width type="stem">0.957</line-width>
+        //      <line-width type="beam">5</line-width>
+        //      <line-width type="staff">1.25</line-width>
+        //      <line-width type="light barline">1.4583</line-width>
+        //      <line-width type="heavy barline">5</line-width>
+        //      <line-width type="leger">1.875</line-width>
+        //      <line-width type="ending">1.4583</line-width>
+        //      <line-width type="wedge">0.9375</line-width>
+        //      <line-width type="enclosure">1.4583</line-width>
+        //      <line-width type="tuplet bracket">1.4583</line-width>
+        //      <note-size type="grace">50</note-size>
+        //      <note-size type="cue">50</note-size>
+        //      <distance type="hyphen">60</distance>
+        //      <distance type="beam">8</distance>
+        //    </appearance>
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_music_font()
+    {
+        //TODO
+        //<!ELEMENT music-font EMPTY>
+        //<!ATTLIST music-font
+        //    %font;
+        //>
+        //    <music-font font-family="Maestro" font-size="10.7"/>
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_word_font()
+    {
+        //<!ELEMENT word-font EMPTY>
+        //<!ATTLIST word-font
+        //    %font;
+        //>
+        //    <word-font font-family="Times New Roman" font-size="5.3"/>
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_lyric_font()
+    {
+        //TODO
+        //<!ELEMENT lyric-font EMPTY>
+        //<!ATTLIST lyric-font
+        //    number NMTOKEN #IMPLIED
+        //    name CDATA #IMPLIED
+        //    %font;
+        //>
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_lyric_language()
+    {
+        //TODO
+        //<!ELEMENT lyric-language EMPTY>
+        //<!ATTLIST lyric-language
+        //    number NMTOKEN #IMPLIED
+        //    name CDATA #IMPLIED
+        //    xml:lang CDATA #REQUIRED
+        //>
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
+class SlurMxlGenerator : public MxlGenerator
+{
+protected:
+    ImoSlur* m_pSlur;
+    ImoNote* m_pNote;
+
+public:
+    SlurMxlGenerator(ImoObj* pSlur, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pSlur( static_cast<ImoSlur*>(pSlur) )
+        , m_pNote( static_cast<ImoNote*>(pParent) )
+    {
+    }
+
+    string generate_source() override
+    {
+        if (m_pNote == m_pSlur->get_start_object())
+        {
+            start_element_if_not_started("notations");
+            start_element("slur");
+            add_attribute("number", m_pExporter->start_slur_and_get_number(m_pSlur->get_id()));
+            add_attribute("type", "start");
+
+            //TODO
+            //%line-type;
+            //%dashed-formatting;
+            add_attributes_for_position(m_pSlur);
+
+            //%placement;
+            //%orientation;
+            //TODO: placement is not correctly imported and interferes with orientation
+            if (m_pSlur->get_orientation() != k_orientation_default)
+            {
+                add_attribute("placement",
+                    m_pSlur->get_orientation() == k_orientation_over ? "above" : "below");
+            }
+
+            //TODO
+            //%bezier;
+            //%color;
+            add_attribute_optional_unique_id(m_pSlur);
+
+            end_element(false, false);  //slur
+        }
+        else if (m_pNote == m_pSlur->get_end_object())
+        {
+            start_element_if_not_started("notations");
+            start_element("slur");
+            add_attribute("number", m_pExporter->close_slur_and_get_number(m_pSlur->get_id()));
+            add_attribute("type", "stop");
+            end_element(false, false);  //slur
+        }
+        return m_source.str();
+    }
 };
 
 
@@ -3313,7 +3874,7 @@ protected:
     ImoSoundChange* m_pImo;
 
 public:
-    SoundMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    SoundMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoSoundChange*>(pImo))
     {
@@ -3378,7 +3939,7 @@ public:
         // attrib: soft-pedal %yes-no-number; #IMPLIED
         // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
 
-        //TODO   attrib: %optional-unique-id;
+        add_attribute_optional_unique_id(m_pImo);
 
             // content
 
@@ -3425,7 +3986,8 @@ protected:
     ImoStyles* m_pObj;
 
 public:
-    StylesMxlGenerator(ImoObj* pImo, MxlExporter* pExporter) : MxlGenerator(pExporter)
+    StylesMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStyles*>(pImo);
     }
@@ -3482,7 +4044,7 @@ protected:
     ImoTranspose* m_pImo;
 
 public:
-    TransposeMxlGenerator(ImoObj* pImo, MxlExporter* pExporter)
+    TransposeMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoTranspose*>(pImo))
     {
@@ -3507,7 +4069,7 @@ protected:
         if (iStaff > 0)
             add_attribute("number", iStaff);
 
-        //TODO: %optional-unique-id; (not yet imported)
+        add_attribute_optional_unique_id(m_pImo);
 
         close_start_tag();
     }
@@ -3530,6 +4092,136 @@ protected:
 
 };
 
+
+//---------------------------------------------------------------------------------------
+class TupletMxlGenerator : public MxlGenerator
+{
+protected:
+    ImoTuplet* m_pTuplet;
+    ImoNoteRest* m_pNR;
+
+public:
+    TupletMxlGenerator(ImoObj* pTuplet, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pTuplet( static_cast<ImoTuplet*>(pTuplet) )
+        , m_pNR( static_cast<ImoNoteRest*>(pParent) )
+    {
+    }
+
+    string generate_source() override
+    {
+        //TODO  attributes
+        //    %line-shape;
+        //    %position;
+        //    %placement;
+        //add_attribute_optional_unique_id(m_pTuplet);
+
+        if (m_pNR == m_pTuplet->get_start_object())
+        {
+            start_element_if_not_started("notations");
+            start_element("tuplet");
+            add_attribute("type", "start");
+            add_attribute("number", m_pExporter->start_tuplet_and_get_number(m_pTuplet->get_id()));
+
+            if (m_pTuplet->get_show_bracket() != k_yesno_default)
+            {
+                add_attribute("bracket",
+                    m_pTuplet->get_show_bracket() == k_yesno_yes ? "yes" : "no");
+            }
+
+            if (m_pTuplet->get_placement() != k_placement_default)
+            {
+                add_attribute("placement",
+                    m_pTuplet->get_placement() == k_placement_above ? "above" : "below");
+            }
+
+            if (m_pTuplet->get_show_number() == ImoTuplet::k_number_none)
+            {
+                add_attribute("show-number", "none");
+                end_element(false, false);  //tuplet
+            }
+            else
+            {
+                if (m_pTuplet->get_show_number() == ImoTuplet::k_number_both)
+                    add_attribute("show-number", "both");
+                else
+                    add_attribute("show-number", "actual");
+
+                close_start_tag();
+                start_element_no_attribs("tuplet-actual");
+                create_element("tuplet-number", m_pTuplet->get_actual_number());
+                end_element();    //tuplet-actual
+                start_element_no_attribs("tuplet-normal");
+                create_element("tuplet-number", m_pTuplet->get_normal_number());
+                end_element();    //tuplet-normal
+                end_element();    //tuplet
+            }
+        }
+        else if (m_pNR == m_pTuplet->get_end_object())
+        {
+            start_element_if_not_started("notations");
+            start_element("tuplet");
+            add_attribute("type", "stop");
+            add_attribute("number", m_pExporter->close_tuplet_and_get_number(m_pTuplet->get_id()));
+            end_element(false, false);  //tuplet
+        }
+        return m_source.str();
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
+class VoltaBracketMxlGenerator : public MxlGenerator
+{
+protected:
+    ImoVoltaBracket* m_pImo;
+    ImoBarline* m_pParent;
+
+public:
+    VoltaBracketMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+        : MxlGenerator(pExporter)
+        , m_pImo( static_cast<ImoVoltaBracket*>(pImo))
+        , m_pParent( static_cast<ImoBarline*>(pParent))
+    {
+    }
+
+    string generate_source() override
+    {
+        start_element("ending", m_pImo);
+
+        //attrib: number
+        add_attribute("number", m_pImo->get_volta_number());
+
+        //attrib: number
+        if (m_pImo->get_start_barline() == m_pParent)
+            add_attribute("type", "start");
+        else if (m_pImo->has_final_jog())
+            add_attribute("type", "stop");
+        else
+            add_attribute("type", "discontinue");
+
+        //attrib: %print-object;
+        add_attribute_print_object(m_pImo);
+
+        //attrib: %print-style;
+        add_attributes_for_print_style(m_pImo);
+        //TODO
+        //    end-length %tenths; #IMPLIED
+        //    text-x %tenths; #IMPLIED
+        //    text-y %tenths; #IMPLIED
+
+        //content
+        if (m_pImo->get_volta_text().empty())
+            end_element(false, false);
+        else
+        {
+            m_source << m_pImo->get_volta_text();
+            close_start_tag();
+        }
+        return m_source.str();
+    }
+
+};
 
 
 //=======================================================================================
@@ -3723,9 +4415,9 @@ void MxlGenerator::end_element_if_started(const string& tag)
 }
 
 //---------------------------------------------------------------------------------------
-void MxlGenerator::add_source_for(ImoObj* pImo)
+void MxlGenerator::add_source_for(ImoObj* pImo, ImoObj* pParent)
 {
-    m_source << m_pExporter->get_source(pImo);
+    m_source << m_pExporter->get_source(pImo, pParent);
 }
 
 //---------------------------------------------------------------------------------------
@@ -3786,6 +4478,24 @@ void MxlGenerator::add_attributes_for_print_style(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+void MxlGenerator::add_attributes_for_printout(ImoObj* pImo)
+{
+    //<!ENTITY % printout
+    //	"%print-object;
+    //	 print-dot     %yes-no;  #IMPLIED
+    //	 %print-spacing;
+    //	 print-lyric   %yes-no;  #IMPLIED">
+
+    add_attribute_print_object(pImo);
+    //TODO
+//    add_attribute_print_dot(pImo);
+//    add_attribute_print_spacing(pImo);
+        //<!ENTITY % print-spacing
+        //"print-spacing %yes-no;  #IMPLIED">
+//    add_attribute_print_lyric(pImo);
+}
+
+//---------------------------------------------------------------------------------------
 void MxlGenerator::add_attributes_for_position(ImoObj* pObj)
 {
     //@<!ENTITY % position
@@ -3819,6 +4529,22 @@ void MxlGenerator::add_attributes_for_position(ImoObj* pObj)
 }
 
 //---------------------------------------------------------------------------------------
+void MxlGenerator::add_attibutes_for_text_formatting(ImoObj* pObj)
+{
+    //<!ENTITY % text-formatting
+    //	"%justify;
+    add_attributes_for_print_style_align(pObj);
+    //	 %text-decoration;
+    //	 %text-rotation;
+    //	 %letter-spacing;
+    //	 %line-height;
+    //	 xml:lang CDATA #IMPLIED
+    //	 xml:space (default | preserve) #IMPLIED
+    //	 %text-direction;
+    //	 %enclosure;">
+}
+
+//---------------------------------------------------------------------------------------
 void MxlGenerator::add_attributes_for_font(ImoObj* pObj)
 {
     if (pObj->is_contentobj())
@@ -3847,6 +4573,20 @@ void MxlGenerator::add_attribute_print_object(ImoObj* pObj)
         if (!static_cast<ImoContentObj*>(pObj)->is_visible())
             add_attribute("print-object", "no");
     }
+}
+
+//---------------------------------------------------------------------------------------
+void MxlGenerator::add_attribute_optional_unique_id(ImoObj* UNUSED(pObj))
+{
+    //TODO: This is not supported/imported
+    //<!--
+    //	The optional-unique-id entity allows an element to optionally
+    //	specify an ID that is unique to the entire document. This
+    //	entity is not used for a required id attribute, or for an id
+    //	attribute that specifies an id reference.
+    //-->
+    //<!ENTITY % optional-unique-id
+    //	"id ID #IMPLIED">
 }
 
 
@@ -3899,9 +4639,9 @@ string MxlExporter::get_version_and_time_string() const
 }
 
 //---------------------------------------------------------------------------------------
-string MxlExporter::get_source(ImoObj* pImo)
+string MxlExporter::get_source(ImoObj* pImo, ImoObj* pParent)
 {
-    MxlGenerator* pGen = new_generator(pImo);
+    MxlGenerator* pGen = new_generator(pImo, pParent);
     string source = pGen->generate_source();
 
     delete pGen;
@@ -3912,39 +4652,43 @@ string MxlExporter::get_source(ImoObj* pImo)
 string MxlExporter::get_source(AScore score)
 {
     if (score.is_valid())
-        return get_source(score.internal_object());
+        return get_source(score.internal_object(), nullptr);
 
     return string();
 }
 
 //---------------------------------------------------------------------------------------
-MxlGenerator* MxlExporter::new_generator(ImoObj* pImo)
+MxlGenerator* MxlExporter::new_generator(ImoObj* pImo, ImoObj* pParent)
 {
     //factory method
 
     switch(pImo->get_obj_type())
     {
-        case k_imo_barline:         return LOMSE_NEW BarlineMxlGenerator(pImo, this);
-        case k_imo_clef:            return LOMSE_NEW ClefMxlGenerator(pImo, this);
-        case k_imo_document:        return LOMSE_NEW LenmusdocMxlGenerator(pImo, this);
-        case k_imo_instrument:      return LOMSE_NEW InstrumentMxlGenerator(pImo, this);
-        case k_imo_key_signature:   return LOMSE_NEW KeySignatureMxlGenerator(pImo, this);
-        case k_imo_midi_info:       return LOMSE_NEW MidiInfoMxlGenerator(pImo, this);
-        case k_imo_music_data:      return LOMSE_NEW MusicDataMxlGenerator(pImo, this);
-        case k_imo_note_regular:    return LOMSE_NEW NoteRestMxlGenerator(pImo, this);
-        case k_imo_note_grace:      return LOMSE_NEW NoteRestMxlGenerator(pImo, this);
-        case k_imo_note_cue:        return LOMSE_NEW NoteRestMxlGenerator(pImo, this);
-        case k_imo_rest:            return LOMSE_NEW NoteRestMxlGenerator(pImo, this);
-        case k_imo_score:           return LOMSE_NEW ScoreMxlGenerator(pImo, this);
-        case k_imo_direction:       return LOMSE_NEW DirectionMxlGenerator(pImo, this);
-        case k_imo_sound_change:    return LOMSE_NEW SoundMxlGenerator(pImo, this);
-        case k_imo_style:           return LOMSE_NEW DefineStyleMxlGenerator(pImo, this);
-        case k_imo_styles:          return LOMSE_NEW StylesMxlGenerator(pImo, this);
-        case k_imo_time_signature:  return LOMSE_NEW TimeSignatureMxlGenerator(pImo, this);
-        case k_imo_transpose:       return LOMSE_NEW TransposeMxlGenerator(pImo, this);
+        case k_imo_arpeggio:        return LOMSE_NEW ArpeggioMxlGenerator(pImo, pParent, this);
+        case k_imo_barline:         return LOMSE_NEW BarlineMxlGenerator(pImo, pParent, this);
+        case k_imo_clef:            return LOMSE_NEW ClefMxlGenerator(pImo, pParent, this);
+        case k_imo_direction:       return LOMSE_NEW DirectionMxlGenerator(pImo, pParent, this);
+        case k_imo_document:        return LOMSE_NEW LenmusdocMxlGenerator(pImo, pParent, this);
+        case k_imo_instrument:      return LOMSE_NEW InstrumentMxlGenerator(pImo, pParent, this);
+        case k_imo_key_signature:   return LOMSE_NEW KeySignatureMxlGenerator(pImo, pParent, this);
+        case k_imo_midi_info:       return LOMSE_NEW MidiInfoMxlGenerator(pImo, pParent, this);
+        case k_imo_music_data:      return LOMSE_NEW MusicDataMxlGenerator(pImo, pParent, this);
+        case k_imo_note_regular:    return LOMSE_NEW NoteRestMxlGenerator(pImo, pParent, this);
+        case k_imo_note_grace:      return LOMSE_NEW NoteRestMxlGenerator(pImo, pParent, this);
+        case k_imo_note_cue:        return LOMSE_NEW NoteRestMxlGenerator(pImo, pParent, this);
+        case k_imo_rest:            return LOMSE_NEW NoteRestMxlGenerator(pImo, pParent, this);
+        case k_imo_score:           return LOMSE_NEW ScoreMxlGenerator(pImo, pParent, this);
+        case k_imo_slur:            return LOMSE_NEW SlurMxlGenerator(pImo, pParent, this);
+        case k_imo_sound_change:    return LOMSE_NEW SoundMxlGenerator(pImo, pParent, this);
+        case k_imo_style:           return LOMSE_NEW DefineStyleMxlGenerator(pImo, pParent, this);
+        case k_imo_styles:          return LOMSE_NEW StylesMxlGenerator(pImo, pParent, this);
+        case k_imo_time_signature:  return LOMSE_NEW TimeSignatureMxlGenerator(pImo, pParent, this);
+        case k_imo_transpose:       return LOMSE_NEW TransposeMxlGenerator(pImo, pParent, this);
+        case k_imo_tuplet:          return LOMSE_NEW TupletMxlGenerator(pImo, pParent, this);
+        case k_imo_volta_bracket:   return LOMSE_NEW VoltaBracketMxlGenerator(pImo, pParent, this);
 
         default:
-            return new ErrorMxlGenerator(pImo, this);
+            return new ErrorMxlGenerator(pImo, pParent, this);
     }
 }
 
@@ -3964,12 +4708,6 @@ void MxlExporter::clear_data_for_left_barline()
 const BarlineData& MxlExporter::get_data_for_left_barline() const
 {
     return *m_pLeftBarline;
-}
-
-//---------------------------------------------------------------------------------------
-bool MxlExporter::left_barline_required()
-{
-    return m_pLeftBarline && !m_pLeftBarline->style.empty();
 }
 
 //---------------------------------------------------------------------------------------
@@ -4062,7 +4800,7 @@ string MxlExporter::note_type_to_mxl_name(int noteType)
 {
     switch(noteType)
     {
-        case k_longa:   return "longa";
+        case k_longa:   return "long";
         case k_breve:   return "breve";
         case k_whole:   return "whole";
         case k_half:    return "half";

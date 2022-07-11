@@ -189,6 +189,23 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
+    inline void failure_header()
+    {
+        cout << endl << "*** Failure in " << test_name() << ":" << endl;
+    }
+
+    bool check_errormsg(const stringstream& msg, const stringstream& expected)
+    {
+        if (msg.str() != expected.str())
+        {
+            failure_header();
+            cout << "     msg=[" << msg.str() << "]" << endl;
+            cout << "expected=[" << expected.str() << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
     list<ImoTuplet*> get_tuplets(ImoNoteRest* pNR)
     {
         list<ImoTuplet*> tuplets;
@@ -247,10 +264,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( a.get_musicxml_version() == 300 );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
@@ -274,13 +288,10 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
         CHECK( pRoot != nullptr );
         CHECK( pRoot && pRoot->is_document() == true );
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         delete pRoot;
     }
@@ -298,10 +309,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -326,10 +334,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -363,10 +368,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -399,10 +401,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -429,10 +428,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -462,10 +458,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -500,10 +493,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -542,6 +532,33 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, score_partwise_10)
+    {
+        //@10. score. source format is musicxml
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. <score-partwise>: missing mandatory element <part>." << endl;
+        parser.parse_text("<score-partwise version='4.0'><part-list>"
+                          "<score-part id='P1'><part-name>Music</part-name></score-part>"
+                          "</part-list><part id='P1'></part></score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore && pScore->was_created_from_musicxml() );
+
+        delete pRoot;
+    }
+
 
     //@ score-part -------------------------------------------------------------
 
@@ -558,10 +575,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_instrument() == true );
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
@@ -603,10 +617,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -653,10 +664,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -696,10 +704,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -739,10 +744,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -788,10 +790,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -837,10 +836,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -888,10 +884,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -950,10 +943,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1011,10 +1001,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1071,10 +1058,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1132,10 +1116,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1197,10 +1178,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -1272,10 +1250,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -1332,10 +1307,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot );
         CHECK( a.current_divisions() == 7L );
 
@@ -1364,9 +1336,7 @@ SUITE(MxlAnalyserTest)
 
 //        cout << test_name() << endl;
 //        cout << "divisons:" << a.current_divisions() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( a.current_divisions() == 1L );
 
         delete pRoot;
@@ -1394,7 +1364,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -1434,7 +1404,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -1462,10 +1432,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
@@ -1493,10 +1460,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1522,10 +1486,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1549,10 +1510,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1583,10 +1541,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1619,10 +1574,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1654,10 +1606,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1689,10 +1638,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1724,10 +1670,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
@@ -1771,10 +1714,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -1834,10 +1774,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -1894,10 +1831,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -1950,10 +1884,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -2007,10 +1938,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -2060,10 +1988,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -2118,10 +2043,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -2168,10 +2090,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc );
@@ -2224,10 +2143,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2261,10 +2177,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2306,10 +2219,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2460,10 +2370,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2500,10 +2407,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2543,10 +2447,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2578,10 +2479,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2614,10 +2512,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -2661,10 +2556,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -2735,10 +2627,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -2802,10 +2691,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -2854,10 +2741,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -2891,10 +2776,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -2948,10 +2831,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -3007,10 +2888,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -3046,10 +2925,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
@@ -3077,10 +2953,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
@@ -3111,10 +2984,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot == nullptr);
 
         a.do_not_delete_instruments_in_destructor();
@@ -3142,10 +3012,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKey != nullptr );
@@ -3188,10 +3055,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKey != nullptr );
@@ -3257,10 +3121,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKey != nullptr );
@@ -3320,10 +3181,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( pRoot );
@@ -3369,10 +3227,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3441,10 +3296,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3541,10 +3393,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3650,7 +3499,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -3723,10 +3572,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3789,10 +3635,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3858,10 +3701,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3924,9 +3764,7 @@ SUITE(MxlAnalyserTest)
 //        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //
 ////        cout << test_name() << endl;
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//////        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -3973,10 +3811,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -4050,10 +3885,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -4110,10 +3942,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -4192,10 +4021,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -4231,10 +4057,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4268,10 +4091,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4304,10 +4124,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4340,10 +4157,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4378,10 +4192,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4416,10 +4227,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4455,10 +4263,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4499,10 +4304,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -4558,10 +4360,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -4610,10 +4409,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4648,10 +4444,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4688,10 +4481,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -4730,8 +4520,6 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
        //AWARE: initialy <divisions>==1
         CHECK( is_equal_time(a.get_current_time(), 3.0f*k_duration_quarter) );
@@ -4766,10 +4554,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -4840,10 +4625,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -4918,10 +4700,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -4969,10 +4748,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -5020,10 +4796,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -5072,9 +4845,7 @@ SUITE(MxlAnalyserTest)
 //        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //
 ////        cout << test_name() << endl;
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//////        CHECK( check_errormsg(errormsg, expected) );
 //        CHECK( pRoot != nullptr);
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -5122,10 +4893,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -5173,10 +4941,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -5234,10 +4999,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5317,9 +5080,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
 
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -5398,10 +5159,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5498,10 +5257,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5573,10 +5330,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5670,10 +5425,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5773,10 +5526,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -5863,10 +5614,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_rest() == true );
         ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
@@ -5898,10 +5646,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_rest() == true );
         ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
@@ -5935,10 +5681,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -5975,10 +5718,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -6017,10 +5757,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -6062,10 +5799,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -6108,10 +5842,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
@@ -6165,10 +5896,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -6222,10 +5950,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -6320,10 +6045,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot == nullptr);
 
         a.do_not_delete_instruments_in_destructor();
@@ -6343,10 +6065,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
@@ -6371,10 +6090,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
@@ -6399,10 +6115,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
@@ -6429,10 +6142,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
@@ -6461,10 +6171,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
@@ -6506,10 +6213,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -6581,10 +6285,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -6683,10 +6384,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -6759,10 +6457,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_staff_info() == true );
         ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
@@ -6796,10 +6491,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_staff_info() == true );
         ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
@@ -6834,10 +6526,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_time_signature() == true );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
@@ -6865,10 +6554,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_time_signature() == true );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
@@ -6901,10 +6587,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
@@ -6941,10 +6624,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_transpose() == true );
         ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
@@ -6979,10 +6659,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_transpose() == true );
         ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
@@ -7016,10 +6693,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         CHECK( pRoot && pRoot->is_transpose() == true );
         ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
@@ -7060,10 +6734,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -7140,10 +6811,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -7219,10 +6888,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -7285,10 +6952,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -7396,10 +7061,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -7502,7 +7165,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -7575,10 +7238,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -7657,10 +7318,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -7739,10 +7398,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -7842,10 +7499,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -7986,9 +7641,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -8069,9 +7722,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -8152,9 +7803,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -8235,9 +7884,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -8317,9 +7964,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -8385,10 +8030,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot == nullptr);
         //AWARE: initialy <divisions>==1
         CHECK( is_equal_time(a.get_current_time(), 0.0f) );
@@ -8425,10 +8067,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8485,10 +8125,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         CHECK( a.my_get_num_voices() == 1 );
@@ -8543,10 +8181,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8613,10 +8249,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         CHECK( a.my_get_num_voices() == 2 );
@@ -8683,10 +8317,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8756,10 +8388,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8830,10 +8460,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8901,10 +8529,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -8974,10 +8600,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -9047,10 +8671,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -9128,11 +8750,9 @@ SUITE(MxlAnalyserTest)
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -9165,15 +8785,13 @@ SUITE(MxlAnalyserTest)
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -9238,10 +8856,8 @@ SUITE(MxlAnalyserTest)
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -9300,10 +8916,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
@@ -9357,7 +8970,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-        CHECK( errormsg.str() == expected.str() );
+        CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );

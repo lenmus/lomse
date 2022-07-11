@@ -3318,6 +3318,7 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(200);   //2.0
+        pScore->set_source_format(ImoScore::k_mnx);
         pScore->add_required_text_styles();
 
         return pScore;
@@ -3899,24 +3900,6 @@ public:
         set_result( LOMSE_NEW ImoData(pRest) );
         return true;    //success
     }
-};
-
-//@--------------------------------------------------------------------------------------
-//@ <score>
-//
-class ScoreMnxAnalyser : public MnxElementAnalyser
-{
-public:
-    ScoreMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                     LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    bool do_analysis() override
-    {
-        return false;   //failure
-    }
-
-protected:
 };
 
 //@--------------------------------------------------------------------------------------
@@ -5259,7 +5242,6 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mnx_tag_part_name:           return LOMSE_NEW PartNameMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_repeat:              return LOMSE_NEW RepeatMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_rest:                return LOMSE_NEW RestMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_mnx_tag_score:               return LOMSE_NEW ScoreMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_segno:               return LOMSE_NEW SegnoMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_sequence:            return LOMSE_NEW SequenceMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_sequence_content:    return LOMSE_NEW SequenceContentMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
