@@ -2925,14 +2925,13 @@ public:
 class ImoStaffObj : public ImoScoreObj
 {
 protected:
-    int m_staff;
-    TimeUnits m_time;
-    ColStaffObjsEntry* m_pEntry;        //entry in ColStaffObjs table associated to this staffobj
+    int m_staff = 0;
+    int m_nVoice = 0;       //1..n. voice==0 means not defined
+    TimeUnits m_time = 0.0;
+    ColStaffObjsEntry* m_pEntry = nullptr;  //entry in ColStaffObjs table associated to this staffobj
 
-    ImoStaffObj(int objtype)
-        : ImoScoreObj(objtype), m_staff(0), m_time(0.0), m_pEntry(nullptr) {}
-    ImoStaffObj(ImoId id, int objtype)
-        : ImoScoreObj(id, objtype), m_staff(0), m_time(0.0), m_pEntry(nullptr) {}
+    ImoStaffObj(int objtype) : ImoScoreObj(objtype) {}
+    ImoStaffObj(ImoId id, int objtype) : ImoScoreObj(id, objtype) {}
 
 public:
     ~ImoStaffObj() override;
@@ -2958,10 +2957,12 @@ public:
     inline TimeUnits get_time() { return m_time; }
     virtual TimeUnits get_duration() { return 0.0; }
     inline int get_staff() { return m_staff; }
+    inline int get_voice() { return m_nVoice; }
     inline ColStaffObjsEntry* get_colstaffobjs_entry() { return m_pEntry; }
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
+    inline void set_voice(int voice) { m_nVoice = voice; }
     virtual void set_time(TimeUnits rTime) { m_time = rTime; }
     inline void set_colstaffobjs_entry(ColStaffObjsEntry* pEntry) { m_pEntry = pEntry; }
 
@@ -4224,7 +4225,6 @@ class ImoDirection : public ImoStaffObj
 protected:
     Tenths  m_space = 0.0f;
     EPlacement m_placement = k_placement_default;
-    int     m_nVoice = 0;       //1..n. voice==0 means not defined
 
     // When the <direction> element contains a <sound> children related to repetition
     // marks or a <direction-type> children of type <segno>/<coda>, or a <words>
@@ -4252,14 +4252,12 @@ public:
     inline EPlacement get_placement() const { return m_placement; }
     inline int get_display_repeat() { return m_displayRepeat; }
     inline int get_sound_repeat() { return m_soundRepeat; }
-    inline int get_voice() { return m_nVoice; }
 
     //setters
     inline void set_width(Tenths space) { m_space = space; }
     inline void set_placement(EPlacement placement) { m_placement = placement; }
     inline void set_display_repeat(int repeat) { m_displayRepeat = repeat; }
     inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
-    inline void set_voice(int voice) { m_nVoice = voice; }
 
     //info
     inline bool is_display_repeat() { return m_displayRepeat != k_repeat_none; }
@@ -6138,11 +6136,11 @@ public:
 class ImoSystemInfo : public ImoSimpleObj
 {
 protected:
-    bool    m_fFirst;   //true=first, false=other
-    LUnits   m_leftMargin;
-    LUnits   m_rightMargin;
-    LUnits   m_systemDistance;
-    LUnits   m_topSystemDistance;
+    bool    m_fFirst = true;            //true=first system, false=other systems
+    LUnits   m_leftMargin = 0.0f;
+    LUnits   m_rightMargin = 0.0f;
+    LUnits   m_systemDistance = 0.0f;
+    LUnits   m_topSystemDistance = 0.0f;
 
     //to control if variables contain inherited/default values or a new value has been set
     long m_modified = 0L;
@@ -6155,7 +6153,7 @@ protected:
 
     friend class ImFactory;
     friend class ImoScore;
-    ImoSystemInfo();
+    ImoSystemInfo() : ImoSimpleObj(k_imo_system_info) {}
 
 public:
 
@@ -6179,6 +6177,10 @@ public:
     inline void set_right_margin(LUnits rValue) { m_rightMargin = rValue; m_modified |= k_modified_right_margin; }
     inline void set_system_distance(LUnits rValue) { m_systemDistance = rValue; m_modified |= k_modified_distance; }
     inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; m_modified |= k_modified_top_distance; }
+
+protected:
+    inline void set_default_system_distance(LUnits rValue) { m_systemDistance = rValue; }
+    inline void set_default_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; }
 };
 
 //---------------------------------------------------------------------------------------

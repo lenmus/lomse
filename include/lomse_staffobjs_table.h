@@ -400,21 +400,16 @@ class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
 protected:
     std::vector<TimeUnits> m_rCurTime;      //time for each voice
     std::vector<TimeUnits> m_rStaffTime;    //time for each staff
-    int         m_curVoice;
-    int         m_prevVoice;
-    int         m_numStaves;            //in current instrument
-    TimeUnits   m_rCurAlignTime;
-    ImoBarline* m_pLastBarline;
+    std::list< std::pair<ImoStaffObj*, int> > m_pendingObjs;
+    int         m_curVoice = 0;
+    int         m_prevVoice = 0;
+    int         m_numStaves = 1;            //in current instrument
+    TimeUnits   m_rCurAlignTime = 0.0;
+    TimeUnits   m_instrTime = 0.0;        //current timepos for this instrument
+    ImoBarline* m_pLastBarline = nullptr;
 
 public:
-    ColStaffObjsBuilderEngine2x(ImoScore* pScore)
-        : ColStaffObjsBuilderEngine(pScore)
-        , m_curVoice(0)
-        , m_prevVoice(0)
-        , m_rCurAlignTime(0.0)
-        , m_pLastBarline(nullptr)
-    {
-    }
+    ColStaffObjsBuilderEngine2x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
     ~ColStaffObjsBuilderEngine2x() override {}
 
 private:
@@ -429,6 +424,8 @@ private:
     void reset_counters();
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
+    void assign_timepos_to_pending_objs(TimeUnits time);
+    void assign_timepos_to_pending_objs_in_staff(int staff, TimeUnits time);
 
 };
 

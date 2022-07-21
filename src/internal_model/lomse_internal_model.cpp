@@ -3669,12 +3669,12 @@ string ImoScore::get_version_string()
 void ImoScore::set_defaults_for_system_info()
 {
     m_systemInfoFirst.set_first(true);
-    m_systemInfoFirst.set_top_system_distance(1000.0f);     //half system distance
-    m_systemInfoFirst.set_system_distance(2000.0f);         //2 cm
+    m_systemInfoFirst.set_default_top_system_distance(1000.0f);     //half system distance
+    m_systemInfoFirst.set_default_system_distance(2000.0f);         //2 cm
 
     m_systemInfoOther.set_first(false);
-    m_systemInfoOther.set_top_system_distance(1500.0f);     //1.5 cm
-    m_systemInfoOther.set_system_distance(2000.0f);         //2 cm
+    m_systemInfoOther.set_default_top_system_distance(1500.0f);     //1.5 cm
+    m_systemInfoOther.set_default_system_distance(2000.0f);         //2 cm
 }
 
 //---------------------------------------------------------------------------------------
@@ -5585,20 +5585,6 @@ ImoSlurDto::~ImoSlurDto()
 ImoStaffObj* ImoSlurDto::get_staffobj()
 {
     return m_pNote;
-}
-
-
-//=======================================================================================
-// ImoSystemInfo implementation
-//=======================================================================================
-ImoSystemInfo::ImoSystemInfo()
-    : ImoSimpleObj(k_imo_system_info)
-    , m_fFirst(true)
-    , m_leftMargin(0.0f)
-    , m_rightMargin(0.0f)
-    , m_systemDistance(0.0f)
-    , m_topSystemDistance(0.0f)
-{
 }
 
 

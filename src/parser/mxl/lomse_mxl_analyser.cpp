@@ -220,11 +220,6 @@ MxlTimeKeeper::MxlTimeKeeper(ostream& reporter, MxlAnalyser* pAnalyser)
 {
 }
 
-////---------------------------------------------------------------------------------------
-//MxlTimeKeeper::~MxlTimeKeeper()
-//{
-//}
-
 //---------------------------------------------------------------------------------------
 TimeUnits MxlTimeKeeper::duration_to_time_units(long duration)
 {
@@ -368,9 +363,9 @@ void MxlTimeKeeper::reset_for_new_measure()
 //---------------------------------------------------------------------------------------
 void MxlTimeKeeper::full_reset()
 {
-    reset_for_new_measure();
     m_time = 0.0;
     m_maxTime = 0.0;
+    reset_for_new_measure();
 }
 
 //---------------------------------------------------------------------------------------
@@ -5742,20 +5737,7 @@ protected:
 //@               delayed-inverted-turn | vertical-turn | shake |
 //@               wavy-line | mordent | inverted-mordent | schleifer |
 //@               tremolo | other-ornament]
-// Examples:
-//      <ornaments><tremolo>3</tremolo></ornaments>
-//      <ornaments>
-//          <turn/>
-//          <accidental-mark>natural</accidental-mark>
-//      </ornaments>
-//      <ornaments>
-//          <wavy-line placement="below" type="stop"/>
-//      </ornaments>
-//      <ornaments><mordent/></ornaments>
-//      <ornaments>
-//          <inverted-mordent long="yes" placement="above"/>
-//      </ornaments>
-
+//
 class OrnamentsMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5793,10 +5775,10 @@ public:
             {
                 get_ornament_symbol(pNR, k_ornament_shake);
             }
-            else if (m_childToAnalyse.name() == "wavy-line")
-            {
-                get_ornament_wavy_line(pNR);
-            }
+//            else if (m_childToAnalyse.name() == "wavy-line")
+//            {
+//                get_ornament_wavy_line(pNR);
+//            }
             else if (m_childToAnalyse.name() == "turn")
             {
                 get_ornament_symbol(pNR, k_ornament_turn);
@@ -5823,7 +5805,7 @@ public:
             }
             else if (m_childToAnalyse.name() == "tremolo")
             {
-                get_ornament_symbol(pNR, k_ornament_tremolo);
+                get_ornament_tremolo(pNR);
             }
             else if (m_childToAnalyse.name() == "other-ornament")
             {
@@ -5864,8 +5846,31 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    ImoOrnament* get_ornament_tremolo(ImoNoteRest* pNR)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoOrnament* pImo = static_cast<ImoOrnament*>(
+                                ImFactory::inject(k_imo_ornament, pDoc) );
+        pImo->set_ornament_type(k_ornament_tremolo);
+
+        //TODO  attrib: type %tremolo-type; "single"
+        //TODO  attrib: %print-style;
+        //TODO  attrib: %placement;
+        //TODO  attrib: %smufl;
+
+        //TODO  content: tremolo-marks
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+    //-----------------------------------------------------------------------------------
     void get_ornament_wavy_line(ImoNoteRest* pNR)
     {
+        //TODO: this is incorrect. wavy-line has mandatory attribute type=star/stop/continue
+        //It is not a symbol but a line with stat & stop points. Importing it as
+        //ornament symbol is not correct.
+
         //ImoOrnament* pImo =
             get_ornament_symbol(pNR, k_ornament_wavy_line);
 
@@ -5900,20 +5905,20 @@ protected:
         }
     }
 
-    //-----------------------------------------------------------------------------------
-    void set_type(ImoOrnament* UNUSED(pImo))
-    {
-//        string value = get_attribute(&m_childToAnalyse, "type");
-//        if (value == "up")
-//            pImo->set_up(true);
-//        else if (value == "below")
-//            pImo->set_up(false);
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-//                "Unknown type attrib. '" + value + "'. Ignored.");
-//        }
-    }
+//    //-----------------------------------------------------------------------------------
+//    void set_type(ImoOrnament* UNUSED(pImo))
+//    {
+////        string value = get_attribute(&m_childToAnalyse, "type");
+////        if (value == "up")
+////            pImo->set_up(true);
+////        else if (value == "below")
+////            pImo->set_up(false);
+////        else
+////        {
+////            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+////                "Unknown type attrib. '" + value + "'. Ignored.");
+////        }
+//    }
 
 };
 
@@ -9145,7 +9150,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_timeKeeper(m_reporter, this)
     , m_curMeasureNum("")
     , m_measuresCounter(0)
-    , m_curVoice(1)
+    , m_curVoice(0)
 {
     //populate the name to enum conversion map
     m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
@@ -9270,7 +9275,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
 
     m_pTree = root;
 //    m_curStaff = 0;
-    m_curVoice = 1;
+    m_curVoice = 0;
     return analyse_node(root);
 }
 
@@ -9339,22 +9344,23 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
         //barline
         if (pImo->is_barline())
         {
-            if (m_pendingStaffObjs.size() > 0)
-            {
-                int voice = get_current_voice();
-                m_timeKeeper.move_time_as_required_by_voice(voice, 0);
-                add_pending_staffobjs(voice);
-            }
+        //TODO: No test case for this. I have not found a MusicXML sample. Code
+        //is commented out so that the issue will be detected a the sample identified.
+//            if (m_pendingStaffObjs.size() > 0)
+//            {
+//                int voice = get_current_voice();
+//                m_timeKeeper.move_time_as_required_by_voice(voice, 0);
+//                add_pending_staffobjs(voice);
+//            }
 
             Linker linker( get_document_being_analysed() );
             linker.add_child_to_model(pAnchor, pImo, k_imo_barline);
 
             set_current_voice(0);
-            return;
         }
 
-        //direction
-        if (pImo->is_direction())
+        //other staffobjs, but not note/rests as they are processed in add_note_to_model()
+        else    //if (pImo->is_staffobj())
         {
             int voice = get_current_voice();
             if (voice > 0)
@@ -9364,24 +9370,24 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
                 if (m_pendingStaffObjs.size() > 0)
                     add_pending_staffobjs(voice);
 
-                static_cast<ImoDirection*>(pImo)->set_voice(voice);
+                static_cast<ImoStaffObj*>(pImo)->set_voice(voice);
                 Linker linker( get_document_being_analysed() );
                 linker.add_child_to_model(pAnchor, pImo, pImo->get_obj_type());
             }
             else
+            {
                 m_pendingStaffObjs.push_back( static_cast<ImoStaffObj*>(pImo) );
-
-            return;
+            }
         }
-
-        //other
-        m_pendingStaffObjs.push_back( static_cast<ImoStaffObj*>(pImo) );
-        return;
     }
-
-    //no anchor, it is not StaffObj or no pending <backup> or <forward>. Add to model
-    Linker linker( get_document_being_analysed() );
-    linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
+    else
+    {
+        //no anchor, it is not StaffObj or no pending <backup> or <forward>. Add to model
+        Linker linker( get_document_being_analysed() );
+        linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
+        if (pImo->is_staffobj() && !pImo->is_barline())
+            static_cast<ImoStaffObj*>(pImo)->set_voice( get_current_voice() );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -9408,8 +9414,7 @@ void MxlAnalyser::add_pending_staffobjs(int voice)
         for (auto pSO : m_pendingStaffObjs)
         {
             m_currentMD->append_child_imo(pSO);
-            if (pSO->is_direction())
-                static_cast<ImoDirection*>(pSO)->set_voice(voice);
+            pSO->set_voice(voice);
         }
     }
 

@@ -61,7 +61,6 @@ protected:
     int         m_octave = k_octave_undefined;  //also for placement on the staff when
                                                 //unpitched notes and for rests
     int         m_nDots = 0;
-    int         m_nVoice = 1;                   //1..n
     int         m_timeModifierTop = 1;          //for tuplets
     int         m_timeModifierBottom = 1;
     TimeUnits   m_duration = k_duration_quarter;        //nominal duration implied by note type and dots
@@ -70,7 +69,7 @@ protected:
     TimeUnits   m_playTime = 0.0;                       //playback time: on-set time for playback
 
 public:
-    ImoNoteRest(int objtype) : ImoStaffObj(objtype) {}
+    ImoNoteRest(int objtype) : ImoStaffObj(objtype) { m_nVoice = 1; }
     virtual ~ImoNoteRest() {}
     ImoNoteRest(const ImoNoteRest&) = delete;
     ImoNoteRest& operator= (const ImoNoteRest&) = delete;
@@ -87,7 +86,6 @@ public:
     //getters
     inline int get_note_type() { return m_nNoteType; }
     inline int get_dots() { return m_nDots; }
-    inline int get_voice() { return m_nVoice; }
     inline int get_time_modifier_top() { return m_timeModifierTop; }
     inline int get_time_modifier_bottom() { return m_timeModifierBottom; }
     inline TimeUnits get_playback_duration() { return m_playDuration; }
@@ -97,7 +95,6 @@ public:
     //setters
     inline void set_note_type(int noteType) { m_nNoteType = noteType; }
     inline void set_dots(int dots) { m_nDots = dots; }
-    inline void set_voice(int voice) { m_nVoice = voice; }
     void set_note_type_and_dots(int noteType, int dots);
     void set_time_modifiers_and_duration(int numerator, int denominator);
     void set_time_modifiers(int numerator, int denominator);

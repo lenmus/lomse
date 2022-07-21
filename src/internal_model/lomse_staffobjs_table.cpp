@@ -153,7 +153,7 @@ string ColStaffObjsEntry::dump(bool fWithIds)
     {
         s << "\t" << "-" << "\t" << "-";
     }
-    s << "\t" << m_line
+    s << "\t" << m_line << " - " << m_pImo->get_voice()
       << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
 
     return s.str();
@@ -1234,6 +1234,7 @@ void ColStaffObjsBuilderEngine2x::reset_counters()
     m_rCurAlignTime = 0.0;
     m_rMaxSegmentTime = 0.0;
     m_rStartSegmentTime = 0.0;
+    m_instrTime = 0.0;
     m_rCurTime.assign(k_max_voices, 0.0);
     m_rStaffTime.assign(m_numStaves, 0.0);
 }
@@ -1245,8 +1246,9 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
     TimeUnits duration = pSO->get_duration();
     int staff = (pSO->get_staff() == -1 ? 0 : pSO->get_staff());
 
-//    cout << "determine_timepos(), pSO=" << pSO->get_name() << ", staff=" << staff << ", duration="
-//        << duration << ", staffTime=" << m_rStaffTime[staff] << endl;
+//    cout << "determine_timepos(), pSO=" << pSO->get_name() << ", staff=" << staff
+//        << ", voice=" << pSO->get_voice() << ", duration=" << duration
+//        << ", staffTime=" << m_rStaffTime[staff];
     if (pSO->is_note_rest())
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
@@ -1280,28 +1282,68 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
 
         if (duration > 0.0)
             m_minNoteDuration = min(m_minNoteDuration, duration);
+
+//        assign_timepos_to_pending_objs_in_staff(staff, time);
     }
     else if (pSO->is_barline())
     {
         time = m_rMaxSegmentTime;
         for (int i=0; i < m_numStaves; ++i)
             m_rStaffTime[i] = time;
+
+//        assign_timepos_to_pending_objs(time);
     }
-    else if (pSO->is_direction())
+    else if (pSO->is_staffobj())
     {
-        int voice = static_cast<ImoDirection*>(pSO)->get_voice();
+        int voice = static_cast<ImoStaffObj*>(pSO)->get_voice();
         if (voice > 0)
             time = m_rCurTime[voice];
         else
-            time = m_rStaffTime[staff];
+            time = m_instrTime;
+//            time = m_rStaffTime[staff];
     }
     else
     {
-        time = m_rStaffTime[staff];
+//        time = m_rStaffTime[staff];
+        time = m_instrTime;
     }
+//    else
+//    {
+//        //add to list of pending objs
+//        m_pendingObjs.push_back( make_pair(pSO, staff) );
+//    }
 
     pSO->set_time(time);
-    m_rMaxSegmentTime = max(m_rMaxSegmentTime, time+duration);
+    m_instrTime = time + duration;
+    m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_instrTime);
+//    cout << ", assigned timepos=" << time << endl;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::assign_timepos_to_pending_objs(TimeUnits time)
+{
+    for (auto p : m_pendingObjs)
+    {
+        p.first->set_time(time);
+    }
+    m_pendingObjs.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::assign_timepos_to_pending_objs_in_staff(int staff,
+                                                                          TimeUnits time)
+{
+    list< pair<ImoStaffObj*, int> >::iterator it = m_pendingObjs.begin();
+    while (it != m_pendingObjs.end())
+    {
+        if ((*it).second == staff)
+        {
+            ((*it).first)->set_time(time);
+            it = m_pendingObjs.erase(it);
+        }
+        else
+            ++it;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1366,7 +1408,7 @@ int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
         else if (m_firstVoiceForStaff[nStaff] == nVoice)
         {
             //voice nVoice is the first voice found in this staff.
-            //Assign it the sSame line than voice 0 (nStaff)
+            //Assign it the same line than voice 0 (nStaff)
             return get_line_assigned_to(0, nStaff);
         }
         //else, assig it a line
