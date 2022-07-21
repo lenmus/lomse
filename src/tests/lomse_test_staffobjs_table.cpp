@@ -2415,6 +2415,46 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it,	0,	0,	1,	    192,	0,	"(barline simple)" );
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_24)
+    {
+        //@24. cross-staff beamed group with intermediate clef
+
+        //same score as unit-tests/colstaffobjs/09-cross-staff-beamed-group-with-intermediate-clef.lms
+        create_score(
+            "(score (vers 2.0)(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(n c3 e p2 v1 g+)(n c4 e p1 v1)"
+            "(n e3 e p2 v1)(clef F4 p1)(n e4 e p1 v1 g-)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(m_pScore);
+
+//        Document doc(m_libraryScope);
+//        doc.from_file(m_scores_path + "unit-tests/conversion/16-cross-staff-beamed-group-clef-change.xml",
+//                      Document::k_format_mxl);
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 7 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n c3 e v1 p2 (beam 31 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n c4 e v1 p1 (beam 31 =))" );
+        CHECK_ENTRY0(it, 0,    1,      0,  64,     1, "(n e3 e v1 p2 (beam 31 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(clef F4 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e4 e v1 p1 (beam 31 -))" );
+        CHECK( pTable->min_note_duration() == 32.0 );
+    }
+
     // ColStaffObjsBuilderEngine1x ------------------------------------------------------
 
 

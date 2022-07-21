@@ -224,10 +224,10 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-//MxlTimeKeeper: Helper class to manage time and keep track of current time for
-//each voice. It encloses the knowledge to manage note/rests voices, duration,
-//divisions, backup, forward, and anything related to time position.
-//
+/** MxlTimeKeeper: Helper class to manage time and keep track of current time for
+    each voice. It encloses the knowledge to manage note/rests voices, duration,
+    divisions, backup, forward, and anything related to time position.
+*/
 class MxlTimeKeeper
 {
 protected:
@@ -248,12 +248,11 @@ protected:
     long m_curTime = 0L;                //current time (local, in divisions)
 
     //other
-    bool m_fResetVoiceTime = true;      //for debug: when false vector is never reset so that values can be checked
+    bool m_fResetVoiceTime = true;      //for debug: when false, vector is never reset so that values can be checked
 
 
 public:
     MxlTimeKeeper(ostream& reporter, MxlAnalyser* pAnalyser);
-//    MxlTimeKeeper::~MxlTimeKeeper()
 
     long current_divisions() { return m_divisions; }
     void set_current_divisions(long value) { m_divisions = value; }
@@ -285,6 +284,7 @@ protected:
     int assign_voice();
 
 };
+
 
 //---------------------------------------------------------------------------------------
 //MxlAnalyser: responsible for parsing a tree of MusicXML nodes

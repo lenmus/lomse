@@ -28,6 +28,7 @@
 #include "lomse_staffobjs_table.h"
 
 #include <regex>
+#include <cstdarg>
 
 using namespace UnitTest;
 using namespace std;
@@ -194,6 +195,7 @@ public:
         cout << endl << "*** Failure in " << test_name() << ":" << endl;
     }
 
+    //-----------------------------------------------------------------------------------
     bool check_errormsg(const stringstream& msg, const stringstream& expected)
     {
         if (msg.str() != expected.str())
@@ -206,6 +208,7 @@ public:
         return true;
     }
 
+    //-----------------------------------------------------------------------------------
     list<ImoTuplet*> get_tuplets(ImoNoteRest* pNR)
     {
         list<ImoTuplet*> tuplets;
@@ -223,6 +226,7 @@ public:
         return tuplets;
     }
 
+    //-----------------------------------------------------------------------------------
     void dump_timepos_for_voices(MyMxlAnalyser& a)
     {
         std::map<int, long>& voices = a.my_get_voice_times();
@@ -232,14 +236,160 @@ public:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     void dump_music_data(ImoMusicData* pMD)
     {
         TreeNode<ImoObj>::children_iterator it = pMD->begin();
         int numObjs = pMD->get_num_children();
-        for (int i=0; i < numObjs; ++i, ++it)
+        cout << test_name() << ". Dump of MusicData:" << endl;
+        if (numObjs > 0)
         {
-            cout << test_name() << " i=," << i << ", " << (*it)->to_string() << endl;
+            for (int i=0; i < numObjs; ++i, ++it)
+            {
+                ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
+                cout << "    i=," << i << ", time=" << pSO->get_time()
+                    << ", voice=" << pSO->get_voice()
+                    << ",  " << pSO->to_string() << endl;
+            }
         }
+        else
+            cout << "    MusicData is empty." << endl;
+
+        cout << endl;
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool check_music_data(ImoMusicData* pMD, int numItems, ...)
+    {
+        std::va_list args;
+        va_start(args, numItems);
+        bool fError = pMD == nullptr;
+        if (fError)
+        {
+            cout << endl << test_name() << endl;
+            cout << "    pMD (MusicData) is nullptr" << endl;
+            return !fError;
+        }
+        if (pMD->get_num_children() != numItems)
+        {
+            if (!fError)
+                cout << endl << test_name() << endl;
+
+            cout << "    expected " << numItems << " but there are "
+                << pMD->get_num_children() << endl;
+            fError = true;
+        }
+        ImoObj::children_iterator it = pMD->begin();
+        TimeUnits timepos = va_arg(args, TimeUnits);
+        while (timepos != -999.9)
+        {
+            char* src = va_arg(args, char*);
+            bool fOk = strcmp((*it)->to_string().c_str(), src) == 0
+                       && is_equal_time( static_cast<ImoStaffObj*>(*it)->get_time(), timepos);
+            if (!fOk)
+            {
+                if (!fError)
+                    cout << test_name() << endl;
+                cout << "    result: " << static_cast<ImoStaffObj*>(*it)->get_time()
+                    << ", " << (*it)->to_string() << " ---- expected: "
+                    << timepos << ", " << src << endl;
+                fError = true;
+            }
+            ++it;
+
+            timepos = va_arg(args, TimeUnits);
+        }
+        va_end(args);
+
+        if (fError)
+            dump_music_data(pMD);
+
+        return !fError;
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool check_music_data(ImoMusicData* pMD, list<string> data)
+    {
+        int numItems = int( data.size() );
+        bool fError = pMD == nullptr;
+        if (fError)
+        {
+            cout << endl << test_name() << endl;
+            cout << "    pMD (MusicData) is nullptr" << endl;
+            return !fError;
+        }
+        if (pMD->get_num_children() != numItems)
+        {
+            if (!fError)
+                cout << endl << test_name() << endl;
+
+            cout << "    expected " << numItems << " but there are "
+                << pMD->get_num_children() << endl;
+            fError = true;
+        }
+        ImoObj::children_iterator it = pMD->begin();
+        for (auto src : data)
+        {
+            bool fOk = (*it)->to_string() == src;
+            if (!fOk)
+            {
+                if (!fError)
+                    cout << test_name() << endl;
+                cout << "    result: " << (*it)->to_string() << " ---- expected: "
+                    << src << endl;
+                fError = true;
+            }
+            ++it;
+        }
+
+        if (fError)
+            dump_music_data(pMD);
+
+        return !fError;
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool check_music_data2(ImoMusicData* pMD, list< pair<int,string> > data)
+    {
+        int numItems = int( data.size() );
+        bool fError = pMD == nullptr;
+        if (fError)
+        {
+            cout << endl << test_name() << endl;
+            cout << "    pMD (MusicData) is nullptr" << endl;
+            return !fError;
+        }
+        if (pMD->get_num_children() != numItems)
+        {
+            if (!fError)
+                cout << endl << test_name() << endl;
+
+            cout << "    expected " << numItems << " but there are "
+                << pMD->get_num_children() << endl;
+            fError = true;
+        }
+        ImoObj::children_iterator it = pMD->begin();
+        for (auto src : data)
+        {
+            ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
+            bool fOk = pSO->get_voice() == src.first
+                       && pSO->to_string() == src.second;
+            if (!fOk)
+            {
+                if (!fError)
+                    cout << test_name() << endl;
+                cout << "    result: " << pSO->get_voice() << ", "
+                    << pSO->to_string() << " ---- expected: "
+                    << src.first << ", " << src.second << endl;
+                fError = true;
+            }
+            ++it;
+        }
+
+        if (fError)
+            dump_music_data(pMD);
+
+        return !fError;
     }
 
 };
@@ -1268,16 +1418,23 @@ SUITE(MxlAnalyserTest)
                 {
                     CHECK( pInstr->get_num_staves() == 1 );
                     ImoMusicData* pMD = pInstr->get_musicdata();
-                    CHECK( pMD != nullptr );
-                    CHECK( pMD->get_num_items() == 4 );
-                    ImoObj::children_iterator it = pMD->begin();
-                    CHECK( (*it)->is_clef() == true );
-                    ++it;
-                    CHECK( (*it)->is_key_signature() == true );
-                    ++it;
-                    CHECK( (*it)->is_time_signature() == true );
-                    ++it;
-                    CHECK( (*it)->is_barline() == true );
+                    CHECK( check_music_data(pMD, 4,
+                              0.0, "(clef G p1)",
+                              0.0, "(key D)",
+                              0.0, "(time 4 4)",
+                              0.0, "(barline simple)",
+                           -999.9) );
+
+//                    CHECK( pMD != nullptr );
+//                    CHECK( pMD->get_num_items() == 4 );
+//                    ImoObj::children_iterator it = pMD->begin();
+//                    CHECK( (*it)->is_clef() == true );
+//                    ++it;
+//                    CHECK( (*it)->is_key_signature() == true );
+//                    ++it;
+//                    CHECK( (*it)->is_time_signature() == true );
+//                    ++it;
+//                    CHECK( (*it)->is_barline() == true );
                 }
             }
         }
@@ -7769,7 +7926,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -7851,7 +8007,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -7931,7 +8086,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -8011,7 +8165,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -8081,19 +8234,12 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 3 );
-        if (pMD->get_num_children() == 3)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n a5 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f5 e. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n a5 q v1 p1)",
+            "(n f5 e. v1 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8137,19 +8283,12 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 3 );
-        if (pMD->get_num_children() == 3)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n a5 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f5 e. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n a5 q v1 p1)",
+            "(n f5 e. v1 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8194,20 +8333,12 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 3 );
-        if (pMD->get_num_children() == 3)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(chord (n a5 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n c5 q v1 p1))" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(chord (n a5 q v1 p1)",
+            "(n c5 q v1 p1))",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8248,8 +8379,6 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-
         CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
@@ -8262,23 +8391,15 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 6 );
-        if (pMD->get_num_children() == 6)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n c5 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
-            CHECK_MD_OBJECT(it, "(goFwd q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n c5 q v1 p1)",
+            "(n b4 e. v1 p1)",
+            "(n a4 s v1 p1)",
+            "(goFwd q v2 p1)",
+            "(n f4 q v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8331,21 +8452,13 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 4 );
-        if (pMD->get_num_children() == 4)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 e. v1 p1)",
+            "(n a4 s v1 p1)",
+            "(n f4 q v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8402,22 +8515,14 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 5 );
-        if (pMD->get_num_children() == 5)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 q v1 p1)",
+            "(n f4 q v2 p1)",
+            "(n c4 q v1 p1)",
+            "(n g4 q v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8474,23 +8579,15 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 6 );
-        if (pMD->get_num_children() == 6)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(goFwd e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n g4 e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 q v1 p1)",
+            "(n f4 e v2 p1)",
+            "(n c4 q v1 p1)",
+            "(goFwd e v2 p1)",
+            "(n g4 e v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8543,21 +8640,13 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 4 );
-        if (pMD->get_num_children() == 4)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            //                  time,  scr
-            CHECK_MD_OBJECT(it, "(n b4 e. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n a4 s v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 e. v1 p1)",
+            "(n a4 s v1 p1)",
+            "(n f4 q v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8614,21 +8703,14 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 5 );
-        if (pMD->get_num_children() == 5)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 q v1 p1)",
+            "(n f4 q v2 p1)",
+            "(n c4 q v1 p1)",
+            "(n g4 q v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8685,22 +8767,15 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 6 );
-        if (pMD->get_num_children() == 6)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(n b4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(n f4 e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n c4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(goFwd e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(n g4 e v2 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
-
-        a.do_not_delete_instruments_in_destructor();
+        char const *r[] = {
+            "(n b4 q v1 p1)",
+            "(n f4 e v2 p1)",
+            "(n c4 q v1 p1)",
+            "(goFwd e v2 p1)",
+            "(n g4 e v2 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
         delete pRoot;
     }
 
@@ -8710,32 +8785,45 @@ SUITE(MxlAnalyserTest)
         //@    (n a4 q v1)(dir 1)(na f4 q v1)(dir 2)(na d4 q v1)(r q v1)(r h v1)
         //@    -> the same
 
+        //............
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "unit-tests/conversion/12-directions-in-chord.xml",
-                      Document::k_format_mxl);
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        stringstream errormsg;
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/12-directions-in-chord.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        //...............
+//        doc.from_file(m_scores_path + "unit-tests/conversion/12-directions-in-chord.xml",
+//                      Document::k_format_mxl);
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
 
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 10 );
-        if (pMD->get_num_children() == 10)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(clef G p1)" );
-            CHECK_MD_OBJECT(it, "(time 4 4)" );
-            CHECK_MD_OBJECT(it, "(chord (n a4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark))" );
-            CHECK_MD_OBJECT(it, "(n f4 q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir empty)" );
-            CHECK_MD_OBJECT(it, "(n d4 q v1 p1 (dyn \"p\")))" );
-            CHECK_MD_OBJECT(it, "(r q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(r h v1 p1)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
+        char const *r[] = {
+            "(clef G p1)",
+            "(time 4 4)",
+            "(chord (n a4 q v1 p1)",
+            "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark))",
+            "(n f4 q v1 p1)",
+            "(dir empty)",
+            "(n d4 q v1 p1 (dyn \"p\")))",
+            "(r q v1 p1)",
+            "(r h v1 p1)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_13)
@@ -8743,34 +8831,46 @@ SUITE(MxlAnalyserTest)
         //@13. two tied chords. To fix a bug: <notations> were processed before setting
         //@    the voice and thus, start-end of ties were not properly matched
 
+        //............
+        Document doc(m_libraryScope);
         stringstream errormsg;
+        XmlParser parser;
         stringstream expected;
-        Document doc(m_libraryScope, errormsg);
-        doc.from_file(m_scores_path + "unit-tests/conversion/13-tied-chords.xml",
-                      Document::k_format_mxl);
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( check_errormsg(errormsg, expected) );
+        parser.parse_file(m_scores_path + "unit-tests/conversion/13-tied-chords.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        //...............
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope, errormsg);
+//        doc.from_file(m_scores_path + "unit-tests/conversion/13-tied-chords.xml",
+//                      Document::k_format_mxl);
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( check_errormsg(errormsg, expected) );
+
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 7 );
-        if (pMD->get_num_children() == 7)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
-            CHECK_MD_OBJECT(it, "(time 3 4)" );
-            CHECK_MD_OBJECT(it, "(chord (n e2 h v3 p1 (stem up)(tie 1 start))" );
-            CHECK_MD_OBJECT(it, "(n e3 h v3 p1 (stem up)(tie 2 start)))" );
-            CHECK_MD_OBJECT(it, "(chord (n e2 q v3 p1 (stem up)(tie 1 stop))" );
-            CHECK_MD_OBJECT(it, "(n e3 q v3 p1 (stem up)(tie 2 stop)))" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
+        char const *r[] = {
+            "(clef F4 p1)",
+            "(time 3 4)",
+            "(chord (n e2 h v3 p1 (stem up)(tie 1 start))",
+            "(n e3 h v3 p1 (stem up)(tie 2 start)))",
+            "(chord (n e2 q v3 p1 (stem up)(tie 1 stop))",
+            "(n e3 q v3 p1 (stem up)(tie 2 stop)))",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_14)
@@ -8778,42 +8878,54 @@ SUITE(MxlAnalyserTest)
         //@14. words. To fix a bug: <direction> incorrectly moved after first note
         //@    of second voice
 
+        //............
+        Document doc(m_libraryScope);
         stringstream errormsg;
+        XmlParser parser;
         stringstream expected;
-        Document doc(m_libraryScope, errormsg);
-        doc.from_file(m_scores_path + "unit-tests/conversion/14-words.xml",
-                      Document::k_format_mxl);
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
+        parser.parse_file(m_scores_path + "unit-tests/conversion/14-words.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+
         CHECK( check_errormsg(errormsg, expected) );
-
-//        cout << test_name() << endl;
-//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-//        cout << pTable->dump();
-
-//        cout << test_name() << endl;
+        CHECK( pRoot && pRoot->is_document() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        //...............
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope, errormsg);
+//        doc.from_file(m_scores_path + "unit-tests/conversion/14-words.xml",
+//                      Document::k_format_mxl);
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        CHECK( check_errormsg(errormsg, expected) );
+//
+////        cout << test_name() << endl;
+////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+////        cout << pTable->dump();
 
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 11 );
-        if (pMD->get_num_children() == 11)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(clef F4 p1)" );
-            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
-            CHECK_MD_OBJECT(it, "(time 3 4)" );
-            CHECK_MD_OBJECT(it, "(r e v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 p1 (text \"dolce\"))" );
-            CHECK_MD_OBJECT(it, "(n e3 e v1 p1 (stem down))" );
-            CHECK_MD_OBJECT(it, "(n e3 q v1 p1 (stem down))" );
-            CHECK_MD_OBJECT(it, "(n c4 q v1 p1 (stem down))" );
-            CHECK_MD_OBJECT(it, "(n a2 q v2 p2 (stem up))" );
-            CHECK_MD_OBJECT(it, "(r h v2 p2)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
+        char const *r[] = {
+            "(clef F4 p1)",
+            "(clef F4 p2)",
+            "(time 3 4)",
+            "(r e v1 p1)",
+            "(dir 0 p1 (text \"dolce\"))",
+            "(n e3 e v1 p1 (stem down))",
+            "(n e3 q v1 p1 (stem down))",
+            "(n c4 q v1 p1 (stem down))",
+            "(n a2 q v2 p2 (stem up))",
+            "(r h v2 p2)",
+            "(barline simple)" };
+        list<string> result(r, r + sizeof(r) / sizeof(*r));
+        CHECK( check_music_data(pMD, result) );
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_15)
@@ -8855,8 +8967,6 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
-//        cout << test_name() << endl;
-
         CHECK( check_errormsg(errormsg, expected) );
         CHECK( pRoot && pRoot->is_document() );
 
@@ -8870,24 +8980,259 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-//        dump_music_data(pMD);
-        CHECK( pMD->get_num_children() == 8 );
-        if (pMD->get_num_children() == 8)
-        {
-            ImoObj::children_iterator it = pMD->begin();
-            CHECK_MD_OBJECT(it, "(clef G p1)" );
-            CHECK_MD_OBJECT(it, "(key C)" );
-            CHECK_MD_OBJECT(it, "(time 4 4)" );
-            CHECK_MD_OBJECT(it, "(n f4 w v1 p1)" );
-            CHECK_MD_OBJECT(it, "(clef F4 p2)" );
-            CHECK_MD_OBJECT(it, "(key D)" );
-            CHECK_MD_OBJECT(it, "(n b2 w v2 p2)" );
-            CHECK_MD_OBJECT(it, "(barline simple)" );
-        }
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(key C)" },
+            { 0, "(time 4 4)" },
+            { 1, "(n f4 w v1 p1)" },
+            { 2, "(clef F4 p2)" },
+            { 2, "(key D)" },
+            { 2, "(n b2 w v2 p2)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_16)
+    {
+        //@16. cross-staff beamed group, clef change in middle.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path
+                  + "unit-tests/conversion/16-cross-staff-beamed-group-clef-change.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 1 );
+        CHECK( a.my_get_timepos_for_voice(2) == 4L );   //in divisions
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(clef F4 p2)" },
+            { 2, "(n a3 e v2 p2 (beam 43 +))" },
+            { 2, "(n e4 e v2 p1 (beam 43 =))" },
+            { 2, "(n a3 e v2 p2 (beam 43 =))" },
+            { 2, "(clef F4 p1)" },
+            { 2, "(n e3 e v2 p1 (beam 43 -))" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_17)
+    {
+        //@17. barline, non-timed, forward.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path
+                  + "unit-tests/conversion/22-forward-to-move-end-of-wedge.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        std::map<int, long>& voices = a.my_get_voice_times();
+        CHECK( voices.size() == 2 );
+        CHECK( a.my_get_timepos_for_voice(1) == 6144L );   //in divisions
+        CHECK( a.my_get_timepos_for_voice(2) == 12L );   //in divisions
+//        dump_timepos_for_voices(a);
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef F4 p1)" },
+            { 0, "(key C)" },
+            { 0, "(time 3 4)" },
+            { 1, "(n e3 h. v1 p1)" },
+            { 2, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 2, "(goFwd f v2 p1)" },
+            { 2, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_18)
+    {
+        //@18. barline, wedge, note.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/20-wedge.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(clef F4 p2)" },
+            { 0, "(key C)" },
+            { 0, "(time 2 4)" },
+            { 1, "(goFwd q v1 p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(r e v1 p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(n g4 e v1 p1)" },
+            { 2, "(n g4 q v2 p1)" },
+            { 2, "(n d3 q v2 p2)" },
+            { 3, "(r q v3 p2)" },
+            { 0, "(barline simple)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(n f5 q v1 p1 (stem down))" },
+            { 1, "(n b4 e v1 p1 (stem down))" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(n g4 e v1 p1 (stem down))" },
+            { 3, "(n e3 q v3 p2 (stem down))" },
+            { 3, "(r q v3 p2)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_19)
+    {
+        //@19. backup, forward, non-timed
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/23-word-direction.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(key C)" },
+            { 0, "(time 3 8)" },
+            { 1, "(n d5 q v1 p1)" },
+            { 1, "(r e v1 p1)" },
+            { 2, "(goFwd q. v2 p1)" },
+            { 2, "(dir 0 p1 (text \"(a 2)\"))" },
+            { 3, "(n d4 q. v3 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(n b4 q. v1 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_20)
+    {
+        //@20. forward, barline
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/19-foward-before-barline.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef F4 p1)" },
+            { 0, "(key C)" },
+            { 0, "(time 2 4)" },
+            { 1, "(n e3 e v1 p1 (stem up))" },
+            { 1, "(n e3 e v1 p1)" },
+            { 1, "(n c3 e v1 p1)" },
+            { 1, "(n a2 e v1 p1)" },
+            { 3, "(r q v3 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_21)
+    {
+        //@21. clef change after <forward>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/18-clef-change-after-forward.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef F4 p1)" },
+            { 0, "(time 2 4)" },
+            { 2, "(n d3 q v2 p1)" },
+            { 2, "(n b3 q v2 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(goFwd q v1 p1)" },
+            { 1, "(clef G p1)" },
+            { 1, "(n c4 q v1 p1)" },
+            { 2, "(n a3 q v2 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
 
     //@ miscellaneous -------------------------------------------------------------
 
@@ -9029,7 +9374,7 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
+        //a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
