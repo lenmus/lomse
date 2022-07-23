@@ -89,7 +89,7 @@ public:
         {
             failure_header();
             cout << "  result=[" << ss << "]" << endl;
-            cout << "expected=[" << expected << "]" << endl;
+            cout << endl << "expected=[" << expected << "]" << endl;
             return false;
         }
         return true;
@@ -114,7 +114,7 @@ public:
                     cout << "  result=[" << ss.substr(iStart, iEnd-iStart) << "]" << endl;
                 }
             }
-            cout << "expected=[" << expected << "]" << endl;
+            cout << endl << "expected=[" << expected << "]" << endl;
             return false;
         }
         return true;
@@ -137,7 +137,7 @@ public:
                 else
                     cout << "  result=[" << ss.substr(iStart, iEnd-iStart) << "]" << endl;
             }
-            cout << "expected=[" << expected << "]" << endl;
+            cout << endl << "expected=[" << expected << "]" << endl;
             return false;
         }
         return true;
@@ -187,20 +187,17 @@ SUITE(MxlExporterTest)
 //        //02070-dynamics-marks
 //        //02080-all-accents
 //        //02081-all-caesura-and-breath-marks
-//        //Lilypond tests
-//        //02b-Rests-PitchedRests.xml", Document::k_format_mxl);
-//        //12a-Clefs.xml", Document::k_format_mxl);
 //        //doc.from_file(m_scores_path + "00205-multimetric.lmd", Document::k_format_lmd );
 //        //doc.from_file(m_scores_path + "00023-spacing-in-prolog-two-instr.lms" );
 ////        doc.from_file(m_scores_path + "50120-fermatas.lms" );
-//        //doc.from_file(m_scores_path + "unit-tests/xml-export/018-clef-change-barline-double.xml", Document::k_format_mxl);
-//        doc.from_file("/datos/cecilio/lm/projects/lomse//vregress/scores/lilypond/01e-Pitches-ParenthesizedAccidentals.xml", Document::k_format_mxl);
+//        //doc.from_file(m_scores_path + "unit-tests/xml-export/021-single-voice-cross-staff-clef-change.xml", Document::k_format_mxl);
+//        doc.from_file(m_scores_path + + "unit-tests/colstaffobjs/09-cross-staff-beamed-group-with-intermediate-clef.lms");
+//        //doc.from_file("/datos/cecilio/lm/projects/lomse//vregress/scores/lilypond/43d-MultiStaff-StaffChange.xml", Document::k_format_mxl);
 ////        doc.from_file(m_scores_path + "00110-triplet-against-5-tuplet-4.14.lms" );
 ////        doc.from_file(m_scores_path + "50130-metronome.lms" );
 ////        doc.from_file(m_scores_path + "50180-new-system-tag.lms" );
 ////        doc.from_file(m_scores_path + "50110-graphic-line-text.lms" );
 ////        doc.from_file("/datos/cecilio/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
-//        //doc.from_file(m_scores_path + "MahlFaGe4Sample.mxl,
 //        ImoDocument* pRoot = doc.get_im_root();
 //
 //        MxlExporter exporter(m_libraryScope);
@@ -210,9 +207,6 @@ SUITE(MxlExporterTest)
 //        if (file1.good())
 //        {
 //            string source = exporter.get_source(pRoot);
-////            cout << "----------------------------------------------------" << endl;
-////            cout << source << endl;
-////            cout << "----------------------------------------------------" << endl;
 //            file1.write(source.c_str(), source.size());
 //            file1.close();
 //        }
@@ -384,7 +378,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, backup_01)
     {
-        //@01. two voices.
+        //@01. backup. two voices.
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
@@ -646,9 +640,9 @@ SUITE(MxlExporterTest)
 
     // @ beam ---------------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlExporterTestFixture, beam_00)
+    TEST_FIXTURE(MxlExporterTestFixture, beam_01)
     {
-        //@00. beam. begin and end
+        //@01. beam. begin and end
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument"
@@ -676,9 +670,9 @@ SUITE(MxlExporterTest)
         CHECK( check_result(source, expected) );
     }
 
-    TEST_FIXTURE(MxlExporterTestFixture, beam_01)
+    TEST_FIXTURE(MxlExporterTestFixture, beam_02)
     {
-        //@01. chord: beam only in base note. backward hook
+        //@02. beam. chord: beam only in base note. backward hook
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData (clef G)"
@@ -727,7 +721,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, clef_01)
     {
-        //@01 clef, minimal test. sign and line
+        //@01 clef. minimal test. sign and line
 
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
@@ -742,7 +736,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, clef_02)
     {
-        //@02. staff added when instrument has more than one
+        //@02. clef. staff added when instrument has more than one
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument (staves 2)"
@@ -767,7 +761,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, clef_03)
     {
-        //@03. intermediate clef
+        //@03. clef. intermediate clef
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument (musicData"
@@ -798,7 +792,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, clef_04)
     {
-        //@04. clef: print-style, print-object
+        //@04. clef. print-style, print-object
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument (musicData"
@@ -821,7 +815,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, defaults_01)
     {
-        //@01. defaults not exported when not imported from MusicXML
+        //@01. defaults not exported when values not modified (imported or user set)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument (musicData"
@@ -837,7 +831,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, defaults_02)
     {
-        //@02. scaling
+        //@02. defaults. scaling
 
         Document doc(m_libraryScope);
         doc.from_string("<score-partwise version='3.0'>"
@@ -855,13 +849,13 @@ SUITE(MxlExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
         string expected = "<defaults><scaling><millimeters>7.2</millimeters>"
-            "<tenths>40</tenths></scaling>";
-        CHECK( check_result_contains(source, expected, "<defaults>", "</scaling>") );
+            "<tenths>40</tenths></scaling></defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
     }
 
     TEST_FIXTURE(MxlExporterTestFixture, defaults_03)
     {
-        //@03. page layout
+        //@03. defaults. page layout
 
         Document doc(m_libraryScope);
         doc.from_string("<score-partwise version='3.0'>"
@@ -896,7 +890,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, defaults_04)
     {
-        //@04. system layout
+        //@04. defaults. system layout
 
         Document doc(m_libraryScope);
         doc.from_string("<score-partwise version='3.0'>"
@@ -918,18 +912,19 @@ SUITE(MxlExporterTest)
         MxlExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        string expected = "<system-layout>"
-                "<system-margins><left-margin>248</left-margin>"
-                    "<right-margin>206</right-margin></system-margins>"
-                "<system-distance>561</system-distance>"
-                "<top-system-distance>436</top-system-distance>"
-            "</system-layout>";
-        CHECK( check_result_contains(source, expected, "system-layout") );
+        string expected = "<defaults>"
+            "<scaling><millimeters>3.7703</millimeters><tenths>40</tenths></scaling>"
+            "<system-layout><system-margins><left-margin>248</left-margin>"
+                "<right-margin>206</right-margin></system-margins>"
+            "<system-distance>561</system-distance>"
+            "<top-system-distance>436</top-system-distance>"
+            "</system-layout></defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
     }
 
 //    TEST_FIXTURE(MxlExporterTestFixture, defaults_05)
 //    {
-//        //@05. staff layout
+//        //@05. defaults. staff layout
 //
 //        Document doc(m_libraryScope);
 //        doc.from_string("<score-partwise version='3.0'>"
@@ -1451,7 +1446,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, direction_16)
     {
-        //@16. sound as child of <measure>
+        //@16. direction. sound as child of <measure>
 
         Document doc(m_libraryScope);
         doc.from_string("<score-partwise version='3.0'><part-list>"
@@ -1483,7 +1478,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, direction_17)
     {
-        //@17. dynamics moved to <note> in importer is restored in exporter
+        //@17. direction. dynamics moved to <note> in importer is restored in exporter
 
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "unit-tests/xml-export/012-directive-moved-to-note.xml",
@@ -2389,7 +2384,7 @@ SUITE(MxlExporterTest)
 
     TEST_FIXTURE(MxlExporterTestFixture, ornaments_01)
     {
-        //@01. notations. ornaments
+        //@01. ornaments. turn
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -2426,6 +2421,52 @@ SUITE(MxlExporterTest)
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
+
+    TEST_FIXTURE(MxlExporterTestFixture, ornaments_02)
+    {
+        //@02. ornaments. tremolo
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<ornaments><tremolo type=\"single\">3</tremolo></ornaments>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pNote);
+            string expected = "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type>"
+                "<notations><ornaments><tremolo type=\"single\">3</tremolo></ornaments>"
+                "</notations></note>";
+            CHECK( check_result(source, expected) );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+//    TEST_FIXTURE(MxlExporterTestFixture, ornaments_xx)
+//    {
+//        //@xx. ornaments. wavy-line
+//
+//    }
 
     //@ part-list -----------------------------------------------------------------------
 
@@ -2896,6 +2937,47 @@ SUITE(MxlExporterTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlExporterTestFixture, technical_04)
+    {
+        //@04. technical notations. fingering: substitution, alternate
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        parser.parse_text(
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<technical><fingering>5</fingering>"
+                        "<fingering substitution=\"yes\">3</fingering>"
+                        "<fingering alternate=\"yes\">2</fingering></technical>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser2 a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg_empty(errormsg.str()) );
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        if (pNote)
+        {
+            MxlExporter exporter(m_libraryScope);
+            exporter.set_remove_newlines(true);
+            string source = exporter.get_source(pNote);
+            string expected = "<technical><fingering>5</fingering>"
+                "<fingering substitution=\"yes\">3</fingering>"
+                "<fingering alternate=\"yes\">2</fingering></technical>";
+            CHECK( check_result_contains(source, expected, "<technical>", "</notations>") );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
     //@ tie -----------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlExporterTestFixture, tie_01)
@@ -3139,8 +3221,80 @@ SUITE(MxlExporterTest)
             "</notations></note>";
         CHECK( check_result(source, expected) );
     }
-////
-////
+
+    //@ tests to check StaffObjs order --------------------------------------------------
+
+    TEST_FIXTURE(MxlExporterTestFixture, staffobjs_order_01)
+    {
+        //@01. order. cross-staff beamed notes
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/020-single-voice-cross-staff.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\"><attributes><divisions>480</divisions><staves>2</staves>"
+            "<clef number=\"1\"><sign>G</sign><line>2</line></clef><clef number=\"2\">"
+            "<sign>F</sign><line>4</line></clef></attributes><note><pitch><step>A</step>"
+            "<octave>3</octave></pitch><duration>240</duration><voice>2</voice>"
+            "<type>eighth</type><staff>2</staff><beam number=\"1\">begin</beam></note>"
+            "<note><pitch><step>E</step><octave>4</octave></pitch><duration>240</duration>"
+            "<voice>2</voice><type>eighth</type><staff>1</staff>"
+            "<beam number=\"1\">continue</beam></note><note><pitch><step>A</step>"
+            "<octave>3</octave></pitch><duration>240</duration><voice>2</voice>"
+            "<type>eighth</type><staff>2</staff><beam number=\"1\">continue</beam>"
+            "</note><note><pitch><step>E</step><octave>3</octave></pitch>"
+            "<duration>240</duration><voice>2</voice><type>eighth</type><staff>1</staff>"
+            "<beam number=\"1\">end</beam></note></measure>";
+        CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, staffobjs_order_02)
+    {
+        //@02. order. cross-staff beamed notes with intermediate clef
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/021-single-voice-cross-staff-clef-change.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\"><attributes><divisions>480</divisions><staves>2</staves>"
+            "<clef number=\"1\"><sign>G</sign><line>2</line></clef><clef number=\"2\">"
+            "<sign>F</sign><line>4</line></clef></attributes><note><pitch><step>A</step>"
+            "<octave>3</octave></pitch><duration>240</duration><voice>2</voice>"
+            "<type>eighth</type><staff>2</staff><beam number=\"1\">begin</beam></note>"
+            "<note><pitch><step>E</step><octave>4</octave></pitch><duration>240</duration>"
+            "<voice>2</voice><type>eighth</type><staff>1</staff>"
+            "<beam number=\"1\">continue</beam></note><note><pitch><step>A</step>"
+            "<octave>3</octave></pitch><duration>240</duration><voice>2</voice>"
+            "<type>eighth</type><staff>2</staff><beam number=\"1\">continue</beam>"
+            "</note><attributes><clef number=\"1\"><sign>F</sign><line>4</line></clef>"
+            "</attributes><note><pitch><step>E</step><octave>3</octave></pitch>"
+            "<duration>240</duration><voice>2</voice><type>eighth</type><staff>1</staff>"
+            "<beam number=\"1\">end</beam></note></measure>";
+        CHECK( check_result(source, expected) );
+    }
+
 ////    // color ------------------------------------------------------------------------------------
 ////
 ////    TEST_FIXTURE(MxlExporterTestFixture, color)
