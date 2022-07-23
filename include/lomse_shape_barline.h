@@ -69,6 +69,8 @@ protected:
                          LUnits uHeight, Color color);
     void draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, Color color);
     void draw_repeat_dots_for_all_staves(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, Color color);
+    void draw_doted_line(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, LUnits uyBottom, Color color);
+    void draw_dashed_line(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, LUnits uyBottom, Color color);
 
 };
 

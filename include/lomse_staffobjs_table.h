@@ -424,8 +424,6 @@ private:
     void reset_counters();
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    void assign_timepos_to_pending_objs(TimeUnits time);
-    void assign_timepos_to_pending_objs_in_staff(int staff, TimeUnits time);
 
 };
 

@@ -3535,10 +3535,23 @@ string LdpExporter::barline_type_to_ldp(int barlineType)
         case k_barline_start:
             return "start";
         case k_barline_double_repetition:
-        case k_barline_double_repetition_alt:
             return "doubleRepetition";
+        case k_barline_double_repetition_alt:
+            return "doubleRepetitionAlt";
+        case k_barline_heavy_heavy:
+            return "heavy-heavy";
         case k_barline_none:
             return "none";
+        case k_barline_dashed:
+            return "dashed";
+        case k_barline_dotted:
+            return "dotted";
+        case k_barline_heavy:
+            return "heavy";
+        case k_barline_short:
+            return "short";
+        case k_barline_tick:
+            return "tick";
         default:
             return "undefined";
     }

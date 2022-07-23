@@ -85,7 +85,19 @@ void GmoShapeBarline::compute_width()
             break;
 
         case k_barline_simple:
+        case k_barline_dashed:
+        case k_barline_dotted:
+        case k_barline_short:
+        case k_barline_tick:
             width = m_uThinLineWidth;
+            break;
+
+        case k_barline_heavy:
+            width = m_uThickLineWidth;
+            break;
+
+        case k_barline_heavy_heavy:
+            width = m_uThickLineWidth + m_uSpacing + m_uThickLineWidth;
             break;
 
         default:
@@ -162,7 +174,18 @@ void GmoShapeBarline::determine_lines_relative_positions()
             m_xRightLine = uxPos + m_uThickLineWidth;
             break;
 
+        case k_barline_heavy_heavy:
+            m_xLeftLine = uxPos;
+            uxPos += m_uThickLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThickLineWidth;
+            break;
+
         case k_barline_simple:
+        case k_barline_dashed:
+        case k_barline_dotted:
+        case k_barline_heavy:
+        case k_barline_short:
+        case k_barline_tick:
             m_xLeftLine = uxPos;
             m_xRightLine = uxPos + m_uThinLineWidth;
             break;
@@ -251,6 +274,44 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
         case k_barline_simple:
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             break;
+
+        case k_barline_heavy_heavy:
+            draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
+            uxPos += m_uThickLineWidth + m_uSpacing;
+            draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
+            break;
+
+        case k_barline_dashed:
+            draw_dashed_line(pDrawer, uxPos, uyTop, uyBottom, color);
+            break;
+
+        case k_barline_dotted:
+            //a dot in the center of each space
+            draw_doted_line(pDrawer, uxPos, uyTop, uyBottom, color);
+            break;
+
+        case k_barline_heavy:
+            draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
+            break;
+
+        case k_barline_short:
+        {
+            //a partial	barline between the 2nd and 4th lines
+            LUnits uHeight = (uyBottom - uyTop) / 4.0f;    //10 tenths
+            uyTop += uHeight;
+            uyBottom -= uHeight;
+            draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
+            break;
+        }
+        case k_barline_tick:
+        {
+            //a	short stroke through the top line
+            LUnits uHeight = (uyBottom - uyTop) / 4.0f;    //10 tenths
+            uyTop -= uHeight / 2.0f;
+            uyBottom = uyTop + uHeight;
+            draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
+            break;
+        }
     }
     pDrawer->render();
 
@@ -283,6 +344,43 @@ void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTo
     pDrawer->line(uxPos + uWidth/2, uyTop,
                   uxPos + uWidth/2, uyTop + uHeight,
                   uWidth, k_edge_normal);
+    pDrawer->end_path();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeBarline::draw_doted_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop,
+                                      LUnits uyBottom, Color color)
+{
+    LUnits space = (uyBottom - uyTop) / 4.0f;    //10 tenths
+    uyTop += space / 2.0f;
+    LUnits radius = m_uRadius / 2.0f;
+
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->stroke(color);
+    for (int i=0; i < 4; ++i)
+    {
+        pDrawer->circle(uxPos, uyTop, radius);
+        uyTop += space;
+    }
+    pDrawer->end_path();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeBarline::draw_dashed_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop,
+                                       LUnits uyBottom, Color color)
+{
+    LUnits length = (uyBottom - uyTop) / 11.0f;    //3.363 tenths
+    uxPos += m_uThinLineWidth/2;
+
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->stroke(color);
+    for (int i=0; i < 6; ++i)
+    {
+        pDrawer->line(uxPos, uyTop, uxPos, uyTop + length, m_uThinLineWidth, k_edge_normal);
+        uyTop += length + length;
+    }
     pDrawer->end_path();
 }
 

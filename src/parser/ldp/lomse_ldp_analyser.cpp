@@ -967,6 +967,22 @@ protected:
             type = k_barline_start_repetition;
         else if (value == "doubleRepetition")
             type = k_barline_double_repetition;
+        else if (value == "doubleRepetitionAlt")
+            type = k_barline_double_repetition_alt;
+        else if (value == "heavy-heavy")
+            type = k_barline_heavy_heavy;
+        else if (value == "dashed")
+            type = k_barline_dashed;
+        else if (value == "dotted")
+            type = k_barline_dotted;
+        else if (value == "heavy")
+            type = k_barline_heavy;
+        else if (value == "short")
+            type = k_barline_short;
+        else if (value == "tick")
+            type = k_barline_tick;
+        else if (value == "none")
+            type = k_barline_none;
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),

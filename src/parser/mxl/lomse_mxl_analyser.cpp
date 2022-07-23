@@ -2492,7 +2492,6 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ http://www.musicxml.com/for-developers/musicxml-dtd/barline-elements/
 //@ <!ELEMENT barline (bar-style?, %editorial;, wavy-line?,
 //@     segno?, coda?, (fermata, fermata?)?, ending?, repeat?)>
 //@ <!ATTLIST barline
@@ -2501,25 +2500,20 @@ protected:
 //@     coda CDATA #IMPLIED
 //@     divisions CDATA #IMPLIED
 //@ >
-//@
-//@ <barline location="right">
-//@     <bar-style>light-heavy</bar-style>
-//@     <ending number="1" type="stop"/>
-//@     <repeat direction="backward" winged="none"/>
-//@ </barline>
-
+//
 class BarlineMxlAnalyser : public MxlElementAnalyser
 {
 protected:
-    bool        m_fNewBarline;
-    ImoBarline* m_pBarline;
+    bool m_fRightMiddle = false;         //true for middle or right barline, false for left barline
+    ImoBarline* m_pBarline = nullptr;
+    string m_direction;     //for repeat. direction: backward, forward or empty
+    string m_wings;         //for repeat. winged: none | straight | curved | double-straight | double-curved
+    int m_times = 1;        //for repeat. number of repetitions
 
 public:
     BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_fNewBarline(false)
-        , m_pBarline(nullptr)
     {
     }
 
@@ -2530,15 +2524,15 @@ public:
         //previous right one. Otherwise (middle or right barlines) the barline is
         //created. This is done as follows:
         //
-        //1. for right and middle barlines the ImoBarline is created, but left barlines
-        //   the previous ImoBarline is retrieved:      create_barline(location);
+        //1. Create or reuse ImoBarline: for right and middle barlines a new ImoBarline
+        //   is created, but for left barline the previous ImoBarline is retrieved.
+        //           method create_barline()
         //
         //2. for barlines having <repeat> element, fix the barline type to add the repeat dots:
-        //            EBarline type = find_barline_type(barStyle, repeat);
+        //            EBarline type = find_barline_type(barStyle);
         //
         //3. if left barline exists, update its info by combining it with current one:
         //            combine_barlines(m_pBarline, type);
-
 
             //attributes:
 
@@ -2558,21 +2552,11 @@ public:
             //content:
 
         //@ bar-style?
-        //@ Valid values are regular, dotted, dashed, heavy, light-light,
-        //@ light-heavy, heavy-light, heavy-heavy, tick (a
-        //@ short stroke through the top line), short (a partial
-        //@ barline between the 2nd and 4th lines), and none.
-        //@ <!ELEMENT bar-style (#PCDATA)>
-        //@ <!ATTLIST bar-style
-        //@     %color;
-        //@>
-        //
-        //TODO: proper analysis and validation of <bar-style>
         string barStyle = "";
         if (get_optional("bar-style"))
             barStyle = m_childToAnalyse.value();
         if (barStyle.empty())
-            barStyle = "none";
+            barStyle = (location == "left" ? "none" : "regular");
 
         create_barline(location);
 
@@ -2587,16 +2571,18 @@ public:
         analyse_optional("ending", m_pBarline);
 
         // repeat?
-        string repeat = "";
         if (get_optional("repeat"))
-            repeat = get_repeat();
+            get_repeat_info();
 
         error_if_more_elements();
 
-        EBarline type = find_barline_type(barStyle, repeat);
+        EBarline type = find_barline_type(barStyle);
         combine_barlines(m_pBarline, type);
+        set_num_repeats();
 
-        if (m_fNewBarline)
+        //TODO: do anything with m_wings
+
+        if (m_fRightMiddle)
         {
             add_to_model(m_pBarline);
             m_pAnalyser->save_last_barline(m_pBarline);
@@ -2607,13 +2593,14 @@ public:
 
 protected:
 
+    //-----------------------------------------------------------------------------------
     void create_barline(const string& location)
     {
         if (location == "left" && m_pAnalyser->get_last_barline())
         {
             //this barline must be combined with previous barline
             m_pBarline = m_pAnalyser->get_last_barline();
-            m_fNewBarline = false;
+            m_fRightMiddle = false;
             return;
         }
 
@@ -2621,12 +2608,15 @@ protected:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         m_pBarline = static_cast<ImoBarline*>(
                             ImFactory::inject(k_imo_barline, pDoc) );
-        m_pBarline->set_type(k_barline_simple);
-        m_fNewBarline = true;
+        m_pBarline->set_type(k_barline_unknown);
+        m_fRightMiddle = true;
     }
 
-    EBarline find_barline_type(const string& barType, const string& repeat)
+    //-----------------------------------------------------------------------------------
+    EBarline find_barline_type(const string& barType)
     {
+        string barStyle = m_childToAnalyse.value();
+
         bool fError = false;
         EBarline type = k_barline_simple;
 
@@ -2634,48 +2624,45 @@ protected:
             type = k_barline_none;
         else if (barType == "regular")
             type = k_barline_simple;
-//        else if (barType == "dotted")
-//            type = ?
-//        else if (barType == "dashed")
-//            type = ?
-//        else if (barType == "heavy")
-//            type = ?
+        else if (barType == "dotted")
+            type = k_barline_dotted;
+        else if (barType == "dashed")
+            type = k_barline_dashed;
+        else if (barType == "heavy")
+            type = k_barline_heavy;
         else if (barType == "light-light")
             type = k_barline_double;
+        else if (barType == "tick")   //a short stroke through the top line
+            type = k_barline_tick;
+        else if (barType == "short")  //a partial barline between the 2nd and 4th lines
+            type = k_barline_short;
         else if (barType == "light-heavy")
         {
-            if (repeat == "backward")
+            if (m_direction == "backward")
                 type = k_barline_end_repetition;
-            else if (repeat.empty())
+            else if (m_direction.empty())
                 type = k_barline_end;
             else
                 fError = true;
         }
         else if (barType == "heavy-light")
         {
-            if (repeat == "forward")
+            if (m_direction == "forward")
                 type = k_barline_start_repetition;
-            else if (repeat.empty())
+            else if (m_direction.empty())
                 type = k_barline_start;
             else
                 fError = true;
         }
         else if (barType == "heavy-heavy")
         {
-            if (repeat == "backward")
+            if (m_direction == "backward")
                 type = k_barline_double_repetition_alt;     //heavy-heavy. See E.Gould, p.234
-            else if (repeat.empty())
-                type = k_barline_double;
+            else if (m_direction.empty())
+                type = k_barline_heavy_heavy;
             else
                 fError = true;
         }
-//        else if (barType == "tick")   //a short stroke through the top line
-//            type = ?
-//        else if (barType == "short")  //a partial barline between the 2nd and 4th lines
-//            type = ?
-//        else if (barType == "none")
-//            type =
-
         else
             fError = true;
 
@@ -2683,95 +2670,113 @@ protected:
         {
             error_msg2(
                 "Invalid or not supported <bar-style> ('" + barType
-                + "') and/or <repeat> ('" + repeat
-                + "') values. Replaced by 'regular' barline.");
+                + "') and/or <repeat direction='" + m_direction
+                + "'>) values. Replaced by 'regular' barline.");
         }
 
         return type;
     }
 
-    //@ <repeat>
-    //@ <!ELEMENT repeat EMPTY>
-    //@ <!ATTLIST repeat
-    //@     direction (backward | forward) #REQUIRED
-    //@     times CDATA #IMPLIED
-    //@     winged (none | straight | curved |
-    //@         double-straight | double-curved) #IMPLIED
-    //@ >
-    //
-    //TODO: proper analysis of <repeat>
-    string get_repeat()
+    //-----------------------------------------------------------------------------------
+    void get_repeat_info()
     {
-        // attrib: direction (backward | forward) #REQUIRED
-        // 		The start of the repeat has a forward direction
-        // 		while the end of the repeat has a backward direction.
-        string direction = "";
+        // attrib: direction
         if (has_attribute(&m_childToAnalyse, "direction"))
-            direction = m_childToAnalyse.attribute_value("direction");
-        return direction;
+        {
+            m_direction = m_childToAnalyse.attribute_value("direction");
+            if (!(m_direction == "backward" || m_direction == "forward"))
+            {
+                error_msg2("Invalid value '" + m_direction +
+                           "'for attribute 'direction'. <repeat> ignored.");
+                m_direction = "";
+            }
+        }
+        else
+            error_msg2("Missing mandatory attribute 'direction'. <repeat> ignored.");
 
-        // attrib: times CDATA #IMPLIED
-        // 		Backward repeats **that are not part of an ending** can use the times
-        // 		attribute to indicate the number of times the repeated section
-        // 		is played.
-            //TODO
+        // attrib: times
+        if (has_attribute(&m_childToAnalyse, "times"))
+        {
+            if (m_direction != "backward")
+            {
+                error_msg2("'times' attribute in <repeat> is only possible when "
+                           "direction='backward'. Attribute ignored.");
+            }
+            else
+                m_times = get_child_attribute_as_integer("times", 1);
+        }
 
-        // attrib: winged (none | straight | curved | double-straight | double-curved) #IMPLIED
-        // 		The winged attribute indicates whether the repeat
-        //		has winged extensions that appear above and below the barline.
-        // 		The straight and curved values represent single wings, while
-        // 		the double-straight and double-curved values represent double
-        // 		wings. The none value indicates no wings and is the default.
-            //TODO
+        // attrib: winged
+        if (has_attribute(&m_childToAnalyse, "winged"))
+        {
+            m_wings = m_childToAnalyse.attribute_value("winged");
+            if (!(m_wings == "none" || m_wings == "straight" || m_wings == "curved"
+                  || m_wings == "double-straight" || m_wings == "double-curved"))
+            {
+                error_msg2("Invalid value '" + m_wings +
+                           "'for attribute 'winged'. winged='none' assumed.");
+                m_wings = "none";
+            }
+        }
     }
 
-    void combine_barlines(ImoBarline* pBarline, EBarline rightType)
+    //-----------------------------------------------------------------------------------
+    void combine_barlines(ImoBarline* pBarline, EBarline newType)
     {
-        EBarline type;
-        EBarline leftType = EBarline(pBarline->get_type());
-
-        if (leftType == k_barline_simple && rightType == k_barline_simple)
-            type = k_barline_double;
-        else if (rightType == k_barline_simple || rightType == k_barline_none)
-            type = leftType;
-        else if (leftType == k_barline_simple)
-            type = rightType;
-        else if (leftType == k_barline_end && rightType == k_barline_start_repetition)
-            type = rightType;
-        else if (leftType == k_barline_end_repetition &&
-                 rightType == k_barline_start_repetition)
-            type = k_barline_double_repetition;
+        if (m_fRightMiddle)
+        {
+            //processing 'middle' or 'right' barline. Nothing to combine
+            pBarline->set_type(newType);
+        }
         else
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-            error_msg2(
-                "Barlines combination not supported: left = "
-                + LdpExporter::barline_type_to_ldp(leftType)
-                + ", right = "
-                + LdpExporter::barline_type_to_ldp(rightType)
-                + ". Replaced by 'double' barline.");
-            type = k_barline_double;
-        }
-#if 0
-        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                "Combining barlines: left = "
-                + LdpExporter::barline_type_to_ldp(leftType)
-                + ", right = "
-                + LdpExporter::barline_type_to_ldp(rightType)
-                + ", result = "
-                + LdpExporter::barline_type_to_ldp(type)
-                );
-#endif
+            //processing a 'left' barline. m_pBarline is the previous right barline
+            //and newType is the type for this <barline> element being processed.
+            //Combine types
+            EBarline leftSide = EBarline(pBarline->get_type());
+            EBarline rightSide = newType;
+            EBarline type;
 
-        pBarline->set_type(type);
-        if (pBarline->get_num_repeats() == 0
-            && (type == k_barline_double_repetition
-                || type == k_barline_double_repetition_alt
-                || type == k_barline_end_repetition
+            if (rightSide == k_barline_none)
+                type = leftSide;
+            else if (leftSide == k_barline_simple && rightSide == k_barline_simple)
+                type = k_barline_double;
+            else if (rightSide == k_barline_simple || rightSide == k_barline_none)
+                type = k_barline_simple;
+            else if (leftSide == k_barline_simple)
+                type = rightSide;
+            else if (leftSide == k_barline_end && rightSide == k_barline_start_repetition)
+                type = rightSide;
+            else if (leftSide == k_barline_end_repetition &&
+                     rightSide == k_barline_start_repetition)
+                type = k_barline_double_repetition;
+            else
+            {
+                error_msg2(
+                    "Barlines combination not supported: left = "
+                    + LdpExporter::barline_type_to_ldp(leftSide)
+                    + ", right = "
+                    + LdpExporter::barline_type_to_ldp(rightSide)
+                    + ". Replaced by 'heavy-heavy' barline.");
+                type = k_barline_heavy_heavy;
+            }
+            pBarline->set_type(type);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_num_repeats()
+    {
+        if (!m_direction.empty()
+            && m_times > 0
+            && m_pBarline->get_num_repeats() == 0
+            && (m_pBarline->get_type() == k_barline_double_repetition
+                || m_pBarline->get_type() == k_barline_end_repetition
+                || m_pBarline->get_type() == k_barline_double_repetition_alt
                )
            )
         {
-            pBarline->set_num_repeats(1);           //TODO: extract from <repeat>
+            m_pBarline->set_num_repeats(m_times);
         }
     }
 

@@ -52,6 +52,12 @@ static bool is_repeat_barline_type(EBarline type)
         case k_barline_double:
         case k_barline_start:
         case k_barline_end:
+        case k_barline_dashed:
+        case k_barline_dotted:
+        case k_barline_heavy:
+        case k_barline_short:
+        case k_barline_tick:
+        case k_barline_heavy_heavy:
             return false;
         case k_barline_start_repetition:
         case k_barline_end_repetition:

@@ -3190,7 +3190,7 @@ protected:
         else if (barType == "heavy-heavy")
         {
             if (repeat == "backward")
-                type = k_barline_double_repetition_alt;     //heavy-heavy. See E.Gould, p.234
+                type = k_barline_heavy_heavy;     //heavy-heavy. See E.Gould, p.234
             else if (repeat.empty())
                 type = k_barline_double;
             else
