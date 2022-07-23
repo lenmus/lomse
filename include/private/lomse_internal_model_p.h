@@ -551,19 +551,24 @@ enum ENoteDuration
 */
 enum EBarline
 {
-    k_barline_unknown = -1,             ///< Unknown barline type
-    k_barline_none,						///< No barline
-    k_barline_simple,                   ///< Simple barline
-    k_barline_double,                   ///< Double barline
-    k_barline_start,                    ///< Start barline
-    k_barline_end,                      ///< End barline
-    k_barline_start_repetition,         ///< Start of repetition barline
-    k_barline_end_repetition,           ///< End of repetition barline
-    k_barline_double_repetition,        ///< Double repetition barline
-    k_barline_double_repetition_alt,    ///< Double repetition barline alternative design
-                                        //for heavy-heavy in MusicXML. See E.Gould, p.234
+    k_barline_unknown = -1,         ///< Unknown barline type
+    k_barline_none,                 ///< No barline
+    k_barline_simple,               ///< Simple barline
+    k_barline_double,               ///< Double barline
+    k_barline_start,                ///< Start barline
+    k_barline_end,                  ///< End barline
+    k_barline_start_repetition,     ///< Start of repetition barline
+    k_barline_end_repetition,       ///< End of repetition barline
+    k_barline_double_repetition,    ///< Double repetition barline
+    k_barline_double_repetition_alt,  ///< heavy-heavy double repetition. See E.Gould, p.234
+    k_barline_heavy_heavy,          ///< heavy-heavy when no repetition
+    k_barline_dashed,               ///< dashed barline
+    k_barline_dotted,               ///< dotted barline
+    k_barline_heavy,                ///< heavy barline
+    k_barline_short,                ///< short barline
+    k_barline_tick,                 ///< tick barline
 
-    k_max_barline,                      ///< Last element, for loops and checks
+    k_max_barline,                  ///< Last element, for loops and checks
 };
 
 //-----------------------------------------------------------------------------
@@ -3882,9 +3887,10 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-/** %ImoBarline represents a barline for an instrument. Each instrument/staff has its own
-    barlines. System barlines do not explicitly exist, they are just implicit, as a
-    consequence of aligning the barlines in all instruments.
+/** %ImoBarline represents a barline for an instrument. Each instrument/staff has its
+    own barline. Systemic barlines do not explicitly exist, they are just implicit when
+    the score has barlines. The systemic barline can be supressed by invoking
+    ImoScore::set_bool_option("Staff.DrawLeftBarline", false).
 */
 class ImoBarline : public ImoStaffObj
 {

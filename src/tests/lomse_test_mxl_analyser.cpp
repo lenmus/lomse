@@ -1601,6 +1601,159 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_02)
+    {
+        //@02. all barlines, without repetition dots.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/other/02-barlines.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(key C)" },
+            { 0, "(time common)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline dotted)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline dashed)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline heavy)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline double)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline end)" },         //light-heavy
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline start)" },       //heavy-light
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline heavy-heavy)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline tick)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline short)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline none)" },
+            { 1, "(r w v1 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_03)
+    {
+        //@03. right barline: when bar-style not present value "regular" is implied
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/xml-export/015-volta-brackets.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        a.dbg_do_not_reset_voice_times();
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(key C)" },
+            { 0, "(time common)" },
+            { 1, "(n c5 w v1 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(n c5 w v1 p1)" },
+            { 0, "(barline endRepetition)" },
+            { 1, "(n c5 w v1 p1)" },
+            { 0, "(barline simple)" },
+            { 1, "(n c5 w v1 p1)" },
+            { 0, "(barline end)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_04)
+    {
+        //@04. barline. repeat times
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<barline location='left'>"
+                    "<bar-style>heavy-light</bar-style>"
+                    "<repeat direction='forward'/>"
+                "</barline>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>4</duration><type>whole</type></note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<repeat direction='backward' times='3'/>"
+                "</barline>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot != nullptr );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc != nullptr );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        ImoObj::children_iterator it = pMD->begin(); //measure 1: start repeat barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_start_repetition );
+
+        ++it; //measure 1: note
+        CHECK( (*it)->is_note() );
+
+        ++it; //measure 1: repeat barline
+        CHECK( (*it)->is_barline() );
+        pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_end_repetition );
+        CHECK( pBarline->get_num_repeats() == 3 );
+
+        delete pRoot;
+    }
+
 
     //@ clef -------------------------------------------------------------
 

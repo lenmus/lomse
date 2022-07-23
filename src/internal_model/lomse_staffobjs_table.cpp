@@ -1282,16 +1282,12 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
 
         if (duration > 0.0)
             m_minNoteDuration = min(m_minNoteDuration, duration);
-
-//        assign_timepos_to_pending_objs_in_staff(staff, time);
     }
     else if (pSO->is_barline())
     {
         time = m_rMaxSegmentTime;
         for (int i=0; i < m_numStaves; ++i)
             m_rStaffTime[i] = time;
-
-//        assign_timepos_to_pending_objs(time);
     }
     else if (pSO->is_staffobj())
     {
@@ -1300,50 +1296,16 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
             time = m_rCurTime[voice];
         else
             time = m_instrTime;
-//            time = m_rStaffTime[staff];
     }
     else
     {
-//        time = m_rStaffTime[staff];
         time = m_instrTime;
     }
-//    else
-//    {
-//        //add to list of pending objs
-//        m_pendingObjs.push_back( make_pair(pSO, staff) );
-//    }
 
     pSO->set_time(time);
     m_instrTime = time + duration;
     m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_instrTime);
 //    cout << ", assigned timepos=" << time << endl;
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine2x::assign_timepos_to_pending_objs(TimeUnits time)
-{
-    for (auto p : m_pendingObjs)
-    {
-        p.first->set_time(time);
-    }
-    m_pendingObjs.clear();
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine2x::assign_timepos_to_pending_objs_in_staff(int staff,
-                                                                          TimeUnits time)
-{
-    list< pair<ImoStaffObj*, int> >::iterator it = m_pendingObjs.begin();
-    while (it != m_pendingObjs.end())
-    {
-        if ((*it).second == staff)
-        {
-            ((*it).first)->set_time(time);
-            it = m_pendingObjs.erase(it);
-        }
-        else
-            ++it;
-    }
 }
 
 //---------------------------------------------------------------------------------------
