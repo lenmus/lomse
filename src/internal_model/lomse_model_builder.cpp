@@ -693,16 +693,6 @@ void GroupBarlinesFixer::set_barlines_layout_for(ImoInstrGroup* pGrp)
 //=======================================================================================
 // MeasuresTableBuilder implementation
 //=======================================================================================
-MeasuresTableBuilder::MeasuresTableBuilder()
-{
-}
-
-//---------------------------------------------------------------------------------------
-MeasuresTableBuilder::~MeasuresTableBuilder()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void MeasuresTableBuilder::build(ImoScore* pScore)
 {
     ColStaffObjs* pCSO = pScore->get_staffobjs_table();
@@ -710,8 +700,8 @@ void MeasuresTableBuilder::build(ImoScore* pScore)
         return;
 
     int numInstrs = pScore->get_num_instruments();
-    m_instruments.assign(numInstrs, nullptr);
-    m_measures.assign(numInstrs, nullptr);
+    m_tables.assign(numInstrs, nullptr);
+    m_curMeasure.assign(numInstrs, nullptr);
 
     ColStaffObjsIterator it = pCSO->begin();
     while (it != pCSO->end())
@@ -721,79 +711,82 @@ void MeasuresTableBuilder::build(ImoScore* pScore)
         ImoStaffObj* pSO = pCsoEntry->imo_object();
 
         //if first entry for the instrument create measures table and first measure
-        if (m_instruments[iInstr] == nullptr)
+        if (m_tables[iInstr] == nullptr)
         {
             ImoInstrument* pInstr = pScore->get_instrument(iInstr);
             start_measures_table_for(iInstr, pInstr, pCsoEntry);
         }
 
-        //start new measure if no current measure
-        if (m_measures[iInstr] == nullptr)
+        //start new measure if no current measure or current object is for next measure
+        if (m_curMeasure[iInstr] == nullptr
+            || pCsoEntry->measure() > m_curMeasure[iInstr]->get_start_entry()->measure())
+        {
             start_new_measure(iInstr, pCsoEntry);
+        }
 
         //if Time Signature update beat duration
         if (pSO->is_time_signature())
         {
             ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(pSO);
-            m_measures[iInstr]->set_implied_beat_duration( pTS->get_beat_duration() );
-            m_measures[iInstr]->set_bottom_ts_beat_duration( pTS->get_ref_note_duration() );
+            m_curMeasure[iInstr]->set_implied_beat_duration( pTS->get_beat_duration() );
+            m_curMeasure[iInstr]->set_bottom_ts_beat_duration( pTS->get_ref_note_duration() );
         }
 
         //if not intermediate barline finish current measure
-        if (pSO->is_barline())
+        if (pSO->is_barline()
+            && pCsoEntry->measure() == m_curMeasure[iInstr]->get_start_entry()->measure())
         {
             ImoBarline* pBL = static_cast<ImoBarline*>(pSO);
             if (!pBL->is_middle())
-                finish_current_measure(iInstr);
+                finish_current_measure(iInstr, pCsoEntry);
         }
 
         //advance to next entry
         ++it;
     }
-
-//    //debug
-//    int maxInstr = pScore->get_num_instruments();
-//    for (int i=0; i < maxInstr; ++i)
-//    {
-//        ImoInstrument* pInstr = pScore->get_instrument(i);
-//        ImMeasuresTable* pTable = pInstr->get_measures_table();
-//        LOMSE_LOG_INFO(pTable->dump());
-//    }
 }
 
 //---------------------------------------------------------------------------------------
 void MeasuresTableBuilder::start_measures_table_for(int iInstr, ImoInstrument* pInstr,
                                                     ColStaffObjsEntry* pCsoEntry)
 {
-    m_instruments[iInstr] = pInstr;
-
     //create measures table
-    ImMeasuresTable* pTable = LOMSE_NEW ImMeasuresTable();
-    pInstr->set_measures_table(pTable);
+    m_tables[iInstr] = LOMSE_NEW ImMeasuresTable();
+    pInstr->set_measures_table(m_tables[iInstr]);
 
     //add first measure
-    m_measures[iInstr] = pTable->add_entry(pCsoEntry);
+    m_curMeasure[iInstr] = m_tables[iInstr]->add_entry(pCsoEntry);
 }
 
 //---------------------------------------------------------------------------------------
-void MeasuresTableBuilder::finish_current_measure(int iInstr)
+void MeasuresTableBuilder::finish_current_measure(int iInstr, ColStaffObjsEntry* pEndEntry)
 {
-    m_measures[iInstr] = nullptr;
+    m_curMeasure[iInstr]->set_end_entry(pEndEntry);
+
+    //the next measure could already exits when it starts with clef, key or time
+    //signature, as these objects are moved to previous measure and, in these cases,
+    //they have been already processed.
+    ImMeasuresTableEntry* pMeasure = m_tables[iInstr]->back();
+    if (pMeasure->get_table_index() > m_curMeasure[iInstr]->get_table_index())
+        m_curMeasure[iInstr] = pMeasure;
+    else
+        m_curMeasure[iInstr] = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
-void MeasuresTableBuilder::start_new_measure(int iInstr, ColStaffObjsEntry* pCsoEntry)
+void MeasuresTableBuilder::start_new_measure(int iInstr, ColStaffObjsEntry* pStartEntry)
 {
-    ImoInstrument* pInstr = m_instruments[iInstr];
-    ImMeasuresTable* pTable = pInstr->get_measures_table();
-    ImMeasuresTableEntry* prevMeasure = pTable->back();
-    m_measures[iInstr] = pTable->add_entry(pCsoEntry);
+    ImMeasuresTableEntry* prevMeasure = m_tables[iInstr]->back();
+    ImMeasuresTableEntry* pMeasure = m_tables[iInstr]->add_entry(pStartEntry);
 
     if (prevMeasure != nullptr)
     {
-        m_measures[iInstr]->set_implied_beat_duration( prevMeasure->get_implied_beat_duration() );
-        m_measures[iInstr]->set_bottom_ts_beat_duration( prevMeasure->get_bottom_ts_beat_duration() );
+        pMeasure->set_implied_beat_duration( prevMeasure->get_implied_beat_duration() );
+        pMeasure->set_bottom_ts_beat_duration( prevMeasure->get_bottom_ts_beat_duration() );
     }
+
+    if (m_curMeasure[iInstr] == nullptr)
+        m_curMeasure[iInstr] = pMeasure;
 }
 
 

@@ -2208,9 +2208,9 @@ SUITE(MxlAnalyserTest)
             if (pInstr)
             {
                 ImoStaffInfo* pInfo = pInstr->get_staff(0);
-                CHECK( is_equal_float( pInfo->get_staff_margin(), 1440.0f) );
+                CHECK( is_equal_float( pInfo->get_staff_margin(), pScore->tenths_to_logical(80)) );
                 pInfo = pInstr->get_staff(1);
-                CHECK( is_equal_float( pInfo->get_staff_margin(), 1000.0f) );
+                CHECK( is_equal_float( pInfo->get_staff_margin(), pScore->tenths_to_logical(80)) );
             }
         }
 
@@ -2262,9 +2262,9 @@ SUITE(MxlAnalyserTest)
             if (pInstr)
             {
                 ImoStaffInfo* pInfo = pInstr->get_staff(0);
-                CHECK( is_equal_float( pInfo->get_staff_margin(), 1440.0f) );
+                CHECK( is_equal_float( pInfo->get_staff_margin(), pScore->tenths_to_logical(80)) );
                 pInfo = pInstr->get_staff(1);
-                CHECK( is_equal_float( pInfo->get_staff_margin(), 2160.0f) );
+                CHECK( is_equal_float( pInfo->get_staff_margin(), pScore->tenths_to_logical(120)) );
             }
         }
 
@@ -2308,6 +2308,8 @@ SUITE(MxlAnalyserTest)
         {
             ImoStyle* pStyle = pScore->get_default_style();
             CHECK( pStyle->font_name() == "Times New Roman" );
+            CHECK( pStyle->font_data_modified() == true );
+            CHECK( pStyle->font_name_modified() == true );
             CHECK( is_equal_float(pStyle->font_size(), 9.0f) );
 //            cout << test_name() << ", name='" << pStyle->font_name()
 //                << "', size=" << pStyle->font_size() << endl;
@@ -2321,6 +2323,8 @@ SUITE(MxlAnalyserTest)
 //                cout << test_name() << ", name='" << pFont->name
 //                    << "', size=" << pFont->size << endl;
             }
+
+            CHECK( pScore->get_number_of_lyric_fonts() == 1 );
         }
 
         delete pRoot;
@@ -2361,8 +2365,11 @@ SUITE(MxlAnalyserTest)
         CHECK( pScore != nullptr );
         if (pScore)
         {
+            CHECK( pScore->get_number_of_lyric_fonts() == 1 );
             ImoStyle* pStyle = pScore->find_style("Lyrics");
             CHECK( pStyle->font_name() == "ＭＳ ゴシック" );
+            CHECK( pStyle->font_data_modified() == true );
+            CHECK( pStyle->font_name_modified() == true );
             CHECK( is_equal_float(pStyle->font_size(), 10.25f) );
 //            cout << test_name() << ", name='" << pStyle->font_name()
 //                << "', size=" << pStyle->font_size() << endl;
@@ -2373,7 +2380,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_08)
     {
-        //@08. defaults: lyric-font for two lines
+        //@08. defaults: lyric-font and lyric-language for three lines.
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -2384,8 +2391,10 @@ SUITE(MxlAnalyserTest)
             "<defaults>"
                 "<lyric-font number='1' font-family='Book Antiqua' font-size='10'/>"
                 "<lyric-font number='2' font-family='ＭＳ ゴシック' font-size='10.25'/>"
+                "<lyric-font number=\"3\" font-family=\"Georgia\" font-size=\"10.25\"/>"
                 "<lyric-language number='1' xml:lang='en'/>"
                 "<lyric-language number='2' xml:lang='ja'/>"
+                "<lyric-language number='3' xml:lang='es'/>"
             "</defaults>"
             "<part-list><score-part id='P1'><part-name/></score-part>"
             "</part-list><part id='P1'>"
@@ -2408,20 +2417,36 @@ SUITE(MxlAnalyserTest)
         CHECK( pScore != nullptr );
         if (pScore)
         {
+            CHECK( pScore->get_number_of_lyric_fonts() == 4 );
             ImoStyle* pStyle = pScore->find_style("Lyric-1");
             CHECK( pStyle );
             if (pStyle)
             {
                 CHECK( pStyle->font_name() == "Book Antiqua" );
+                CHECK( pStyle->font_data_modified() == true );
+                CHECK( pStyle->font_name_modified() == true );
                 CHECK( is_equal_float(pStyle->font_size(), 10.0f) );
 //                cout << test_name() << ", name='" << pStyle->font_name()
 //                    << "', size=" << pStyle->font_size() << endl;
             }
-            CHECK( pStyle );
             pStyle = pScore->find_style("Lyric-2");
+            CHECK( pStyle );
             if (pStyle)
             {
                 CHECK( pStyle->font_name() == "ＭＳ ゴシック" );
+                CHECK( pStyle->font_data_modified() == true );
+                CHECK( pStyle->font_name_modified() == true );
+                CHECK( is_equal_float(pStyle->font_size(), 10.25f) );
+//                cout << test_name() << ", name='" << pStyle->font_name()
+//                    << "', size=" << pStyle->font_size() << endl;
+            }
+            pStyle = pScore->find_style("Lyric-3");
+            CHECK( pStyle );
+            if (pStyle)
+            {
+                CHECK( pStyle->font_name() == "Georgia" );
+                CHECK( pStyle->font_data_modified() == true );
+                CHECK( pStyle->font_name_modified() == true );
                 CHECK( is_equal_float(pStyle->font_size(), 10.25f) );
 //                cout << test_name() << ", name='" << pStyle->font_name()
 //                    << "', size=" << pStyle->font_size() << endl;
@@ -2430,6 +2455,52 @@ SUITE(MxlAnalyserTest)
             //languages
             CHECK( a.get_lyric_language(1) == "en" );
             CHECK( a.get_lyric_language(2) == "ja" );
+            CHECK( a.get_lyric_language(3) == "es" );
+        }
+
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_defaults_09)
+    {
+        //@09. defaults: staff-distance saved in ImoScore.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<staff-layout>"
+                  "<staff-distance>93</staff-distance>"
+                "</staff-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            CHECK( pScore->default_staff_distance_modified() == true );
+            CHECK( pScore->get_default_staff_distance() == 93 );
+//            cout << test_name() << ", distance='"
+//                << pScore->get_default_staff_distance() << endl;
         }
 
         delete pRoot;
@@ -3912,7 +3983,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -3978,7 +4048,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -4040,7 +4109,6 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        a.do_not_delete_instruments_in_destructor();
         delete pRoot;
     }
 
@@ -5907,6 +5975,55 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    //@ print ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_print_01)
+    {
+        //@01. print: staff-distance saved in ImoStaffInfo
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<print>"
+                "<staff-layout number=\"2\">"
+                  "<staff-distance>93</staff-distance>"
+                "</staff-layout>"
+            "</print>"
+            "<attributes>"
+                "<staves>2</staves>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore && pScore->default_staff_distance_modified() == false );
+        if (pScore)
+        {
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            CHECK( pInstr && pInstr->get_num_staves() == 2 );
+            ImoStaffInfo* pInfo = pInstr->get_staff(0);
+            CHECK( pInfo->is_staff_margin_modified() == false );
+            pInfo = pInstr->get_staff(1);
+            CHECK( pInfo->is_staff_margin_modified() == true );
+            CHECK( pInfo->get_staff_margin() == pScore->tenths_to_logical(93) );
+        }
+
+        delete pRoot;
+    }
 
     //@ rest --------------------------------------------------------------------
 
@@ -9382,6 +9499,42 @@ SUITE(MxlAnalyserTest)
             { 1, "(clef G p1)" },
             { 1, "(n c4 q v1 p1)" },
             { 2, "(n a3 q v2 p1)" },
+            { 0, "(barline simple)" }};
+        CHECK( check_music_data2(pMD, result) );
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_conversion_22)
+    {
+        //@22. direction after barline, two voices
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_file(m_scores_path + "unit-tests/conversion/24-direction-after-barline.xml");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+        CHECK( pRoot && pRoot->is_document() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        list< pair<int, string> > result = {
+          //voice   obj
+            { 0, "(clef G p1)" },
+            { 0, "(clef F4 p2)" },
+            { 1, "(r e v1 p1)" },
+            { 2, "(r e v2 p2)" },
+            { 0, "(barline simple)" },
+            { 1, "(dir empty)" },
+            { 1, "(r e v1 p1 (dyn \"p\" below))" },
+            { 1, "(n d5 e v1 p1 (stem down))" },
+            { 2, "(n g3 q v2 p2 (stem down))" },
             { 0, "(barline simple)" }};
         CHECK( check_music_data2(pMD, result) );
         delete pRoot;

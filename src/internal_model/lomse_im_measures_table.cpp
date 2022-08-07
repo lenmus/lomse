@@ -23,26 +23,10 @@ namespace lomse
 // ImMeasuresTableEntry implementation
 //=======================================================================================
 ImMeasuresTableEntry::ImMeasuresTableEntry(ColStaffObjsEntry* pEntry)
-    : m_index(-1)
-    , m_timepos(LOMSE_NO_TIME)
-    , m_firstId(-1)
-    , m_bottomBeat(LOMSE_NO_DURATION)
-    , m_impliedBeat(LOMSE_NO_DURATION)
-    , m_pCsoEntry(pEntry)
 {
+    m_pStartEntry = pEntry;
     if (pEntry != nullptr)
         m_timepos = pEntry->time();
-}
-
-//---------------------------------------------------------------------------------------
-ImMeasuresTableEntry::ImMeasuresTableEntry()
-    : m_index(-1)
-    , m_timepos(LOMSE_NO_TIME)
-    , m_firstId(-1)
-    , m_bottomBeat(LOMSE_NO_DURATION)
-    , m_impliedBeat(LOMSE_NO_DURATION)
-    , m_pCsoEntry(nullptr)
-{
 }
 
 //---------------------------------------------------------------------------------------
@@ -52,10 +36,22 @@ string ImMeasuresTableEntry::dump()
     s << m_index << "\t" << m_timepos << "\t" << m_bottomBeat << "\t"
       << m_impliedBeat << "\t";
 
-    if (m_pCsoEntry != nullptr)
-        s << m_pCsoEntry->to_string_with_ids();
+    s << "start=" << (m_pStartEntry == nullptr ? "nullptr"
+                                               : m_pStartEntry->to_string_with_ids());
+    s << ", end=" << (m_pEndEntry == nullptr ? "nullptr"
+                                             : m_pEndEntry->to_string_with_ids());
     s << endl;
     return s.str();
+}
+
+//---------------------------------------------------------------------------------------
+ImoBarline* ImMeasuresTableEntry::get_barline()
+{
+    if (m_pEndEntry && m_pEndEntry->imo_object()->is_barline())
+    {
+        return static_cast<ImoBarline*>(m_pEndEntry->imo_object());
+    }
+    return nullptr;
 }
 
 
@@ -102,7 +98,7 @@ string ImMeasuresTable::dump()
     vector<ImMeasuresTableEntry*>::iterator it;
     s << "ImMeasuresTable. Num.entries = " << num_entries() << endl;
     //    +.......+.......+.......+.......+.......+.......+
-    s << "meas.   time    beat    object" << endl;
+    s << "meas.   time    beat    implied  objects" << endl;
     s << "--------------------------------------------" << endl;
     for (it=m_theTable.begin(); it != m_theTable.end(); ++it)
     {
@@ -124,11 +120,9 @@ ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
     int first = 0;
     int last = int(m_theTable.size() - 1);
     int const max = last;
-    //cout << "looking for=" << timepos << "--------------------------------------" << endl;
     while (first <= last)
     {
         int guess = (first + last) / 2;
-        //cout << "first=" << first << ", last=" << last << ", guess=" << guess << endl;
         ImMeasuresTableEntry* pEntry = m_theTable[guess];
         if (timepos >= pEntry->get_timepos())
         {
@@ -136,16 +130,10 @@ ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
             {
                 ImMeasuresTableEntry* pNext = m_theTable[guess+1];
                 if (timepos < pNext->get_timepos())
-                {
-                    //cout << "Found: in measure " << guess << endl;
                     return pEntry;
-                }
             }
             else
-            {
-                //cout << "Found: in last measure " << guess << " or above" << endl;
                 return pEntry;
-            }
         }
         if (timepos < pEntry->get_timepos())
             last = guess - 1;
@@ -153,6 +141,14 @@ ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
             first = guess + 1;
     }
 
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoBarline* ImMeasuresTable::get_barline(int iMeasure)
+{
+    if (get_measure(iMeasure))
+        return get_measure(iMeasure)->get_barline();
     return nullptr;
 }
 

@@ -1288,6 +1288,19 @@ ImoRelObj* ImoStaffObj::find_relation(int type)
 }
 
 //---------------------------------------------------------------------------------------
+ImoStaffObj* ImoStaffObj::get_next_noterest_or_barline()
+{
+    ImoObj* pNext = get_next_sibling();
+    while (pNext && !(pNext->is_note_rest() || pNext->is_barline()))
+        pNext = pNext->get_next_sibling();
+
+    if (pNext && pNext->is_staffobj())
+        return static_cast<ImoStaffObj*>(pNext);
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 ImoInstrument* ImoStaffObj::get_instrument()
 {
     ImoObj* pParent = this->get_parent_imo();   //musicData
@@ -2833,13 +2846,11 @@ ImoInstrument::ImoInstrument()
     , m_abbrev()
     , m_partId("")
     , m_barlineLayout(EBarlineLayout::k_isolated)
-    , m_measuresNumbering(EMeasuresNumbering::k_none)
+    , m_measuresNumbering(EMeasuresNumbering::k_undefined)
     , m_pMeasures(nullptr)
     , m_pLastMeasureInfo(nullptr)
 {
     add_staff();
-//	m_midiChannel = g_pMidi->get_default_voice_channel();
-//	m_midiInstr = g_pMidi->get_default_voice_instr();
 }
 
 //---------------------------------------------------------------------------------------
@@ -2897,6 +2908,13 @@ void ImoInstrument::set_staff_margin(int iStaff, LUnits distance)
         ImoStaffInfo* pInfo = *it;
         pInfo->set_staff_margin(distance);
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::mark_staff_margin_as_imported(int iStaff)
+{
+    ImoStaffInfo* pInfo = get_staff(iStaff);
+    pInfo->mark_staff_margin_as_imported();
 }
 
 //---------------------------------------------------------------------------------------
@@ -4031,7 +4049,10 @@ void ImoScore::add_title(ImoScoreTitle* pTitle)
 //---------------------------------------------------------------------------------------
 void ImoScore::add_style(ImoStyle* pStyle)
 {
-    m_nameToStyle[pStyle->get_name()] = pStyle;
+    const string& name = pStyle->get_name();
+    m_nameToStyle[name] = pStyle;
+    if (name.compare(0, 6, "Lyric-") == 0)
+        ++m_numLyricFonts;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4139,6 +4160,7 @@ ImoStyle* ImoScore::create_default_style()
 
 //    m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
     add_style(pDefStyle);
+    pDefStyle->reset_style_modified();
     return pDefStyle;
 }
 
@@ -4160,6 +4182,7 @@ void ImoScore::add_required_text_styles()
         pStyle->font_style( ImoStyle::k_font_style_italic);
         pStyle->font_weight( ImoStyle::k_font_weight_normal);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
 
     //For instrument and group names and abbreviations
@@ -4170,6 +4193,7 @@ void ImoScore::add_required_text_styles()
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 14.0f);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
 
     //For metronome marks
@@ -4180,6 +4204,7 @@ void ImoScore::add_required_text_styles()
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 7.0f);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
 
     //for lyrics
@@ -4190,6 +4215,7 @@ void ImoScore::add_required_text_styles()
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size(10.0f);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
     //<lyric-font font-family="Times New Roman" font-size="10"/>
 
@@ -4203,6 +4229,7 @@ void ImoScore::add_required_text_styles()
         pStyle->font_style( ImoStyle::k_font_style_normal);
         pStyle->font_weight( ImoStyle::k_font_weight_bold);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
     //font-family="Liberation Serif" font-size="10" bold
 
@@ -4216,8 +4243,25 @@ void ImoScore::add_required_text_styles()
         pStyle->font_style( ImoStyle::k_font_style_italic);
         pStyle->font_weight( ImoStyle::k_font_weight_normal);
         add_style(pStyle);
+        pStyle->reset_style_modified();
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::add_lyric_language(int number, const string& lang)
+{
+    m_lyricLanguages[number] = lang;
+}
+
+//---------------------------------------------------------------------------------------
+string ImoScore::get_lyric_language(int number)
+{
+	map<int, string>::const_iterator it = m_lyricLanguages.find(number);
+	if (it != m_lyricLanguages.end())
+		return it->second;
+    else
+        return "";
 }
 
 
@@ -5206,16 +5250,6 @@ bool ImoStaffInfo::is_line_visible(int iLine) const
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoStaffInfo::has_default_values() const
-{
-    return (m_nNumLines == 5
-            && m_staffType == k_staff_regular
-            && m_uSpacing == LOMSE_STAFF_LINE_SPACING
-            && m_uLineThickness == LOMSE_STAFF_LINE_THICKNESS
-            && m_uMarging == LOMSE_STAFF_TOP_MARGIN );
-}
-
-//---------------------------------------------------------------------------------------
 double ImoStaffInfo::get_applied_spacing_factor() const
 {
     return double(m_uSpacing) / double(LOMSE_STAFF_LINE_SPACING);
@@ -5366,6 +5400,7 @@ void ImoStyles::create_default_styles()
     pDefStyle->width(0.0f);
 
     add_style(pDefStyle);
+    pDefStyle->reset_style_modified();
 
 
     //Headers 1-6
@@ -5376,6 +5411,7 @@ void ImoStyles::create_default_styles()
     pStyle->font_weight( ImoStyle::k_font_weight_bold);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pStyle->set_name("Heading-2");
@@ -5385,6 +5421,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_top(400);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pStyle->set_name("Heading-3");
@@ -5394,6 +5431,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_top(400);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pStyle->set_name("Heading-4");
@@ -5403,6 +5441,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_top(400);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pStyle->set_name("Heading-5");
@@ -5413,6 +5452,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_top(400);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pStyle->set_name("Heading-6");
@@ -5423,6 +5463,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_top(400);
     pStyle->margin_bottom(300);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     //table
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
@@ -5431,6 +5472,7 @@ void ImoStyles::create_default_styles()
     pStyle->margin_bottom(300);
     pStyle->border_width(20.0);
     add_style(pStyle);
+    pStyle->reset_style_modified();
 
     //paragraph
     pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
@@ -5438,7 +5480,7 @@ void ImoStyles::create_default_styles()
     pStyle->set_parent_style(pDefStyle);
     pStyle->margin_bottom(300);
     add_style(pStyle);
-
+    pStyle->reset_style_modified();
 }
 
 

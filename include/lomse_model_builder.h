@@ -10,13 +10,15 @@
 #ifndef __LOMSE_MODEL_BUILDER_H__
 #define __LOMSE_MODEL_BUILDER_H__
 
-#include <ostream>
+//lomse
+#include "lomse_staffobjs_table.h"
 
+//std library
+#include <ostream>
 #include <map>
 #include <list>
 #include <vector>
 #include <array>
-using namespace std;
 
 namespace lomse
 {
@@ -31,7 +33,6 @@ class ImoNote;
 class ImoObj;
 class ImoScore;
 class ImoSoundInfo;
-class ColStaffObjsEntry;
 class ImMeasuresTable;
 class ImMeasuresTableEntry;
 
@@ -58,7 +59,7 @@ public:
 class PitchAssigner
 {
 protected:
-    vector<std::array<int, 7> > m_context;
+    std::vector<std::array<int, 7> > m_context;
 
 public:
     PitchAssigner() {}
@@ -81,8 +82,8 @@ protected:
 class MidiAssigner
 {
 protected:
-    list<ImoSoundInfo*> m_sounds;
-	list<string> m_ids;
+    std::list<ImoSoundInfo*> m_sounds;
+	std::list<std::string> m_ids;
 
 public:
     MidiAssigner();
@@ -132,26 +133,25 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // MeasuresTableBuilder. Implements the algorithm to traverse the ColStaffObjs table
-// and create the ImMeasuresTable for each instrument. If the measure entries already
-// exist (they could have been created by importers, e.g. MusicXML, MNX) in these cases
-// the algorithm just updates them to ensure they have valid content.
+// for creating the ImMeasuresTable for each instrument.
 class MeasuresTableBuilder
 {
 protected:
-    vector<ImoInstrument*> m_instruments;
-    vector<ImMeasuresTableEntry*> m_measures;   //current open measures
+    std::vector<ImMeasuresTable*> m_tables;             //table for each instrument
+    std::vector<ImMeasuresTableEntry*> m_curMeasure;    //current measure in process, for each instrument
 
 public:
-    MeasuresTableBuilder();
-    virtual ~MeasuresTableBuilder();
+    MeasuresTableBuilder() {}
+    virtual ~MeasuresTableBuilder() {}
 
 	void build(ImoScore* pScore);
 
 protected:
+
     void start_measures_table_for(int iInstr, ImoInstrument* pInstr,
-                                  ColStaffObjsEntry* pCsoEntry);
-    void finish_current_measure(int iInstr);
-    void start_new_measure(int iInstr, ColStaffObjsEntry* pCsoEntry);
+                                  ColStaffObjsEntry* pStartEntry);
+    void finish_current_measure(int iInstr, ColStaffObjsEntry* pEndEntry=nullptr);
+    void start_new_measure(int iInstr, ColStaffObjsEntry* pStartEntry);
 };
 
 

@@ -20,6 +20,7 @@ namespace lomse
 {
 
 class ColStaffObjsEntry;
+class ImoBarline;
 
 //---------------------------------------------------------------------------------------
 // ImMeasuresTableEntry: an entry in the ImMeasuresTable table
@@ -27,18 +28,19 @@ class ColStaffObjsEntry;
 class ImMeasuresTableEntry
 {
 protected:
-    int         m_index;            //index of this element in ImMeasuresTable
-	TimeUnits   m_timepos;          //measure starts at this timepos
-	ImoId       m_firstId;          //id of first note/rest in measure
-    TimeUnits   m_bottomBeat;       //applicable TS bottom number (as note duration)
-    TimeUnits   m_impliedBeat;      //implied beat duration for applicable TS
+    int         m_index = -1;                       //index of this element in ImMeasuresTable
+	TimeUnits   m_timepos = LOMSE_NO_TIME;          //measure starts at this timepos
+	ImoId       m_firstId = -1;                     //id of first note/rest in measure
+    TimeUnits   m_bottomBeat = LOMSE_NO_DURATION;   //applicable TS bottom number (as note duration)
+    TimeUnits   m_impliedBeat = LOMSE_NO_DURATION;  //implied beat duration for applicable TS
 
-	ColStaffObjsEntry* m_pCsoEntry; //ptr to barline (end of this measure) or nullptr
-	                                //when no end barline
+	ColStaffObjsEntry* m_pStartEntry = nullptr; //entry for first staffobj in this measure
+	ColStaffObjsEntry* m_pEndEntry = nullptr;   //entry for barline (end of this measure) or
+	                                            //nullptr when no end barline
 
 public:
     ImMeasuresTableEntry(ColStaffObjsEntry* pEntry);
-    ImMeasuresTableEntry();
+    ImMeasuresTableEntry() {};
 
     //getters
     inline int get_table_index() const { return m_index; }
@@ -46,7 +48,11 @@ public:
 	inline ImoId get_first_id() const { return m_firstId; }
 	inline TimeUnits get_implied_beat_duration() const { return m_bottomBeat; }
 	inline TimeUnits get_bottom_ts_beat_duration() const { return m_impliedBeat; }
-    inline ColStaffObjsEntry* get_entry() const { return m_pCsoEntry; }
+    inline ColStaffObjsEntry* get_start_entry() const { return m_pStartEntry; }
+    inline ColStaffObjsEntry* get_end_entry() const { return m_pEndEntry; }
+
+    /** ptr to barline (end of this measure) or nullptr when no end barline */
+    ImoBarline* get_barline();
 
     //debug
     string dump();
@@ -61,7 +67,8 @@ protected:
 	inline void set_first_id(ImoId id) { m_firstId = id; }
 	inline void set_implied_beat_duration(TimeUnits duration) { m_bottomBeat = duration; }
 	inline void set_bottom_ts_beat_duration(TimeUnits duration) { m_impliedBeat = duration; }
-	inline void set_entry(ColStaffObjsEntry* entry) { m_pCsoEntry = entry; }
+	inline void set_start_entry(ColStaffObjsEntry* entry) { m_pStartEntry = entry; }
+    inline void set_end_entry(ColStaffObjsEntry* pEntry) { m_pEndEntry = pEntry; }
 
 };
 
@@ -93,6 +100,9 @@ public:
 
     //search
     ImMeasuresTableEntry* get_measure_at(TimeUnits timepos);
+
+    //access to barlines
+    ImoBarline* get_barline(int iMeasure);
 
     //debug
     string dump();

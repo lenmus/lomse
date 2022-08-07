@@ -5747,6 +5747,8 @@ public:
         if (get_optional(k_color))
             pInfo->set_color( get_color_param() );
 
+        error_if_more_elements();
+
         m_pAnalysedNode->set_imo(pInfo);
     }
 

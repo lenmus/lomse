@@ -973,9 +973,9 @@ protected:
     {
         //font-family: a comma-separated list of font names
         if (has_attribute(&m_childToAnalyse, "font-family"))
-        {
             pFont->name = get_attribute(&m_childToAnalyse, "font-family");
-        }
+        else
+            pFont->name = "";
 
         //font-style: normal or italic
         if (has_attribute(&m_childToAnalyse, "font-style"))
@@ -992,6 +992,8 @@ protected:
                 pFont->style = ImoStyle::k_font_style_normal;
             }
         }
+        else
+            pFont->style = ImoStyle::k_font_style_undefined;
 
         //font-size: string xx-small, x-small, small, medium, large, x-large, xx-large
         // or a numeric point size.
@@ -1019,6 +1021,8 @@ protected:
                     pFont->size = points;
             }
         }
+        else
+            pFont->size = 0;
 
         //font-weight: normal or bold
         if (has_attribute(&m_childToAnalyse, "font-weight"))
@@ -1035,6 +1039,8 @@ protected:
                 pFont->weight = ImoStyle::k_font_weight_normal;
             }
         }
+        else
+            pFont->weight = ImoStyle::k_font_weight_undefined;
     }
 
     //-----------------------------------------------------------------------------------
@@ -2371,12 +2377,14 @@ public:
         if (get_optional("staves"))
         {
             const int targetStaves = get_child_value_integer(1);
-            int iStaff = pInstr->get_num_staves();
-            // coverity[tainted_data]
-            for (; iStaff < targetStaves; ++iStaff)
-            {
+            for (int iStaff=pInstr->get_num_staves(); iStaff < targetStaves; ++iStaff)
                 pInstr->add_staff();
-                pInstr->set_staff_margin(iStaff, m_pAnalyser->get_default_staff_distance(iStaff));
+
+            for (int iStaff=0; iStaff < targetStaves; ++iStaff)
+            {
+                pInstr->set_staff_margin(iStaff, m_pAnalyser->get_staff_distance(iStaff));
+                if (m_pAnalyser->staff_distance_is_imported(iStaff))
+                    pInstr->mark_staff_margin_as_imported(iStaff);
             }
         }
 
@@ -3181,9 +3189,12 @@ protected:
         {
             //modify already created defaults in the score
             pStyle->font_name(pFont->name);
-            pStyle->font_size(pFont->size);
-            pStyle->font_style(pFont->style);
-            pStyle->font_weight(pFont->weight);
+            if (pFont->size != 0)
+                pStyle->font_size(pFont->size);
+            if (pFont->style != ImoStyle::k_font_style_undefined)
+                pStyle->font_style(pFont->style);
+            if (pFont->weight != ImoStyle::k_font_weight_undefined)
+                pStyle->font_weight(pFont->weight);
         }
     }
 
@@ -3240,16 +3251,19 @@ protected:
         {
             //modify already created defaults in the score
             pStyle->font_name(pFont->name);
-            pStyle->font_size(pFont->size);
-            pStyle->font_style(pFont->style);
-            pStyle->font_weight(pFont->weight);
+            if (pFont->size != 0)
+                pStyle->font_size(pFont->size);
+            if (pFont->style != ImoStyle::k_font_style_undefined)
+                pStyle->font_style(pFont->style);
+            if (pFont->weight != ImoStyle::k_font_weight_undefined)
+                pStyle->font_weight(pFont->weight);
         }
 
         delete pFont;
     }
 
     //-----------------------------------------------------------------------------------
-    void set_lyric_language(ImoScore* UNUSED(pScore))
+    void set_lyric_language(ImoScore* pScore)
     {
         //@ <!ELEMENT lyric-language EMPTY>
         //@ <!ATTLIST lyric-language
@@ -3264,6 +3278,7 @@ protected:
             return;
 
         m_pAnalyser->set_lyric_language(number, lang);
+        pScore->add_lyric_language(number, lang);
     }
 
 };
@@ -3339,6 +3354,15 @@ public:
 
         error_if_more_elements();
 
+        //TODO: For spanner directions an empty direction can be created so that the
+        // builders can attach the RelObjs to them. But if something is wrong (e.g.
+        // the direction-type is not yet supported, or the builder decides not to
+        // create the relationship) an empty direction remains. This is not a problem
+        // but in some very specific circumstances the empty direction can slightly
+        // increase spacing to next object (unnoticeable). As these empty directions
+        // are never exported the re-imported file will not contain it and in these
+        // rare cases were the empty directions adds space, the round-trip regression
+        // test will fail (e.g. unit-test/xml-export/025-dashes.xml)
         if (fSpanner || pDirection->get_num_attachments() > 0)
             add_to_model(pDirection);
         else
@@ -3401,10 +3425,10 @@ public:
                 m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
             }
             else if (m_childToAnalyse.name() == "wedge"
-                     || m_childToAnalyse.name() == "dashes"
+//                     || m_childToAnalyse.name() == "dashes"
                      || m_childToAnalyse.name() == "bracket"
                      || m_childToAnalyse.name() == "pedal"
-                     || m_childToAnalyse.name() == "principal-voice"
+//                     || m_childToAnalyse.name() == "principal-voice"
                     )
             {
                 m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
@@ -6640,25 +6664,22 @@ public:
         // page-layout?
         if (get_optional("page-layout"))
         {
-
+            //TODO
         }
 
         // system-layout?
         if (get_optional("system-layout"))
         {
-
+            //TODO
         }
 
         // staff-layout*
-        while (get_optional("staff-layout"))
-        {
-
-        }
+        while (analyse_optional("staff-layout"));
 
         // measure-layout?
         if (get_optional("measure-layout"))
         {
-
+            //TODO
         }
 
         // measure-numbering?
@@ -6668,13 +6689,13 @@ public:
         // part-name-display?
         if (get_optional("part-name-display"))
         {
-
+            //TODO
         }
 
         // part-abbreviation-display?
         if (get_optional("part-abbreviation-display"))
         {
-
+            //TODO
         }
 
         return nullptr;
@@ -7437,18 +7458,49 @@ public:
 
     ImoObj* do_analysis() override
     {
-        ImoScore* pScore = get_anchor_as_score();
-        if (pScore == nullptr)
-            return nullptr;
+        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 
-        //attrb: number
-        int iStaff = get_attribute_as_integer("number", 1) - 1;
-
-        // staff-distance
-        if (get_optional("staff-distance"))
+        if (m_pAnchor && m_pAnchor->is_score())
         {
-            float value = pScore->tenths_to_logical( get_child_value_float(55.555555555f) );     //1000.0f LUnits
-            m_pAnalyser->save_default_staff_distance(iStaff, value);
+            //processing <staff-layout> in <defaults> element
+
+            //attrb: number
+            int iStaff = get_attribute_as_integer("number", 0);
+
+            if (iStaff == 0)
+                m_pAnalyser->set_default_staff_distance_is_for_all_staves();
+            else
+                --iStaff;
+
+            // staff-distance
+            if (get_optional("staff-distance"))
+            {
+                float value = get_child_value_float(0.0f);
+                if (value != 0.0f)
+                {
+                    pScore->save_default_staff_distance(value);
+                    float distance = pScore->tenths_to_logical(value);
+                    m_pAnalyser->save_default_staff_distance(iStaff, distance);
+                }
+            }
+        }
+        else
+        {
+            //processing <staff-layout> in a <part>, in <print> element
+
+            //attrb: number
+            int iStaff = get_attribute_as_integer("number", 1) - 1;
+
+            // staff-distance
+            if (get_optional("staff-distance"))
+            {
+                float value = get_child_value_float(0.0f);
+                if (value != 0.0f)
+                {
+                    float distance = pScore->tenths_to_logical(value);
+                    m_pAnalyser->save_staff_distance(iStaff, distance);
+                }
+            }
         }
 
         return nullptr;
@@ -7996,27 +8048,26 @@ public:
             pSC->set_bool_attribute(k_attr_pizzicato, value);
         }
 
-        //TODO: yes-no-number
-//        // attrib: damper-pedal %yes-no-number; #IMPLIED
-//        if (has_attribute("damper-pedal"))
-//        {
-//            bool value = get_optional_yes_no_attribute("damper-pedal", false);
-//            pSC->set_bool_attribute(k_attr_damper_pedal, value);
-//        }
-//
-//        // attrib: soft-pedal %yes-no-number; #IMPLIED
-//        if (has_attribute("soft-pedal"))
-//        {
-//            bool value = get_optional_yes_no_attribute("soft-pedal", false);
-//            pSC->set_bool_attribute(k_attr_soft_pedal, value);
-//        }
-//
-//        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
-//        if (has_attribute("sostenuto-pedal"))
-//        {
-//            bool value = get_optional_yes_no_attribute("sostenuto-pedal", false);
-//            pSC->set_bool_attribute(k_attr_sostenuto_pedal, value);
-//        }
+        // attrib: damper-pedal %yes-no-number; #IMPLIED
+        if (has_attribute("damper-pedal"))
+        {
+            bool value = get_optional_yes_no_attribute("damper-pedal", false);
+            pSC->set_bool_attribute(k_attr_damper_pedal, value);
+        }
+
+        // attrib: soft-pedal %yes-no-number; #IMPLIED
+        if (has_attribute("soft-pedal"))
+        {
+            bool value = get_optional_yes_no_attribute("soft-pedal", false);
+            pSC->set_bool_attribute(k_attr_soft_pedal, value);
+        }
+
+        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+        if (has_attribute("sostenuto-pedal"))
+        {
+            bool value = get_optional_yes_no_attribute("sostenuto-pedal", false);
+            pSC->set_bool_attribute(k_attr_sostenuto_pedal, value);
+        }
 
         bool fHasContent = (pSC->get_num_attributes() > 0);
 
@@ -9323,6 +9374,7 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     m_timeKeeper.full_reset();
     save_last_barline(nullptr);
     m_measuresCounter = 0;
+    clear_staff_distances();
 }
 
 //---------------------------------------------------------------------------------------
@@ -9344,8 +9396,10 @@ ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
 //---------------------------------------------------------------------------------------
 void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
 {
-    if (pAnchor && pAnchor->is_music_data() && pImo->is_staffobj() && m_fPendingBackFwd)
+//    cout << "add_to_model: pImo=" << pImo->get_name();
+    if (pAnchor && pAnchor->is_music_data() && pImo->is_staffobj() && m_fWaitingForVoice)
     {
+//        cout << ", anchor && staffobj && m_fWaitingForVoice";
         //barline
         if (pImo->is_barline())
         {
@@ -9362,36 +9416,50 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
             linker.add_child_to_model(pAnchor, pImo, k_imo_barline);
 
             set_current_voice(0);
+//            cout << " voice set to 0 --> add to model" << endl;
         }
 
         //other staffobjs, but not note/rests as they are processed in add_note_to_model()
-        else    //if (pImo->is_staffobj())
+        else
         {
             int voice = get_current_voice();
+//            cout << ", curVoice=" << voice;
             if (voice > 0)
             {
                 m_timeKeeper.move_time_as_required_by_voice(voice, 0);
-                m_fPendingBackFwd = false;
+                m_fWaitingForVoice = false;
                 if (m_pendingStaffObjs.size() > 0)
                     add_pending_staffobjs(voice);
 
                 static_cast<ImoStaffObj*>(pImo)->set_voice(voice);
                 Linker linker( get_document_being_analysed() );
                 linker.add_child_to_model(pAnchor, pImo, pImo->get_obj_type());
+//                cout << ", voice > 0 --> add to model" << endl;
             }
             else
             {
                 m_pendingStaffObjs.push_back( static_cast<ImoStaffObj*>(pImo) );
+//                cout << ", voice==0 --> add to pending staffobjs" << endl;
             }
         }
     }
     else
     {
+//        cout << ", no musicData, no staffobj or not m_fWaitingForVoice --> add to model" << endl;
         //no anchor, it is not StaffObj or no pending <backup> or <forward>. Add to model
         Linker linker( get_document_being_analysed() );
         linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
-        if (pImo->is_staffobj() && !pImo->is_barline())
-            static_cast<ImoStaffObj*>(pImo)->set_voice( get_current_voice() );
+        if (pImo->is_staffobj())
+        {
+            if (!pImo->is_barline())
+                static_cast<ImoStaffObj*>(pImo)->set_voice( get_current_voice() );
+            else
+            {
+                m_fWaitingForVoice = true;
+                set_current_voice(0);
+//                cout << "     Barline: voice set to 0 and m_fWaitingForVoice set to true" << endl;
+            }
+        }
     }
 }
 
@@ -9408,7 +9476,7 @@ void MxlAnalyser::add_note_to_model(ImoNoteRest* pNR, bool fInChord, long durati
     if (!fInChord)
         increment_time(pNR->get_voice(), pNR->get_staff(), duration);
 
-    m_fPendingBackFwd = false;
+    m_fWaitingForVoice = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -9434,21 +9502,21 @@ void MxlAnalyser::forward_timepos(long amount, int voice, int staff)
     if (voice != 0)
         set_current_voice(voice);
 
-    if (m_fPendingBackFwd && m_pendingStaffObjs.size() > 0)
+    if (m_fWaitingForVoice && m_pendingStaffObjs.size() > 0)
     {
         m_timeKeeper.move_time_as_required_by_voice(voice, staff);
         add_pending_staffobjs(voice);
     }
 
     m_timeKeeper.forward_timepos(amount, voice, staff);
-    m_fPendingBackFwd = true;
+    m_fWaitingForVoice = true;
 }
 
 //---------------------------------------------------------------------------------------
 void MxlAnalyser::backup_timepos(long amount)
 {
     m_timeKeeper.backup_timepos(amount);
-    m_fPendingBackFwd = true;
+    m_fWaitingForVoice = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -9641,18 +9709,60 @@ void MxlAnalyser::save_current_instrument(ImoInstrument* pInstr)
 //---------------------------------------------------------------------------------------
 void MxlAnalyser::save_default_staff_distance(int iStaff, LUnits distance)
 {
-    m_staffDistance[iStaff] = distance;
+    m_defaultStaffDistance[iStaff] = distance;
 }
 
 //---------------------------------------------------------------------------------------
 LUnits MxlAnalyser::get_default_staff_distance(int iStaff)
 {
+    if (m_fDefaultStaffDistanceForAllStaves)
+        iStaff = 0;
+
+    map<int, LUnits>::iterator it = m_defaultStaffDistance.find(iStaff);
+    if (it != m_defaultStaffDistance.end())
+        return it->second;
+
+    return LOMSE_STAFF_TOP_MARGIN;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlAnalyser::default_staff_distance_is_imported(int iStaff)
+{
+    if (m_fDefaultStaffDistanceForAllStaves)
+        iStaff = 0;
+
+    return m_defaultStaffDistance.find(iStaff) != m_defaultStaffDistance.end();
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::save_staff_distance(int iStaff, LUnits distance)
+{
+    m_staffDistance[iStaff] = distance;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits MxlAnalyser::get_staff_distance(int iStaff)
+{
     map<int, LUnits>::iterator it = m_staffDistance.find(iStaff);
     if (it != m_staffDistance.end())
         return it->second;
 
-    //return default value
+    if (default_staff_distance_is_imported(iStaff))
+        return get_default_staff_distance(iStaff);
+
     return LOMSE_STAFF_TOP_MARGIN;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlAnalyser::staff_distance_is_imported(int iStaff)
+{
+    return m_staffDistance.find(iStaff) != m_staffDistance.end();
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::clear_staff_distances()
+{
+    m_staffDistance.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -10417,25 +10527,26 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
                                 ImFactory::inject(k_imo_wedge, pDoc));
 
     //set data taken from start dto
-    pWedge->set_start_spread( pStartDto->get_spread() );
     pWedge->set_wedge_number( pStartDto->get_wedge_number() );
     pWedge->set_color( pStartDto->get_color() );
+    if (pStartDto->get_spread() != 0.0f)
+        pWedge->set_start_spread( pStartDto->get_spread() );
 
     //set data taken from end dto
-    pWedge->set_end_spread( pEndDto->get_spread() );
+    if (pEndDto->get_spread() != 0.0f)
+        pWedge->set_end_spread( pEndDto->get_spread() );
 
     //set data that can be on any of them
     pWedge->set_niente( pStartDto->is_niente() || pEndDto->is_niente() );
     pWedge->set_crescendo( pStartDto->is_crescendo() || pEndDto->is_crescendo());
 
-
     //set default spread when no spread is specified
     if (pEndDto->get_spread() == 0.0f && pStartDto->get_spread() == 0.0f)
     {
         if (pWedge->is_crescendo())
-            pWedge->set_end_spread(15.0f);
+            pWedge->set_default_spreads(0.0f, 15.0f);
         else
-            pWedge->set_start_spread(15.0f);
+            pWedge->set_default_spreads(15.0f, 0.0f);
     }
 
     std::list<ImoWedgeDto*>::iterator it;

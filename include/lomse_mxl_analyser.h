@@ -311,8 +311,6 @@ protected:
     std::vector<ImoLyric*>          m_lyrics;
     std::map<std::string, int>      m_soundIdToIdx;     //conversion sound-instrument id to index
 	std::vector<ImoMidiInfo*>       m_latestMidiInfo;  //latest MidiInfo for each soundIdx
-	std::map<int, LUnits>           m_staffDistance;    //<defaults> for staff-distance
-
 
     int                  m_musicxmlVersion;
     ImoObj*              m_pNodeImo;
@@ -357,8 +355,14 @@ protected:
 
     //<backup> and <forward> managemet
     std::list<ImoStaffObj*> m_pendingStaffObjs;     //non-timed, after a <backup> or <forward>
-    bool m_fPendingBackFwd = false;             //last processed element was a <backup> or <forward>
-    ImoMusicData* m_currentMD = nullptr;        //current ImoMusicData
+    bool m_fWaitingForVoice = false;                //no voice yet defined
+    ImoMusicData* m_currentMD = nullptr;            //current ImoMusicData
+
+    //temporary storage for <staff-distance>
+    std::map<int, LUnits> m_defaultStaffDistance;   //global <staff-distance> defined in <defaults>
+    std::map<int, LUnits> m_staffDistance;          //staff-distance for each staff, for current <part>
+    bool m_fDefaultStaffDistanceForAllStaves = false;   //global <staff-distance> defined in <defaults> is
+                                                        //for all staves
 
     //inherited values
 //    int m_curStaff;
@@ -477,9 +481,15 @@ public:
     void save_current_instrument(ImoInstrument* pInstr);
     inline ImoInstrument* get_current_instrument() { return m_pCurInstrument; }
 
-    //access to default staves spacing, for current instrument being analysed
+    //access to defualt staves spacing, for current instrument being analysed
     void save_default_staff_distance(int iStaff, LUnits distance);
     LUnits get_default_staff_distance(int iStaff);
+    bool default_staff_distance_is_imported(int iStaff);
+    void set_default_staff_distance_is_for_all_staves() { m_fDefaultStaffDistanceForAllStaves = true; }
+    void save_staff_distance(int iStaff, LUnits distance);
+    LUnits get_staff_distance(int iStaff);
+    bool staff_distance_is_imported(int iStaff);
+    void clear_staff_distances();
 
 
     //access to document being analysed

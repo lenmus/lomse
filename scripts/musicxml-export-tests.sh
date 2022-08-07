@@ -211,10 +211,10 @@ fi    #===== End of commented out block =====================
 
 cd "${extra_scores_path}/lilypond"
 GenerateImages "*.xml"
-
-if [ 1 -eq 0 ]; then    #===== Commented out =====================
 cd "${extra_scores_path}/recordare"
 GenerateImages "*.musicxml"
+
+if [ 1 -eq 0 ]; then    #===== Commented out =====================
 cd "${scores_path}"
 cd "./mnx"
 GenerateImages "*.mnx"

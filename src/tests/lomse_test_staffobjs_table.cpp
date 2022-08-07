@@ -642,7 +642,7 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_14)
     {
-        //@14. Rx. Clef, key signature and time signature always in that order and other
+        //@14. R12. Clef, key signature and time signature always in that order and other
         //@        non-timed after them
 
         Document doc(m_libraryScope);
@@ -2429,13 +2429,6 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjsBuilder builder;
         ColStaffObjs* pTable = builder.build(m_pScore);
 
-//        Document doc(m_libraryScope);
-//        doc.from_file(m_scores_path + "unit-tests/conversion/16-cross-staff-beamed-group-clef-change.xml",
-//                      Document::k_format_mxl);
-//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-//        CHECK( pScore != nullptr );
-//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 7 );
         CHECK( pTable->is_anacrusis_start() == false );
@@ -2453,6 +2446,37 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(clef F4 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e4 e v1 p1 (beam 31 -))" );
         CHECK( pTable->min_note_duration() == 32.0 );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_25)
+    {
+        //@25. direction after barline, two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/conversion/24-direction-after-barline.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 10 );
+
+//        cout << test_name() << endl << pTable->dump();
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,    0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	   1,      0,	 0,     1, "(clef F4 p2)" );
+        CHECK_ENTRY0(it, 0,    0,      0, 	 0,     0, "(r e v1 p1)" );
+        CHECK_ENTRY0(it, 0,	   1,      0,	 0,     1, "(r e v2 p2)" );
+        CHECK_ENTRY0(it, 0,    0,      0,	32,     0, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1,	32,     0, "(dir empty)" );
+        CHECK_ENTRY0(it, 0,    0,      1,	32,     0, "(r e v1 p1 (dyn \"p\" below))" );
+        CHECK_ENTRY0(it, 0,    1,      1,	32,     1, "(n g3 q v2 p2 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      1,	64,     0, "(n d5 e v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      1,	96,     0, "(barline simple)" );
     }
 
     // ColStaffObjsBuilderEngine1x ------------------------------------------------------

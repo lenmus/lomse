@@ -50,7 +50,10 @@ public:
 
 //---------------------------------------------------------------------------------------
 /** ScoreAlgorithms
-    General static methods for dealing with the staffobjs collection
+    General static methods to get information from the different structures that
+    form the internal model (the IM, the ColStaffObjs and the ImMeasuresTable).
+    The objective is to have the knowledge for traversing these structures in a single
+    place.
 **/
 class ScoreAlgorithms
 {
@@ -130,6 +133,7 @@ public:
         @param ml The measure locator to convert.
     */
     static TimeUnits get_timepos_for(ImoScore* pScore, const MeasureLocator& ml);
+
 
 protected:
     static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,

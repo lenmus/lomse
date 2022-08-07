@@ -120,6 +120,18 @@ public:
         return true;
     }
 
+    bool check_result_contains(const string& ss, const string& expected)
+    {
+        if (ss.find(expected) == std::string::npos)
+        {
+            failure_header();
+            cout << "  result=[" << ss << "]" << endl;
+            cout << endl << "expected=[" << expected << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
     bool check_result_contains(const string& ss, const string& expected,
                                const string& start, const string& stop)
     {
@@ -190,9 +202,10 @@ SUITE(MxlExporterTest)
 //        //doc.from_file(m_scores_path + "00205-multimetric.lmd", Document::k_format_lmd );
 //        //doc.from_file(m_scores_path + "00023-spacing-in-prolog-two-instr.lms" );
 ////        doc.from_file(m_scores_path + "50120-fermatas.lms" );
-//        //doc.from_file(m_scores_path + "unit-tests/xml-export/021-single-voice-cross-staff-clef-change.xml", Document::k_format_mxl);
-//        doc.from_file(m_scores_path + + "unit-tests/colstaffobjs/09-cross-staff-beamed-group-with-intermediate-clef.lms");
-//        //doc.from_file("/datos/cecilio/lm/projects/lomse//vregress/scores/lilypond/43d-MultiStaff-StaffChange.xml", Document::k_format_mxl);
+//        //doc.from_file(m_scores_path + "unit-tests/xml-export/023-grace-direction-at-start.xml", Document::k_format_mxl);
+//        //doc.from_file(m_scores_path + + "unit-tests/colstaffobjs/09-cross-staff-beamed-group-with-intermediate-clef.lms");
+//        //doc.from_file("/datos/cecilio/lm/projects/lomse/vregress/scores/lilypond/43d-MultiStaff-StaffChange.xml", Document::k_format_mxl);
+//        doc.from_file("/datos/cecilio/lm/projects/lomse/vregress/scores/recordare/DebuMandSample.musicxml", Document::k_format_mxl);
 ////        doc.from_file(m_scores_path + "00110-triplet-against-5-tuplet-4.14.lms" );
 ////        doc.from_file(m_scores_path + "50130-metronome.lms" );
 ////        doc.from_file(m_scores_path + "50180-new-system-tag.lms" );
@@ -611,14 +624,15 @@ SUITE(MxlExporterTest)
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "unit-tests/xml-export/015-volta-brackets.xml", Document::k_format_mxl);
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        MxlExporter exporter(m_libraryScope);
-        exporter.set_remove_newlines(true);
-        exporter.set_current_score(pScore);
-        exporter.set_remove_separator_lines(true);
-
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
         exporter.set_current_instrument(pInstr);
+
         string source = exporter.get_source(pMD);
         string expected = "<measure number=\"2\">"
             "<barline location=\"left\"><ending number=\"1\" type=\"start\"/></barline>";
@@ -636,6 +650,75 @@ SUITE(MxlExporterTest)
         expected = "<barline>"
             "<ending number=\"2\" type=\"discontinue\"/></barline>";
         CHECK( check_result_contains(source, expected, "<barline><ending number=\"2\"", "</barline>") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, barline_08)
+    {
+        //@08. barline. repeat times
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<attributes>"
+                    "<divisions>4</divisions>"
+                    "<clef><sign>G</sign><line>2</line></clef>"
+                "</attributes>"
+                "<note><rest/><duration>16</duration><type>whole</type></note>"
+            "</measure>"
+            "<measure number='2'>"
+                "<barline location='left'>"
+                    "<bar-style>heavy-light</bar-style>"
+                    "<repeat direction='forward'/>"
+                "</barline>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>16</duration><type>whole</type></note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<repeat direction='backward' times='3'/>"
+                "</barline>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<measure number=\"2\">"
+            "<barline location=\"left\"><bar-style>heavy-light</bar-style>"
+            "<repeat direction=\"forward\"/></barline>";
+        CHECK( check_result_contains(source, expected, "<measure number=\"2\"", "</barline>") );
+
+        expected = "<barline><bar-style>light-heavy</bar-style>"
+            "<repeat direction=\"backward\" times=\"3\"/></barline>";
+        CHECK( check_result_contains(source, expected, "<barline location=\"right", "</barline>") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, barline_09)
+    {
+        //@09. barline. double repetition, heavy-heavy
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/029-barline-double-repetition-heavy.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+
+        string source = exporter.get_source(pMD);
+        string expected = ""
+            "<barline><bar-style>heavy-heavy</bar-style>"
+            "<repeat direction=\"backward\"/></barline>"
+            "</measure><measure implicit=\"yes\" number=\"X1\">"
+            "<barline location=\"left\"><repeat direction=\"forward\"/>"
+            "</barline>";
+        CHECK( check_result_contains(source, expected, "<barline>", "<note>") );
     }
 
     // @ beam ---------------------------------------------------------------------------
@@ -764,11 +847,27 @@ SUITE(MxlExporterTest)
         //@03. clef. intermediate clef
 
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument (musicData"
-                "(clef G)(n c4 q)(clef F4)(n d3 q) )))");
+//        doc.from_string("(score (vers 2.0) (instrument (musicData"
+//                "(clef G)(n c4 q)(clef F4)(n d3 q) )))");
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number=\"1\">"
+            "<attributes><divisions>480</divisions>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type></note>"
+            "<attributes><clef><sign>F</sign><line>4</line></clef></attributes>"
+            "<note><pitch><step>D</step><octave>3</octave></pitch>"
+                "<duration>480</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
+
+//        dump_colection(pScore);
 
         MxlExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -947,6 +1046,124 @@ SUITE(MxlExporterTest)
 //                "<staff-distance>90</staff-distance></staff-layout>";
 //        CHECK( check_result_contains(source, expected, "staff-layout") );
 //    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, defaults_06)
+    {
+        //@06. defaults: word-font
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'>"
+            "<defaults>"
+            "<word-font font-family=\"Times New Roman\" font-size=\"10.2\"/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<defaults>"
+            "<word-font font-family=\"Times New Roman\" font-size=\"10.2\"/>"
+            "</defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, defaults_07)
+    {
+        //@07. defaults: lyric-font. No: number, language
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'>"
+            "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font font-family=\"Times New Roman\" font-size=\"10\"/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font font-family=\"Times New Roman\" font-size=\"10\"/>"
+            "</defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, defaults_08)
+    {
+        //@08. defaults: lyric-font with lyric-language
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'>"
+            "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font font-family=\"Times New Roman\" font-size=\"10\"/>"
+            "<lyric-language xml:lang=\"fr\"/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font font-family=\"Times New Roman\" font-size=\"10\"/>"
+            "<lyric-language xml:lang=\"fr\"/>"
+            "</defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, defaults_09)
+    {
+        //@09. defaults: three lyric-font with language
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'>"
+            "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font number=\"1\" font-family=\"Times New Roman\" font-size=\"10.25\"/>"
+            "<lyric-font number=\"2\" font-family=\"ＭＳ ゴシック\" font-size=\"10.25\"/>"
+            "<lyric-font number=\"3\" font-family=\"Georgia\" font-size=\"10.25\"/>"
+            "<lyric-language number=\"1\" xml:lang=\"fr\"/>"
+            "<lyric-language number=\"2\" xml:lang=\"ja\"/>"
+            "<lyric-language number=\"3\" xml:lang=\"es\"/>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<defaults>"
+            "<word-font font-family=\"Sans serif\" font-size=\"10.2\"/>"
+            "<lyric-font number=\"1\" font-family=\"Times New Roman\" font-size=\"10.25\"/>"
+            "<lyric-font number=\"2\" font-family=\"ＭＳ ゴシック\" font-size=\"10.25\"/>"
+            "<lyric-font number=\"3\" font-family=\"Georgia\" font-size=\"10.25\"/>"
+            "<lyric-language number=\"1\" xml:lang=\"fr\"/>"
+            "<lyric-language number=\"2\" xml:lang=\"ja\"/>"
+            "<lyric-language number=\"3\" xml:lang=\"es\"/>"
+            "</defaults>";
+        CHECK( check_result_contains(source, expected, "defaults") );
+    }
 
     //@ direction -----------------------------------------------------------------------
 
@@ -1541,6 +1758,105 @@ SUITE(MxlExporterTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlExporterTestFixture, direction_19)
+    {
+        //@19. direction after grace note in other staff (bug detected)
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/023-grace-direction-at-start.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<measure number=\"1\"><attributes><divisions>480</divisions><staves>2</staves>"
+            "<clef number=\"1\"><sign>G</sign><line>2</line></clef>"
+            "<clef number=\"2\"><sign>F</sign><line>4</line></clef></attributes>"
+            "<note><grace steal-time-previous=\"20\" slash=\"yes\"/><pitch><step>G</step>"
+            "<octave>3</octave></pitch><voice>1</voice><type>eighth</type><stem>up</stem>"
+            "<staff>2</staff></note>"
+            "<direction placement=\"below\"><direction-type><dynamics><sfp/></dynamics>"
+            "</direction-type><staff>1</staff><sound dynamics=\"54\"/></direction>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+            "<duration>1440</duration><voice>1</voice><type>half</type><dot/><stem>up</stem>"
+            "<staff>1</staff></note>"
+            "<backup><duration>1440</duration></backup>"
+            "<note><rest><display-step>D</display-step><display-octave>3</display-octave></rest>"
+            "<duration>1440</duration><voice>2</voice><type>whole</type><staff>2</staff></note>"
+            "</measure>";
+        CHECK( check_result(source, expected) );
+
+        expected =
+            "<direction placement=\"below\"><direction-type><dynamics><sfp/></dynamics>"
+            "</direction-type><staff>1</staff><sound dynamics=\"54\"/></direction>";
+        CHECK( check_result_contains(source, expected, "<direction", "<note>") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_20)
+    {
+        //@20. direction. span direction ends before <backup> for next voice (bug detected)
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/024-span-direction-backup.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        exporter.set_current_score(pScore);
+        exporter.set_current_instrument(pInstr);
+
+        string source = exporter.get_source(pMD);
+        string expected =
+            "<direction><direction-type><wedge type=\"stop\"/></direction-type>"
+            "<staff>1</staff></direction>";
+        CHECK( check_result_contains(source, expected, "<direction>", "<backup>") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, direction_21)
+    {
+        //@21. direction: wedge attributes
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<wedge default-y=\"-73\" spread=\"11\" type=\"diminuendo\"/></direction-type>"
+            "</direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction>"
+                "<direction-type><wedge type=\"stop\" niente=\"yes\"/></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+
+        string expected = "<wedge type=\"diminuendo\" spread=\"11\"/>";
+        CHECK( check_result_contains(source, expected, "<wedge type=\"diminuendo\"", "</direction-type") );
+
+        expected = "<wedge type=\"stop\" niente=\"yes\"/>";
+        CHECK( check_result_contains(source, expected, "<wedge type=\"stop\"", "</direction-type") );
+    }
+
+
     //@ key -----------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlExporterTestFixture, key_01)
@@ -2034,6 +2350,52 @@ SUITE(MxlExporterTest)
             "<duration>1920</duration><voice>1</voice><type>whole</type></note>"
             "</measure>";
         CHECK( check_result_contains(source, expected, "<measure number=\"3\">", "</part") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, measure_04)
+    {
+        //@04. measure. print and measure-numbering exported
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/022-measure-numbering.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<part id=\"P1\"><measure number=\"1\">"
+            "<print><measure-numbering>system</measure-numbering></print>";
+        CHECK( check_result_contains(source, expected, "<part id=\"P1\">", "<attributes") );
+
+        expected = "<part id=\"P2\"><measure number=\"1\">";
+        CHECK( check_result_contains(source, expected, "<part id=\"P2\">", "<attributes") );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, measure_05)
+    {
+        //@05. measure. 'implicit' and 'number' attributes
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure implicit=\"yes\" number=\"X1\">"
+                "<attributes>"
+                    "<divisions>4</divisions>"
+                    "<clef><sign>G</sign><line>2</line></clef>"
+                "</attributes>"
+                "<note><rest/><duration>16</duration><type>whole</type></note>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<measure implicit=\"yes\" number=\"X1\">";
+        CHECK( check_result_contains(source, expected, "<measure", "<attributes>") );
     }
 
     //@ notations -----------------------------------------------------------------------
@@ -2618,6 +2980,121 @@ SUITE(MxlExporterTest)
         CHECK( check_result_contains(source, expected, "part-list") );
     }
 
+    TEST_FIXTURE(MxlExporterTestFixture, part_list_05)
+    {
+        //@05. part-list. several instruments per part
+
+        Document doc(m_libraryScope);
+        doc.from_string("<score-partwise version='3.0'><part-list>"
+            "<score-part id=\"P2\">"
+             "<part-name/>"
+             "<score-instrument id=\"P2-I4\">"
+                "<instrument-name>Cantus 2</instrument-name>"
+                "<solo/>"
+             "</score-instrument>"
+             "<score-instrument id=\"P2-I3\">"
+                "<instrument-name>Tenor</instrument-name>"
+                "<solo/>"
+             "</score-instrument>"
+             "<midi-instrument id=\"P2-I4\">"
+                "<midi-channel>2</midi-channel>"
+                "<midi-program>42</midi-program>"
+                "<volume>80</volume>"
+                "<pan>0</pan>"
+             "</midi-instrument>"
+             "<midi-instrument id=\"P2-I3\">"
+                "<midi-channel>3</midi-channel>"
+                "<midi-program>43</midi-program>"
+                "<volume>80</volume>"
+                "<pan>0</pan>"
+             "</midi-instrument>"
+            "</score-part></part-list>"
+            "<part id=\"P2\"><measure number='1'>"
+            "</measure></part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected = "<part-list><score-part id=\"P2\">"
+             "<part-name/>"
+             "<score-instrument id=\"P2-I4\">"
+                "<instrument-name>Cantus 2</instrument-name>"
+                "<solo/>"
+             "</score-instrument>"
+             "<score-instrument id=\"P2-I3\">"
+                "<instrument-name>Tenor</instrument-name>"
+                "<solo/>"
+             "</score-instrument>"
+             "<midi-instrument id=\"P2-I4\">"
+                "<midi-channel>2</midi-channel>"
+                "<midi-program>42</midi-program>"
+                "<volume>80</volume>"
+                "<pan>0</pan>"
+             "</midi-instrument>"
+             "<midi-instrument id=\"P2-I3\">"
+                "<midi-channel>3</midi-channel>"
+                "<midi-program>43</midi-program>"
+                "<volume>80</volume>"
+                "<pan>0</pan>"
+             "</midi-instrument>"
+            "</score-part></part-list>";
+        CHECK( check_result_contains(source, expected, "part-list") );
+    }
+
+    //@ print ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlExporterTestFixture, print_01)
+    {
+        //@01. print: staff-distance exported
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise version='3.0'>"
+            "<defaults>"
+                "<staff-layout>"
+                  "<staff-distance>80</staff-distance>"
+                "</staff-layout>"
+            "</defaults>"
+            "<part-list><score-part id='P1'><part-name/></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<print>"
+                "<staff-layout number=\"2\">"
+                  "<staff-distance>93</staff-distance>"
+                "</staff-layout>"
+            "</print>"
+            "<attributes>"
+                "<staves>2</staves>"
+                "<clef number=\"1\"><sign>G</sign><line>2</line></clef>"
+                "<clef number=\"2\"><sign>F</sign><line>4</line></clef>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>", Document::k_format_mxl );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+        string expected =
+            "<defaults>"
+                "<staff-layout>"
+                  "<staff-distance>80</staff-distance>"
+                "</staff-layout>"
+            "</defaults>";
+        CHECK( check_result_contains(source, expected, "<defaults>") );
+
+        expected =
+            "<print>"
+                "<staff-layout number=\"2\">"
+                  "<staff-distance>93</staff-distance>"
+                "</staff-layout>"
+            "</print>";
+        CHECK( check_result_contains(source, expected, "<print>") );
+    }
+
     //@ rest ----------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlExporterTestFixture, rest_01)
@@ -2815,6 +3292,32 @@ SUITE(MxlExporterTest)
         CHECK( check_result_contains(source, expected, "slur") );
     }
 
+    TEST_FIXTURE(MxlExporterTestFixture, slur_04)
+    {
+        //@04. slur. stop before start
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/028-slurs.xml", Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+
+        string expected = "<slur number=\"1\" type=\"start\" placement=\"above\"/>";
+        CHECK( check_result_contains(source, expected) );
+
+        expected = "<slur number=\"2\" type=\"stop\"/>";
+        CHECK( check_result_contains(source, expected) );
+
+        expected = "<slur number=\"2\" type=\"start\" placement=\"above\"/>";
+        CHECK( check_result_contains(source, expected) );
+
+        expected = "<slur number=\"1\" type=\"stop\"/>";
+        CHECK( check_result_contains(source, expected) );
+    }
+
     //@ technical -----------------------------------------------------------------------
 
     TEST_FIXTURE(MxlExporterTestFixture, technical_01)
@@ -3010,6 +3513,27 @@ SUITE(MxlExporterTest)
             "<duration>480</duration><tie type=\"stop\"/><voice>1</voice><type>quarter</type>"
             "<notations><tied type=\"stop\"/></notations></note>";
         CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, tie_02)
+    {
+        //@02. tie. orientation
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/026-tied-orientation.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+
+        string expected = "<tied type=\"start\" orientation=\"under\"/>";
+        CHECK( check_result_contains(source, expected, "<tied type=\"start\"/", "</notations>") );
+
+        expected = "<tied type=\"stop\"/>";
+        CHECK( check_result_contains(source, expected, "<tied type=\"stop\"/", "</notations>") );
     }
 
     //@ time signature ------------------------------------------------------------------
@@ -3220,6 +3744,28 @@ SUITE(MxlExporterTest)
             "<notations><tuplet type=\"stop\" number=\"1\"/>"
             "</notations></note>";
         CHECK( check_result(source, expected) );
+    }
+
+    TEST_FIXTURE(MxlExporterTestFixture, tuplet_03)
+    {
+        //@03. tuplet. starts in rest
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/xml-export/027-tuplet-starts-in-rest.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MxlExporter exporter(m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_remove_separator_lines(true);
+        string source = exporter.get_source(pScore);
+
+        string expected =
+            "<tuplet type=\"start\" number=\"1\" bracket=\"no\" show-number=\"actual\">"
+                "<tuplet-actual><tuplet-number>6</tuplet-number></tuplet-actual>"
+                "<tuplet-normal><tuplet-number>4</tuplet-number></tuplet-normal>"
+            "</tuplet>";
+        CHECK( check_result_contains(source, expected, "tuplet") );
     }
 
     //@ tests to check StaffObjs order --------------------------------------------------

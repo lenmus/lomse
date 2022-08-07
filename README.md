@@ -21,13 +21,14 @@ For details, see file [LICENSE](LICENSE).
 
 * Platform independent.
 * Can be safely used in commercial closed source projects.
-* MusicXML import.
-* Rendering in two formats: as SVG and as images on provided memory (bitmap, window buffer, etc.).
-* Rendition of full documents (paragraphs, tables, lists, scores, images, etc.).
+* MusicXML import / export.
+* [LDP](https://lenmus.github.io/ldp/) import / export.
+* Rendering in two formats: as SVG (text stream) and as images on provided memory (bitmap, window buffer, etc.).
+* Rendition of full documents (paragraphs, tables, lists, scores, images, etc.). Limited support.
 * Support for score playback, by generating *MIDI events* in real time
 * Support for visual tracking effects (i.e. moving cursor) during playback in sync. with MIDI events or with external player.
 * Support for music scores edition.
-* Music renderization is based on fonts compliant with the Standard Music Font Layout (SMuFL) [specification](https://www.smufl.org/).
+* Music rendition is based on fonts compliant with the Standard Music Font Layout (SMuFL) [specification](https://www.smufl.org/).
 
 
 ## Installation and documentation:
