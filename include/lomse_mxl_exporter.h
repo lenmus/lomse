@@ -58,6 +58,9 @@ protected:
     static const int k_max_tuplet_number = 16;
     std::array<ImoId, k_max_tuplet_number> m_tuplets;
 
+    //for ensuring proper ordering of non-timed staffobjs
+    std::list< std::pair<ImoStaffObj*, ImoStaffObj*> > m_pendingStaffObjs;
+
 public:
     MxlExporter(LibraryScope& libScope);
     virtual ~MxlExporter();
@@ -98,8 +101,7 @@ public:
     int close_tuplet_and_get_number(ImoId tupletId);
 
     //slurs
-    int start_slur_and_get_number(ImoId slurId);
-    int close_slur_and_get_number(ImoId slurId);
+    int get_number_for_slur(ImoId slurId);
 
     //the main method
     std::string get_source(ImoObj* pImo, ImoObj* pParent=nullptr);
@@ -110,12 +112,16 @@ public:
     std::string get_lomse_version() const { return m_lomseVersion; }
     std::string get_export_time() const { return m_exportTime; }
 
-    //static methods for types mnx names to conversion
+    //static methods for conversion of types to mxl names
     static std::string barline_type_to_mnx(int barType);
     static std::string note_type_to_mxl_name(int noteType);
     static std::string accidentals_to_mxl_name(int acc);
     static std::string color_to_mnx(Color color);
     static std::string float_to_string(float num);
+
+    //managing pending staffobjs
+    void save_pending_staffobj(ImoStaffObj* pNext, ImoStaffObj* pSO);
+    void export_pending_staffobjs(MxlGenerator* pRequester, ImoStaffObj* pOwner);
 
     //other methods
     inline void set_processing_chord(bool value) { m_fProcessingChord = value; }

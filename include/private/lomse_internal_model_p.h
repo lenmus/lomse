@@ -1913,6 +1913,15 @@ protected:
     std::map<int, int> m_intProps;
     std::map<int, Color> m_colorProps;
 
+    //to control if values are defaults or has been imported/set
+    long m_modified = 0L;
+    enum {
+        k_modified_font_name =      0x00000001,
+        k_modified_font_size =      0x00000002,
+        k_modified_font_style =     0x00000004,
+        k_modified_font_weight =    0x00000008,
+    };
+
     friend class ImFactory;
     ImoStyle() : ImoSimpleObj(k_imo_style), m_name(), m_pParent(nullptr) {}
 
@@ -1931,8 +1940,8 @@ public:
     enum { k_align_left, k_align_right, k_align_center, k_align_justify };
 
     //font style/weight
-    enum { k_font_style_normal=0, k_font_style_italic };
-    enum { k_font_weight_normal=0, k_font_weight_bold, };
+    enum { k_font_style_undefined=0, k_font_style_normal, k_font_style_italic };
+    enum { k_font_weight_undefined=0, k_font_weight_normal, k_font_weight_bold, };
 
     //style properties
     enum
@@ -2016,7 +2025,14 @@ public:
     {
         return get_int_property(ImoStyle::k_font_style) == k_font_style_italic;
     }
+
+    //check if contains default values or a new value has been set
     bool is_default_style_with_default_values();
+    inline bool font_data_modified()  { return m_modified != 0L; }
+    inline bool font_name_modified() { return (m_modified & k_modified_font_name) != 0; }
+    inline bool font_size_modified() { return (m_modified & k_modified_font_size) != 0; }
+    inline bool font_style_modified() { return (m_modified & k_modified_font_style) != 0; }
+    inline bool font_weight_modified() { return (m_modified & k_modified_font_weight) != 0; }
 
     //utility getters/setters to avoid stupid mistakes and to simplify source code
     //font
@@ -2343,18 +2359,41 @@ public:
 
 protected:
 
+    friend class ImoScore;
+    friend class ImoStyles;
+    void reset_style_modified() { m_modified = 0L; }
+
     //setters
     void set_string_property(int prop, const std::string& value)
     {
         m_stringProps[prop] = value;
+        switch(prop)
+        {
+            case ImoStyle::k_font_name:    m_modified |= k_modified_font_name;   break;
+            default:
+                ;
+        }
     }
     void set_float_property(int prop, float value)
     {
         m_floatProps[prop] = value;
+        switch(prop)
+        {
+            case ImoStyle::k_font_size:    m_modified |= k_modified_font_size;   break;
+            default:
+                ;
+        }
     }
     void set_int_property(int prop, int value)
     {
         m_intProps[prop] = value;
+        switch(prop)
+        {
+            case ImoStyle::k_font_style:    m_modified |= k_modified_font_style;   break;
+            case ImoStyle::k_font_weight:   m_modified |= k_modified_font_weight;  break;
+            default:
+                ;
+        }
     }
     void set_lunits_property(int prop, LUnits value)
     {
@@ -2974,6 +3013,14 @@ public:
     //other
     ImoInstrument* get_instrument();
     ImoScore* get_score();
+
+    /** Non-timed staffobjs (e.g. ImoDirections) are stored in the IM maintaining the
+        same order, in relation to note/rests and barlines, than the score order in
+        source format. This ordering is important, in some cases, for re-exporting
+        an score. This method returns the first noterest or barline that has been
+        defined after this staffobj. If no barline or noterest, returns nullptr.
+    */
+    ImoStaffObj* get_next_noterest_or_barline();
 
     //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value) override;
@@ -5378,6 +5425,7 @@ public:
 
     //to change default settings at creation time (MusicXML importer)
     void set_staff_margin(int iStaff, LUnits distance);
+    void mark_staff_margin_as_imported(int iStaff);
 
         //layout options
 
@@ -5394,9 +5442,10 @@ public:
     /// Valid values for measure numbering global policy.
     enum EMeasuresNumbering
     {
-        k_none=0,   ///< Measure numbers are never displayed
-        k_system,   ///< Display measure numbers only at start of each system
-        k_all,      ///< Display measure numbers in all measures
+        k_undefined=0,  ///< Measure numbering global policy not defined
+        k_none,         ///< Measure numbers are never displayed
+        k_system,       ///< Display measure numbers only at start of each system
+        k_all,          ///< Display measure numbers in all measures
     };
 
     /** Barlines layout describes the policy for laying out barlines.
@@ -6203,7 +6252,12 @@ protected:
     ImoSystemInfo m_systemInfoOther;
     std::list<ImoScoreTitle*> m_titles;     //titles are added as children nodes. This list is
                                             //  kept for quick access. Do not delete in destructor.
-    std::map<string, ImoStyle*> m_nameToStyle;
+    std::map<std::string, ImoStyle*> m_nameToStyle;
+    int m_numLyricFonts = 1;        //count for fonts "Lyrics" and "Lyric-nn"
+
+    //data saved only when importing MusicXML, to re-export it
+    std::map<int, std::string> m_lyricLanguages;    //lyric languages defined in <defaults>
+    Tenths m_staffDistance = 0.0f;          //default value for <staff-distance>
 
     //to control if variables contain inherited/default values or a new value has been set
     long m_modified = 0L;
@@ -6302,6 +6356,15 @@ public:
     ImoStyle* find_style(const std::string& name);
     ImoStyle* get_default_style();
     ImoStyle* get_style_or_default(const std::string& name);
+    int get_number_of_lyric_fonts() { return m_numLyricFonts; }
+
+    //MusicXML imported data, but no used. Only for MusicXML export
+    void add_lyric_language(int number, const std::string& lang);
+    std::string get_lyric_language(int number);
+    void save_default_staff_distance(Tenths value) { m_staffDistance = value; }
+    Tenths get_default_staff_distance() { return m_staffDistance; }
+    bool default_staff_distance_modified() { return m_staffDistance != 0.0f; }
+
 
     //low level edition API
     /** Append a new empty instrument (score part) to the score. Returns a pointer to
@@ -6323,6 +6386,7 @@ protected:
     void set_defaults_for_options();
 
     friend class ScoreLdpGenerator;
+    friend class ScoreMxlGenerator;
     inline std::map<std::string, ImoStyle*>& get_styles()
     {
         return m_nameToStyle;
@@ -6512,6 +6576,12 @@ protected:
     bool m_fTablature = false;      //This staff is for tablature notation
     double m_notationScaling = 1.0;
 
+    //to control if variables contain default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_size =       0x00000001,
+        k_modified_margin =     0x00000002,
+    };
 
     friend class ImFactory;
     friend class ImoInstrument;
@@ -6535,9 +6605,10 @@ public:
            k_staff_alternate,
          };
 
-
-    bool has_default_values() const;
+    //checks, for exporting modified data
     bool is_staff_size_modified() const { return m_uSpacing != LOMSE_STAFF_LINE_SPACING; }
+    bool is_staff_margin_modified() const { return (m_modified & k_modified_margin) != 0; }
+    void mark_staff_margin_as_imported() { m_modified |= k_modified_margin; }
 
     //staff number
     inline int get_staff_number() const { return m_numStaff; }
@@ -7805,11 +7876,18 @@ public:
 class ImoWedge : public ImoRelObj
 {
 protected:
-    Tenths  m_startSpread = 0.0f;
-    Tenths  m_endSpread = 0.0f;
-    bool    m_fNiente = false;
-    bool    m_fCrescendo = false;
+    Tenths  m_startSpread = 0.0f;       //spread at start point
+    Tenths  m_endSpread = 0.0f;         //spread at end point
+    bool    m_fNiente = false;          //at start for crescendo or at end for diminuendo
+    bool    m_fCrescendo = false;       //crescendo (true) or diminuendo (false)
     int     m_wedgeNum;
+
+    //to control if variables contain default values or a new value has been set
+    long m_modified = 0L;
+    enum {
+        k_modified_start_spread =   0x00000001,
+        k_modified_end_spread =     0x00000002,
+    };
 
     friend class ImFactory;
     ImoWedge(int num=0) : ImoRelObj(k_imo_wedge), m_wedgeNum(num) {}
@@ -7821,8 +7899,9 @@ public:
     ImoWedge& operator= (ImoWedge&&) = delete;
 
     //setters
-    inline void set_start_spread(Tenths value) { m_startSpread = value; }
-    inline void set_end_spread(Tenths value) { m_endSpread = value; }
+    inline void set_start_spread(Tenths value) { m_startSpread = value; m_modified |= k_modified_start_spread; }
+    inline void set_end_spread(Tenths value) { m_endSpread = value;  m_modified |= k_modified_end_spread; }
+    inline void set_default_spreads(Tenths start, Tenths end) { m_startSpread = start; m_endSpread = end; }
     inline void set_niente(bool value) { m_fNiente = value; }
     inline void set_crescendo(bool value) { m_fCrescendo = value; }
     inline void set_wedge_number(int value) { m_wedgeNum = value; }
@@ -7833,6 +7912,10 @@ public:
     inline bool is_niente() { return m_fNiente; }
     inline bool is_crescendo() { return m_fCrescendo; }
     inline int get_wedge_number() { return m_wedgeNum; }
+
+    //check for modified values, for exporters
+    bool is_start_spread_modified() const { return (m_modified & k_modified_start_spread) != 0; }
+    bool is_end_spread_modified() const { return (m_modified & k_modified_end_spread) != 0; }
 
     //required override for ImoRelObj
     void reorganize_after_object_deletion() override;

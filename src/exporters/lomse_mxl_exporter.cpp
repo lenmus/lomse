@@ -19,6 +19,7 @@
 #include "lomse_time.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_im_attributes.h"
+#include "lomse_im_measures_table.h"
 
 
 #include <cmath>        //round
@@ -102,7 +103,10 @@ protected:
     void add_attribute_print_object(ImoObj* pObj);
     void add_attribute_optional_unique_id(ImoObj* pObj);
 
+protected:
 
+    friend class MxlExporter;
+    stringstream& get_stream() { return m_source; }
 };
 
 const bool k_in_same_line = false;
@@ -206,7 +210,7 @@ protected:
     void split_barline()
     {
         m_left.fRepeat = false;
-        m_left.times = 0;
+        m_left.times = 0;       //always 0. Repeat timeas are only for right barlines
         m_left.location = "left";
 
         m_right.fRepeat = false;
@@ -247,9 +251,6 @@ protected:
                 m_left.style = "heavy-light";
                 m_left.fRepeat = true;
                 m_left.location = "left";
-                //TODO: in current IM times is only save on end of repetition barline.
-                //Need to find next barline to get this information !
-                m_left.times = 1;
                 m_left.winged = m_right.winged;
                 return;
 
@@ -264,21 +265,15 @@ protected:
                 m_left.style = "heavy-light";
                 m_left.fRepeat = true;
                 m_left.location = "left";
-                //TODO: in current IM times is only save on end of repetition barline.
-                //Need to find next barline to get this information !
-                m_left.times = 1;
                 m_left.winged = m_right.winged;
                 return;
 
             case k_barline_double_repetition_alt:
-                m_right.style = "heavy";
+                m_right.style = "heavy-heavy";
                 m_right.fRepeat = true;
-                m_left.style = "heavy";
+                m_left.style = "";
                 m_left.fRepeat = true;
                 m_left.location = "left";
-                //TODO: in current IM times is only save on end of repetition barline.
-                //Need to find next barline to get this information !
-                m_left.times = 1;
                 m_left.winged = m_right.winged;
                 return;
 
@@ -322,7 +317,7 @@ protected:
     //-----------------------------------------------------------------------------------
     string generate_source_for_barline(const BarlineData& data)
     {
-        if (data.style.empty() && data.times == 0 && data.pVoltaBracket == nullptr)
+        if (data.style.empty() && data.fRepeat == false && data.pVoltaBracket == nullptr)
             return "";
 
         start_element("barline", m_pObj);
@@ -1210,23 +1205,56 @@ protected:
 
         start_element("wedge", pImo);
 
+        //attribs: type, niente and spread
+        //AWARE: niente is only valid when begin with a crescendo type, or the type is
+        //stop for a wedge that began with a diminuendo type.
+        //spread is only valid at the start of a diminuendo wedge or the end of a
+        //crecendo wedge.
         if (pImo->get_start_object() == m_pObj)
         {
-            add_attribute("type", pImo->is_crescendo() ? "crescendo" : "diminuendo");
-            if (pImo->is_niente())
-                add_attribute("niente", "yes");
+            if (pImo->is_crescendo())
+            {
+                //attrib: type
+                add_attribute("type", "crescendo");
+
+                //attrib: niente
+                if (pImo->is_niente())
+                    add_attribute("niente", "yes");
+            }
+            else
+            {
+                //attrib: type
+                add_attribute("type", "diminuendo");
+
+                //attrib: spread
+                if (pImo->is_start_spread_modified())
+                    add_attribute("spread", pImo->get_start_spread());
+            }
         }
         else
         {
+            //attrib: type
             add_attribute("type", "stop");
-            if (pImo->is_niente())
-                add_attribute("niente", "yes");
+
+            if (pImo->is_crescendo())
+            {
+                //attrib: spread
+                if (pImo->is_end_spread_modified())
+                    add_attribute("spread", pImo->get_end_spread());
+            }
+            else
+            {
+                //attrib: niente
+                if (pImo->is_niente())
+                    add_attribute("niente", "yes");
+            }
         }
 
         //TODO
-        //    number %number-level; #IMPLIED
-        //    spread %tenths; #IMPLIED
-        //    niente %yes-no; #IMPLIED
+        //attrib: number %number-level;
+
+
+
         //    %line-type;
         //    %dashed-formatting;
         add_attributes_for_position(pImo);
@@ -1831,11 +1859,7 @@ protected:
     ColStaffObjs* m_pColStaffObjs;
     ColStaffObjsIterator m_itStartOfMeasure;    //first object or current position
     ColStaffObjsIterator m_itEndOfMeasure;      //barline for instr,measure or end pos.
-    ColStaffObjsIterator m_itStartOfNextMeasure;    //could be before m_itEndOfMeasure as
-                                                    //ColStaffObjs is not ordered by measure
     bool m_fDivisionsAdded = false;
-
-#define LOMSE_USE_LINES   0
 
     //-----------------------------------------------------------------------------------
     void add_measures()
@@ -1844,39 +1868,35 @@ protected:
         m_iInstr = m_pScore->get_instr_number_for(pInstr);
         m_pColStaffObjs = m_pScore->get_staffobjs_table();
 
-        if (m_pColStaffObjs->num_entries() < 1)
+        ImMeasuresTable* pMeasures = pInstr->get_measures_table();
+        if (!pMeasures)
             return;
 
-        m_itStartOfNextMeasure = m_pColStaffObjs->begin();
-        advance_to_right_instrument();
-
-        ColStaffObjsIterator it = m_itStartOfMeasure;
-        while (it != m_pColStaffObjs->end())
+        int numMeasures = pMeasures->num_entries();
+        for (int iMeasure=0; iMeasure < numMeasures; ++iMeasure)
         {
-///*DBG*/            cout << endl << "measure start: " << (*it)->imo_object()->get_id() <<endl;
-            add_measure();
+            ImMeasuresTableEntry* pMeasure = pMeasures->get_measure(iMeasure);
 
-            find_start_of_next_measure();
-            it = m_itStartOfMeasure;
-///*DBG*/     cout << "measure ended: ";
-///*DBG*/     if (m_itStartOfMeasure != m_pColStaffObjs->end())
-///*DBG*/         cout << "next measure starts at " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
-///*DBG*/     else
-///*DBG*/         cout << "end of score" << endl;
+            m_itStartOfMeasure = ColStaffObjsIterator( pMeasure->get_start_entry() );
+            m_itEndOfMeasure = (pMeasure->get_end_entry()
+                                ? ColStaffObjsIterator( pMeasure->get_end_entry() )
+                                : m_pColStaffObjs->end() );
+
+            //TODO: is this required? could it use iMeasure instead?
+            m_curMeasure = (*m_itStartOfMeasure)->measure();
+
+            add_measure(iMeasure);
         }
     }
 
     //-----------------------------------------------------------------------------------
-    void add_measure()
+    void add_measure(int iMeasure)
     {
-        //measure starts at m_itStartOfMeasure
-
-///*DBG*/ cout << "    add_measure(). m_curMeasure = " << m_curMeasure
-///*DBG*/      << ", m_iInstr = " << m_iInstr << endl;
         count_voices_in_measure();
 
-        start_measure_element();
-
+        start_measure_element(iMeasure);
+        if(iMeasure == 0)
+            add_print();
         add_attributes_at_start_of_measure();
         add_source_for_this_measure();
         add_source_for_barline();
@@ -1887,158 +1907,39 @@ protected:
     //-----------------------------------------------------------------------------------
     void count_voices_in_measure()
     {
-        //measure starts at m_itStartOfMeasure. Identify existing lines in this measure
-        //and locate end of measure (its barline). While traversing, identify first
-        //object for next measure, if exist
+        //Identify existing lines in this measure
 
         m_voices.clear();
         ColStaffObjsIterator it = m_itStartOfMeasure;
-        if (it != m_pColStaffObjs->end())
+        if (it != m_itEndOfMeasure)
         {
-///*DBG*/     cout << "    count_voices_in_measure(). start: " << (*it)->imo_object()->get_id() <<endl;
             int voice = 0;
-            while (it != m_pColStaffObjs->end())
+            while (it != m_itEndOfMeasure)
             {
                 if ((*it)->measure() == m_curMeasure)
                 {
-                    if (!(*it)->imo_object()->is_barline())
+                    if ((*it)->num_instrument() == m_iInstr)
                     {
-                        if ((*it)->num_instrument() == m_iInstr)
-                        {
-                        #if (LOMSE_USE_LINES == 1)
-                            m_voices.push_back( (*it)->line() );
-                        #else
-                            ImoStaffObj* pSO = (*it)->imo_object();
-                            if (pSO->is_note_rest())
-                                voice = static_cast<ImoNoteRest*>(pSO)->get_voice();
-                            else if (pSO->is_direction())
-                                voice = static_cast<ImoDirection*>(pSO)->get_voice();
+                        ImoStaffObj* pSO = (*it)->imo_object();
+                        if (pSO->is_note_rest())
+                            voice = static_cast<ImoNoteRest*>(pSO)->get_voice();
+                        else if (pSO->is_direction())
+                            voice = static_cast<ImoDirection*>(pSO)->get_voice();
 
-                            m_voices.push_back(voice);
-                       #endif
-///*DBG2*/                           cout << "object " << pSO->get_name() << " assigned to voice " << voice << endl;
-         }
-                    }
-                    else /* barline for this measure */
-                    {
-                        if ((*it)->num_instrument() == m_iInstr)
-                            break;
+                        m_voices.push_back(voice);
                     }
                 }
-                else if (m_itStartOfNextMeasure == m_pColStaffObjs->end()
-                         && (*it)->measure() > m_curMeasure)
-                {
-///*DBG*/             cout << "    count_voices_in_measure(). StartOfNextMeasure is empty. Assigning: " << (*it)->imo_object()->get_id() <<endl;
-                    m_itStartOfNextMeasure = it;
-                }
-
                 ++it;
             }
+
             m_voices.sort();
             m_voices.unique();
-///*DBG2*/           cout << endl << "voices: ";
-///*DBG2*/           for (auto i : m_voices)
-///*DBG2*/           {
-///*DBG2*/               cout << i << ", ";
-///*DBG2*/           }
         }
-
-        m_itEndOfMeasure = it;
-///*DBG*/ if (it != m_pColStaffObjs->end())
-///*DBG*/     cout << "    count_voices_in_measure(). end for this measure: " << (*it)->imo_object()->get_id() <<endl;
-///*DBG*/ else
-///*DBG*/     cout << "    count_voices_in_measure(). end for this measure is end of StaffObjsCol." << endl;
-
-        //if start of next measure not set, use end of this measure as next start point
-        if (m_itStartOfNextMeasure == m_pColStaffObjs->end())
-        {
-///*DBG*/     cout << "    count_voices_in_measure(). StartOfNextMeasure is empty. Assigning end of this one." <<endl;
-            m_itStartOfNextMeasure = m_itEndOfMeasure;
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_source_for_this_measure()
-    {
-        bool fFirstLine = true;
-        for (auto i : m_voices)
-        {
-            if (!fFirstLine)
-                add_backup();
-            add_source_for_voice(i);
-            fFirstLine = false;
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_source_for_barline()
-    {
-        ColStaffObjsIterator it = m_itEndOfMeasure;
-        if (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline()
-            && (*it)->num_instrument() == m_iInstr && (*it)->measure() == m_curMeasure)
-        {
-            add_source_for((*it)->imo_object());
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void find_start_of_next_measure()
-    {
-        //measure is finished and m_itStartOfNextMeasure points to end barline or to
-        //a previous object for next measure. If points to barline, advance to first
-        //object for next measure
-
-        ColStaffObjsIterator it = m_itStartOfNextMeasure;
-///*DBG*/ if (it != m_pColStaffObjs->end())
-///*DBG*/            cout << "    find_start_of_next_measure(). StartOfNextMeasure: " << (*it)->imo_object()->get_id() <<endl;
-        while (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline())
-        {
-            ++it;
-///*DBG*/            if (it != m_pColStaffObjs->end())
-///*DBG*/         cout << "    find_start_of_next_measure(). incrementing to " << (*it)->imo_object()->get_id() <<endl;
-///*DBG*/     else
-///*DBG*/         cout << "    find_start_of_next_measure(). incrementing to end of collection." <<endl;
-        }
-        m_itStartOfNextMeasure = it;
-///*DBG*/        if (it != m_pColStaffObjs->end())
-///*DBG*/     cout << "    find_start_of_next_measure(). StartOfNextMeasure: " << (*it)->imo_object()->get_id() <<endl;
-///*DBG*/ else
-///*DBG*/     cout << "    find_start_of_next_measure(). StartOfNextMeasure is end of collection." <<endl;
-
-        advance_to_right_instrument();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void advance_to_right_instrument()
-    {
-        //sets m_itStartOfMeasure and avances it if not in right instrument. Also
-        //sets m_curMeasure
-
-        m_itStartOfMeasure = m_itStartOfNextMeasure;
-        m_itStartOfNextMeasure = m_pColStaffObjs->end();
-
-        ColStaffObjsIterator it = m_itStartOfMeasure;
-///*DBG*/  if (it != m_pColStaffObjs->end())
-///*DBG*/     cout << "    advance_to_right_instrument(). StartOfMeasure: " << (*it)->imo_object()->get_id() <<endl;
-        if (it != m_pColStaffObjs->end())
-        {
-            while (it != m_pColStaffObjs->end() && (*it)->num_instrument() != m_iInstr)
-                ++it;
-            m_itStartOfMeasure = it;
-
-            if (it != m_pColStaffObjs->end())
-                m_curMeasure = (*it)->measure();
-        }
-///*DBG*/  if (it != m_pColStaffObjs->end())
-///*DBG*/     cout << "                                   StartOfMeasure: " << (*it)->imo_object()->get_id() <<endl;
     }
 
     //-----------------------------------------------------------------------------------
     void add_attributes_at_start_of_measure()
     {
-///*DBG*/ if (m_itStartOfMeasure != m_pColStaffObjs->end())
-///*DBG*/     cout << "    add_attributes_at_start_of_measure(). m_itStartOfMeasure: " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
-
         ColStaffObjsIterator it;
         for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
         {
@@ -2063,34 +1964,6 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void start_measure_element()
-    {
-        add_separator_line();
-        start_element("measure");
-        start_attrib("number");
-        m_source << m_curMeasure+1;
-        end_attrib();
-        close_start_tag();
-        m_pExporter->set_current_timepos(0);
-        add_left_barline();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_left_barline()
-    {
-        BarlineMxlGenerator exporter(nullptr, nullptr, m_pExporter);
-        m_source << exporter.generate_left_barline();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void add_divisions()
-    {
-        start_element_no_attribs("attributes");
-        create_element("divisions", m_pExporter->get_divisions());
-        m_fDivisionsAdded = true;
-    }
-
-    //-----------------------------------------------------------------------------------
     void add_attributes(ColStaffObjsIterator& it)
     {
         //@ <!ELEMENT attributes (%editorial;, divisions?, key*, time*,
@@ -2108,7 +1981,6 @@ protected:
         {
             if ((*it)->num_instrument() == m_iInstr && (*it)->measure() == m_curMeasure)
             {
-///*DBG*/     cout << "                   Collecting attribute " << (*it)->imo_object()->get_id() <<endl;
                 ImoStaffObj* pImo = (*it)->imo_object();
                 if (pImo->is_clef())
                     clefs.push_back(pImo);
@@ -2152,10 +2024,13 @@ protected:
             }
 
             //staves?
-            ImoInstrument* pInsr = m_pExporter->get_current_instrument();
-            if (pInsr && pInsr->get_num_staves() > 1)
+            if (m_curMeasure == 0)
             {
-                create_element("staves", pInsr->get_num_staves());
+                ImoInstrument* pInsr = m_pExporter->get_current_instrument();
+                if (pInsr && pInsr->get_num_staves() > 1)
+                {
+                    create_element("staves", pInsr->get_num_staves());
+                }
             }
 
             //TODO: part-symbol?
@@ -2174,6 +2049,97 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    void add_source_for_this_measure()
+    {
+        bool fFirstLine = true;
+        for (auto i : m_voices)
+        {
+            if (!fFirstLine)
+                add_backup();
+            add_source_for_voice(i);
+            fFirstLine = false;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_barline()
+    {
+        ColStaffObjsIterator it = m_itEndOfMeasure;
+        if (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline()
+            && (*it)->num_instrument() == m_iInstr && (*it)->measure() == m_curMeasure)
+        {
+            add_source_for((*it)->imo_object());
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void start_measure_element(int iMeasure)
+    {
+        add_separator_line();
+        start_element("measure");
+
+        bool fAddNumber = true;
+        ImoInstrument* pInstr = m_pExporter->get_current_instrument();
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        ImoBarline* pBarline = pTable->get_barline(iMeasure);
+        if (pBarline)
+        {
+            TypeMeasureInfo* pInfo = pBarline->get_measure_info();
+            if (pInfo)
+            {
+                //attrib: implicit
+                if (pInfo->fHideNumber)
+                    add_attribute("implicit", "yes");
+                //TODO: text is not currently imported or is mixed with number
+//                else
+//                {
+//                    //attrib: text
+//                    //AWARE: ignored for measures where the 'implicit' is set to "yes"
+//                    if (!(pInfo->number).empty())
+//                    {
+//                        add_attribute("text", pInfo->number); <----
+//                    }
+//                }
+
+                //attrib: number
+                fAddNumber = false;
+                if (!(pInfo->number).empty())
+                    add_attribute("number", pInfo->number);
+                else
+                    add_attribute("number", pInfo->count);
+            }
+        }
+
+        //attrib: number. It is mandatory. Add number if not added above
+        if (fAddNumber)
+            add_attribute("number", m_curMeasure+1);
+
+        //TODO
+        //attrib: non-controlling %yes-no; #IMPLIED
+        //attrib: width %tenths; #IMPLIED
+        //attrib: %optional-unique-id;
+
+        close_start_tag();
+        m_pExporter->set_current_timepos(0);
+        add_left_barline();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_left_barline()
+    {
+        BarlineMxlGenerator exporter(nullptr, nullptr, m_pExporter);
+        m_source << exporter.generate_left_barline();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_divisions()
+    {
+        start_element_no_attribs("attributes");
+        create_element("divisions", m_pExporter->get_divisions());
+        m_fDivisionsAdded = true;
+    }
+
+    //-----------------------------------------------------------------------------------
     void add_staff_details()
     {
         ImoInstrument* pInstr = m_pObj->get_instrument();
@@ -2183,7 +2149,10 @@ protected:
         for (int i=0; i < pInstr->get_num_staves(); ++i)
         {
             ImoStaffInfo* pInfo = pInstr->get_staff(i);
-            if (pInfo && !pInfo->has_default_values())
+            if (pInfo && (pInfo->get_num_lines() != 5
+                          || pInfo->is_staff_size_modified()
+                         )
+               )
             {
                 start_element_if_not_started("attributes");
                 start_element("staff-details");
@@ -2252,26 +2221,55 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void add_source_for_voice(int voice)
+    void add_print()
     {
-///*DBG2*/      cout << endl << "processing voice " << line << endl;
-///*DBG*/ if (m_itStartOfMeasure != m_pColStaffObjs->end())
-///*DBG*/     cout << "    add_source_for_voice(). first no attribe obj: " << (*m_itStartOfMeasure)->imo_object()->get_id() <<endl;
-    #if (LOMSE_USE_LINES == 1)
-        ColStaffObjsIterator it;
-        for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
+        ImoInstrument* pInstr = m_pExporter->get_current_instrument();
+        ImoScore* pScore = m_pExporter->get_current_score();
+
+        //staff-layout
+        int numStaves = pInstr->get_num_staves();
+        for (int i=0; i < numStaves; ++i)
         {
-            ColStaffObjsEntry* pEntry = *it;
-            if (pEntry->num_instrument() == m_iInstr && pEntry->measure() == m_curMeasure)
+            ImoStaffInfo* pInfo = pInstr->get_staff(i);
+            if (pInfo->is_staff_margin_modified())
             {
-                if (pEntry->line() == voice)
-                {
-                    if (pEntry->measure() == m_curMeasure)
-                        add_source_for( pEntry->imo_object() );
-                }
+                start_element_if_not_started("print");
+
+                start_element("staff-layout");
+                add_attribute("number", i+1);
+                close_start_tag();
+
+                start_element_no_attribs("staff-distance");
+                m_source << pScore->logical_to_tenths( pInfo->get_staff_margin() );
+                end_element(k_in_same_line);  //staff-distance
+
+                end_element();  //staff-layout
             }
         }
-    #else
+
+        //measure-numbering
+        string numbering;
+        if (pInstr->get_measures_numbering() == ImoInstrument::k_system)
+            numbering = "system";
+        else if (pInstr->get_measures_numbering() == ImoInstrument::k_all)
+            numbering = "measure";
+        else if (pInstr->get_measures_numbering() == ImoInstrument::k_none)
+            numbering = "none";
+
+        if (!numbering.empty())
+        {
+            start_element_if_not_started("print");
+            start_element_no_attribs("measure-numbering");
+            m_source << numbering;
+            end_element(k_in_same_line);  //measure-numbering
+        }
+
+        end_element_if_started("print");
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_voice(int voice)
+    {
         ColStaffObjsIterator it;
         int curVoice = 0;
         for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
@@ -2280,17 +2278,23 @@ protected:
             if (pEntry->num_instrument() == m_iInstr && pEntry->measure() == m_curMeasure)
             {
                 ImoStaffObj* pSO = (*it)->imo_object();
-                if (pSO->is_note_rest())
-                    curVoice = static_cast<ImoNoteRest*>(pSO)->get_voice();
-                else if (pSO->is_direction())
-                    curVoice = static_cast<ImoDirection*>(pSO)->get_voice();
-
-///*DBG2*/               cout << "    processing " << pSO->get_name() << " in voice " << curVoice << endl;
+                curVoice = pSO->get_voice();
                 if (voice == curVoice)
-                    add_source_for(pSO);
+                {
+                    if (pSO->is_note_rest())
+                        add_source_for(pSO);
+                    else
+                    {
+                        ImoStaffObj* pNext = pSO->get_next_noterest_or_barline();
+                        if (pNext == nullptr)
+                            add_source_for(pSO);
+                        else
+                            m_pExporter->save_pending_staffobj(pNext, pSO);
+                    }
+                }
             }
         }
-    #endif
+        m_pExporter->export_pending_staffobjs(this, nullptr);
     }
 
     //-----------------------------------------------------------------------------------
@@ -2381,6 +2385,9 @@ public:
     string generate_source() override
     {
         end_element_if_started("attributes");
+
+        //export directions and other non-timed associated to this note/rest
+        m_pExporter->export_pending_staffobjs(this, m_pNR);
 
         //AWARE: octave-shifts are modelled as a RelObj relating all notes. Therefore,
         //first note/rest will contain the start of an octave shift and must be exported
@@ -2732,19 +2739,6 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_notations()
     {
-        //TODO
-        //<!ATTLIST tied
-        //    type %tied-type; #REQUIRED
-        //    number %number-level; #IMPLIED
-        //    %line-type;
-        //    %dashed-formatting;
-        //    %position;
-        //    %placement;
-        //    %orientation;
-        //    %bezier;
-        //    %color;
-        //    add_attribute_optional_unique_id(m_pObj);
-        //>
         if (m_pNote)
         {
             if (m_pNote->is_tied_prev())
@@ -2756,9 +2750,29 @@ protected:
             }
             if (m_pNote->is_tied_next())
             {
+                ImoTie* pTie = m_pNote->get_tie_next();
                 start_element_if_not_started("notations");
                 start_element("tied");
                 add_attribute("type", "start");
+
+                //TODO
+                //attrib: number %number-level; #IMPLIED
+                //attrib: %line-type;
+                //attrib: %dashed-formatting;
+                //attrib: %position;
+                //attrib: %placement;
+
+                //attrib: %orientation;
+                if (pTie->get_orientation() != k_orientation_default)
+                    add_attribute("orientation",
+                                  pTie->get_orientation() == k_orientation_over ?
+                                  "over" : "under");
+
+                //TODO
+                //attrib: %bezier;
+                //attrib: %color;
+                //attrib: add_attribute_optional_unique_id(m_pObj);
+
                 end_element(false, false);
             }
         }
@@ -2814,7 +2828,7 @@ protected:
                 ImoRelObj* pRO = pRelObjs->get_item(i);
                 if (pRO->is_tuplet() || pRO->is_slur() || pRO->is_arpeggio())
                 {
-                    add_source_for(pRO, m_pNote);
+                    add_source_for(pRO, m_pNR);
                 }
             }
         }
@@ -3491,10 +3505,14 @@ protected:
             ImoSoundInfo* pInfo = pInstr->get_sound_info(i);
             string& instr = pInfo->get_score_instr_name();
             if (!instr.empty())
-            {
                 add_score_instrument(pInfo);
+        }
+        for (int i=0; i < numSounds; ++i)
+        {
+            ImoSoundInfo* pInfo = pInstr->get_sound_info(i);
+            string& instr = pInfo->get_score_instr_name();
+            if (!instr.empty())
                 add_midi_info(pInfo);
-            }
         }
     }
 
@@ -3674,26 +3692,21 @@ protected:
     //-----------------------------------------------------------------------------------
 	void add_defaults()
 	{
-	    if (m_pScore->is_global_scaling_modified())
-	    {
-            start_element_no_attribs("defaults");
+        add_scaling();
+        add_concert_score();
 
-            add_scaling();
-            add_concert_score();
+        //common-layout = (page-layout?, system-layout?, staff-layout*)
+        add_page_layout();
+        add_system_layout();
+        add_staff_layout();
 
-            //common-layout = (page-layout?, system-layout?, staff-layout*)
-            add_page_layout();
-            add_system_layout();
-            add_staff_layout();
+        add_appearance();
+        add_music_font();
+        add_word_font();
+        add_lyric_font();
+        add_lyric_language();
 
-            add_appearance();
-            add_music_font();
-            add_word_font();
-            add_lyric_font();
-            add_lyric_language();
-
-            end_element();  //defaults
-	    }
+        end_element_if_started("defaults");
 	}
 
     //-----------------------------------------------------------------------------------
@@ -3722,13 +3735,17 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_scaling()
     {
-        start_element_no_attribs("scaling");
+	    if (m_pScore->is_global_scaling_modified())
+	    {
+	        start_element_if_not_started("defaults");
+            start_element_no_attribs("scaling");
 
-        float millimeters = m_pScore->tenths_to_logical(40) / 100.0f;
-        create_element("millimeters", millimeters);
-        create_element("tenths", 40);
+            float millimeters = m_pScore->tenths_to_logical(40) / 100.0f;
+            create_element("millimeters", millimeters);
+            create_element("tenths", 40);
 
-        end_element();  //scaling
+            end_element();  //scaling
+	    }
     }
 
     //-----------------------------------------------------------------------------------
@@ -3736,6 +3753,7 @@ protected:
     {
         //TODO: Not yet supported in IM. DTD score
         //<!ELEMENT concert-score EMPTY>
+	    //    start_element_if_not_started("defaults");
     }
 
     //-----------------------------------------------------------------------------------
@@ -3747,6 +3765,7 @@ protected:
 	    if (!pInfo->is_page_layout_modified())
 	        return;
 
+        start_element_if_not_started("defaults");
         start_element_no_attribs("page-layout");
 
 	    if (pInfo->is_page_size_modified())
@@ -3793,6 +3812,7 @@ protected:
                 {
                     start_element("page-margins");
                     add_attribute("type", "odd");
+                    close_start_tag();
                     create_element("left-margin", m_pScore->logical_to_tenths(pInfo->get_left_margin_odd()));
                     create_element("right-margin", m_pScore->logical_to_tenths(pInfo->get_right_margin_odd()));
                     create_element("top-margin", m_pScore->logical_to_tenths(pInfo->get_top_margin_odd()));
@@ -3811,6 +3831,7 @@ protected:
         ImoSystemInfo* pInfo = m_pScore->get_first_system_info();
 	    if (pInfo->is_system_layout_modified())
 	    {
+	        start_element_if_not_started("defaults");
             start_element_no_attribs("system-layout");
 
             //system-margins
@@ -3840,25 +3861,18 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_staff_layout()
     {
-        //TODO
-        //All found examples are just
-        //    <staff-layout>
-        //      <staff-distance>93</staff-distance>
-        //    </staff-layout>
-        //
-        //the <staff-distance> is use to initialize the staff margin of all staves:
-        //    pInstr->set_staff_margin(iStaff, m_pAnalyser->get_default_staff_distance(iStaff));
-        //But in Lomse, this distance can be different for each staff and will be adjusted
-        //dynamically by the vertical spacing algorithm. It is non-sense to export this
-        //default staff value unless the exported score has been imported from MusicXML
-        //or has been created from scratch and this value explicitly set
+        if (!m_pScore->was_created_from_musicxml())
+            return;
 
-//        if (!m_pScore->created_by_musicxml())
-//            return;
-//
-//        start_element_no_attribs("staff-layout");
-//
-//        end_element();  //staff-layout
+        if (!m_pScore->default_staff_distance_modified())
+            return;
+
+        start_element_if_not_started("defaults");
+        start_element_no_attribs("staff-layout");
+        start_element_no_attribs("staff-distance");
+        m_source << m_pScore->get_default_staff_distance();
+        end_element(k_in_same_line);  //staff-distance
+        end_element();  //staff-layout
     }
 
     //-----------------------------------------------------------------------------------
@@ -3869,6 +3883,7 @@ protected:
         //	(line-width*, note-size*, distance*, glyph*,
         //	 other-appearance*)>
 
+//	        start_element_if_not_started("defaults");
         //Example: (MozartTrio.musicxml)
         //    <appearance>
         //      <line-width type="stem">0.957</line-width>
@@ -3891,46 +3906,121 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_music_font()
     {
-        //TODO
-        //<!ELEMENT music-font EMPTY>
-        //<!ATTLIST music-font
-        //    %font;
-        //>
-        //    <music-font font-family="Maestro" font-size="10.7"/>
+        //TODO: For now Lomse always uses 'Bravura' but can be changed with
+        //method LibraryScope::set_music_font. If the music font is imported from
+        //MusicXML it is necessary to look up for it in the system. This is not done
+        //and for now the music font is not imported, and therefore not exported.
+
+//        ImoStyle* pStyle = m_pScore->find_style("Music");
+//        if (pStyle)
+//            export_font("music-font", pStyle);
     }
 
     //-----------------------------------------------------------------------------------
     void add_word_font()
     {
-        //<!ELEMENT word-font EMPTY>
-        //<!ATTLIST word-font
-        //    %font;
-        //>
-        //    <word-font font-family="Times New Roman" font-size="5.3"/>
+        export_font("word-font", m_pScore->get_default_style());
     }
 
     //-----------------------------------------------------------------------------------
     void add_lyric_font()
     {
-        //TODO
-        //<!ELEMENT lyric-font EMPTY>
-        //<!ATTLIST lyric-font
-        //    number NMTOKEN #IMPLIED
-        //    name CDATA #IMPLIED
-        //    %font;
-        //>
+        //TODO attrib: name
+
+        int num =  m_pScore->get_number_of_lyric_fonts();
+        if (num == 1)
+        {
+            export_font("lyric-font", m_pScore->find_style("Lyrics"));
+        }
+        else
+        {
+            for (int i=1; i < num; ++i)
+            {
+                stringstream ss;
+                ss << "Lyric-" << i;
+                export_font("lyric-font", m_pScore->find_style(ss.str()), i);
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void export_font(const string& element, ImoStyle* pStyle, int number=0)
+    {
+        if (pStyle && pStyle->font_data_modified())
+        {
+	        start_element_if_not_started("defaults");
+            start_element(element);
+            if (number != 0)
+                add_attribute("number", number);
+
+            if (pStyle->font_name_modified())
+                add_attribute("font-family", pStyle->font_name());
+
+            if (pStyle->font_size_modified())
+                add_attribute("font-size", pStyle->font_size());
+
+            if (pStyle->font_style_modified())
+            {
+                int value = pStyle->font_style();
+                if (value == ImoStyle::k_font_style_normal)
+                    add_attribute("font-style", "normal");
+                else if (value == ImoStyle::k_font_style_italic)
+                    add_attribute("font-style", "italic");
+                else
+                {
+                    stringstream msg;
+                    msg << "Maintenance error? Unknown font-style '" << value << "'";
+                    LOMSE_LOG_ERROR(msg.str());
+                }
+            }
+
+            if (pStyle->font_weight_modified())
+            {
+                int value = pStyle->font_weight();
+                if (value == ImoStyle::k_font_weight_normal)
+                    add_attribute("font-weight", "normal");
+                else if (value == ImoStyle::k_font_weight_bold)
+                    add_attribute("font-weight", "bold");
+                else
+                {
+                    stringstream msg;
+                    msg << "Maintenance error? Unknown font-weight '" << value << "'";
+                    LOMSE_LOG_ERROR(msg.str());
+                }
+            }
+
+            end_element(false, false);
+        }
     }
 
     //-----------------------------------------------------------------------------------
     void add_lyric_language()
     {
-        //TODO
-        //<!ELEMENT lyric-language EMPTY>
-        //<!ATTLIST lyric-language
-        //    number NMTOKEN #IMPLIED
-        //    name CDATA #IMPLIED
-        //    xml:lang CDATA #REQUIRED
-        //>
+        int num =  m_pScore->get_number_of_lyric_fonts();
+        if (num == 1)
+            export_lyric_language(0);
+        else
+        {
+            for (int i=1; i < num; ++i)
+                export_lyric_language(i);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void export_lyric_language(int number)
+    {
+        //TODO attrib: name
+
+        string lang = m_pScore->get_lyric_language(number);
+        if (!lang.empty())
+        {
+            start_element_if_not_started("defaults");
+            start_element("lyric-language");
+            if (number != 0)
+                add_attribute("number", number);
+            add_attribute("xml:lang", lang);
+            end_element(false, false);
+        }
     }
 };
 
@@ -3956,7 +4046,7 @@ public:
         {
             start_element_if_not_started("notations");
             start_element("slur");
-            add_attribute("number", m_pExporter->start_slur_and_get_number(m_pSlur->get_id()));
+            add_attribute("number", m_pExporter->get_number_for_slur(m_pSlur->get_id()));
             add_attribute("type", "start");
 
             //TODO
@@ -3984,7 +4074,7 @@ public:
         {
             start_element_if_not_started("notations");
             start_element("slur");
-            add_attribute("number", m_pExporter->close_slur_and_get_number(m_pSlur->get_id()));
+            add_attribute("number", m_pExporter->get_number_for_slur(m_pSlur->get_id()));
             add_attribute("type", "stop");
             end_element(false, false);  //slur
         }
@@ -4060,10 +4150,18 @@ public:
 
         //AWARE: pan and elevation attributtes were deprecated in v2.0
 
-        //TODO: yes-no-number attributes
         // attrib: damper-pedal
-        // attrib: soft-pedal %yes-no-number; #IMPLIED
-        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+        if (m_pImo->has_attributte(k_attr_damper_pedal))
+            add_attribute("damper-pedal", m_pImo->get_bool_attribute(k_attr_damper_pedal) ? "yes" : "no");
+
+        // attrib: soft-pedal
+        if (m_pImo->has_attributte(k_attr_soft_pedal))
+            add_attribute("soft-pedal", m_pImo->get_bool_attribute(k_attr_soft_pedal) ? "yes" : "no");
+
+        // attrib: sostenuto-pedal
+        if (m_pImo->has_attributte(k_attr_sostenuto_pedal))
+            add_attribute("sostenuto-pedal", m_pImo->get_bool_attribute(k_attr_sostenuto_pedal) ? "yes" : "no");
+
 
         add_attribute_optional_unique_id(m_pImo);
 
@@ -4102,64 +4200,6 @@ public:
 
         return m_source.str();
     }
-};
-
-
-//---------------------------------------------------------------------------------------
-class StylesMxlGenerator : public MxlGenerator
-{
-protected:
-    ImoStyles* m_pObj;
-
-public:
-    StylesMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
-        : MxlGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoStyles*>(pImo);
-    }
-
-    string generate_source() override
-    {
-//        if (there_is_any_non_default_style())
-//        {
-//            start_element_no_attribs("styles", m_pObj);
-//            add_styles();
-//            end_element();
-//            empty_line();
-//            return m_source.str();
-//        }
-        return "";
-    }
-
-protected:
-
-//    bool there_is_any_non_default_style()
-//    {
-//     	map<std::string, ImoStyle*>& styles = m_pObj->get_styles_collection();
-//
-//        map<std::string, ImoStyle*>::iterator it;
-//        for(it = styles.begin(); it != styles.end(); ++it)
-//        {
-//            ImoStyle* pStyle = it->second;
-//            if (!pStyle->is_default_style_with_default_values())
-//                return true;
-//        }
-//        return false;
-//    }
-//
-//    void add_styles()
-//    {
-//     	map<std::string, ImoStyle*>& styles = m_pObj->get_styles_collection();
-//
-//        map<std::string, ImoStyle*>::iterator it;
-//        for(it = styles.begin(); it != styles.end(); ++it)
-//        {
-//            ImoStyle* pStyle = it->second;
-//            if (!pStyle->is_default_style_with_default_values())
-//                add_source_for(pStyle);
-//        }
-//    }
-
 };
 
 
@@ -4206,8 +4246,7 @@ protected:
         if (m_pImo->get_diatonic() != 0)
             create_element("diatonic", m_pImo->get_diatonic());
 
-        if (m_pImo->get_chromatic() != 0)
-            create_element("chromatic", m_pImo->get_chromatic());
+        create_element("chromatic", m_pImo->get_chromatic());
 
         if (m_pImo->get_octave_change() != 0)
             create_element("octave-change", m_pImo->get_octave_change());
@@ -4808,7 +4847,6 @@ MxlGenerator* MxlExporter::new_generator(ImoObj* pImo, ImoObj* pParent)
         case k_imo_slur:            return LOMSE_NEW SlurMxlGenerator(pImo, pParent, this);
         case k_imo_sound_change:    return LOMSE_NEW SoundMxlGenerator(pImo, pParent, this);
         case k_imo_style:           return LOMSE_NEW DefineStyleMxlGenerator(pImo, pParent, this);
-        case k_imo_styles:          return LOMSE_NEW StylesMxlGenerator(pImo, pParent, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureMxlGenerator(pImo, pParent, this);
         case k_imo_transpose:       return LOMSE_NEW TransposeMxlGenerator(pImo, pParent, this);
         case k_imo_tuplet:          return LOMSE_NEW TupletMxlGenerator(pImo, pParent, this);
@@ -4838,8 +4876,19 @@ const BarlineData& MxlExporter::get_data_for_left_barline() const
 }
 
 //---------------------------------------------------------------------------------------
-int MxlExporter::start_slur_and_get_number(ImoId slurId)
+int MxlExporter::get_number_for_slur(ImoId slurId)
 {
+    //get number if it is already open, and remove it from list
+    for (int i=0; i < k_max_slur_number; ++i)
+    {
+        if (m_slurs[i] == slurId)
+        {
+            m_slurs[i] = k_no_imoid;
+            return i+1;
+        }
+    }
+
+    //slur is not yet created. Do it
     for (int i=0; i < k_max_slur_number; ++i)
     {
         if (m_slurs[i] == k_no_imoid)
@@ -4850,22 +4899,6 @@ int MxlExporter::start_slur_and_get_number(ImoId slurId)
     }
 
     LOMSE_LOG_ERROR("more than 16 open slurs!");
-    return 1;
-}
-
-//---------------------------------------------------------------------------------------
-int MxlExporter::close_slur_and_get_number(ImoId slurId)
-{
-    for (int i=0; i < k_max_slur_number; ++i)
-    {
-        if (m_slurs[i] == slurId)
-        {
-            m_slurs[i] = k_no_imoid;
-            return i+1;
-        }
-    }
-
-    LOMSE_LOG_ERROR("slurId is not yet created!");
     return 1;
 }
 
@@ -4901,7 +4934,32 @@ int MxlExporter::close_tuplet_and_get_number(ImoId tupletId)
     return 1;
 }
 
+//---------------------------------------------------------------------------------------
+void MxlExporter::save_pending_staffobj(ImoStaffObj* pNext, ImoStaffObj* pSO)
+{
+    m_pendingStaffObjs.push_back( make_pair(pNext, pSO) );
+}
 
+//---------------------------------------------------------------------------------------
+void MxlExporter::export_pending_staffobjs(MxlGenerator* pRequester, ImoStaffObj* pOwner)
+{
+    stringstream& source = pRequester->get_stream();
+    list< pair<ImoStaffObj*, ImoStaffObj*> >::iterator it = m_pendingStaffObjs.begin();
+    while (it != m_pendingStaffObjs.end())
+    {
+        if ((*it).first == pOwner || pOwner == nullptr)
+        {
+            source << get_source((*it).second, nullptr);
+            pRequester->end_element_if_started("attributes");
+            it = m_pendingStaffObjs.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
+
+//=======================================================================================
 // static methods
 
 //---------------------------------------------------------------------------------------

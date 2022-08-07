@@ -840,27 +840,6 @@ SUITE(MidiAssignerTest)
 //=======================================================================================
 // MeasuresTableBuilder tests
 //=======================================================================================
-
-//---------------------------------------------------------------------------------------
-//Derived class to access protected members
-class MyMeasuresTableBuilder : public MeasuresTableBuilder
-{
-protected:
-
-public:
-    MyMeasuresTableBuilder()
-        : MeasuresTableBuilder()
-    {
-    }
-    virtual ~MyMeasuresTableBuilder() {}
-
-    //access to protected member methods
-    ImMeasuresTableEntry* my_get_current_measure(int iInstr) { return m_measures[iInstr]; }
-};
-
-//---------------------------------------------------------------------------------------
-// MeasuresTableBuilder test fixture
-//---------------------------------------------------------------------------------------
 class MeasuresTableBuilderTestFixture
 {
 public:
@@ -935,7 +914,7 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
 
@@ -945,11 +924,15 @@ SUITE(MeasuresTableBuilderTest)
 
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(0) == pMeasure );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
+        ColStaffObjsEntry* pCSOEntry = pMeasure->get_start_entry();
+        CHECK( pCSOEntry && pCSOEntry->imo_object()->is_clef() );
+        pCSOEntry = pMeasure->get_end_entry();
+        CHECK( pCSOEntry == nullptr );
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
+//        cout << test_name() << endl << pTable->dump();
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_003)
@@ -965,7 +948,7 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
 
@@ -975,11 +958,11 @@ SUITE(MeasuresTableBuilderTest)
 
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(0) == pMeasure );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_barline() == nullptr );
 
         pInstr = m_pScore->get_instrument(1);
         pTable = pInstr->get_measures_table();
@@ -987,10 +970,10 @@ SUITE(MeasuresTableBuilderTest)
 
         pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(1) == pMeasure );
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_barline() == nullptr );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_004)
@@ -1008,7 +991,7 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
 
@@ -1018,11 +1001,11 @@ SUITE(MeasuresTableBuilderTest)
 
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(0) == pMeasure );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() == nullptr );
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
 
@@ -1032,10 +1015,10 @@ SUITE(MeasuresTableBuilderTest)
 
         pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(1) == pMeasure );
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() == nullptr );
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
 
@@ -1054,11 +1037,9 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
-
-        CHECK( builder.my_get_current_measure(0) == nullptr );
 
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImMeasuresTable* pTable = pInstr->get_measures_table();
@@ -1071,7 +1052,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( pMeasure->get_timepos() == 0.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
+        CHECK( pMeasure->get_barline() && pMeasure->get_barline()->is_barline() );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_006)
@@ -1087,11 +1069,9 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
-
-        CHECK( builder.my_get_current_measure(0) != nullptr );
 
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImMeasuresTable* pTable = pInstr->get_measures_table();
@@ -1101,14 +1081,14 @@ SUITE(MeasuresTableBuilderTest)
 
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
 
         pMeasure = pTable->get_measure(1);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_timepos() == 64.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() == nullptr );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_007)
@@ -1126,11 +1106,9 @@ SUITE(MeasuresTableBuilderTest)
         ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
 //        cout << test_name() << endl;
 //        cout << pCSO->dump();
-        MyMeasuresTableBuilder builder;
+        MeasuresTableBuilder builder;
 
         builder.build(m_pScore);
-
-        CHECK( builder.my_get_current_measure(0) != nullptr );
 
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImMeasuresTable* pTable = pInstr->get_measures_table();
@@ -1140,20 +1118,68 @@ SUITE(MeasuresTableBuilderTest)
 
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
-        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
 
         pMeasure = pTable->get_measure(1);
         CHECK( pMeasure != nullptr );
         CHECK( pMeasure->get_timepos() == 128.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() && pMeasure->get_barline()->is_barline() );
 
         pMeasure = pTable->get_measure(2);
         CHECK( pMeasure != nullptr );
-        CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_timepos() == 256.0f );
         CHECK( pMeasure->get_implied_beat_duration() == 96.0f );
         CHECK( pMeasure->get_bottom_ts_beat_duration() == 32.0f );
+        CHECK( pMeasure->get_barline() == nullptr );
+    }
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_008)
+    {
+        //@008. clef change at start of measure
+
+        create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(clef F4)(n e3 q)(n g3 q)(barline)"
+            "(n e3 q.)(n c3 e)(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder csoBuilder;
+        ColStaffObjs* pCSO = csoBuilder.build(m_pScore);
+//        cout << test_name() << endl;
+//        cout << pCSO->dump();
+        MeasuresTableBuilder builder;
+
+        builder.build(m_pScore);
+
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 3 );
+//        cout << test_name() << endl << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_start_entry() == pCSO->front() );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() && pMeasure->get_barline()->is_barline() );
+
+        pMeasure = pTable->get_measure(1);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_start_entry()->imo_object()->is_clef() );
+        CHECK( pMeasure->get_timepos() == 128.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() && pMeasure->get_barline()->is_barline() );
+
+        pMeasure = pTable->get_measure(2);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 256.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_barline() && pMeasure->get_barline()->is_barline() );
     }
 
 };

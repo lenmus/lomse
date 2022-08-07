@@ -867,7 +867,7 @@ SUITE(InteractorTest)
 
         //get graphic model clicked object
         LUnits x = 19095.1;
-        LUnits y = 12894.2;
+        LUnits y = 11849.2;
         GraphicModel* pGM = pIntor->get_graphic_model(); //this also forces to engrave the score
         GmoObj* pGmo = pGM->hit_test(0, x, y);
 
