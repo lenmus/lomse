@@ -6,6 +6,7 @@ var index =
       [ "The Document and related classes", "page-introduction.html#overview-mvc", null ],
       [ "Displaying documents", "page-introduction.html#overview-rendering", null ],
       [ "Printing documents", "page-introduction.html#overview-print", null ],
+      [ "Saving and exporting and documents", "page-introduction.html#overview-export", null ],
       [ "Editing documents", "page-introduction.html#overview-edition", null ],
       [ "The sound engine", "page-introduction.html#overview-sound-engine", null ]
     ] ],
@@ -47,6 +48,7 @@ var index =
       [ "Supported edition modes", "page-edit-overview.html#edit-modes", null ],
       [ "Edition commands", "page-edit-overview.html#edit-commands", null ]
     ] ],
+    [ "Saving and exporting documents", "document-export.html", null ],
     [ "Scores playback overview", "page-sound-generation.html", [
       [ "How Lomse playback works", "page-sound-generation.html#page-sound-generation-overview", null ],
       [ "Your application set-up: summary", "page-sound-generation.html#page-sound-generation-summary", null ],
@@ -77,9 +79,9 @@ var index =
     ] ],
     [ "File formats supported by Lomse", "page-file-formats.html", [
       [ "Supported file formats", "page-file-formats.html#page-file-formats-overview", [
+        [ "MusicXML format", "page-file-formats.html#mxl-format", null ],
         [ "LDP format", "page-file-formats.html#ldp-format", null ],
-        [ "LMD format", "page-file-formats.html#lmd-format", null ],
-        [ "MusicXML format", "page-file-formats.html#mxl-format", null ]
+        [ "LMD format", "page-file-formats.html#lmd-format", null ]
       ] ]
     ] ],
     [ "Coordinate systems, units, scaling and viewport", "page-coordinates-viewport.html", [

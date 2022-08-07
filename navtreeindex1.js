@@ -1,0 +1,19 @@
+var NAVTREEINDEX1 =
+{
+"page-sound-generation.html#page-sound-generation-player-gui":[0,6,5],
+"page-sound-generation.html#page-sound-generation-summary":[0,6,1],
+"page-sound-generation.html#page-sound-generation-tracking":[0,6,4],
+"page-tasks.html":[0,7],
+"page-tasks.html#gui-interaction":[0,7,0],
+"page-tasks.html#task-data-entry":[0,7,1,6],
+"page-tasks.html#task-drag-view":[0,7,1,0],
+"page-tasks.html#task-move-handler":[0,7,1,5],
+"page-tasks.html#task-move-object":[0,7,1,4],
+"page-tasks.html#task-only-clicks":[0,7,1,1],
+"page-tasks.html#task-selection":[0,7,1,2],
+"page-tasks.html#task-selection-rectangle":[0,7,1,3],
+"page-tasks.html#tasks-overview":[0,7,1],
+"page-tutorials-license.html":[5],
+"pages.html":[],
+"todo.html":[6]
+};

@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.2</span>
+   &#160;<span id="projectnumber">0.29.3</span>
    </div>
   </td>
  </tr>
@@ -92,6 +92,7 @@ $(document).ready(function(){initNavTree('page-introduction.html','');});
 <li class="level1"><a href="#overview-mvc">The Document and related classes</a></li>
 <li class="level1"><a href="#overview-rendering">Displaying documents</a></li>
 <li class="level1"><a href="#overview-print">Printing documents</a></li>
+<li class="level1"><a href="#overview-export">Saving and exporting and documents</a></li>
 <li class="level1"><a href="#overview-edition">Editing documents</a></li>
 <li class="level1"><a href="#overview-sound-engine">The sound engine</a></li>
 </ul>
@@ -120,6 +121,7 @@ Initializing the Lomse library</h1>
 <h1><a class="anchor" id="overview-mvc"></a>
 The Document and related classes</h1>
 <p>Class Document represents a document with any kind of content: music scores, texts, paragraphs, images, tables, lists, etc. Documents are created by invoking <a class="el" href="classLomseDoorway.html#af622c7d1c6af2e3394f6a7aaaab51878">LomseDoorway::new_document()</a> and <a class="el" href="classLomseDoorway.html#a999ff150d71094b9798aee411742161a">LomseDoorway::open_document()</a> methods.</p>
+<p>Documents can be created from scratch or by importing scores from files in MusicXML format or in other currently supported formats (see <a class="el" href="page-file-formats.html">File formats supported by Lomse</a>).</p>
 <p>When a Document is created, additional objects for marshaling the actions between your application and the Document are created. These additional objects are part of the Lomse Model-View-Controller (MVC) architecture. The main objects associated to a Document are:</p>
 <ul>
 <li>The <a class="el" href="classInteractor.html">Interactor</a>: It is the interface for interacting with the Document. You can consider it as the controller in the MVC model.</li>
@@ -141,6 +143,9 @@ Displaying documents</h1>
 Printing documents</h1>
 <p>As Lomse is platform independent code, it knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
 <p>The details and methods you have to use for printing are described in <a class="el" href="page-printing.html">Printing documents overview</a>.</p>
+<h1><a class="anchor" id="overview-export"></a>
+Saving and exporting and documents</h1>
+<p>Lomse export documents as strings in MusicXML format or LDP format. But currently Lomse does not include facilities for writing files (although this is planned for future). Therefore, for now it is responsibility of your application to save in a file the source code string provided by Lomse. See <a class="el" href="document-export.html">Saving and exporting documents</a>.</p>
 <h1><a class="anchor" id="overview-edition"></a>
 Editing documents</h1>
 <p>Editing documents in Lomse is very simple: just invoke <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and pass the command to execute, e.g. <em>insert note</em> or <em>delete paragraph</em>.</p>
@@ -161,7 +166,7 @@ The sound engine</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat May 14 2022 16:53:09 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

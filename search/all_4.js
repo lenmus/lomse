@@ -16,6 +16,7 @@ var searchData=
   ['eintervaltype',['EIntervalType',['../group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4',1,'lomse_interval.h']]],
   ['ejoinbarlines',['EJoinBarlines',['../group__enumerations.html#ga391ee07675002e9ed01d8f5adfb18804',1,'lomse_internal_model.h']]],
   ['elevation',['elevation',['../classAMidiInfo.html#a6e19917c52450dd931ddb8c6cc604762',1,'AMidiInfo']]],
+  ['emutetype',['EMuteType',['../group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e',1,'lomse_internal_model.h']]],
   ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],
   ['enable_5fforced_5fview_5fupdates',['enable_forced_view_updates',['../classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b',1,'Interactor']]],
   ['end_5fcomposite_5fnotation',['end_composite_notation',['../classDrawer.html#a1959c83923da6b3537521afe9ea06a71',1,'Drawer']]],

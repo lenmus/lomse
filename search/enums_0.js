@@ -15,6 +15,7 @@ var searchData=
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
   ['eintervaltype',['EIntervalType',['../group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4',1,'lomse_interval.h']]],
   ['ejoinbarlines',['EJoinBarlines',['../group__enumerations.html#ga391ee07675002e9ed01d8f5adfb18804',1,'lomse_internal_model.h']]],
+  ['emutetype',['EMuteType',['../group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e',1,'lomse_internal_model.h']]],
   ['eobservedchild',['EObservedChild',['../classObservable.html#aeba2229fd6aa952b9d2e67b22444682e',1,'Observable']]],
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
   ['erenderoptions',['ERenderOptions',['../group__enumerations.html#ga1903a90921a42ab8abc8857c21f08c15',1,'lomse_drawer.h']]],

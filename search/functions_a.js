@@ -14,5 +14,6 @@ var searchData=
   ['move_5ftempo_5fline_5fand_5fscroll_5fif_5fnecessary',['move_tempo_line_and_scroll_if_necessary',['../classInteractor.html#a4d27182dd9d0930064818342e915fed8',1,'Interactor::move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0)'],['../classInteractor.html#ab81ca1916be48701ed5c9cba49aee299',1,'Interactor::move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure, TimeUnits location, int iInstr=0)']]],
   ['move_5fto',['move_to',['../classDrawer.html#a9eddd9d627fa763647c61ae2f8280148',1,'Drawer']]],
   ['move_5fto_5frel',['move_to_rel',['../classDrawer.html#a028d04bd545b30119f2bf5a6e71a4094',1,'Drawer']]],
-  ['move_5fup_5finstrument',['move_up_instrument',['../classAScore.html#ad392638c71061468fb7ef0c53e1ae9a1',1,'AScore::move_up_instrument(ImoId instrId)'],['../classAScore.html#a1ffe095edfdbfec517a6dff8f564f5d7',1,'AScore::move_up_instrument(AInstrument &amp;instr)']]]
+  ['move_5fup_5finstrument',['move_up_instrument',['../classAScore.html#ad392638c71061468fb7ef0c53e1ae9a1',1,'AScore::move_up_instrument(ImoId instrId)'],['../classAScore.html#a1ffe095edfdbfec517a6dff8f564f5d7',1,'AScore::move_up_instrument(AInstrument &amp;instr)']]],
+  ['mxlexporter',['MxlExporter',['../classMxlExporter.html#abd6f2308ed9600dad3aff20b9f834a73',1,'MxlExporter']]]
 ];

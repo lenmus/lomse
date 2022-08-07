@@ -110,6 +110,23 @@ var group__enumerations =
       [ "k_joined_barlines", "group__enumerations.html#gga391ee07675002e9ed01d8f5adfb18804ab917fd54e52945368980419718e098c4", null ],
       [ "k_mensurstrich_barlines", "group__enumerations.html#gga391ee07675002e9ed01d8f5adfb18804aceadece5287a005301fd85e6a7e2278e", null ]
     ] ],
+    [ "EMuteType", "group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e", [
+      [ "k_mute_off", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ead91c2adbead8de7fc5ebc62c9c8479f4", null ],
+      [ "k_mute_on", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3eaa1ac35dfea3607f071ec818cba1a754a", null ],
+      [ "k_mute_bucket", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea4ac813c1eaa29fd2720c13d1eaf79d89", null ],
+      [ "k_mute_cup", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea9302c5adad1528f58a84987472086446", null ],
+      [ "k_mute_echo", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea3ce8c7f6500f0ef6f8f6108c3c184b03", null ],
+      [ "k_mute_harmon_no_stem", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea2578d0c588a090e4a9ea5fe10e09d57d", null ],
+      [ "k_mute_harmon_stem", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ead4ec1bdc26c99cf365287ec45a623eb5", null ],
+      [ "k_mute_hat", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3eaf575b7a0b6c66978c69707392a23a2b1", null ],
+      [ "k_mute_palm", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea2751d5a868f3ae1a8f50c75b4ad0de07", null ],
+      [ "k_mute_plunger", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3eafbcbbeb8cb0c9e0d56c68ecd82311f03", null ],
+      [ "k_mute_practice", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea5eb1ded3e9f67a224639cf547c5b4ebe", null ],
+      [ "k_mute_solotone", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3eae5c787f74dbea00454f7fbf9f2449f92", null ],
+      [ "k_mute_stop_hand", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea94d193489c27924a5108ef78f4929d6f", null ],
+      [ "k_mute_stop_mute", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ea9303f03c1c9d2c5890b9bbb4b2a8bf23", null ],
+      [ "k_mute_straight", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ead19386f62b29c205ecc381ea96e601d7", null ]
+    ] ],
     [ "EPixelFormat", "group__enumerations.html#gafb559e26bc610db43ba605230a142898", [
       [ "k_pix_format_undefined", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a0a8e233d72c2d66ca39207b151d7e18f", null ],
       [ "k_pix_format_gray8", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a2f83422ee812cbca20c9d080f783f702", null ],

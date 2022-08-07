@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.2</span>
+   &#160;<span id="projectnumber">0.29.3</span>
    </div>
   </td>
  </tr>
@@ -113,16 +113,18 @@ Enumerations</h2></td></tr>
 <tr class="separator:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5428193fc11653b86ce227a4c89bb2b9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9">EVisualTrackingMode</a> </td></tr>
 <tr class="separator:ga5428193fc11653b86ce227a4c89bb2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae068fb94856ef833f5f757db5fe079b4"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4">EIntervalType</a> </td></tr>
-<tr class="separator:gae068fb94856ef833f5f757db5fe079b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafb559e26bc610db43ba605230a142898"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
-<tr class="separator:gafb559e26bc610db43ba605230a142898"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga391ee07675002e9ed01d8f5adfb18804"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga391ee07675002e9ed01d8f5adfb18804">EJoinBarlines</a> </td></tr>
 <tr class="separator:ga391ee07675002e9ed01d8f5adfb18804"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1ac603296fabf17c64fa8eb9c8a9382b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga1ac603296fabf17c64fa8eb9c8a9382b">EGroupSymbol</a> </td></tr>
 <tr class="separator:ga1ac603296fabf17c64fa8eb9c8a9382b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga173c0eb2ce88a7538d93dcf7132a27fe"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga173c0eb2ce88a7538d93dcf7132a27fe">EDocObject</a> </td></tr>
 <tr class="separator:ga173c0eb2ce88a7538d93dcf7132a27fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga61b4687bf419e0e7cae37296f7ee4d3e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e">EMuteType</a> </td></tr>
+<tr class="separator:ga61b4687bf419e0e7cae37296f7ee4d3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae068fb94856ef833f5f757db5fe079b4"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4">EIntervalType</a> </td></tr>
+<tr class="separator:gae068fb94856ef833f5f757db5fe079b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafb559e26bc610db43ba605230a142898"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
+<tr class="separator:gafb559e26bc610db43ba605230a142898"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="gadd4d321bb9cc51030786d53d76b8b0bd"></a>
@@ -485,6 +487,53 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a id="ga61b4687bf419e0e7cae37296f7ee4d3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga61b4687bf419e0e7cae37296f7ee4d3e">&#9670;&nbsp;</a></span>EMuteType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e">EMuteType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the valid values for muting playback for different instruments. A mute is a device attached to a musical instrument which changes the instrument's tone quality (timbre) or lowers its volume. Mutes are commonly used on string and brass instruments, especially the trumpet and trombone, and are occasionally used on woodwinds. Muting can also be done by hand, as in the case of palm muting a guitar or grasping a triangle to dampen its sound. The on value is used to totally remove playback. See: <a href="https://en.wikipedia.org/wiki/Mute_(music)">https://en.wikipedia.org/wiki/Mute_(music)</a> </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ead91c2adbead8de7fc5ebc62c9c8479f4"></a>k_mute_off&#160;</td><td class="fielddoc"><p>Not muted. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3eaa1ac35dfea3607f071ec818cba1a754a"></a>k_mute_on&#160;</td><td class="fielddoc"><p>Total mute. No playback. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea4ac813c1eaa29fd2720c13d1eaf79d89"></a>k_mute_bucket&#160;</td><td class="fielddoc"><p>Bucket mute, also known as the velvetone or velvet-tone. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea9302c5adad1528f58a84987472086446"></a>k_mute_cup&#160;</td><td class="fielddoc"><p>Cup mute. Similar to strait but includes an extra inverted cone. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea3ce8c7f6500f0ef6f8f6108c3c184b03"></a>k_mute_echo&#160;</td><td class="fielddoc"><p>Mute echo not main sound. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea2578d0c588a090e4a9ea5fe10e09d57d"></a>k_mute_harmon_no_stem&#160;</td><td class="fielddoc"><p>Harmon mute, also known as the wa-wa, wow-wow, or wah-wah mute . </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ead4ec1bdc26c99cf365287ec45a623eb5"></a>k_mute_harmon_stem&#160;</td><td class="fielddoc"><p>Harmon mute, with a small tube inserted into the mute. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3eaf575b7a0b6c66978c69707392a23a2b1"></a>k_mute_hat&#160;</td><td class="fielddoc"><p>Derby or hat mute is done with a bowler hat or similar object. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea2751d5a868f3ae1a8f50c75b4ad0de07"></a>k_mute_palm&#160;</td><td class="fielddoc"><p>Palm mute, a playing technique for guitar and bass guitar,. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3eafbcbbeb8cb0c9e0d56c68ecd82311f03"></a>k_mute_plunger&#160;</td><td class="fielddoc"><p>Muted with a plunger held in front of the bell. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea5eb1ded3e9f67a224639cf547c5b4ebe"></a>k_mute_practice&#160;</td><td class="fielddoc"><p>Muted with absorbent material. Used during practice to prevent bothering others. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3eae5c787f74dbea00454f7fbf9f2449f92"></a>k_mute_solotone&#160;</td><td class="fielddoc"><p>Solotone mute (two telescoping cones and a small tube in the center). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea94d193489c27924a5108ef78f4929d6f"></a>k_mute_stop_hand&#160;</td><td class="fielddoc"><p>Stop mute using the hand. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ea9303f03c1c9d2c5890b9bbb4b2a8bf23"></a>k_mute_stop_mute&#160;</td><td class="fielddoc"><p>Stop mute using a physical stop mute. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga61b4687bf419e0e7cae37296f7ee4d3ead19386f62b29c205ecc381ea96e601d7"></a>k_mute_straight&#160;</td><td class="fielddoc"><p>Strait mute using a truncated cone. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a id="gafb559e26bc610db43ba605230a142898"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gafb559e26bc610db43ba605230a142898">&#9670;&nbsp;</a></span>EPixelFormat</h2>
 
@@ -652,7 +701,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat May 14 2022 16:53:10 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

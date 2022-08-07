@@ -16,5 +16,6 @@ var searchData=
   ['move_5fto',['move_to',['../classDrawer.html#a9eddd9d627fa763647c61ae2f8280148',1,'Drawer']]],
   ['move_5fto_5frel',['move_to_rel',['../classDrawer.html#a028d04bd545b30119f2bf5a6e71a4094',1,'Drawer']]],
   ['move_5fup_5finstrument',['move_up_instrument',['../classAScore.html#ad392638c71061468fb7ef0c53e1ae9a1',1,'AScore::move_up_instrument(ImoId instrId)'],['../classAScore.html#a1ffe095edfdbfec517a6dff8f564f5d7',1,'AScore::move_up_instrument(AInstrument &amp;instr)']]],
-  ['musicxmloptions',['MusicXmlOptions',['../classMusicXmlOptions.html',1,'']]]
+  ['musicxmloptions',['MusicXmlOptions',['../classMusicXmlOptions.html',1,'']]],
+  ['mxlexporter',['MxlExporter',['../classMxlExporter.html',1,'MxlExporter'],['../classMxlExporter.html#abd6f2308ed9600dad3aff20b9f834a73',1,'MxlExporter::MxlExporter()']]]
 ];
