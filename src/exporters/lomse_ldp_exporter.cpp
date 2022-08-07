@@ -87,7 +87,6 @@ protected:
 
 const bool k_in_same_line = false;
 const bool k_in_new_line = true;
-const int k_indent_step = 3;
 
 
 //=======================================================================================
@@ -3096,7 +3095,7 @@ void LdpGenerator::new_line_and_indent_spaces(bool fStartLine)
     {
         if (fStartLine)
             new_line();
-        int indent = m_pExporter->get_indent() * k_indent_step;
+        int indent = m_pExporter->get_indent_level() * m_pExporter->get_indent_spaces();
         while (indent > 0)
         {
             m_source << " ";
@@ -3364,30 +3363,13 @@ void LdpGenerator::add_style(ImoStyle* pStyle)
 //=======================================================================================
 // LdpExporter implementation
 //=======================================================================================
-LdpExporter::LdpExporter(LibraryScope* pLibraryScope)
-    : m_pLibraryScope(pLibraryScope)
-    , m_version( pLibraryScope->get_version_string() )
-    , m_nIndent(0)
-    , m_fAddId(false)
-    , m_fRemoveNewlines(false)
-    , m_pCurrScore(nullptr)
-    , m_fProcessingChord(false)
-{
-}
-
 LdpExporter::LdpExporter()
-    : m_pLibraryScope(nullptr)
-    , m_version()
+    : m_version()
     , m_nIndent(0)
     , m_fAddId(false)
     , m_fRemoveNewlines(false)
     , m_pCurrScore(nullptr)
     , m_fProcessingChord(false)
-{
-}
-
-//---------------------------------------------------------------------------------------
-LdpExporter::~LdpExporter()
 {
 }
 

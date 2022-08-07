@@ -19,7 +19,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Lomse library. API documentation"
-PROJECT_NUMBER         = 0.29.2
+PROJECT_NUMBER         = 0.29.3
 PROJECT_BRIEF          =
 PROJECT_LOGO           = ./images/logo_100x195.png
 OUTPUT_DIRECTORY       = ../../zz_build-api
@@ -647,8 +647,11 @@ INPUT     = mainpages \
 			../../include/lomse_im_attributes.h \
 			../../include/lomse_import_options.h \
 			../../include/lomse_interactor.h \
+			../../include/lomse_internal_model.h \
 			../../include/lomse_interval.h \
+			../../include/lomse_ldp_exporter.h \
 			../../include/lomse_measure_highlight.h \
+			../../include/lomse_mxl_exporter.h \
 			../../include/lomse_pitch.h \
 			../../include/lomse_pixel_formats.h \
 			../../include/lomse_presenter.h \
@@ -656,7 +659,6 @@ INPUT     = mainpages \
 			../../include/lomse_tempo_line.h \
 			../../include/lomse_view.h \
 			../../include/lomse_visual_effect.h \
-			../../include/lomse_internal_model.h \
             ../../src/internal_model/lomse_api_internal_model.cpp \
 			../../src/document/lomse_document.cpp \
             groups

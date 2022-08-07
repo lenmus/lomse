@@ -214,7 +214,6 @@ SUITE(MxlExporterTest)
 //        ImoDocument* pRoot = doc.get_im_root();
 //
 //        MxlExporter exporter(m_libraryScope);
-//        exporter.set_add_id(true);
 //
 //        ofstream file1(m_scores_path + "../z_test_musicxml_export.xml", ios::out);
 //        if (file1.good())

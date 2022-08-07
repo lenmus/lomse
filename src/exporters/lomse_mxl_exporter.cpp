@@ -110,8 +110,6 @@ protected:
 };
 
 const bool k_in_same_line = false;
-//const bool k_in_new_line = true;
-const int k_indent_step = 3;
 
 //=======================================================================================
 // generators for specific elements
@@ -174,7 +172,7 @@ protected:
     BarlineData  m_left;        //data for left barline in next measure
 
 public:
-    BarlineMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    BarlineMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoBarline*>(pImo);
@@ -442,7 +440,7 @@ protected:
     ImoBeam* m_pBeam;
 
 public:
-    BeamMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    BeamMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pNR = static_cast<ImoNoteRest*>(pImo);
@@ -512,7 +510,7 @@ protected:
     ImoClef* m_pObj;
 
 public:
-    ClefMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    ClefMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoClef*>(pImo);
@@ -584,7 +582,7 @@ protected:
     ImoStyle* m_pObj;
 
 public:
-    DefineStyleMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    DefineStyleMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStyle*>(pImo);
@@ -878,7 +876,7 @@ protected:
     ImoDirection* m_pObj;
 
 public:
-    DirectionMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    DirectionMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoDirection*>(pImo);
@@ -1308,7 +1306,7 @@ protected:
     ImoObj* m_pImo;
 
 public:
-    ErrorMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    ErrorMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo(pImo)
     {
@@ -1335,7 +1333,7 @@ protected:
     ImoFermata* m_pImo;
 
 public:
-    FermataMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    FermataMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo(static_cast<ImoFermata*>(pImo))
     {
@@ -1389,7 +1387,7 @@ protected:
     ImoInstrument* m_pObj;
 
 public:
-    InstrumentMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    InstrumentMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoInstrument*>(pImo);
@@ -1431,7 +1429,7 @@ public:
     {
     }
 
-    KeySignatureMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    KeySignatureMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pObj(static_cast<ImoKeySignature*>(pImo))
         , m_fExportNumber(false)
@@ -1532,7 +1530,7 @@ protected:
     ImoDocument* m_pObj;
 
 public:
-    LenmusdocMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    LenmusdocMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoDocument*>(pImo);
@@ -1690,7 +1688,7 @@ protected:
     ImoMidiInfo* m_pImo;
 
 public:
-    MidiInfoMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    MidiInfoMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoMidiInfo*>(pImo))
     {
@@ -1758,7 +1756,7 @@ public:
     {
     }
 
-    TimeSignatureMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    TimeSignatureMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pObj(static_cast<ImoTimeSignature*>(pImo))
         , m_fExportNumber(false)
@@ -1838,7 +1836,7 @@ protected:
     ImoScore* m_pScore;
 
 public:
-    MusicDataMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    MusicDataMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoMusicData*>(pImo);
@@ -2372,7 +2370,7 @@ protected:
     ImoRest* m_pRest = nullptr;
 
 public:
-    NoteRestMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    NoteRestMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pNR = static_cast<ImoNoteRest*>(pImo);
@@ -3335,7 +3333,7 @@ protected:
     ImoScore* m_pObj;
 
 public:
-    PartListMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    PartListMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pObj = static_cast<ImoScore*>(pImo);
@@ -3490,7 +3488,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void add_groups(ImoInstrument* pInstr)
+    void add_groups(ImoInstrument* UNUSED(pInstr))
     {
         //TODO
         //    group*
@@ -3588,7 +3586,7 @@ protected:
     ImoScore* m_pScore;
 
 public:
-    ScoreMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    ScoreMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
     {
         m_pScore = static_cast<ImoScore*>(pImo);
@@ -4090,7 +4088,7 @@ protected:
     ImoSoundChange* m_pImo;
 
 public:
-    SoundMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    SoundMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoSoundChange*>(pImo))
     {
@@ -4210,7 +4208,7 @@ protected:
     ImoTranspose* m_pImo;
 
 public:
-    TransposeMxlGenerator(ImoObj* pImo, ImoObj* pParent, MxlExporter* pExporter)
+    TransposeMxlGenerator(ImoObj* pImo, ImoObj* UNUSED(pParent), MxlExporter* pExporter)
         : MxlGenerator(pExporter)
         , m_pImo( static_cast<ImoTranspose*>(pImo))
     {
@@ -4549,7 +4547,7 @@ void MxlGenerator::new_line_and_indent_spaces(bool fStartLine)
     {
         if (fStartLine)
             new_line();
-        int indent = m_pExporter->get_indent() * k_indent_step;
+        int indent = m_pExporter->get_indent_level() * m_pExporter->get_indent_spaces();
         while (indent > 0)
         {
             m_source << " ";
@@ -4963,24 +4961,6 @@ void MxlExporter::export_pending_staffobjs(MxlGenerator* pRequester, ImoStaffObj
 // static methods
 
 //---------------------------------------------------------------------------------------
-string MxlExporter::barline_type_to_mnx(int barType)
-{
-    //AWARE: indexes in correspondence with enum in ImoBarline
-    static const string name[] = {
-        "none",
-        "simple",
-        "double",
-        "start",
-        "end",
-        "endRepetition",
-        "startRepetition",
-        "doubleRepetition",
-    };
-
-    return name[barType];
-}
-
-//---------------------------------------------------------------------------------------
 string MxlExporter::note_type_to_mxl_name(int noteType)
 {
     switch(noteType)
@@ -5073,22 +5053,6 @@ string MxlExporter::accidentals_to_mxl_name(int acc)
             return "";
         }
     }
-}
-
-//---------------------------------------------------------------------------------------
-string MxlExporter::color_to_mnx(Color color)
-{
-    stringstream source;
-    source << "#";
-    int r = color.r;
-    int g = color.g;
-    int b = color.b;
-    int a = color.a;
-    source << std::hex << setfill('0') << setw(2) << r;
-    source << std::hex << setfill('0') << setw(2) << g;
-    source << std::hex << setfill('0') << setw(2) << b;
-    source << std::hex << setfill('0') << setw(2) << a;
-    return source.str();
 }
 
 //---------------------------------------------------------------------------------------

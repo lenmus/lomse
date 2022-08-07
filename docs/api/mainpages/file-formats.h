@@ -7,15 +7,68 @@
 @section page-file-formats-overview Supported file formats
 
 Lomse supports the following file formats:
+    
+- <b>MusicXML:  (usually .xml extension for uncompressed files or .musicxml for compressed files):</b>
+    An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.
 
 - <b>LMS: LenMus Score (.lms extension):</b>
     Plain txt file containing only a music score written in LDP language. LDP is the acronym for Spanish <i>Lenguaje De Partituras</i> (<i>Language for music scores</i>). It was the initial language which started LenMus project.
 
 - <b>LMD: LenMus Document (.lmd extension):</b>
     Plain XML file containing a full document with headers, paragraphs, images, tables lists, scores, etc. It is similar to an HTML or DocBook file with scores in LDP language (tag \<ldpmusic\>) or MusicXML (tag \<mxlmusic\>)
-    
-- <b>MusicXML:  (usually .xml extension for uncompressed files or .musicxml for compressed files):</b>
-    An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.
+
+
+
+@subsection mxl-format MusicXML format
+
+MusicXML is a widely use format for music scores. It was designed for the interchange of scores between different music notation. 
+The following example is a score consisting of a single whole note middle C, with 4/4 time signature, in the key of C major, on the G clef:
+
+@image html ldp-hello-world-score.jpg "Image: Rendering of the following MusicXML score."
+
+In MusicXML this score is described as follows:
+
+@code
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC
+    "-//Recordare//DTD MusicXML 3.0 Partwise//EN"
+    "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.0">
+  <part-list>
+    <score-part id="P1">
+      <part-name>Music</part-name>
+    </score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key>
+          <fifths>0</fifths>
+        </key>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+        </clef>
+      </attributes>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>whole</type>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+@endcode
+
+For more information visit http://www.musicxml.com/
 
 
 
@@ -126,58 +179,6 @@ This is an example of an LMD file:
 @endcode
 
 For more information see the DTD for LMD at https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd.
-
-
-@subsection mxl-format MusicXML format
-
-MusicXML is a widely use format for music scores. It was designed for the interchange of scores between different music notation. 
-The following example is a score consisting of a single whole note middle C, with 4/4 time signature, in the key of C major, on the G clef:
-
-@image html ldp-hello-world-score.jpg "Image: Rendering of the following MusicXML score."
-
-In MusicXML this score is described as follows:
-
-@code
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE score-partwise PUBLIC
-    "-//Recordare//DTD MusicXML 3.0 Partwise//EN"
-    "http://www.musicxml.org/dtds/partwise.dtd">
-<score-partwise version="3.0">
-  <part-list>
-    <score-part id="P1">
-      <part-name>Music</part-name>
-    </score-part>
-  </part-list>
-  <part id="P1">
-    <measure number="1">
-      <attributes>
-        <divisions>1</divisions>
-        <key>
-          <fifths>0</fifths>
-        </key>
-        <time>
-          <beats>4</beats>
-          <beat-type>4</beat-type>
-        </time>
-        <clef>
-          <sign>G</sign>
-          <line>2</line>
-        </clef>
-      </attributes>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>4</duration>
-        <type>whole</type>
-      </note>
-    </measure>
-  </part>
-</score-partwise>
-@endcode
-
-For more information visit http://www.musicxml.com/
 
 
 */

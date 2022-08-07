@@ -38,6 +38,8 @@ Details about Lomse initialization can be found in  @ref page-render-overview-in
 
 Class Document represents a document with any kind of content: music scores, texts, paragraphs, images, tables, lists, etc. Documents are created by invoking LomseDoorway::new_document() and LomseDoorway::open_document() methods.
 
+Documents can be created from scratch or by importing scores from files in MusicXML format or in other currently supported formats (see @ref page-file-formats).
+
 When a Document is created, additional objects for marshaling the actions between your application and the Document are created. These additional objects are part of the Lomse Model-View-Controller (MVC) architecture. The main objects associated to a Document are:
 
 - The Interactor: It is the interface for interacting with the Document. You can consider it as the controller in the MVC model.
@@ -70,6 +72,13 @@ The details and methods you have to use for displaying documents are described i
 As Lomse is platform independent code, it knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.
 
 The details and methods you have to use for printing are described in @ref page-printing.
+
+
+
+@section overview-export Saving and exporting and documents
+
+Lomse export documents as strings in MusicXML format or LDP format. But currently Lomse does not include facilities for writing files (although this is planned for future). Therefore, for now it is responsibility of your application to save in a file the source code string provided by Lomse.
+See @ref document-export.
 
 
 
