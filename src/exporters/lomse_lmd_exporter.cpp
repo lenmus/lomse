@@ -1222,7 +1222,7 @@ protected:
         close_start_tag();
 
         LdpExporter exporter;
-        exporter.set_indent( m_pExporter->get_indent() );
+        exporter.set_indent_level( m_pExporter->get_indent() );
         exporter.set_add_id( m_pExporter->get_add_id() );
         m_source << exporter.get_source(m_pObj);
 

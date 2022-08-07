@@ -102,9 +102,10 @@ public:
 
     /// This enum describes the available undo policies for commands
     enum ECmdUndoPolicy {
-        k_undo_policy_full_checkpoint=0,    ///< Undo is based on a full checkpoint
-        k_undo_policy_partial_checkpoint,   ///< Undo is based on a partial checkpoint
-        k_undo_policy_specific,             ///< Undo is implemented by the command
+        k_undo_policy_full_checkpoint=0,    ///< Undo based on a full checkpoint
+        k_undo_policy_partial_checkpoint,   ///< Undo based on a partial checkpoint
+        k_undo_policy_specific,             ///< Undo implemented by the command
+        k_undo_policy_replay_from_scratch,  ///< Undo based on replaying commands
     };
 
     /** Returns a value from #ECmdUndoPolicy that indicates the undo policy

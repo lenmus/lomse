@@ -95,7 +95,7 @@ SUITE(LdpExporterTest)
 ////        doc.from_file("/datos/cecilio/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
 //        ImoDocument* pRoot = doc.get_im_root();
 //
-//        LdpExporter exporter(&m_libraryScope);
+//        LdpExporter exporter;
 //        exporter.set_add_id(true);
 //        string source = exporter.get_source(pRoot);
 //        cout << "----------------------------------------------------" << endl;
@@ -116,7 +116,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -134,7 +134,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
@@ -150,7 +150,7 @@ SUITE(LdpExporterTest)
         ImoBarline* pImo = static_cast<ImoBarline*>(ImFactory::inject(k_imo_barline, &doc));
         pImo->set_type(k_barline_double);
         pImo->set_middle(true);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -166,7 +166,7 @@ SUITE(LdpExporterTest)
         ImoBarline* pImo = static_cast<ImoBarline*>(ImFactory::inject(k_imo_barline, &doc));
         pImo->set_type(k_barline_start_repetition);
         pImo->set_visible(false);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -185,7 +185,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>(
                                         pMD->get_child_of_type(k_imo_barline) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -206,7 +206,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -229,7 +229,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -253,7 +253,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -277,7 +277,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -297,7 +297,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
         pClef->set_clef_type(k_clef_F4);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pClef);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -312,7 +312,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc, 27L));
         pClef->set_clef_type(k_clef_F4);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pClef);
@@ -329,7 +329,7 @@ SUITE(LdpExporterTest)
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
         pClef->set_clef_type(k_clef_F4);
         pClef->set_symbol_size(k_size_cue);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pClef);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -348,7 +348,7 @@ SUITE(LdpExporterTest)
         ImoDirection* pImo = static_cast<ImoDirection*>(
                             ImFactory::inject(k_imo_direction, &doc));
         pImo->set_width(53.2f);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -369,7 +369,7 @@ SUITE(LdpExporterTest)
         ImoDirection* pImo = static_cast<ImoDirection*>(
                                         pMD->get_child_of_type(k_imo_direction) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
@@ -388,7 +388,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoDirection* pImo = static_cast<ImoDirection*>(
                                         pMD->get_child_of_type(k_imo_direction) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -406,7 +406,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoDirection* pImo = static_cast<ImoDirection*>(
                                         pMD->get_child_of_type(k_imo_direction) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -430,7 +430,7 @@ SUITE(LdpExporterTest)
             ")))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -461,7 +461,7 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
@@ -480,7 +480,7 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
@@ -499,7 +499,7 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
@@ -515,7 +515,7 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
@@ -535,7 +535,7 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
@@ -555,7 +555,7 @@ SUITE(LdpExporterTest)
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
                                         ImFactory::inject(k_imo_key_signature, &doc));
         pImo->set_key_type(k_key_A);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -573,7 +573,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
                                         pMD->get_child_of_type(k_imo_key_signature) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
@@ -592,7 +592,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
                                         pMD->get_child_of_type(k_imo_key_signature) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -618,7 +618,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -647,7 +647,7 @@ SUITE(LdpExporterTest)
                                         pMD->get_child_of_type(k_imo_direction) );
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -668,7 +668,7 @@ SUITE(LdpExporterTest)
                                         pMD->get_child_of_type(k_imo_direction) );
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
@@ -688,7 +688,7 @@ SUITE(LdpExporterTest)
         ImoDirection* pDir = static_cast<ImoDirection*>(
                                         pMD->get_child_of_type(k_imo_direction) );
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -707,7 +707,7 @@ SUITE(LdpExporterTest)
         ImoDirection* pDir = static_cast<ImoDirection*>(
                                         pMD->get_child_of_type(k_imo_direction) );
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -726,7 +726,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -746,7 +746,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -767,7 +767,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(1);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -786,7 +786,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -808,7 +808,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -831,7 +831,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -854,7 +854,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -885,7 +885,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -912,7 +912,7 @@ SUITE(LdpExporterTest)
             "))) ))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -938,7 +938,7 @@ SUITE(LdpExporterTest)
         ImoNote* pImo = static_cast<ImoNote*>(
                                         pMD->get_child_of_type(k_imo_note_regular) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -957,7 +957,7 @@ SUITE(LdpExporterTest)
             "))) ))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -982,7 +982,7 @@ SUITE(LdpExporterTest)
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -1003,7 +1003,7 @@ SUITE(LdpExporterTest)
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -1026,7 +1026,7 @@ SUITE(LdpExporterTest)
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -1050,7 +1050,7 @@ SUITE(LdpExporterTest)
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -1076,7 +1076,7 @@ SUITE(LdpExporterTest)
             "(instrument (musicData)))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
@@ -1111,7 +1111,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -1137,7 +1137,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -1167,7 +1167,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -1190,7 +1190,7 @@ SUITE(LdpExporterTest)
                             ImFactory::inject(k_imo_time_signature, &doc));
         pImo->set_type(ImoTimeSignature::k_single_number);
         pImo->set_top_number(10);
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -1211,7 +1211,7 @@ SUITE(LdpExporterTest)
         ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
                                         pMD->get_child_of_type(k_imo_time_signature) );
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
@@ -1230,7 +1230,7 @@ SUITE(LdpExporterTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
                                         pMD->get_child_of_type(k_imo_time_signature) );
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -1247,7 +1247,7 @@ SUITE(LdpExporterTest)
 //            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
 //            ")))" );
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        LdpExporter exporter(&m_libraryScope);
+//        LdpExporter exporter;
 //        string source = exporter.get_source(pScore);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
 //        CHECK( source ==
@@ -1268,7 +1268,7 @@ SUITE(LdpExporterTest)
 //        Document doc(m_libraryScope);
 //        ImoNote* pImo = ImFactory::inject_note(&doc, k_step_D, k_octave_4,
 //                            k_eighth, k_no_accidentals);
-//        LdpExporter exporter(&m_libraryScope);
+//        LdpExporter exporter;
 //        string source = exporter.get_source(pImo);
 //        //cout << test_name() << endl << "\"" << source << "\"" << endl;
 //        CHECK( source == "(n d4 e p1)" );
@@ -1280,7 +1280,7 @@ SUITE(LdpExporterTest)
 //        Document doc(m_libraryScope);
 //        ImoNote* pImo = ImFactory::inject_note(&doc, k_step_B, k_octave_7,
 //                            k_whole, k_sharp, 2);
-//        LdpExporter exporter(&m_libraryScope);
+//        LdpExporter exporter;
 //        string source = exporter.get_source(pImo);
 //        //cout << test_name() << endl << "\"" << source << "\"" << endl;
 //        CHECK( source == "(n +b7 w.. p1)" );
@@ -1296,7 +1296,7 @@ SUITE(LdpExporterTest)
 //        ImoClef* pImo = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
 //        pImo->set_clef_type(k_clef_F4);
 //        pImo->set_color( Color(127, 40, 12, 128) );
-//        LdpExporter exporter(&m_libraryScope);
+//        LdpExporter exporter;
 //        string source = exporter.get_source(pImo);
 ////        cout << test_name() << endl << "\"" << source << "\"" << endl;
 //        CHECK( source == "(clef F4 p1 (color #7f280c80))" );
@@ -1311,7 +1311,7 @@ SUITE(LdpExporterTest)
 ////        obj.set_type(k_clef_G2);
 ////        obj.set_user_location_x(30.0f);
 ////        obj.set_user_location_y(-7.05f);
-////        LdpExporter exporter(&m_libraryScope);
+////        LdpExporter exporter;
 ////        string source = exporter.get_source(&obj);
 ////        cout << test_name() << endl << "\"" << source << "\"" << endl;
 ////        CHECK( source == "(clef G3 p1 (dx 30.0000) (dy -7.0500))" );
@@ -1335,7 +1335,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -1365,7 +1365,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
@@ -1397,7 +1397,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
-        LdpExporter exporter(&m_libraryScope);
+        LdpExporter exporter;
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
