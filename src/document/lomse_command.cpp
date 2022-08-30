@@ -54,7 +54,6 @@ void DocCommand::create_checkpoint(Document* pDoc)
 void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //default implementation based on restoring from saved checkpoint data
-
     //log command for forensic analysis
     ostream& logger = get_global_logger().get_forensic_log_stream();
 
@@ -1147,11 +1146,11 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
         //for the second group
 
         //remove 'before' notes from existing beam
-        list<ImoNoteRest*>::iterator it = notesBefore.begin();
-        for (it = notesBefore.begin(); it != notesBefore.end(); ++it)
+        list<ImoNoteRest*>::iterator it2 = notesBefore.begin();
+        for (it2 = notesBefore.begin(); it2 != notesBefore.end(); ++it2)
             //Coverity false positive. pBeam is not freed as it has more than one note
             // coverity[use_after_free]
-            (*it)->remove_from_relation(pBeam);
+            (*it2)->remove_from_relation(pBeam);
 
         //create a new beam for the removed notes
         pDoc->add_beam(notesBefore);
@@ -2018,11 +2017,11 @@ void CmdDeleteSelection::delete_staffobj(ImoStaffObj* pImo)
         ImoRelations* pRels = pImo->get_relations();
         if (pRels)
         {
-            list<ImoRelObj*>& relations = pRels->get_relations();
-            if (relations.size() > 0)
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
                 list<ImoRelObj*>::iterator it;
-                for (it = relations.begin(); it != relations.end(); ++it)
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
                     m_relIds.push_back( (*it)->get_id() );
                 }
@@ -2146,11 +2145,11 @@ int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
         ImoRelations* pRels = pImo->get_relations();
         if (pRels)
         {
-            list<ImoRelObj*>& relations = pRels->get_relations();
-            if (relations.size() > 0)
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
                 list<ImoRelObj*>::iterator it;
-                for (it = relations.begin(); it != relations.end(); ++it)
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
                     relIds.push_back( (*it)->get_id() );
                 }

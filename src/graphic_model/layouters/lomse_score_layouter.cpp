@@ -577,11 +577,11 @@ void ScoreLayouter::create_stub()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::add_score_titles()
 {
-    list<ImoScoreTitle*>& titles = m_pScore->get_titles();
-    list<ImoScoreTitle*>::iterator it;
-    for (it = titles.begin(); it != titles.end(); ++it)
+    ImoScoreTitles* pTitles = m_pScore->get_titles();
+    ImoObj::children_iterator it;
+    for (it = pTitles->begin(); it != pTitles->end(); ++it)
     {
-        ImoScoreTitle* pImo = *it;
+        ImoScoreTitle* pImo = static_cast<ImoScoreTitle*>(*it);
         TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
                            pImo->get_language(), pImo->get_style(),
                            TextEngraver::k_class_score_title);
@@ -1712,7 +1712,7 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
     if (fTrace)
     {
         dbgLogger << "Breaks computed. Entries: ************************************" << endl;
-        dump_entries(logger.get_stream());
+        dump_entries(glogger.get_stream());
     }
 
     int i = m_numCols;

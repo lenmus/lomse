@@ -40,9 +40,9 @@ class EngraversMap;
 class SpAlgColumn;
 class StaffObjsCursor;
 class TimeGridTable;
-class TypeMeasureInfo;
 class GmoBoxSystem;
 class VerticalProfile;
+struct TypeMeasureInfo;
 
 //---------------------------------------------------------------------------------------
 // Barlines at the end of a column

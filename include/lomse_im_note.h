@@ -70,9 +70,11 @@ protected:
 
 public:
     ImoNoteRest(int objtype) : ImoStaffObj(objtype) { m_nVoice = 1; }
-    virtual ~ImoNoteRest() {}
-    ImoNoteRest(const ImoNoteRest&) = delete;
-    ImoNoteRest& operator= (const ImoNoteRest&) = delete;
+
+    //the five special
+    ~ImoNoteRest() override {}
+    ImoNoteRest(const ImoNoteRest&) = default;
+    ImoNoteRest& operator= (const ImoNoteRest&) = default;
     ImoNoteRest(ImoNoteRest&&) = delete;
     ImoNoteRest& operator= (ImoNoteRest&&) = delete;
 
@@ -103,6 +105,8 @@ public:
     inline void set_event_duration(TimeUnits value) { m_eventDuration = value; }
     inline void set_playback_time(TimeUnits value) { m_playTime = value; }
     inline void set_unpitched() { m_fUnpitched = true; }
+    inline void reset_playback_duration() { m_playDuration = m_duration; }
+
 
     //pitch (notes) or placement on the staff (rests & unpitched notes)
     inline int get_step() { return m_step; }
@@ -177,9 +181,10 @@ protected:
     list<TIntAttribute> get_supported_attributes() override;
 
 public:
-    virtual ~ImoRest() {}
-    ImoRest(const ImoRest&) = delete;
-    ImoRest& operator= (const ImoRest&) = delete;
+    //the five special
+    ~ImoRest() override {}
+    ImoRest(const ImoRest&) = default;
+    ImoRest& operator= (const ImoRest&) = default;
     ImoRest(ImoRest&&) = delete;
     ImoRest& operator= (ImoRest&&) = delete;
 
@@ -205,8 +210,8 @@ protected:
 
     //stem and ties
     int     m_stemDirection;        //value from ENoteStem
-    ImoTie* m_pTieNext;
-    ImoTie* m_pTiePrev;
+    ImoId m_idTieNext = k_no_imoid;
+    ImoId m_idTiePrev = k_no_imoid;
 
     //computed values for layout
     int     m_computedStem;         //value from ENoteStem
@@ -226,9 +231,10 @@ protected:
     bool m_fMute = false;       //true: mute in playback, do not generate MIDI events
 
 public:
-    virtual ~ImoNote();
-    ImoNote(const ImoNote&) = delete;
-    ImoNote& operator= (const ImoNote&) = delete;
+    //the five special
+    ~ImoNote() override;
+    ImoNote(const ImoNote&) = default;
+    ImoNote& operator= (const ImoNote&) = default;
     ImoNote(ImoNote&&) = delete;
     ImoNote& operator= (ImoNote&&) = delete;
 
@@ -307,12 +313,12 @@ public:
     inline bool notated_accidentals_never_computed() { return !(m_options & k_computed); }
 
     //ties
-    inline ImoTie* get_tie_next() { return m_pTieNext; }
-    inline ImoTie* get_tie_prev() { return m_pTiePrev; }
-    inline bool is_tied_next() { return m_pTieNext != nullptr; }
-    inline bool is_tied_prev() { return m_pTiePrev != nullptr; }
-    inline void set_tie_next(ImoTie* pStartTie) { m_pTieNext = pStartTie; }
-    inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
+    ImoTie* get_tie_next();
+    ImoTie* get_tie_prev();
+    inline bool is_tied_next() { return m_idTieNext != k_no_imoid; }
+    inline bool is_tied_prev() { return m_idTiePrev != k_no_imoid; }
+    void set_tie_next(ImoTie* pStartTie);
+    void set_tie_prev(ImoTie* pEndTie);
 
     //notated stem
     /** Stem direction, as notated in source file */
@@ -382,9 +388,10 @@ protected:
     ImoGraceNote() : ImoNote(k_imo_note_grace), m_alignTime(0.0) {}
 
 public:
-    virtual ~ImoGraceNote() {}
-    ImoGraceNote(const ImoGraceNote&) = delete;
-    ImoGraceNote& operator= (const ImoGraceNote&) = delete;
+    //the five special
+    ~ImoGraceNote() override {}
+    ImoGraceNote(const ImoGraceNote&) = default;
+    ImoGraceNote& operator= (const ImoGraceNote&) = default;
     ImoGraceNote(ImoGraceNote&&) = delete;
     ImoGraceNote& operator= (ImoGraceNote&&) = delete;
 

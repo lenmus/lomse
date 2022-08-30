@@ -177,6 +177,49 @@ public:
     {
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
+    inline void failure_header()
+    {
+        cout << endl << "*** Failure in " << test_name() << ":" << endl;
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool check_errormsg(const stringstream& msg, const stringstream& expected)
+    {
+        if (msg.str() != expected.str())
+        {
+            failure_header();
+            cout << "     msg=[" << msg.str() << "]" << endl;
+            cout << "expected=[" << expected.str() << "]" << endl;
+            return false;
+        }
+        return true;
+    }
+
+    //-----------------------------------------------------------------------------------
+    bool check_result(MyVisitor& v, int depth, int inNodes)
+    {
+        if (v.max_depth() != depth
+            || v.num_in_nodes() != inNodes
+            || v.num_out_nodes() != v.num_in_nodes()
+           )
+        {
+            failure_header();
+            if (v.max_depth() != depth)
+                cout << "   max_depth=" << v.max_depth() << ", expected=" << depth << endl;
+            if (v.num_in_nodes() != inNodes)
+                cout << "   num_in_nodes=" << v.num_in_nodes() << ", expected=" << inNodes << endl;
+            if (v.num_out_nodes() != v.num_in_nodes())
+                cout << "   num_out_nodes=" << v.num_out_nodes() << ", expected=" << inNodes << endl;
+            return false;
+        }
+        return true;
+    }
+
 };
 
 SUITE(ImVisitorTest)
@@ -190,12 +233,7 @@ SUITE(ImVisitorTest)
         MyObjVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
 
-//        cout << "max_depth=" << v.max_depth()
-//             << ", num_in_nodes=" << v.num_in_nodes()
-//             << ", num_out_nodes=" << v.num_out_nodes() << endl;
-        CHECK( v.max_depth() == 3 );
-        CHECK( v.num_in_nodes() == 12 );
-        CHECK( v.num_out_nodes() == v.num_in_nodes() );
+        CHECK( check_result(v, 3, 13) );
     }
 
     TEST_FIXTURE(ImVisitorTestFixture, EbookExample)
@@ -207,13 +245,7 @@ SUITE(ImVisitorTest)
         MyObjVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
 
-//        cout << "max_depth=" << v.max_depth()
-//             << ", num_in_nodes=" << v.num_in_nodes()
-//             << ", num_out_nodes=" << v.num_out_nodes() << endl;
-//        cout << doc.dump_ids() << endl;
-        CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 111 );
-        CHECK( v.num_out_nodes() == v.num_in_nodes() );
+        CHECK( check_result(v, 9, 136) );
     }
 
 //    TEST_FIXTURE(ImVisitorTestFixture, EbookExample2)
@@ -242,12 +274,7 @@ SUITE(ImVisitorTest)
         MyParaVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
 
-//        cout << "max_depth=" << v.max_depth()
-//             << ", num_in_nodes=" << v.num_in_nodes()
-//             << ", num_out_nodes=" << v.num_out_nodes() << endl;
-        CHECK( v.max_depth() == 1 );
-        CHECK( v.num_in_nodes() == 4 );
-        CHECK( v.num_out_nodes() == v.num_in_nodes() );
+        CHECK( check_result(v, 1, 4) );
     }
 
     TEST_FIXTURE(ImVisitorTestFixture, ParagraphHeadingVisitor)
@@ -259,12 +286,7 @@ SUITE(ImVisitorTest)
         MyHPVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
 
-//        cout << "max_depth=" << v.max_depth()
-//             << ", num_in_nodes=" << v.num_in_nodes()
-//             << ", num_out_nodes=" << v.num_out_nodes() << endl;
-        CHECK( v.max_depth() == 1 );
-        CHECK( v.num_in_nodes() == 6 );
-        CHECK( v.num_out_nodes() == v.num_in_nodes() );
+        CHECK( check_result(v, 1, 6) );
     }
 
 };

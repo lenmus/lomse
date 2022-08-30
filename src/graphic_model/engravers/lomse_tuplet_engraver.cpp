@@ -350,17 +350,21 @@ int TupletEngraver::count_nested_tuplets()
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>((*it).first);
         if (pNR->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = pNR->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = pNR->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (pRO->is_tuplet())
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    if (pRO->get_start_object() == pNR)
-                        openTuplets++;
-                    else if (pRO->get_end_object() == pNR)
-                        openTuplets--;
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (pRO->is_tuplet())
+                    {
+                        if (pRO->get_start_object() == pNR)
+                            openTuplets++;
+                        else if (pRO->get_end_object() == pNR)
+                            openTuplets--;
+                    }
                 }
             }
         }

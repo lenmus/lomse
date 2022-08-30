@@ -135,6 +135,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "en" );
+        CHECK( pDoc->get_styles() != nullptr );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -1546,7 +1547,7 @@ SUITE(LmdAnalyserTest)
 
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn->get_classid() == "test" );
-        std::list<ImoParamInfo*>& params = pDyn->get_params();
+        std::list<ImoParamInfo*> params = pDyn->get_params();
         CHECK( params.size() == 1 );
         ImoParamInfo* pParm = params.front();
         CHECK( pParm->get_name() == "play" );
@@ -2289,7 +2290,7 @@ SUITE(LmdAnalyserTest)
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
-        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        std::list<ImoStyle*> cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
         std::list<ImoStyle*>::iterator it = cols.begin();
         CHECK( (*it)->get_name() == "table1-col1" );
@@ -2344,7 +2345,7 @@ SUITE(LmdAnalyserTest)
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
-        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        std::list<ImoStyle*> cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
 
         ImoTableHead* pHead = pTable->get_head();

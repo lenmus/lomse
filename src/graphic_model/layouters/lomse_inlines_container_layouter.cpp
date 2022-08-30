@@ -162,7 +162,7 @@ void InlinesContainerLayouter::prepare_line()
 //---------------------------------------------------------------------------------------
 Engrouter* InlinesContainerLayouter::create_next_engrouter(bool fRemoveLeftSpace)
 {
-    if (logger.debug_mode_enabled() || logger.trace_mode_enabled())
+    if (glogger.debug_mode_enabled() || glogger.trace_mode_enabled())
     {
         Engrouter* pEngr = m_pEngrCreator->create_next_engrouter(m_availableSpace,
                                                                  fRemoveLeftSpace);

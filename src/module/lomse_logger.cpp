@@ -21,7 +21,7 @@ static ofstream defaultLoggerStream;
 static const char* forensicLogPath = "forensic_log.txt";
 StreamLogger dbgLogger;
 ofstream nullLogger;
-Logger logger;
+Logger glogger;
 
 //=======================================================================================
 // Logger implementation.

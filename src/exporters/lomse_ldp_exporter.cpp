@@ -846,22 +846,35 @@ public:
 
     string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
-        if (m_pObj->has_attachments() || m_pObj->get_num_relations() > 0)
-            start_element("dir", m_pObj->get_id());
+        if (is_empty_direction())
+            return string("(dir empty)");
         else if (m_pObj->get_width() > 0.0f)
             start_element("spacer", m_pObj->get_id());
         else
-            return string("(dir empty)");
+            start_element("dir", m_pObj->get_id());
 
         add_space_width();
         add_spanners();
         source_for_staffobj_options(m_pObj);
         source_for_attachments(m_pObj);
+        add_sound();
         end_element(k_in_same_line);
         return m_source.str();
     }
 
 protected:
+
+    bool is_empty_direction()
+    {
+        ImoAttachments* pAuxObjs = m_pObj->get_attachments();
+        ImoSoundChange* pSound = static_cast<ImoSoundChange*>(
+                                    m_pObj->get_child_of_type(k_imo_sound_change) );
+        return ((pAuxObjs == nullptr || (pAuxObjs && pAuxObjs->get_num_items() == 0))
+                && pSound == nullptr
+                && m_pObj->get_num_relations() == 0
+                && m_pObj->get_width() == 0.0f
+               );
+    }
 
     void add_space_width()
     {
@@ -873,14 +886,26 @@ protected:
     {
         if (m_pObj->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pObj->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pObj->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                source_for_relobj(pRO, m_pObj);
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
+                {
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    source_for_relobj(pRO, m_pObj);
+                }
             }
         }
+    }
+
+    void add_sound()
+    {
+        ImoSoundChange* pSound = static_cast<ImoSoundChange*>(
+                                    m_pObj->get_child_of_type(k_imo_sound_change) );
+        if (pSound)
+            source_for_auxobj(pSound);
     }
 
 };
@@ -933,7 +958,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("TODO: ", m_pImo->get_id());
-        m_source << " No LdpGenerator for Imo. Name=" << m_pImo->get_name();
+        m_source << " No LdpGenerator for " << m_pImo->get_name();
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -1319,14 +1344,17 @@ protected:
     void add_content()
     {
         ImoContent* pContent = m_pObj->get_content();
-        start_element("content", pContent->get_id());
-        int numItems = m_pObj->get_num_content_items();
-        for (int i=0; i < numItems; i++)
+        if (pContent)
         {
-            m_source << " ";
-            add_source_for( m_pObj->get_content_item(i) );
+            start_element("content", pContent->get_id());
+            int numItems = m_pObj->get_num_content_items();
+            for (int i=0; i < numItems; i++)
+            {
+                m_source << " ";
+                add_source_for( m_pObj->get_content_item(i) );
+            }
+            end_element();
         }
-        end_element();
     }
 
 };
@@ -1919,14 +1947,18 @@ protected:
     {
         if (m_pObj->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pObj->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pObj->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (pRO->is_tie() || pRO->is_slur() )
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    source_for_relobj(pRO, m_pObj);
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (pRO->is_tie() || pRO->is_slur() )
+                    {
+                        source_for_relobj(pRO, m_pObj);
+                    }
                 }
             }
         }
@@ -2366,19 +2398,23 @@ protected:
     {
         if (m_pObj->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pObj->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pObj->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (!(pRO->is_chord() || pRO->is_tie() || pRO->is_slur()
-                      || pRO->is_beam() || pRO->is_tuplet()) )
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    //AWARE: chords, ties, slurs are specific for notes and
-                    //are generated in NoteLdpGenerator
-                    //AWARE: beams and tuplets are specific for notes and rests, and
-                    //are generated in source_for_noterest_options()
-                    source_for_relobj(pRO, m_pObj);
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (!(pRO->is_chord() || pRO->is_tie() || pRO->is_slur()
+                          || pRO->is_beam() || pRO->is_tuplet()) )
+                    {
+                        //AWARE: chords, ties, slurs are specific for notes and
+                        //are generated in NoteLdpGenerator
+                        //AWARE: beams and tuplets are specific for notes and rests, and
+                        //are generated in source_for_noterest_options()
+                        source_for_relobj(pRO, m_pObj);
+                    }
                 }
             }
         }
@@ -2834,9 +2870,9 @@ protected:
 
     void add_titles()
     {
-        list<ImoScoreTitle*>& titles = m_pObj->get_titles();
-        list<ImoScoreTitle*>::iterator it;
-        for (it = titles.begin(); it != titles.end(); ++it)
+        ImoScoreTitles* pTitles = m_pObj->get_titles();
+        ImoObj::children_iterator it;
+        for (it = pTitles->begin(); it != pTitles->end(); ++it)
         {
             TitleLdpGenerator gen(*it, m_pExporter, is_space_needed());
             m_source << gen.generate_source();
@@ -3114,8 +3150,11 @@ void LdpGenerator::new_line()
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_source_for(ImoObj* pImo)
 {
-    add_space_if_needed();
-    m_source << m_pExporter->get_source(pImo);
+    if (pImo)
+    {
+        add_space_if_needed();
+        m_source << m_pExporter->get_source(pImo);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -3136,30 +3175,34 @@ void LdpGenerator::source_for_noterest_options(ImoNoteRest* pNR)
 
     if (pNR->get_num_relations() > 0)
     {
-        ImoRelations* pRelObjs = pNR->get_relations();
-        int size = pRelObjs->get_num_items();
-        for (int i=0; i < size; ++i)
+        ImoRelations* pRels = pNR->get_relations();
+        list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+        if (relobjs.size() > 0)
         {
-            ImoRelObj* pRO = pRelObjs->get_item(i);
-            if (pRO->is_tuplet() )
+            list<ImoRelObj*>::iterator it;
+            for (it = relobjs.begin(); it != relobjs.end(); ++it)
             {
-                TupletLdpGenerator gen(pRO, m_pExporter);
-                string src = gen.generate_source(pNR);
-                if (!src.empty())
+                ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                if (pRO->is_tuplet() )
                 {
-                    add_space_if_needed();
-                    m_source << src;
+                    TupletLdpGenerator gen(pRO, m_pExporter);
+                    string src = gen.generate_source(pNR);
+                    if (!src.empty())
+                    {
+                        add_space_if_needed();
+                        m_source << src;
+                    }
                 }
-            }
 
-            else if (pRO->is_beam() )
-            {
-                BeamLdpGenerator gen(pRO, m_pExporter);
-                string src = gen.generate_source(pNR);
-                if (!src.empty())
+                else if (pRO->is_beam() )
                 {
-                    add_space_if_needed();
-                    m_source << src;
+                    BeamLdpGenerator gen(pRO, m_pExporter);
+                    string src = gen.generate_source(pNR);
+                    if (!src.empty())
+                    {
+                        add_space_if_needed();
+                        m_source << src;
+                    }
                 }
             }
         }

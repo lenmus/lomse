@@ -13,14 +13,15 @@
 #include "lomse_basic.h"
 
 #include <map>
+#include <unordered_map>
 #include <string>
-using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
 class ImoObj;
+class ImoDocument;
 class Control;
 
 //---------------------------------------------------------------------------------------
@@ -30,14 +31,13 @@ class IdAssigner
 {
 protected:
     ImoId m_idCounter;
-    std::map<ImoId, ImoObj*> m_idToImo;
-    std::map<ImoId, Control*> m_idToControl;
-    std::map<ImoId, std::string> m_idToXmlId;
+    std::unordered_map<ImoId, ImoObj*> m_idToImo;
+    std::unordered_map<ImoId, Control*> m_idToControl;
+    std::unordered_map<ImoId, std::string> m_idToXmlId;
     std::map<std::string, ImoId> m_xmlIdToId;
 
 public:
-    IdAssigner();
-    ~IdAssigner() {}
+    IdAssigner() : m_idCounter(k_no_imoid) {}
 
     void reset();
 
@@ -53,12 +53,19 @@ public:
     void set_xml_id_for(ImoId id, const std::string& xmlId);
 
     //debug
-    string dump() const;
+    std::string dump() const;
     inline size_t size() const { return m_idToImo.size(); }
+    bool check_ids(IdAssigner* pCopy, std::stringstream& reporter, const std::string& label);
 
 protected:
+    friend class FixModelVisitor;
+    friend class DocModel;
+
     void add_id(ImoId id, ImoObj* pImo);
     void add_control_id(ImoId id, Control* pControl);
+    void copy_strings_from(IdAssigner* pIdAssigner);
+    void set_counter(ImoId value) { m_idCounter = value; }
+    void set_control_id(ImoId id, Control* pControl);
 
 };
 

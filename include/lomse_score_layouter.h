@@ -209,7 +209,7 @@ public:
     void finish_measure(int iInstr, GmoShapeBarline* pBarlineShape);
 
     //support for debugging and unit tests
-    void dump_column_data(int iCol, ostream& outStream=logger.get_stream());
+    void dump_column_data(int iCol, ostream& outStream=glogger.get_stream());
     void delete_not_used_objects();
     void delete_pendig_aux_objects();
     void delete_system_boxes();
@@ -448,7 +448,7 @@ public:
     void decide_line_breaks() override;
 
     //support for debug and tests
-    void dump_entries(ostream& outStream=logger.get_stream());
+    void dump_entries(ostream& outStream=glogger.get_stream());
 
 protected:
     struct Entry

@@ -513,6 +513,7 @@ ColStaffObjs* ColStaffObjsBuilderEngine::do_build()
     create_table();
     set_num_lines();
     set_min_note_duration();
+//    cout << m_pColStaffObjs->dump() << endl;
     return m_pColStaffObjs;
 }
 
@@ -526,9 +527,17 @@ void ColStaffObjsBuilderEngine::create_table()
         create_entries_for_instrument(instr);
         prepare_for_next_instrument();
     }
+
+    //the table is created. Fix notes playback time and playback duration
     compute_grace_notes_playback_time();
-    collect_anacrusis_info();
     compute_arpeggiated_chords_playback_time();
+
+    //determine anacrusis info and fix negative playback times due to the anacrusis
+    //start or to grace notes in first note.
+    collect_anacrusis_info();
+    fix_negative_playback_times();
+
+    //compute divisions for exporting MusicXML
     compute_divisions();
 }
 
@@ -556,7 +565,6 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
     {
         if (m_gracesAnacrusisTime > 0.0)
         {
-            fix_negative_playback_times();
             m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacrusisTime);
             m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
         }
@@ -580,7 +588,6 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
     //TODO: test case can not be generated with MusicXML
 //        if (m_gracesAnacrusisTime > 0.0)
 //        {
-//            fix_negative_playback_times();
 //            m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacrusisTime);
 //            m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
 //        }
@@ -593,7 +600,6 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
 
     if (m_gracesAnacrusisTime > 0.0)
     {
-        fix_negative_playback_times();
         m_pColStaffObjs->set_anacrusis_extra_time(m_gracesAnacrusisTime);
         anacrusis += m_gracesAnacrusisTime;
     }
@@ -630,15 +636,15 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
     determine_timepos(pSO);
 
     int staff = pSO->get_staff();
-    if (staff == -1 || pSO->is_time_signature())
+    bool fCommon = (pSO->is_key_signature()
+                    && static_cast<ImoKeySignature*>(pSO)->is_common_for_all_staves());
+    if (fCommon || pSO->is_time_signature())
     {
         //key signature common to all staves, or time signature
-        pSO->set_staff(0);
         for (int nStaff=0; nStaff < numStaves; nStaff++)
         {
             int nLine = get_line_for(0, nStaff);
             m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
-//            cout << "        add_entry_for_staffobj() pSO=" << pSO->to_string() << endl;
         }
     }
     else
@@ -646,7 +652,6 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
         //key signature, specific for one staff
         int nLine = get_line_for(0, staff);
         m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, staff, pSO);
-//        cout << "        add_entry_for_staffobj() pSO=" << pSO->to_string() << endl;
     }
 }
 
@@ -671,6 +676,10 @@ void ColStaffObjsBuilderEngine::compute_grace_notes_playback_time()
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilderEngine::compute_arpeggiated_chords_playback_time()
 {
+    //this method shifts the start time of each chord note so that they are played
+    //arpeggiated. Notes playback duration is shortened by the shift amount, so that
+    //all notes end of playback time do not change.
+
     for (auto pBaseNote : m_arpeggios)
     {
         //determine arpeggio direction: top-down or bottom-up
@@ -709,7 +718,7 @@ void ColStaffObjsBuilderEngine::compute_arpeggiated_chords_playback_time()
 void ColStaffObjsBuilderEngine::save_arpeggiated_note(ImoNote* pNote, bool fBottomUp,
                                                       list<ImoNote*>& chordNotes)
 {
-    //notes are inserted to keep them sorted by pitch
+    //notes are inserted in the passed list to keep them sorted by pitch
 
     if (chordNotes.size() == 0)
     {
@@ -739,7 +748,9 @@ void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
                                                      ColStaffObjsEntry* pEntry)
 {
     //this method is invoked only for the first grace note of each grace relobj.
-
+    //As grace notes will steal time from their associated regular note, this
+    //method sets the grace notes playback duration and adjusts the playback duration
+    //and playback start time of the associated regular notes
 
     //default playback time of first grace in the group
     TimeUnits gracePlayTime = pGrace->get_playback_time();
@@ -928,17 +939,20 @@ ImoNote* ColStaffObjsBuilderEngine::locate_grace_previous_note(ColStaffObjsEntry
 //----------------------------------------------------------------------------------
 void ColStaffObjsBuilderEngine::fix_negative_playback_times()
 {
-    ColStaffObjsIterator it = m_pColStaffObjs->begin();
-    while(it != m_pColStaffObjs->end())
+    if (m_gracesAnacrusisTime > 0.0)
     {
-        ImoStaffObj* pSO = (*it)->imo_object();
-        if (pSO->is_note_rest())
+        ColStaffObjsIterator it = m_pColStaffObjs->begin();
+        while(it != m_pColStaffObjs->end())
         {
-            ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pSO );
-            TimeUnits playtime = pNR->get_playback_time();
-            pNR->set_playback_time(playtime + m_gracesAnacrusisTime);
+            ImoStaffObj* pSO = (*it)->imo_object();
+            if (pSO->is_note_rest())
+            {
+                ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pSO );
+                TimeUnits playtime = pNR->get_playback_time();
+                pNR->set_playback_time(playtime + m_gracesAnacrusisTime);
+            }
+            ++it;
         }
-        ++it;
     }
 }
 
@@ -1072,6 +1086,7 @@ void ColStaffObjsBuilderEngine1x::determine_timepos(ImoStaffObj* pSO)
         else
         {
             ImoNote* pNote = static_cast<ImoNote*>(pSO);
+            pNote->reset_playback_duration();
             if (!pNote->is_in_chord() || pNote->is_end_of_chord())
                 m_rCurTime += pSO->get_duration();
             m_rCurAlignTime = m_rCurTime;
@@ -1115,10 +1130,10 @@ void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
 //---------------------------------------------------------------------------------------
 ImoDirection* ColStaffObjsBuilderEngine1x::anchor_object(ImoAuxObj* pAux)
 {
-    Document* pDoc = m_pImScore->get_the_document();
+    DocModel* pDocModel = m_pImScore->get_doc_model();
     ImoDirection* pAnchor =
-            static_cast<ImoDirection*>(ImFactory::inject(k_imo_direction, pDoc));
-    pAnchor->add_attachment(pDoc, pAux);
+            static_cast<ImoDirection*>(ImFactory::inject(k_imo_direction, pDocModel));
+    pAnchor->add_attachment(pAux);
     return pAnchor;
 }
 
@@ -1271,6 +1286,7 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
             else
             {
                 ImoNote* pNote = static_cast<ImoNote*>(pSO);
+                pNote->reset_playback_duration();
                 if (pNote->is_in_chord() && !pNote->is_end_of_chord())
                     duration = 0.0;
 

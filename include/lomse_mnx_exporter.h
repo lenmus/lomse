@@ -14,7 +14,7 @@
 #include "lomse_injectors.h"
 
 #include <sstream>
-using namespace std;
+#include <stack>
 
 namespace lomse
 {
@@ -32,14 +32,14 @@ protected:
     int m_nIndent;
     bool m_fAddId;
     bool m_fRemoveNewlines;
-    string m_lomseVersion;
-    string m_exportTime;
+    std::string m_lomseVersion;
+    std::string m_exportTime;
 
     //temporary
     bool m_fProcessingChord;
 
     //controlling open tags
-    stack<string> m_openTags;
+    std::stack<std::string> m_openTags;
 
 
 public:
@@ -59,16 +59,16 @@ public:
     inline bool get_remove_newlines() { return m_fRemoveNewlines; }
 
     //the main method
-    string get_source(ImoObj* pImo);
+    std::string get_source(ImoObj* pImo);
 
     //auxiliary
-    string get_version_and_time_string();
+    std::string get_version_and_time_string();
 
     //static methods for types mnx names to conversion
-    static string clef_type_to_mnx(int clefType);
-    static string barline_type_to_mnx(int barType);
-    static string color_to_mnx(Color color);
-    static string float_to_string(float num);
+    static std::string clef_type_to_mnx(int clefType);
+    static std::string barline_type_to_mnx(int barType);
+    static std::string color_to_mnx(Color color);
+    static std::string float_to_string(float num);
 
     //other methods
     inline void set_processing_chord(bool value) { m_fProcessingChord = value; }
@@ -76,8 +76,8 @@ public:
 
     //helper for controlling open tags
     inline bool are_there_open_tags() { return m_openTags.size() > 0; }
-    inline string current_open_tag() { return m_openTags.top(); }
-    inline void push_tag(const string& tag) { m_openTags.push(tag); }
+    inline std::string current_open_tag() { return m_openTags.top(); }
+    inline void push_tag(const std::string& tag) { m_openTags.push(tag); }
     inline void pop_tag() { m_openTags.pop(); }
 
 protected:

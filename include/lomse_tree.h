@@ -11,23 +11,6 @@
 #define __LOMSE_TREE_H__
 
 #include <iostream>
-#include <stack>
-#include <vector>
-#include <iterator>
-#include <stdexcept>
-
-#include "lomse_visitor.h"
-
-//---------------------------------------------------------------------------------------
-// macro for avoiding warnings when a parameter is not used
-#ifdef UNUSED
-#elif defined(__GNUC__)
-    #define UNUSED(x) UNUSED_ ## x __attribute__((unused))
-#elif defined(__LCLINT__)
-    #define UNUSED(x) /*@unused@*/ x
-#else
-    #define UNUSED(x) /* x */
-#endif
 
 
 namespace lomse
@@ -43,6 +26,13 @@ protected:
 public:
     Tree() : m_root(nullptr) {}
     Tree(T* node) : m_root(node) {}
+
+    //the five special
+    ~Tree() {}
+    Tree(const Tree& a) { clone(a); }
+    Tree& operator= (const Tree& a)  { clone(a); return *this; }
+    Tree(Tree&&) = delete;
+    Tree& operator= (Tree&&) = delete;
 
     void set_root(T* node) { m_root = node; }
     T* get_root() { return m_root; }
@@ -149,6 +139,9 @@ public:
     /// Insert a node newNode as previous sibling of given node curNode. Returns an
     /// iterator that points to the newly inserted element
     iterator insert(T* curNode, T* newNode);
+
+protected:
+    Tree<T>& clone(const Tree<T>& tree);
 };
 
 
@@ -167,11 +160,16 @@ protected:
     T* m_nextSibling;
     int m_nModified;
 
-    TreeNode() : m_parent(nullptr), m_firstChild(nullptr), m_lastChild(nullptr),
-                   m_prevSibling(nullptr), m_nextSibling(nullptr), m_nModified(0) {}
+    TreeNode() : Tree<T>(), m_parent(nullptr), m_firstChild(nullptr), m_lastChild(nullptr),
+                 m_prevSibling(nullptr), m_nextSibling(nullptr), m_nModified(0) {}
 
 public:
+    //the five specials
     virtual ~TreeNode() {}
+    TreeNode(const TreeNode& a) : Tree<T>(a) { clone(a); }
+    TreeNode& operator= (const TreeNode& a) { clone(a); return *this; }
+    TreeNode(TreeNode&&) = delete;
+    TreeNode& operator= (TreeNode&&) = delete;
 
     //getters
     virtual T* get_parent() { return m_parent; }
@@ -210,7 +208,7 @@ public:
     virtual T* get_child(int i);
     virtual void remove_child(T* child);
 
-
+    //-----------------------------------------------------------------------------------
     class children_iterator
     {
         protected:
@@ -250,6 +248,12 @@ public:
     children_iterator begin() { return children_iterator(m_firstChild); }
     children_iterator end() { return children_iterator(); }
 
+protected:
+    TreeNode<T>& clone(const TreeNode<T>& a);
+    void clone_children(T* parent);
+
+    friend class Tree<T>;
+    T* deep_clone(TreeNode<T>* parent=nullptr);
 };
 
 
@@ -294,8 +298,6 @@ int TreeNode<T>::get_num_children()
 	int numChildren = 0;
     for (it=this->begin(); it != this->end(); ++it)
     {
-        //cout << "it=" << (*it).get_p() << endl;
-        //cout << "this.end=" << *(this->end()) << endl;
         numChildren++;
     }
     return numChildren;
@@ -529,6 +531,63 @@ typename Tree<T>::depth_first_iterator Tree<T>::insert(T* curNode, T* newNode)
         parent->set_first_child( newNode );
 
     return newNode;
+}
+
+//---------------------------------------------------------------------------------------
+/// Clone a tree
+template <class T>
+Tree<T>& Tree<T>::clone(const Tree<T>& tree)
+{
+    if (tree.m_root == nullptr)
+	    m_root = nullptr;
+    else
+	    m_root = tree.m_root->deep_clone();
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+/// Clone a node. Shallow clone
+template <class T>
+TreeNode<T>& TreeNode<T>::clone(const TreeNode<T>& a)
+{
+    m_parent = nullptr;
+    m_firstChild = nullptr;
+    m_lastChild = nullptr;
+    m_prevSibling = nullptr;
+    m_nextSibling = nullptr;
+    m_nModified = a.m_nModified;
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+///clone a node and its children. Set node parent and prev sibling
+template <class T>
+T* TreeNode<T>::deep_clone(TreeNode<T>* parent)
+{
+    //the instance of T to clone
+    T* oldT = dynamic_cast<T*>(this);
+
+    //clone the instance of T
+    T* newT = LOMSE_NEW T(*oldT);
+    if (parent)
+        parent->append_child(newT);
+
+    //clone the children of this node (oldT) and set newT as parent of cloned children
+    this->clone_children(newT);
+
+    return newT;
+}
+
+//---------------------------------------------------------------------------------------
+///clone all children of this node and attach clones as children of 'parent'
+template <class T>
+void TreeNode<T>::clone_children(T* parent)
+{
+    TreeNode<T>::children_iterator it;
+    for (it=this->begin(); it != this->end(); ++it)
+        (*it)->deep_clone(parent);
 }
 
 

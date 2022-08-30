@@ -1,0 +1,12 @@
+(score (vers 2.0)(instrument (musicData 
+    (clef G)
+    (n g5 e g+ (lyric "con" -))
+    (n c5 e (lyric "sa" - (melisma)))
+    (n b4 e g-)
+    (barline)
+    (n c5 e g+)
+    (n b4 e (lyric "cro" "a"))
+    (n a4 e g- (lyric "te"))
+    (barline)
+)))
+

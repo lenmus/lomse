@@ -3314,7 +3314,8 @@ SUITE(MxlAnalyserTest)
         if (pKey)
         {
             CHECK( pKey->get_key_type() == k_key_D );
-            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_common_for_all_staves() == true );
             CHECK( pKey->is_standard() == true );
         }
 
@@ -3342,7 +3343,8 @@ SUITE(MxlAnalyserTest)
         if (pKey)
         {
             CHECK( pKey->get_key_type() == k_key_gs );
-            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_common_for_all_staves() == true );
             CHECK( pKey->is_standard() == true );
         }
 
@@ -3400,7 +3402,8 @@ SUITE(MxlAnalyserTest)
         if (pKey)
         {
             CHECK( pKey->is_standard() == false );
-            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_common_for_all_staves() == true );
             CHECK( pKey->get_key_type() == k_key_non_standard );
             CHECK( pKey->has_accidentals() == true );
 
@@ -3443,7 +3446,8 @@ SUITE(MxlAnalyserTest)
         if (pKey)
         {
             CHECK( pKey->is_standard() == false );
-            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_common_for_all_staves() == true );
             CHECK( pKey->get_key_type() == k_key_non_standard );
             CHECK( pKey->has_accidentals() == true );
 
@@ -3509,7 +3513,8 @@ SUITE(MxlAnalyserTest)
         if (pKey)
         {
             CHECK( pKey->is_standard() == false );
-            CHECK( pKey->get_staff() == -1 );
+            CHECK( pKey->get_staff() == 0 );
+            CHECK( pKey->is_common_for_all_staves() == true );
             CHECK( pKey->get_key_type() == k_key_non_standard );
             CHECK( pKey->has_accidentals() == true );
 
@@ -9084,7 +9089,7 @@ SUITE(MxlAnalyserTest)
             "(clef G p1)",
             "(time 4 4)",
             "(chord (n a4 q v1 p1)",
-            "(dir 0 p1 (TODO:  No LdpGenerator for Imo. Name=symbol-repetition-mark))",
+            "(dir 0 p1 (TODO:  No LdpGenerator for symbol-repetition-mark))",
             "(n f4 q v1 p1)",
             "(dir empty)",
             "(n d4 q v1 p1 (dyn \"p\")))",
@@ -9295,11 +9300,11 @@ SUITE(MxlAnalyserTest)
           //voice   obj
             { 0, "(clef G p1)" },
             { 0, "(clef F4 p2)" },
-            { 2, "(n a3 e v2 p2 (beam 43 +))" },
-            { 2, "(n e4 e v2 p1 (beam 43 =))" },
-            { 2, "(n a3 e v2 p2 (beam 43 =))" },
+            { 2, "(n a3 e v2 p2 (beam 47 +))" },
+            { 2, "(n e4 e v2 p1 (beam 47 =))" },
+            { 2, "(n a3 e v2 p2 (beam 47 =))" },
             { 2, "(clef F4 p1)" },
-            { 2, "(n e3 e v2 p1 (beam 43 -))" },
+            { 2, "(n e3 e v2 p1 (beam 47 -))" },
             { 0, "(barline simple)" }};
         CHECK( check_music_data2(pMD, result) );
         delete pRoot;
@@ -9339,9 +9344,9 @@ SUITE(MxlAnalyserTest)
             { 0, "(key C)" },
             { 0, "(time 3 4)" },
             { 1, "(n e3 h. v1 p1)" },
-            { 2, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 2, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 2, "(goFwd f v2 p1)" },
-            { 2, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 2, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 0, "(barline simple)" },
             { 1, "(r w v1 p1)" },
             { 0, "(barline simple)" }};
@@ -9376,18 +9381,18 @@ SUITE(MxlAnalyserTest)
             { 0, "(key C)" },
             { 0, "(time 2 4)" },
             { 1, "(goFwd q v1 p1)" },
-            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 1, "(r e v1 p1)" },
-            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 1, "(n g4 e v1 p1)" },
             { 2, "(n g4 q v2 p1)" },
             { 2, "(n d3 q v2 p2)" },
             { 3, "(r q v3 p2)" },
             { 0, "(barline simple)" },
-            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 1, "(n f5 q v1 p1 (stem down))" },
             { 1, "(n b4 e v1 p1 (stem down))" },
-            { 1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" },
+            { 1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" },
             { 1, "(n g4 e v1 p1 (stem down))" },
             { 3, "(n e3 q v3 p2 (stem down))" },
             { 3, "(r q v3 p2)" },
@@ -9531,7 +9536,7 @@ SUITE(MxlAnalyserTest)
             { 1, "(r e v1 p1)" },
             { 2, "(r e v2 p2)" },
             { 0, "(barline simple)" },
-            { 1, "(dir empty)" },
+            { 1, "(dir 0 p1 (TODO:  No LdpGenerator for sound-change))" },
             { 1, "(r e v1 p1 (dyn \"p\" below))" },
             { 1, "(n d5 e v1 p1 (stem down))" },
             { 2, "(n g3 q v2 p2 (stem down))" },

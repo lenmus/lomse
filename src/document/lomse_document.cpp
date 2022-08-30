@@ -32,6 +32,7 @@
 #include "lomse_logger.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_autoclef.h"
+#include "lomse_relobj_cloner.h"
 
 #include <sstream>
 using namespace std;
@@ -47,18 +48,15 @@ namespace lomse
 class DumpVisitor : public Visitor<ImoObj>
 {
 protected:
-    LibraryScope& m_libraryScope;
     ostream& m_reporter;
-
     int m_indent;
     int m_nodesIn;
     int m_nodesOut;
     int m_maxDepth;
 
 public:
-    DumpVisitor(LibraryScope& libraryScope, ostream& reporter)
+    DumpVisitor(ostream& reporter)
         : Visitor<ImoObj>()
-        , m_libraryScope(libraryScope)
         , m_reporter(reporter)
         , m_indent(0)
         , m_nodesIn(0)
@@ -66,8 +64,6 @@ public:
         , m_maxDepth(0)
     {
     }
-
-	virtual ~DumpVisitor() {}
 
     int num_in_nodes() { return m_nodesIn; }
     int num_out_nodes() { return m_nodesOut; }
@@ -119,51 +115,230 @@ protected:
 
 
 //=======================================================================================
+// FixModelVisitor:  Helper class for traversing the document and setting the DocModel
+// ptr in each ImoObj
+    //add ptr to this DocModel in ImoObjs and instantiate ids in IdAssigner as the
+    //tree is traversed
+//=======================================================================================
+class FixModelVisitor : public Visitor<ImoObj>
+{
+protected:
+    DocModel* m_pModel = nullptr;
+    IdAssigner* m_pIdAssigner = nullptr;
+    ImoId m_maxId = 0L;
+
+public:
+    FixModelVisitor(DocModel* pModel, IdAssigner* pIdAssigner)
+        : Visitor<ImoObj>(), m_pModel(pModel), m_pIdAssigner(pIdAssigner) {}
+
+    ImoId max_id() { return m_maxId; }
+
+    void start_visit(ImoObj* pImo) override
+    {
+        //fix DocModel pointer
+        pImo->anchor_to_model(m_pModel);
+
+        //collect id and transfer it to IdAssigner
+        ImoId id = pImo->get_id();
+        m_pIdAssigner->add_id(id, pImo);
+        if (pImo->is_control())
+        {
+            Control* pControl = static_cast<ImoControl*>(pImo)->get_control();
+            id = pControl->get_control_id();
+            m_pIdAssigner->set_control_id(id, pControl);;
+        }
+
+        m_maxId = max(id, m_maxId);
+    }
+};
+
+
+//=======================================================================================
+// DocModel implementation
+//=======================================================================================
+DocModel::DocModel(Document* pDoc)
+    : m_pDoc(pDoc)
+    , m_pIdAssigner( LOMSE_NEW IdAssigner() )
+    , m_pImoDoc(nullptr)
+    , m_flags(k_dirty)
+    , m_imRef(-1L)
+{
+}
+
+//---------------------------------------------------------------------------------------
+DocModel::~DocModel()
+{
+    delete m_pImoDoc;
+    delete m_pIdAssigner;
+    delete m_pRelObjCloner;
+}
+
+//---------------------------------------------------------------------------------------
+DocModel& DocModel::clone(const DocModel& a)
+{
+    //instantiate member variables
+    m_pDoc = a.m_pDoc;
+    m_pIdAssigner = LOMSE_NEW IdAssigner();
+    m_pImoDoc = static_cast<ImoDocument*>( ImFactory::clone(a.m_pImoDoc) );
+    m_flags = a.m_flags;
+
+    //add ptr to this DocModel in ImoObjs and instantiate ids in IdAssigner as the
+    //tree is traversed
+    FixModelVisitor v(this, m_pIdAssigner);
+    m_pImoDoc->accept_visitor(v);
+
+    //copy xml strings from old IdAssigner
+    m_pIdAssigner->copy_strings_from(a.m_pIdAssigner);
+
+    //use the maximum found id to instantiate idCounter
+    m_pIdAssigner->set_counter( v.max_id() );
+
+    //build ColStaffObjs and ImMeasureTable
+    //TODO: for speed, instead of running everything, only ColStaffObjs and ImMeasureTable
+    //      builders are needed. Requires another facade method (simple to do, but not now)
+    ModelBuilder builder;
+    builder.fix_cloned_model(m_pImoDoc); //build_model(m_pImoDoc);
+
+    add_unique_model_ref();
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::add_unique_model_ref()
+{
+    static long m_refsCounter = 0L;     //global counter to create unique id numbers
+
+    m_imRef = ++m_refsCounter;
+}
+
+//---------------------------------------------------------------------------------------
+RelObjCloner* DocModel::get_relobj_cloner()
+{
+    if (m_pRelObjCloner)
+        return m_pRelObjCloner;
+    else
+        return m_pRelObjCloner = LOMSE_NEW RelObjCloner;
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::assign_id(ImoObj* pImo)
+{
+    m_pIdAssigner->assign_id(pImo);
+}
+
+//---------------------------------------------------------------------------------------
+ImoId DocModel::reserve_id(ImoId id)
+{
+    return m_pIdAssigner->reserve_id(id);
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::assign_id(Control* pControl)
+{
+    m_pIdAssigner->assign_id(pControl);
+}
+
+//---------------------------------------------------------------------------------------
+string DocModel::get_xml_id_for(ImoId id) const
+{
+    return m_pIdAssigner->get_xml_id_for(id);
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::set_xml_id_for(ImoId id, const string& value)
+{
+    m_pIdAssigner->set_xml_id_for(id, value);
+}
+
+//---------------------------------------------------------------------------------------
+size_t DocModel::id_assigner_size() const
+{
+    return m_pIdAssigner->size();
+}
+
+//---------------------------------------------------------------------------------------
+string DocModel::dump_id_assigner() const
+{
+    return m_pIdAssigner->dump();
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* DocModel::get_pointer_to_imo(const std::string& xmlId) const
+{
+    return m_pIdAssigner->get_pointer_to_imo(xmlId);
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* DocModel::get_pointer_to_imo(ImoId id) const
+{
+    return m_pIdAssigner->get_pointer_to_imo(id);
+}
+
+//---------------------------------------------------------------------------------------
+Control* DocModel::get_pointer_to_control(ImoId id) const
+{
+    return m_pIdAssigner->get_pointer_to_control(id);
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::reset_id_assigner()
+{
+    m_pIdAssigner->reset();
+}
+
+//---------------------------------------------------------------------------------------
+void DocModel::on_removed_from_model(ImoObj* pImo)
+{
+    m_pIdAssigner->remove(pImo);
+}
+
+
+
+//=======================================================================================
 // Document implementation
 //=======================================================================================
 Document::Document(LibraryScope& libraryScope, ostream& reporter)
-    : BlockLevelCreatorApi()
-    , EventNotifier(libraryScope.get_events_dispatcher())
+    : EventNotifier(libraryScope.get_events_dispatcher())
     , Observable()
     , m_libraryScope(libraryScope)
     , m_reporter(reporter)
     , m_docScope(reporter)
-    , m_pIdAssigner( m_docScope.id_assigner() )
-    , m_pImoDoc(nullptr)
-    , m_flags(k_dirty)
     , m_modified(0)
-    , m_imRef(0L)
+    , m_pModel( LOMSE_NEW DocModel(this) )
+    , m_pModelCopy(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
 Document::~Document()
 {
-    delete m_pImoDoc;
+    delete m_pModel;
+    delete m_pModelCopy;
+
     delete_observers();
 }
 
 //---------------------------------------------------------------------------------------
 void Document::initialize()
 {
-    if (m_pImoDoc)
+    if (m_pModel->m_pImoDoc)
     {
         LOMSE_LOG_ERROR("Aborting. Attempting to create already created document");
         throw std::runtime_error(
             "[Document::create] Attempting to create already created document");
     }
 
-    m_flags = k_dirty;
-    m_pImoDoc = nullptr;
+    m_pModel->set_dirty();
+    m_pModel->m_pImoDoc = nullptr;
     m_modified = 0;
 }
 
 //---------------------------------------------------------------------------------------
 void Document::set_imo_doc(ImoDocument* pImoDoc)
 {
-    delete m_pImoDoc;
-    m_pImoDoc = pImoDoc;
-    set_box_level_creator_api_parent( m_pImoDoc );
+    delete m_pModel->m_pImoDoc;
+    m_pModel->m_pImoDoc = pImoDoc;
 }
 
 //---------------------------------------------------------------------------------------
@@ -174,7 +349,7 @@ int Document::from_file(const string& filename, int format)
     Compiler* pCompiler = get_compiler_for_format(format);
     if (pCompiler)
     {
-        m_pImoDoc = pCompiler->compile_file(filename);
+        m_pModel->m_pImoDoc = pCompiler->compile_file(filename);
         numErrors = pCompiler->get_num_errors();
         delete pCompiler;
     }
@@ -184,11 +359,16 @@ int Document::from_file(const string& filename, int format)
         numErrors = 1;
     }
 
-    if (m_pImoDoc == nullptr)
+    if (m_pModel->m_pImoDoc == nullptr)
         create_empty();
 
-    if (m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
+    if (m_pModel->m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
         fix_malformed_musicxml();
+
+
+//    //DEBUG: Force to use a cloned copy
+//    create_backup_copy();
+//    restore_from_backup_copy();
 
     return numErrors;
 }
@@ -201,7 +381,7 @@ int Document::from_string(const string& source, int format)
     Compiler* pCompiler = get_compiler_for_format(format);
     if (pCompiler)
     {
-        m_pImoDoc = pCompiler->compile_string(source);
+        m_pModel->m_pImoDoc = pCompiler->compile_string(source);
         numErrors = pCompiler->get_num_errors();
         delete pCompiler;
     }
@@ -211,10 +391,10 @@ int Document::from_string(const string& source, int format)
         numErrors = 1;
     }
 
-    if (m_pImoDoc == nullptr)
+    if (m_pModel->m_pImoDoc == nullptr)
         create_empty();
 
-    if (m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
+    if (m_pModel->m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
         fix_malformed_musicxml();
 
     return numErrors;
@@ -224,12 +404,12 @@ int Document::from_string(const string& source, int format)
 int Document::from_checkpoint(const string& data)
 {
     //delete old internal model
-    delete m_pImoDoc;
-    m_pImoDoc = nullptr;
-    m_flags = k_dirty;
+    delete m_pModel->m_pImoDoc;
+    m_pModel->m_pImoDoc = nullptr;
+    m_pModel->set_dirty();
 
     //reset IdAssigner
-    m_pIdAssigner->reset();
+    m_pModel->reset_id_assigner();
 
     //observers are external to the Document. Therefore, they do not change by
     //modifying the Document. So, nothing to do about observers.
@@ -250,10 +430,10 @@ int Document::replace_object_from_checkpoint_data(ImoId id, const string& data)
 
     //new object
     IdAssigner assigner;
-    IdAssigner* pSave = m_pIdAssigner;
-    m_pIdAssigner = &assigner;
+    IdAssigner* pSave = m_pModel->m_pIdAssigner;
+    m_pModel->m_pIdAssigner = &assigner;
     ImoObj* pNewImo = create_object_from_lmd(data);
-    m_pIdAssigner = pSave;
+    m_pModel->m_pIdAssigner = pSave;
 
     //replace old object
     //TODO: check that new and old have the same id?
@@ -262,7 +442,7 @@ int Document::replace_object_from_checkpoint_data(ImoId id, const string& data)
     delete pOldImo;
 
     //add new ids
-    assigner.copy_ids_to(m_pIdAssigner, id);
+    assigner.copy_ids_to(m_pModel->m_pIdAssigner, id);
 
     return 0;
 }
@@ -274,7 +454,7 @@ int Document::from_input(LdpReader& reader)
     try
     {
         LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-        m_pImoDoc = pCompiler->compile_input(reader);
+        m_pModel->m_pImoDoc = pCompiler->compile_input(reader);
         int numErrors = pCompiler->get_num_errors();
         delete pCompiler;
         return numErrors;
@@ -283,7 +463,7 @@ int Document::from_input(LdpReader& reader)
     {
         //this avoids programs crashes when a document is malformed but
         //will produce memory lekeages
-        m_pImoDoc = nullptr;
+        m_pModel->m_pImoDoc = nullptr;
         create_empty();
         return 0;
     }
@@ -294,7 +474,7 @@ void Document::create_empty()
 {
     initialize();
     LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-    m_pImoDoc = pCompiler->create_empty();
+    m_pModel->m_pImoDoc = pCompiler->create_empty();
     delete pCompiler;
 }
 
@@ -303,7 +483,7 @@ void Document::create_with_empty_score()
 {
     initialize();
     LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-    m_pImoDoc = pCompiler->create_with_empty_score();
+    m_pModel->m_pImoDoc = pCompiler->create_with_empty_score();
     delete pCompiler;
 }
 
@@ -311,8 +491,8 @@ void Document::create_with_empty_score()
 void Document::end_of_changes()
 {
     ModelBuilder builder;
-    builder.build_model(m_pImoDoc);
-    ++m_imRef;
+    builder.build_model(m_pModel->m_pImoDoc);
+    m_pModel->add_unique_model_ref();
 }
 
 //---------------------------------------------------------------------------------------
@@ -320,7 +500,7 @@ void Document::fix_malformed_musicxml()
 {
     if (m_libraryScope.get_musicxml_options()->use_default_clefs())
     {
-        ImoScore* pScore = dynamic_cast<ImoScore*>( m_pImoDoc->get_content_item(0) );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( m_pModel->m_pImoDoc->get_content_item(0) );
         if (pScore)
         {
             AutoClef ac(pScore);
@@ -335,13 +515,31 @@ string Document::to_string(bool fWithIds)
     LdpExporter exporter;
     exporter.set_remove_newlines(true);
     exporter.set_add_id(fWithIds);
-    return exporter.get_source(m_pImoDoc);
+    return exporter.get_source(m_pModel->m_pImoDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::create_backup_copy()
+{
+    delete m_pModelCopy;
+    m_pModelCopy = LOMSE_NEW DocModel(*m_pModel);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::restore_from_backup_copy()
+{
+    if (m_pModelCopy)
+    {
+        delete m_pModel;
+        m_pModel = m_pModelCopy;
+        m_pModelCopy = nullptr;
+    }
 }
 
 //---------------------------------------------------------------------------------------
 string Document::get_checkpoint_data()
 {
-    return get_checkpoint_data_for( m_pImoDoc->get_id() );
+    return get_checkpoint_data_for( m_pModel->m_pImoDoc->get_id() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -585,26 +783,26 @@ void Document::add_staff_objects(const string& source, ImoMusicData* pMD)
 //---------------------------------------------------------------------------------------
 ImoStyle* Document::create_style(const string& name, const string& parent)
 {
-    return m_pImoDoc->create_style(name, parent);
+    return m_pModel->m_pImoDoc->create_style(name, parent);
 }
 
 //---------------------------------------------------------------------------------------
 ImoStyle* Document::create_private_style(const string& parent)
 {
-    return m_pImoDoc->create_private_style(parent);
+    return m_pModel->m_pImoDoc->create_private_style(parent);
 }
 
 //---------------------------------------------------------------------------------------
 ImoStyle* Document::get_default_style()
 {
-    return m_pImoDoc->get_default_style();
+    return m_pModel->m_pImoDoc->get_default_style();
 }
-
-//---------------------------------------------------------------------------------------
-ImoStyle* Document::find_style(const string& name)
-{
-    return m_pImoDoc->find_style(name);
-}
+//
+////---------------------------------------------------------------------------------------
+//ImoStyle* Document::find_style(const string& name)
+//{
+//    return m_pModel->m_pImoDoc->find_style(name);
+//}
 
 //---------------------------------------------------------------------------------------
 void Document::notify_if_document_modified()
@@ -633,69 +831,33 @@ Observable* Document::get_observable_child(int childType, ImoId childId)
 }
 
 //---------------------------------------------------------------------------------------
-void Document::assign_id(ImoObj* pImo)
-{
-    m_pIdAssigner->assign_id(pImo);
-}
-
-//---------------------------------------------------------------------------------------
-ImoId Document::reserve_id(ImoId id)
-{
-    return m_pIdAssigner->reserve_id(id);
-}
-
-//---------------------------------------------------------------------------------------
-void Document::assign_id(Control* pControl)
-{
-    m_pIdAssigner->assign_id(pControl);
-}
-
-//---------------------------------------------------------------------------------------
-string Document::get_xml_id_for(ImoId id)
-{
-    return m_pIdAssigner->get_xml_id_for(id);
-}
-
-//---------------------------------------------------------------------------------------
-void Document::set_xml_id_for(ImoId id, const string& value)
-{
-    m_pIdAssigner->set_xml_id_for(id, value);
-}
-
-//---------------------------------------------------------------------------------------
-void Document::on_removed_from_model(ImoObj* pImo)
-{
-    m_pIdAssigner->remove(pImo);
-}
-
-//---------------------------------------------------------------------------------------
 ImoObj* Document::get_pointer_to_imo(ImoId id) const
 {
-    return m_pIdAssigner->get_pointer_to_imo(id);
+    return m_pModel->get_pointer_to_imo(id);
 }
 
 //---------------------------------------------------------------------------------------
 ImoObj* Document::get_pointer_to_imo(const std::string& xmlId) const
 {
-    return m_pIdAssigner->get_pointer_to_imo(xmlId);
+    return m_pModel->get_pointer_to_imo(xmlId);
 }
 
 //---------------------------------------------------------------------------------------
 Control* Document::get_pointer_to_control(ImoId id) const
 {
-    return m_pIdAssigner->get_pointer_to_control(id);
+    return m_pModel->get_pointer_to_control(id);
 }
 
 //---------------------------------------------------------------------------------------
 string Document::dump_ids() const
 {
-    return m_pIdAssigner->dump();
+    return m_pModel->dump_id_assigner();
 }
 
 //---------------------------------------------------------------------------------------
 size_t Document::id_assigner_size() const
 {
-    return m_pIdAssigner->size();
+    return m_pModel->id_assigner_size();
 }
 
 //---------------------------------------------------------------------------------------
@@ -703,7 +865,7 @@ string Document::dump_tree() const
 {
     stringstream data;
 
-    DumpVisitor v(m_libraryScope, data);
+    DumpVisitor v(data);
     ImoDocument* pRoot = get_im_root();
     pRoot->accept_visitor(v);
 
@@ -719,13 +881,13 @@ ADocument Document::get_document_api()
 //---------------------------------------------------------------------------------------
 bool Document::is_valid_model(long imRef)
 {
-    return m_imRef == imRef;
+    return m_pModel->is_valid_model(imRef);
 }
 
 //---------------------------------------------------------------------------------------
 long Document::get_model_ref()
 {
-    return m_imRef;
+    return m_pModel->get_model_ref();
 }
 
 ///@endcond

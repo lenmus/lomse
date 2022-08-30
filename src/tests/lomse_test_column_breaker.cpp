@@ -113,7 +113,7 @@ SUITE(ColumnBreakerTest)
 //        //"(n#128L d4 q)(n#129L g4 q)(barline#130L)"
 //        //"(n#131L e4 q) ))) ))" );
 //        doc.from_string("(score (vers 2.0) "
-//            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+//            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
 //            "(n d4 q)(n g4 q)(barline)"
 //            "(n e4 q) )))" );
 //
@@ -134,7 +134,7 @@ SUITE(ColumnBreakerTest)
 //        //"(n#128L d4 q)(n#129L g4 q)(barline#130L)"
 //        //"(n#131L e4 q) ))) ))" );
 //        doc.from_string("(score (vers 2.0) "
-//            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+//            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
 //            "(n d4 q)(n g4 q)(barline)"
 //            "(n e4 q) )))" );
 //
@@ -164,7 +164,7 @@ SUITE(ColumnBreakerTest)
         //"(n#128L d4 q)(n#129L g4 q)(barline#130L)"
         //"))) ))" );
         doc.from_string("(score (vers 2.0) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n d4 q)(n g4 q)(barline)"
             ")))" );
 
@@ -190,7 +190,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n d4 q)(n g4 q)(barline)"
             ")))" );
 
@@ -224,7 +224,7 @@ SUITE(ColumnBreakerTest)
         //"(n#128L d4 q)(n#129L g4 q)(barline#130L)"
         //"(n#131L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -258,7 +258,7 @@ SUITE(ColumnBreakerTest)
         //(n#128L d4 q)(n#129L g4 q)(barline#130L)"
         //(n#131L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 4 4)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 4 4)(n c4 q)(n e4 q)"
             "(barline simple middle)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -287,7 +287,7 @@ SUITE(ColumnBreakerTest)
         //(n#129L d4 q)(n#130L g4 q)(barline#131L)"
         //(n#132L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -315,7 +315,7 @@ SUITE(ColumnBreakerTest)
         //(n#129L d4 q)(n#130L g4 q)(barline#131L)"
         //(n#132L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -344,7 +344,7 @@ SUITE(ColumnBreakerTest)
         //(n#130L d4 q)(n#131L g4 q)(barline#132L)"
         //(n#133L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(n c5 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(n c5 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -387,7 +387,7 @@ SUITE(ColumnBreakerTest)
         //(n#135L d4 q)(n#136L g4 q)(barline#137L)"
         //(n#138L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 e g+)(n c5 e g-)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -424,7 +424,7 @@ SUITE(ColumnBreakerTest)
         //(n#135L d4 q)(n#136L g4 q)(barline#137L)"
         //(n#138L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 e l+)(n g4 e)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -461,7 +461,7 @@ SUITE(ColumnBreakerTest)
         //(n#130L d4 q)(n#131L g4 q)(barline#132L)"
         //(n#133L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(r q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(r q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -505,7 +505,7 @@ SUITE(ColumnBreakerTest)
         //(n#131L d4 q)(n#132L g4 q)(barline#133L)"
         //(n#134L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 q)(barline simple middle)(n c5 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -549,7 +549,7 @@ SUITE(ColumnBreakerTest)
         //(n#128L g4 q)(n#129L c5 q)(n#130L e4 e l+)
         //(n#131L e4 q)(n#137L g4 e g+)(n#138L e4 e g-)(n#144L b4 q))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(instrument#90L (musicData#122L (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -587,7 +587,7 @@ SUITE(ColumnBreakerTest)
         //(n#126L g4 q)(n#127L c5 q)(n#128L e4 e l+)
         //(n#129L e4 q)(n#135L g4 e g+)(n#136L e4 e g-)(n#142L b4 q))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(n c4 q)(n e4 q)"
+            "(instrument#90L (musicData#122L (clef G)(n c4 q)(n e4 q)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -644,7 +644,7 @@ SUITE(ColumnBreakerTest)
             //(n#131L g4 q p1 v1)(n#132L c5 q)(n#133L e5 q)(n#134L g5 q)(n#135L c6 q)
             //(n#136L e3 q p2 v2)(n#137L c4 q)(n#138L e4 q)(n#139L g4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument#121L (staves 2) (musicData "
+            "(instrument#90L (staves 2) (musicData#122L "
             "(clef G p1)(clef F4 p2)(time 2 4)"
             "(n c4 q p1 v1)(n e4 q)"
             "(n c3 q p2 v2)(n e3 q)(barline)"
@@ -689,7 +689,7 @@ SUITE(ColumnBreakerTest)
             //(n#138L e3 w p2 v2)(n#139L f3 h)"
             //(n#140L a2 q p2 v3)(n#141L c3 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument#121L (staves 2) (musicData "
+            "(instrument#90L (staves 2) (musicData#122L "
             "(clef G p1)(clef F4 p2)(time 2 4)"
             "(n c4 q p1 v1)(n e4 q)"
             "(n c3 q p2 v2)(n e3 q)(barline)"
@@ -729,7 +729,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument#121L (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
+            "(instrument#90L (staves 2) (musicData#122L (clef G p1)(clef F4 p2)(key C)"
             "(n c4 e p1 v1 g+)(n d4 s p1)(n e4 s p1 g-)(n f4 s p1 g+)(n g4 s p1 g-)"
             "(n c4 s p1 g+)(n d4 s g-)(n e4 q)"
             "(n c3 q p2 v2)(n d3 s p2 g+)(n e3 s)(n f3 s)(n g3 s g-)"
@@ -760,7 +760,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument#121L (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
+            "(instrument#90L (staves 2) (musicData#122L (clef G p1)(clef F4 p2)(key C)"
             "(n c4 e p1 v1 g+)(n d4 s p1)(n e4 s p1 g-)(n f4 s p1 g+)(n g4 s p1 g-)"
             "(n c4 s p1 g+)(n d4 s g-)(n e4 q)"
             "(n c3 q p2 v2)(n d3 e l+)(n d3 e)"
@@ -790,7 +790,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData "
+            "(instrument#90L (musicData#122L "
             "(clef G)(key G)(time 3 4)(chord (n g3 q)(n d4 q))"
             "(r e)(n g5 e)(n g5 s g+)(n f5 s)(n g5 e g-)(barline)"
             "(r h.)(barline)"
@@ -831,7 +831,7 @@ SUITE(ColumnBreakerTest)
 //
 //        Document doc(m_libraryScope);
 //        doc.from_string("(score (vers 2.0) "
-//            "(instrument#121L (musicData (clef G)"
+//            "(instrument#90L (musicData#122L (clef G)"
 //            "(n c4 q)(n d4 q)(n e4 q)(barline)"
 //            "(n c4 q)(n d4 q)(n e4 q)(barline)"
 //            "(n c4 q)(n d4 q)(n e4 q)(barline)"
@@ -864,7 +864,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument#121L (musicData (clef G)(key C)"
+            "(instrument#90L (musicData#122L (clef G)(key C)"
             "(n c4 e g+)(n d4 e g-)(barline)(n e4 q) ))"
             "(instrument (musicData (clef F4)(key C)"
             "(n c3 q)(barline)(n d3 q) ))"

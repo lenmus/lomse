@@ -115,15 +115,15 @@ public:
         m_pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, m_pDoc) );
 
         m_pNote1 = ImFactory::inject_note(m_pDoc, step1, octave1, noteType, k_no_accidentals);
-        m_pNote1->include_in_relation(m_pDoc, m_pChord);
+        m_pNote1->include_in_relation(m_pChord);
 
         m_pNote2 = ImFactory::inject_note(m_pDoc, step2, octave2, noteType, k_no_accidentals);
-        m_pNote2->include_in_relation(m_pDoc, m_pChord);
+        m_pNote2->include_in_relation(m_pChord);
 
         if (step3 >= 0)
         {
             m_pNote3 = ImFactory::inject_note(m_pDoc, step3, octave3, noteType, k_no_accidentals);
-            m_pNote3->include_in_relation(m_pDoc, m_pChord);
+            m_pNote3->include_in_relation(m_pChord);
         }
         else
             m_pNote3 = nullptr;

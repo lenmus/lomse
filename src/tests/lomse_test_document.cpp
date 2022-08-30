@@ -88,7 +88,7 @@ SUITE(IdAssignerTest)
         ImoObj* pImo = ImFactory::inject(k_imo_clef, &doc);
         CHECK( doc.get_pointer_to_imo(0L) == pImo );
 
-        doc.on_removed_from_model(pImo);
+        doc.get_doc_model()->on_removed_from_model(pImo);
         CHECK( doc.get_pointer_to_imo(0L) == nullptr );
         delete pImo;
     }
@@ -130,7 +130,7 @@ public:
     {
         //"(lenmusdoc#0 (vers 0.0) (content#3 "
         //    "(score#94 (vers 2.0) "
-        //        "(instrument#119 (musicData#120 (clef#121 G)(key#122 C)"
+        //        "(instrument#115 (musicData#120 (clef#121 G)(key#122 C)"
         //        "(time#123 2 4)(n#124 c4 q)(r#125 q) )))"
         //    "(para#126 (txt#127 \"Hello world!\"))"
         //"))"
@@ -138,7 +138,7 @@ public:
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score#94 (vers 2.0) "
-                "(instrument#119 (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
+                "(instrument#115 (musicData#120 (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
     }
@@ -158,7 +158,6 @@ SUITE(DocumentTest)
         doc.create_empty();
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         CHECK( pImoDoc && pImoDoc->get_content_item(0) == nullptr );
     }
@@ -170,7 +169,6 @@ SUITE(DocumentTest)
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
@@ -183,7 +181,6 @@ SUITE(DocumentTest)
         doc.from_file(m_scores_path + "08011-paragraph.lmd", Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
     }
 
@@ -195,7 +192,6 @@ SUITE(DocumentTest)
             "(instrument (musicData (n c4 q))))))");
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( pImoDoc && pImoDoc->get_language() == "en" );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
@@ -217,7 +213,6 @@ SUITE(DocumentTest)
         doc.from_string(src, Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 
         ImoDocument* pDoc = doc.get_im_root();
@@ -242,7 +237,6 @@ SUITE(DocumentTest)
         doc.from_input(reader);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
@@ -378,14 +372,12 @@ SUITE(DocumentTest)
 #if (LOMSE_ENABLE_COMPRESSION == 1)
         //@011. Compression enabled. Compressed LMB file read ok
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         //cout << doc.to_string() << endl;
         CHECK( doc.to_string().compare(0, 36, "(lenmusdoc (vers 0.0)(content (TODO:") == 0 );
 #else
         //@011. Compression disabled. Error when opening LMB compressed file
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content))" );
@@ -421,7 +413,6 @@ SUITE(DocumentTest)
         doc.create_with_empty_score();
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -517,7 +508,7 @@ SUITE(DocumentTest)
         CHECK( pImo->is_clef() );
         string data =
             "<ldpmusic>"
-            "(score#180 (vers 2.0)(instrument#221 (musicData#222 (n#243 c4 q) )))"
+            "(score#180 (vers 2.0)(instrument#215L (musicData#222L (n#243 c4 q) )))"
             "</ldpmusic>";
 
         m_pDoc->replace_object_from_checkpoint_data(94L, data);

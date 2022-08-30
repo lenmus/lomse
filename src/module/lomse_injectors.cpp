@@ -452,20 +452,4 @@ DocCommandExecuter* Injector::inject_DocCommandExecuter(Document* pDoc)
 }
 
 
-//=======================================================================================
-// DocumentScope implementation
-//=======================================================================================
-DocumentScope::DocumentScope(ostream& reporter)
-    : m_reporter(reporter)
-{
-    m_idAssigner = LOMSE_NEW IdAssigner();
-}
-
-//---------------------------------------------------------------------------------------
-DocumentScope::~DocumentScope()
-{
-    delete m_idAssigner;
-}
-
-
 }  //namespace lomse

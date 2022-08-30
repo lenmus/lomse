@@ -46,7 +46,6 @@ public:
     CheckboxCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                  const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
                  ImoStyle* pStyle=nullptr);
-    virtual ~CheckboxCtrl() {}
 
     //Control mandatory overrides
     USize measure() override;
@@ -72,7 +71,6 @@ public:
     void rewind(unsigned UNUSED(pathId) = 0) override { m_nCurVertex = 0; }
 
 protected:
-    void select_font();
     URect determine_text_position_and_size();
     ImoStyle* create_default_style();
 

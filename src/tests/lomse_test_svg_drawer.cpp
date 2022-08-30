@@ -1986,6 +1986,7 @@ SUITE(SvgDrawerTest)
 
         run_test_for(shape, expected);
 
+        delete pStyles;
         delete pImo;
     }
 

@@ -174,7 +174,6 @@ ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
     {
         ImoDocument* pDoc = static_cast<ImoDocument*>(m_pParent);
         pDoc->add_page_info(pPI);
-        delete pPI;
         return nullptr;
     }
     return pPI;
@@ -342,7 +341,7 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
             //musicData: create anchor (ImoDirection) and attach to it
             ImoDirection* pSpacer = static_cast<ImoDirection*>(
                                         ImFactory::inject(k_imo_direction, m_pDoc) );
-            pSpacer->add_attachment(m_pDoc, pText);
+            pSpacer->add_attachment(pText);
             add_staffobj(pSpacer);
             return pText;
         }
@@ -468,6 +467,7 @@ ImoObj* Linker::add_child(int parentType, ImoObj* pImo)
 {
     if (m_pParent && m_pParent->get_obj_type() == parentType)
         m_pParent->append_child_imo(pImo);
+
     return pImo;
 }
 
@@ -482,7 +482,7 @@ ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
         {
             ImoChord* pChord = static_cast<ImoChord*>(m_pParent);
             ImoNote* pNote = static_cast<ImoNote*>(pSO);
-            pNote->include_in_relation(m_pDoc, pChord);
+            pNote->include_in_relation(pChord);
             return nullptr;
         }
     }
@@ -495,7 +495,7 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
     if (m_pParent && m_pParent->is_staffobj())
     {
         ImoStaffObj* pSO = static_cast<ImoStaffObj*>(m_pParent);
-        pSO->add_attachment(m_pDoc, pAuxObj);
+        pSO->add_attachment(pAuxObj);
     }
     else if (m_pParent && m_pParent->is_music_data())
     {
@@ -504,7 +504,7 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
             //metronome mark in musicData: create anchor (ImoDirection) and attach to it
             ImoDirection* pDirection = static_cast<ImoDirection*>(
                                             ImFactory::inject(k_imo_direction, m_pDoc) );
-            pDirection->add_attachment(m_pDoc, pAuxObj);
+            pDirection->add_attachment(pAuxObj);
             add_staffobj(pDirection);
         }
         #if LOMSE_COMPATIBILITY_LDP_1_5
@@ -517,7 +517,7 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
             //auxObj in musicData: create anchor (ImoDirection) and attach to it
             ImoDirection* pSpacer = static_cast<ImoDirection*>(
                                         ImFactory::inject(k_imo_direction, m_pDoc) );
-            pSpacer->add_attachment(m_pDoc, pAuxObj);
+            pSpacer->add_attachment(pAuxObj);
             add_staffobj(pSpacer);
         }
         #endif  //LOMSE_COMPATIBILITY_LDP_1_5
@@ -547,7 +547,7 @@ ImoObj* Linker::add_relation(ImoRelObj* pRelObj)
     if (m_pParent && m_pParent->is_staffobj())
     {
         ImoStaffObj* pSO = static_cast<ImoStaffObj*>(m_pParent);
-        pSO->add_relation(m_pDoc, pRelObj);
+        pSO->add_relation(pRelObj);
         return nullptr;
     }
     return pRelObj;

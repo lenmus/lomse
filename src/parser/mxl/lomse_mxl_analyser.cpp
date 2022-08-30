@@ -2226,7 +2226,7 @@ protected:
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
         return pImo;
     }
 
@@ -2270,7 +2270,7 @@ protected:
         //%dashed-formatting;
 
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
     }
 
     //-----------------------------------------------------------------------------------
@@ -3036,7 +3036,7 @@ public:
         // attrib: %print-style-align;
         get_attributes_for_print_style_align(pImo);
 
-        pDirection->add_attachment(pDoc, pImo);
+        pDirection->add_attachment(pImo);
         return pImo;
     }
 };
@@ -3517,7 +3517,7 @@ public:
 
         error_if_more_elements();
 
-        pSO->add_attachment(pDoc, pImo);
+        pSO->add_attachment(pImo);
 
         if (!pSO->is_note_rest())
             m_pAnalyser->add_pending_dynamics_mark(pImo);
@@ -3761,7 +3761,7 @@ public:
 
 //        error_if_more_elements();
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
         return pImo;
     }
 
@@ -3877,10 +3877,7 @@ public:
         }
 
         if (!fHasFingeringInfo)
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pNR->add_attachment(pDoc, m_pFingering);
-        }
+            pNR->add_attachment(m_pFingering);
 
         return nullptr;
     }
@@ -3995,10 +3992,7 @@ public:
         }
 
         if (!fHasInfo)
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pNR->add_attachment(pDoc, m_pFretString);
-        }
+            pNR->add_attachment(m_pFretString);
 
         return nullptr;
     }
@@ -4179,7 +4173,10 @@ public:
 
             //attribs
         //attrb: number  CDATA  #IMPLIED
-        pKey->set_staff( get_attribute_as_integer("number", 0) - 1 );
+        if (has_attribute("number"))
+        {
+            pKey->set_staff( get_attribute_as_integer("number", 0) - 1 );
+        }
 
         //attrb: %print-style;
             //TODO
@@ -5240,7 +5237,7 @@ public:
                 ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
                                             ImFactory::inject(k_imo_grace_relobj, pDoc));
 
-                pNote->include_in_relation(pDoc, pGraceRO);
+                pNote->include_in_relation(pGraceRO);
                 pGraceRO->set_grace_type(m_type);
                 pGraceRO->set_slash(m_fSlash);
                 pGraceRO->set_percentage(m_percentage);
@@ -5250,7 +5247,7 @@ public:
             {
                 //this note is not the first grace note in the relation. Continue it.
                 ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
-                pNote->include_in_relation(pDoc, pGraceRO);
+                pNote->include_in_relation(pGraceRO);
             }
         }
 
@@ -5268,11 +5265,11 @@ public:
             {
                 //previous note is the base note. Create the chord
                 pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-                pPrevNote->include_in_relation(pDoc, pChord);
+                pPrevNote->include_in_relation(pChord);
             }
 
             //add current note to chord
-            pNote->include_in_relation(pDoc, pChord);
+            pNote->include_in_relation(pChord);
 
 //        //TODO: check if note in chord has the same duration than base note
 //      //  if (fInChord && m_pLastNote
@@ -5300,7 +5297,7 @@ public:
                     pArpeggio = static_cast<ImoArpeggio*>(ImFactory::inject(k_imo_arpeggio, pDoc));
 
                 pArpeggioDto->apply_properties_to(pArpeggio);
-                pNote->include_in_relation(pDoc, pArpeggio);
+                pNote->include_in_relation(pArpeggio);
             }
 
             m_pAnalyser->reset_arpeggio_data();
@@ -5870,7 +5867,7 @@ protected:
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
         return pImo;
     }
 
@@ -5889,7 +5886,7 @@ protected:
 
         //TODO  content: tremolo-marks
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
         return pImo;
     }
 
@@ -6438,7 +6435,7 @@ protected:
         const bool fAbbreviated = get_optional_yes_no_attribute("abbreviated", false);
         pPedalMark->set_abbreviated(fAbbreviated);
 
-        pDirection->add_attachment(pDoc, pPedalMark);
+        pDirection->add_attachment(pPedalMark);
     }
 
     EPedalMark get_pedal_mark_type(const string& type)
@@ -6994,9 +6991,6 @@ public:
         // [<credit>*]
         while (get_optional("credit"));
 
-        // add default styles
-        add_default(pImoDoc);
-
         // <part-list>
         if (!analyse_optional("part-list"))
         {
@@ -7028,17 +7022,6 @@ public:
     }
 
 protected:
-
-    void add_default(ImoDocument* pImoDoc)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        Linker linker(pDoc);
-        ImoStyles* pStyles = static_cast<ImoStyles*>(
-                                    ImFactory::inject(k_imo_styles, pDoc));
-        linker.add_child_to_model(pImoDoc, pStyles, k_styles);
-        ImoStyle* pDefStyle = pImoDoc->get_default_style();
-        pImoDoc->set_style(pDefStyle);
-    }
 
     ImoScore* create_score()
     {
@@ -7251,7 +7234,7 @@ public:
         // attrib: %print-style-align;
         get_attributes_for_print_style_align(pImo);
 
-        pDirection->add_attachment(pDoc, pImo);
+        pDirection->add_attachment(pImo);
         return pImo;
     }
 };
@@ -7713,7 +7696,7 @@ protected:
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
     }
 
     //-----------------------------------------------------------------------------------
@@ -7743,7 +7726,7 @@ protected:
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
-        pNR->add_attachment(pDoc, pImo);
+        pNR->add_attachment(pImo);
     }
 
 };
@@ -9112,7 +9095,7 @@ public:
         // words (#PCDATA)
         pImo->set_text(text);
 
-        pDirection->add_attachment(pDoc, pImo);
+        pDirection->add_attachment(pImo);
         return pImo;
     }
 
@@ -9850,7 +9833,7 @@ void MxlAnalyser::attach_pending_dynamics_marks(ImoNoteRest* pNR)
 {
     for (ImoDynamicsMark* pDynamics : m_pendingDynamicsMarks)
     {
-        ImoContentObj* pOldParent = pDynamics->get_contentobj_parent();
+        ImoContentObj* pOldParent = pDynamics->get_block_level_parent();
 
         if (pOldParent)
         {
@@ -9860,7 +9843,7 @@ void MxlAnalyser::attach_pending_dynamics_marks(ImoNoteRest* pNR)
         }
 
         pDynamics->mark_as_moved();
-        pNR->add_attachment(m_pDoc, pDynamics);
+        pNR->add_attachment(pDynamics);
     }
 
     m_pendingDynamicsMarks.clear();
@@ -9952,7 +9935,6 @@ ImoInstrGroup* MxlAnalyser::start_part_group(int number)
     Document* pDoc = get_document_being_analysed();
     ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, pDoc));
-    pGrp->set_owner_score(get_score_being_analysed());
 
     m_partGroups.start_group(number, pGrp);
     return pGrp;
@@ -10303,10 +10285,10 @@ void MxlTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
     pTie->set_orientation( pStartDto->get_orientation() );
 
     ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, pStartDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+    pStartNote->include_in_relation(pTie, pStartData);
 
     ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, pEndDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
@@ -10346,11 +10328,11 @@ void MxlSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndDto)
 
     ImoNote* pNote = pStartDto->get_note();
     ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, pStartDto);
-    pNote->include_in_relation(pDoc, pSlur, pData);
+    pNote->include_in_relation(pSlur, pData);
 
     pNote = pEndDto->get_note();
     pData = ImFactory::inject_slur_data(pDoc, pEndDto);
-    pNote->include_in_relation(pDoc, pSlur, pData);
+    pNote->include_in_relation(pSlur, pData);
 }
 
 
@@ -10370,7 +10352,7 @@ void MxlBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
+        pNR->include_in_relation(pBeam, pData);
 
         //check if beam is congruent with note type
         int level = 0;
@@ -10419,7 +10401,7 @@ void MxlTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, pTuplet, nullptr);
+        pNR->include_in_relation(pTuplet, nullptr);
     }
 }
 
@@ -10494,7 +10476,7 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoBarline* pBarline = (*it)->get_barline();
-        pBarline->include_in_relation(pDoc, pVB, nullptr);
+        pBarline->include_in_relation(pVB, nullptr);
     }
 
     //count number of voltas in the set
@@ -10553,7 +10535,7 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoDirection* pDirection = (*it)->get_staffobj();
-        pDirection->include_in_relation(pDoc, pWedge, nullptr);
+        pDirection->include_in_relation(pWedge, nullptr);
     }
 }
 
@@ -10592,10 +10574,10 @@ void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto
             pNR = m_pAnalyser->get_last_note_for(iStaff);
             (*it)->set_staffobj(pNR);
             if (pStartNR != pNR)
-                pNR->include_in_relation(pDoc, pOctave, nullptr);
+                pNR->include_in_relation(pOctave, nullptr);
         }
         else
-            pNR->include_in_relation(pDoc, pOctave, nullptr);
+            pNR->include_in_relation(pOctave, nullptr);
     }
 }
 
@@ -10660,7 +10642,7 @@ void MxlPedalBuilder::add_relation_to_staffobjs(ImoPedalLineDto* pLastDto)
     for (const ImoPedalLineDto* pDto : m_matches)
     {
         ImoDirection* pDirection = pDto->get_staffobj();
-        pDirection->include_in_relation(pDoc, pPedalLine, nullptr);
+        pDirection->include_in_relation(pPedalLine, nullptr);
     }
 }
 

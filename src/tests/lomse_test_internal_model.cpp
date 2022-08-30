@@ -64,6 +64,7 @@ SUITE(InternalModelTest)
         CHECK( pDoc->get_content() == nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_version() == "3.7" );
+        CHECK( pDoc->get_styles() != nullptr );
         delete pDoc;
     }
 
@@ -553,7 +554,7 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
         pMD->append_child_imo(pClef);
         pScore->add_instrument(pInstr);
 
@@ -592,7 +593,7 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
         pMD->append_child_imo(pClef);
         pScore->add_instrument(pInstr);
 
@@ -772,7 +773,7 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
 
         CHECK( pClef->has_attachments() == true );
 
@@ -788,10 +789,10 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
         ImoFermata* pFmt = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, &doc) );
-        pClef->add_attachment(&doc, pFmt);
+        pClef->add_attachment(pFmt);
 
         CHECK( pClef->get_num_attachments() == 2 );
 
@@ -807,12 +808,12 @@ SUITE(InternalModelTest)
 
         ImoFermata* pFmt = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, &doc) );
-        pClef->add_attachment(&doc, pFmt);
+        pClef->add_attachment(pFmt);
 
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
 
         CHECK( pClef->get_attachment(0) == pFmt );
         CHECK( pClef->get_attachment(1) == pText );
@@ -829,10 +830,10 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
         ImoFermata* pFmt = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, &doc) );
-        pClef->add_attachment(&doc, pFmt);
+        pClef->add_attachment(pFmt);
 
         pClef->remove_attachment(pText);
 
@@ -851,10 +852,10 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pClef->add_attachment(&doc, pText);
+        pClef->add_attachment(pText);
         ImoFermata* pFmt = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, &doc) );
-        pClef->add_attachment(&doc, pFmt);
+        pClef->add_attachment(pFmt);
 
         pClef->remove_attachment(pText);
         pClef->remove_attachment(pFmt);
@@ -877,7 +878,7 @@ SUITE(InternalModelTest)
         ImoTieDto dto;
         ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
-        pNote->include_in_relation(&doc, pTie, pData);
+        pNote->include_in_relation(pTie, pData);
 
         CHECK( pNote->get_num_relations() == 1 );
         CHECK( pNote->get_relation(0) == pTie );
@@ -898,7 +899,7 @@ SUITE(InternalModelTest)
         ImoTieDto dto;
         ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
-        pNote->include_in_relation(&doc, pTie, pData);
+        pNote->include_in_relation(pTie, pData);
 
         pNote->remove_from_relation(pTie);
 
@@ -920,12 +921,12 @@ SUITE(InternalModelTest)
         ImoTieDto dto;
         ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
-        pNote->include_in_relation(&doc, pTie, pData);
+        pNote->include_in_relation(pTie, pData);
 
         ImoBeamDto dtoBeam;
         ImoBeamData* pBeamData = ImFactory::inject_beam_data(&doc, &dtoBeam);
         ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
-        pNote->include_in_relation(&doc, pBeam, pBeamData);
+        pNote->include_in_relation(pBeam, pBeamData);
 
         CHECK( pNote->get_num_relations() == 2 );
 
@@ -946,7 +947,7 @@ SUITE(InternalModelTest)
         ImoTieDto dto;
         ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
-        pNote->include_in_relation(&doc, pTie, pData);
+        pNote->include_in_relation(pTie, pData);
 
         pTie->remove_all();
         delete pTie;
@@ -968,12 +969,12 @@ SUITE(InternalModelTest)
         ImoTieDto dtoTie;
         ImoTieData* pTieData = ImFactory::inject_tie_data(&doc, &dtoTie);
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
-        pNote->include_in_relation(&doc, pTie, pTieData);
+        pNote->include_in_relation(pTie, pTieData);
 
         ImoBeamDto dtoBeam;
         ImoBeamData* pBeamData = ImFactory::inject_beam_data(&doc, &dtoBeam);
         ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
-        pNote->include_in_relation(&doc, pBeam, pBeamData);
+        pNote->include_in_relation(pBeam, pBeamData);
 
         CHECK( pNote->get_relation(0) == pTie );
         CHECK( pNote->get_relation(1) == pBeam );
@@ -1274,10 +1275,10 @@ SUITE(InternalModelTest)
 //                                    ImFactory::inject(k_imo_articulation, &doc));
 //        pAccent->set_articulation_type(k_articulation_accent);
 //
-//        pNote->add_attachment(&doc, pText);
+//        pNote->add_attachment(pText);
 //        ImoFermata* pFmt = static_cast<ImoFermata*>(
 //                                ImFactory::inject(k_imo_fermata, &doc) );
-//        pClef->add_attachment(&doc, pFmt);
+//        pClef->add_attachment(pFmt);
 //
 //        CHECK( pClef->get_num_attachments() == 2 );
 //
@@ -1526,7 +1527,9 @@ SUITE(InternalModelTest)
     {
         //@ MultiColumn_creates_columns
         Document doc(m_libraryScope);
-        ImoMultiColumn* pMC = ImFactory::inject_multicolumn(&doc);
+//        ImoMultiColumn* pMC = ImFactory::inject_multicolumn(&doc);
+        ImoMultiColumn* pMC = static_cast<ImoMultiColumn*>(
+                ImFactory::inject(k_imo_multicolumn, doc.get_doc_model()) );
 
         CHECK( pMC != nullptr );
         CHECK( pMC->is_multicolumn() == true );
@@ -1543,48 +1546,11 @@ SUITE(InternalModelTest)
         ImoMultiColumn* pMC = doc.add_multicolumn_wrapper(3);
 
         CHECK( pMC->get_num_columns() == 3 );
-        CHECK( pMC->get_column_width(0) == 100.0f/3.0f );   //in percentage 33.3%
+        CHECK( pMC->get_column_width(0) == 100.0f/3.0f );   //percentage (33.3%)
         CHECK( pMC->get_column_width(1) == 100.0f/3.0f );
         CHECK( pMC->get_column_width(2) == 100.0f/3.0f );
     }
 
-    //@ ImoWidget -------------------------------------------------------------------------
-
-//    TEST_FIXTURE(InternalModelTestFixture, Panel_create)
-//    {
-//        Document doc(m_libraryScope);
-//        ImoWidget* pImo = static_cast<ImoWidget*>( ImFactory::inject(k_imo_widget, &doc) );
-//
-//        CHECK( pImo != nullptr );
-//        CHECK( pImo->is_imo_widget() == true );
-////        CHECK( pImo->get_size() == USize(0.0f, 0.0f) );
-//
-//        delete pImo;
-//    }
-
-//    TEST_FIXTURE(InternalModelTestFixture, Panel_add_to_block_api)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoWidget* pImo = doc.add_widget((1000.0f, 600.0f);
-//
-//        CHECK( pImo != nullptr );
-//        CHECK( pImo->is_imo_widget() == true );
-//        CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
-//    }
-
-    //TEST_FIXTURE(InternalModelTestFixture, Panel_add_child)
-    //{
-    //    Document doc(m_libraryScope);
-    //    doc.create_empty();
-    //    ImoWidget* pImo = doc.add_panel(1000.0f, 600.0f);
-    //
-    //    pImo->add()
-
-    //    CHECK( pImo != nullptr );
-    //    CHECK( pImo->is_imo_widget() == true );
-    //    CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
-    //}
 
     //@ dirty bits -----------------------------------------------------------------------
 
@@ -1770,6 +1736,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, attr_01)
     {
         //@01. constructor
+
         AttrInt a(0, 2);
         AttrString b(1, std::string("string"));
         AttrDouble c(2, 2.7);
@@ -1788,6 +1755,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, attr_02)
     {
         //@02. set and get value
+
         AttrVariant a(0);
         a.set_string_value(std::string("string"));
         CHECK( a.get_string_value() == "string" );
@@ -1806,6 +1774,102 @@ SUITE(InternalModelTest)
 
         a.set_color_value(Color(100,100,100));
         CHECK( is_equal(a.get_color_value(), Color(100,100,100)) == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, attr_03)
+    {
+        //@03. copy constructor
+
+        AttrInt a(0, 2);
+        AttrString b(1, std::string("string"));
+        AttrDouble c(2, 2.7);
+        AttrFloat d(3, 2.5f);
+        AttrBool e(4, true);
+        AttrColor f(5, Color(80,70,55));
+
+        AttrInt aa(a);
+        CHECK( aa.get_int_value() == 2 );
+        aa.set_value(5);
+        CHECK( aa.get_int_value() == 5 );
+        CHECK( a.get_int_value() == 2 );
+
+        AttrString bb(b);
+        CHECK( bb.get_string_value() == "string" );
+        bb.set_value("perico");
+        CHECK( bb.get_string_value() == "perico" );
+        CHECK( b.get_string_value() == "string" );
+
+        AttrDouble cc(c);
+        CHECK( cc.get_double_value() == 2.7 );
+        cc.set_value(3.28);
+        CHECK( cc.get_double_value() == 3.28 );
+        CHECK( c.get_double_value() == 2.7 );
+
+        AttrFloat dd(d);
+        CHECK( dd.get_float_value() == 2.5f );
+        dd.set_value(1.41f);
+        CHECK( dd.get_float_value() == 1.41f );
+        CHECK( d.get_float_value() == 2.5f );
+
+        AttrBool ee(e);
+        CHECK( ee.get_bool_value() == true );
+        ee.set_value(false);
+        CHECK( ee.get_bool_value() == false );
+        CHECK( e.get_bool_value() == true );
+
+        AttrColor ff(f);
+        CHECK( is_equal(ff.get_color_value(), Color(80,70,55)) == true );
+        ff.set_value(Color(80,20,30));
+        CHECK( is_equal(ff.get_color_value(), Color(80,20,30)) == true );
+        CHECK( is_equal(f.get_color_value(), Color(80,70,55)) == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, attr_04)
+    {
+        //@04. assignment constructor
+
+        AttrInt a(0, 2);
+        AttrString b(1, std::string("string"));
+        AttrDouble c(2, 2.7);
+        AttrFloat d(3, 2.5f);
+        AttrBool e(4, true);
+        AttrColor f(5, Color(80,70,55));
+
+        AttrInt aa = a;
+        CHECK( aa.get_int_value() == 2 );
+        aa.set_value(5);
+        CHECK( aa.get_int_value() == 5 );
+        CHECK( a.get_int_value() == 2 );
+
+        AttrString bb = b;
+        CHECK( bb.get_string_value() == "string" );
+        bb.set_value("perico");
+        CHECK( bb.get_string_value() == "perico" );
+        CHECK( b.get_string_value() == "string" );
+
+        AttrDouble cc = c;
+        CHECK( cc.get_double_value() == 2.7 );
+        cc.set_value(3.28);
+        CHECK( cc.get_double_value() == 3.28 );
+        CHECK( c.get_double_value() == 2.7 );
+
+        AttrFloat dd = d;
+        CHECK( dd.get_float_value() == 2.5f );
+        dd.set_value(1.41f);
+        CHECK( dd.get_float_value() == 1.41f );
+        CHECK( d.get_float_value() == 2.5f );
+
+        AttrBool ee = e;
+        CHECK( ee.get_bool_value() == true );
+        ee.set_value(false);
+        CHECK( ee.get_bool_value() == false );
+        CHECK( e.get_bool_value() == true );
+
+        AttrColor ff = f;
+        CHECK( is_equal(ff.get_color_value(), Color(80,70,55)) == true );
+        ff.set_value(Color(80,20,30));
+        CHECK( is_equal(ff.get_color_value(), Color(80,20,30)) == true );
+        CHECK( is_equal(f.get_color_value(), Color(80,70,55)) == true );
     }
 
 
@@ -1860,6 +1924,33 @@ SUITE(InternalModelTest)
         CHECK( pImo->get_int_attribute(5000) == 2 );
 
         delete pImo;
+   }
+
+    TEST_FIXTURE(InternalModelTestFixture, attributes_04)
+    {
+        //@04. clone attribute
+
+        AttrList aa;
+        aa.push_back( LOMSE_NEW AttrInt(0, 2) );
+        aa.push_back( LOMSE_NEW AttrString(1, std::string("string")) );
+        aa.push_back( LOMSE_NEW AttrDouble(2, 2.7) );
+        aa.push_back( LOMSE_NEW AttrFloat(3, 2.5f) );
+        aa.push_back( LOMSE_NEW AttrBool(4, true) );
+        aa.push_back( LOMSE_NEW AttrColor(5, Color(80,70,55)) );
+
+        AttrList bb(const_cast<AttrList&>(aa));
+        AttrObj* pAttr = bb.front();
+        CHECK( pAttr->get_int_value() == 2 );
+        pAttr = pAttr->get_next_attrib();
+        CHECK( pAttr && pAttr->get_string_value() == "string" );
+        pAttr = pAttr->get_next_attrib();
+        CHECK( pAttr && pAttr->get_double_value() == 2.7 );
+        pAttr = pAttr->get_next_attrib();
+        CHECK( pAttr && pAttr->get_float_value() == 2.5f );
+        pAttr = pAttr->get_next_attrib();
+        CHECK( pAttr && pAttr->get_bool_value() == true );
+        pAttr = pAttr->get_next_attrib();
+        CHECK( pAttr &&  is_equal(pAttr->get_color_value(), Color(80,70,55)) == true );
    }
 
 }

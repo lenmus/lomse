@@ -39,8 +39,6 @@ void AutoBeamer::extract_notes()
         if ((*it).first->is_note())
             m_notes.push_back( static_cast<ImoNote*>( (*it).first ) );
     }
-    //cout << "Num. note/rests in beam: " << noteRests.size() << endl;
-    //cout << "NUm. notes in beam: " << m_notes.size() << endl;
 }
 
 //---------------------------------------------------------------------------------------

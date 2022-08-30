@@ -190,7 +190,7 @@ void TableLayouter::determine_width_for_columns()
 
     m_columnsWidth.resize(m_numCols);
     m_tableWidth = 0.0f;
-    std::list<ImoStyle*>& cols = m_pTable->get_column_styles();
+    std::list<ImoStyle*> cols = m_pTable->get_column_styles();
     std::list<ImoStyle*>::iterator it;
     int iCol = 0;
     for (it = cols.begin(); it != cols.end(); ++it, ++iCol)

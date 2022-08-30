@@ -49,6 +49,9 @@ public:
     ImoDocument* build_model(ImoDocument* pImoDoc);
     void structurize(ImoObj* pImo);
 
+    ImoDocument* fix_cloned_model(ImoDocument* pImoDoc);
+    void fix_model(ImoObj* pImo);
+
 };
 
 //---------------------------------------------------------------------------------------

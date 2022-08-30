@@ -496,7 +496,7 @@ void SpAlgGourlay::do_spacing(int iColumnToTrace)
             dbgLogger << " ****************************** After applying Fopt = "
                 << m_Fopt << endl;
             dbgLogger << dump_spacing_parameters();
-            (*it)->dump(logger.get_stream());
+            (*it)->dump(glogger.get_stream());
             dbgLogger << endl;
         }
     }
@@ -2844,7 +2844,7 @@ void ColumnDataGourlay::fix_neighborhood_spacing_problems(bool fTrace)
     {
         dbgLogger << " ****************************** Before fixing neighborhood problems"
             << endl;
-        dump(logger.get_stream());
+        dump(glogger.get_stream());
         dbgLogger << endl;
     }
 

@@ -1,0 +1,13 @@
+(lenmusdoc (vers 0.0) 
+    (content
+        (score
+           (vers 1.6)
+           (instrument
+              (musicData
+                 (clef G)
+                 (n c4 q)
+              )
+           )
+        )
+        (scorePlayer (playLabel "begin")(stopLabel "end"))
+))
