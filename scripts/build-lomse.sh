@@ -218,11 +218,18 @@ if [ ${fBuild} -eq 1 ]; then
         echo ""
     fi
 
+    # compilation options
+    if [ ${fUseClang} -eq 1 ]; then
+        OPTIONS="${OPTIONS} -Wdefaulted-function-deleted -Winconsistent-missing-override"
+    else
+        OPTIONS="${OPTIONS} -Wall"
+    fi
+    echo "options='${OPTIONS}'"
 
     # create the makefile
     cd "${build_path}"
     echo -e "${GREEN}Creating makefile${NC}"
-#    echo "options='${OPTIONS}'"
+    CLAG_OPTS=
     if [ ${fUseClang} -eq 0 ]; then
         cmake -G "Unix Makefiles" ${OPTIONS} ${sources} || exit 1
     else

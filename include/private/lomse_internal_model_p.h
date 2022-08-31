@@ -1091,10 +1091,10 @@ public:
 
     //the five special
     ~AttribValue() { cleanup(); }
-    AttribValue(const AttribValue&) = default;
-    AttribValue& operator= (const AttribValue&);
-    AttribValue(AttribValue&&) = default;
-    AttribValue& operator= (AttribValue&&) = default;
+    AttribValue(const AttribValue& a) { clone(a); }
+    AttribValue& operator= (const AttribValue& a) { clone(a); return *this; }
+    AttribValue(AttribValue&&) = delete;
+    AttribValue& operator= (AttribValue&&) = delete;
 
     explicit operator int() const;
     explicit operator float() const;
@@ -1110,6 +1110,7 @@ public:
     void operator=(const Color& value);
 
 private:
+    AttribValue& clone(const AttribValue& a);
     void cleanup();
     void check_type(AttribType type) const;
 
@@ -1534,7 +1535,7 @@ public:
     void set_xml_id(const std::string& value);
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v) override;
+    void accept_visitor(BaseVisitor& v) override;
     virtual bool has_visitable_children() { return has_children(); }
 
     //parent / children
@@ -3518,7 +3519,7 @@ public:
     ImoAnonymousBlock& operator= (ImoAnonymousBlock&&) = delete;
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v) override;
+    void accept_visitor(BaseVisitor& v) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -3779,7 +3780,7 @@ public:
     ~ImoClef() override {};
     ImoClef(const ImoClef&) = default;
     ImoClef& operator= (const ImoClef&) = default;
-    ImoClef(ImoClef&&) = default;
+    ImoClef(ImoClef&&) = delete;
     ImoClef& operator= (ImoClef&&) = delete;
 
     //building
@@ -4037,7 +4038,8 @@ public:
     ImoDocument& operator= (ImoDocument&&) = delete;
 
     //special node
-    void accept_visitor(BaseVisitor& v);
+    void accept_visitor(BaseVisitor& v) override;
+    bool has_visitable_children() override;
 
     //info
     inline std::string& get_version() { return m_version; }
@@ -4626,13 +4628,10 @@ protected:
     bool        m_fFwd;
     TimeUnits   m_rTimeShift;
 
-    const TimeUnits SHIFT_START_END;     //any too big value
+    static constexpr TimeUnits k_shift_start_end = 100000000.0;     //any too big value
 
     friend class ImFactory;
-    ImoGoBackFwd()
-        : ImoStaffObj(k_imo_go_back_fwd), m_fFwd(true), m_rTimeShift(0.0)
-        , SHIFT_START_END(100000000.0)
-    {}
+    ImoGoBackFwd() : ImoStaffObj(k_imo_go_back_fwd), m_fFwd(true), m_rTimeShift(0.0) {}
 
 public:
     //the five special
@@ -4643,38 +4642,15 @@ public:
     ImoGoBackFwd& operator= (ImoGoBackFwd&&) = delete;
 
     //getters and setters
-    inline bool is_forward()
-    {
-        return m_fFwd;
-    }
-    inline void set_forward(bool fFwd)
-    {
-        m_fFwd = fFwd;
-    }
-    inline bool is_to_start()
-    {
-        return !m_fFwd && (m_rTimeShift == -SHIFT_START_END);
-    }
-    inline bool is_to_end()
-    {
-        return m_fFwd && (m_rTimeShift == SHIFT_START_END);
-    }
-    inline TimeUnits get_time_shift()
-    {
-        return m_rTimeShift;
-    }
-    inline void set_to_start()
-    {
-        set_time_shift(SHIFT_START_END);
-    }
-    inline void set_to_end()
-    {
-        set_time_shift(SHIFT_START_END);
-    }
-    inline void set_time_shift(TimeUnits rTime)
-    {
-        m_rTimeShift = (m_fFwd ? rTime : -rTime);
-    }
+    inline bool is_forward() { return m_fFwd; }
+    inline void set_forward(bool fFwd) { m_fFwd = fFwd; }
+    inline bool is_to_start() { return !m_fFwd && (m_rTimeShift == -k_shift_start_end); }
+    inline bool is_to_end() { return m_fFwd && (m_rTimeShift == k_shift_start_end); }
+    inline TimeUnits get_time_shift() { return m_rTimeShift; }
+    inline void set_to_start() { set_time_shift(k_shift_start_end); }
+    inline void set_to_end() { set_time_shift(k_shift_start_end); }
+    inline void set_time_shift(TimeUnits rTime) { m_rTimeShift = (m_fFwd ? rTime : -rTime); }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -5077,6 +5053,7 @@ public:
 
     //special node
     void accept_visitor(BaseVisitor& v) override;
+    bool has_visitable_children() override;
 
     //methods for accessing ImoSounds child
     LOMSE_DECLARE_IMOSOUNDS_INTERFACE
@@ -5725,7 +5702,7 @@ public:
     ImoParagraph& operator= (ImoParagraph&&) = delete;
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v) override;
+    void accept_visitor(BaseVisitor& v) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -5779,7 +5756,7 @@ public:
     inline void set_level(int level) { m_level = level; }
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v) override;
+    void accept_visitor(BaseVisitor& v) override;
 
 };
 
@@ -6066,6 +6043,7 @@ public:
 
     //required by Visitable parent class
     void accept_visitor(BaseVisitor& v) override;
+    bool has_visitable_children() override;
 
     //instruments
     void add_instrument(ImoInstrument* pInstr, const std::string& partId="");
@@ -6404,7 +6382,7 @@ public:
     bool is_line_visible(int iLine) const;
 
     //tablature
-    inline int is_for_tablature() const { return m_fTablature; }
+    inline bool is_for_tablature() const { return m_fTablature; }
     inline void set_tablature(bool value) { m_fTablature = value; }
 
 protected:

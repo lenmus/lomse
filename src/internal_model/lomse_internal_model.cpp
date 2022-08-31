@@ -445,7 +445,7 @@ void AttribValue::check_type(AttribType type) const
 }
 
 //---------------------------------------------------------------------------------------
-AttribValue& AttribValue::operator= (const AttribValue& a)
+AttribValue& AttribValue::clone(const AttribValue& a)
 {
     switch (a.m_type)
     {
@@ -457,7 +457,7 @@ AttribValue& AttribValue::operator= (const AttribValue& a)
         case vt_color:      colorValue = a.colorValue;      break;
         default:
         {
-            string msg("[AttribValue::operator=]. Invalid type in source object");
+            string msg("[AttribValue::clone]. Invalid type in source object");
             LOMSE_LOG_ERROR(msg);
             throw std::runtime_error(msg);
         }
@@ -1987,7 +1987,6 @@ ImoContent* ImoBlocksContainer::add_content_wrapper(ImoStyle* pStyle)
 //---------------------------------------------------------------------------------------
 ImoMultiColumn* ImoBlocksContainer::add_multicolumn_wrapper(int numCols, ImoStyle* pStyle)
 {
-//    ImoMultiColumn* pImo = ImFactory::inject_multicolumn(m_pDocModel);
     ImoMultiColumn* pImo =
         static_cast<ImoMultiColumn*>( ImFactory::inject(k_imo_multicolumn, m_pDocModel) );
 
@@ -3029,6 +3028,12 @@ void ImoDocument::accept_visitor(BaseVisitor& v)
 }
 
 //---------------------------------------------------------------------------------------
+bool ImoDocument::has_visitable_children()
+{
+    return has_children() || m_privateStyles.size() > 0;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoDocument::initialize_object()
 {
     add_default_styles();
@@ -3324,6 +3329,12 @@ void ImoInstrument::accept_visitor(BaseVisitor& v)
         vThis->end_visit(this);
     else if (vObj)
         vObj->end_visit(this);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoInstrument::has_visitable_children()
+{
+    return has_children() || m_staves.size() > 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4454,6 +4465,12 @@ void ImoScore::accept_visitor(BaseVisitor& v)
         vThis->end_visit(this);
     else if (vObj)
         vObj->end_visit(this);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoScore::has_visitable_children()
+{
+    return has_children() || m_nameToStyle.size() > 0;
 }
 
 //---------------------------------------------------------------------------------------

@@ -1527,7 +1527,6 @@ SUITE(InternalModelTest)
     {
         //@ MultiColumn_creates_columns
         Document doc(m_libraryScope);
-//        ImoMultiColumn* pMC = ImFactory::inject_multicolumn(&doc);
         ImoMultiColumn* pMC = static_cast<ImoMultiColumn*>(
                 ImFactory::inject(k_imo_multicolumn, doc.get_doc_model()) );
 

@@ -20,9 +20,9 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-ImoObj* ImFactory::inject(DocModel* pDocModel, const std::string& ldpSource)
+ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
 {
-    return pDocModel->get_owner_document()->create_object_from_ldp(ldpSource);
+    return inject(type, pDoc->get_doc_model(), id);
 }
 
 //---------------------------------------------------------------------------------------
@@ -281,68 +281,65 @@ ImoObj* ImFactory::clone(ImoObj* a)
 }
 
 //---------------------------------------------------------------------------------------
-ImoBeamData* ImFactory::inject_beam_data(DocModel* pDocModel, ImoBeamDto* pDto)
+ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 {
     ImoBeamData* pObj = LOMSE_NEW ImoBeamData(pDto);
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoTieData* ImFactory::inject_tie_data(DocModel* pDocModel, ImoTieDto* pDto)
+ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 {
     ImoTieData* pObj = LOMSE_NEW ImoTieData(pDto);
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoSlurData* ImFactory::inject_slur_data(DocModel* pDocModel, ImoSlurDto* pDto)
+ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 {
     ImoSlurData* pObj = LOMSE_NEW ImoSlurData(pDto);
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoTuplet* ImFactory::inject_tuplet(DocModel* pDocModel, ImoTupletDto* pDto)
+ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTuplet* pObj = LOMSE_NEW ImoTuplet(pDto);
     pObj->set_id( pDto->get_id() );
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoTextBox* ImFactory::inject_text_box(DocModel* pDocModel, ImoTextBlockInfo& dto, ImoId id)
+ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, ImoId id)
 {
     ImoTextBox* pObj = LOMSE_NEW ImoTextBox(dto);
     pObj->set_id(id);
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoNote* ImFactory::inject_note(DocModel* pDocModel, int step, int octave,
+ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
                                 int noteType, EAccidentals accidentals,
                                 int dots, int staff, int voice, int stem)
 {
     ImoNote* pObj = LOMSE_NEW ImoNote(step, octave, noteType, accidentals, dots,
-                                staff, voice, stem);
-    pDocModel->assign_id(pObj);
-    pObj->set_owner_model(pDocModel);
-    return pObj;
-}
-
-//---------------------------------------------------------------------------------------
-ImoMultiColumn* ImFactory::inject_multicolumn(DocModel* pDocModel)
-{
-    ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn();
+                                      staff, voice, stem);
+    DocModel* pDocModel = pDoc->get_doc_model();
     pDocModel->assign_id(pObj);
     pObj->set_owner_model(pDocModel);
     return pObj;
@@ -366,49 +363,6 @@ ImoControl* ImFactory::inject_control(DocModel* pDocModel)
     pObj->set_owner_model(pDocModel);
     return pObj;
 }
-
-
-
-//factory injector, from type
-ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
-    { return inject(type, pDoc->get_doc_model(), id); }
-
-//factory injector, from LDP source code
-ImoObj* ImFactory::inject(Document* pDoc, const std::string& ldpSource)
-    { return inject(pDoc->get_doc_model(), ldpSource); }
-
-//specific injectors, to simplify testing
-ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
-                            int noteType, EAccidentals accidentals,
-                            int dots, int staff, int voice,
-                            int stem)
-    { return inject_note(pDoc->get_doc_model(),step, octave,
-                         noteType, accidentals, dots, staff, voice, stem); }
-
-ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
-    { return inject_beam_data(pDoc->get_doc_model(), pDto); }
-
-ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
-    { return inject_tie_data(pDoc->get_doc_model(), pDto); }
-
-ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
-    { return inject_slur_data(pDoc->get_doc_model(), pDto); }
-
-ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
-    { return inject_tuplet(pDoc->get_doc_model(), pDto); }
-
-ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, ImoId id)
-    { return inject_text_box(pDoc->get_doc_model(), dto, id); }
-
-ImoMultiColumn* ImFactory::inject_multicolumn(Document* pDoc)
-    { return inject_multicolumn(pDoc->get_doc_model()); }
-
-ImoImage* ImFactory::inject_image(Document* pDoc, unsigned char* imgbuf,
-                              VSize bmpSize, EPixelFormat format, USize imgSize)
-    { return inject_image(pDoc->get_doc_model(), imgbuf, bmpSize, format, imgSize); }
-
-ImoControl* ImFactory::inject_control(Document* pDoc)
-    { return inject_control(pDoc->get_doc_model()); }
 
 
 }  //namespace lomse
