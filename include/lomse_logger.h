@@ -33,12 +33,12 @@ namespace lomse
 #define PRINTF_SYNTAX(strindex)
 #endif
 
-#define LOMSE_LOG_ERROR(...)            logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
-#define LOMSE_LOG_WARN(...)             logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
-#define LOMSE_LOG_INFO(...)             logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#define LOMSE_LOG_ERROR(...)            glogger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#define LOMSE_LOG_WARN(...)             glogger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#define LOMSE_LOG_INFO(...)             glogger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
 #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
-    #define LOMSE_LOG_DEBUG(area, ...)  logger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
-    #define LOMSE_LOG_TRACE(area, ...)  logger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
+    #define LOMSE_LOG_DEBUG(area, ...)  glogger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
+    #define LOMSE_LOG_TRACE(area, ...)  glogger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
 #else
     #define LOMSE_LOG_DEBUG(area, ...)  do {} while(0)
     #define LOMSE_LOG_TRACE(area, ...)  do {} while(0)
@@ -164,22 +164,22 @@ protected:
     std::string get_default_log_path();
 };
 
-extern Logger logger;
+extern Logger glogger;      //logger instance (global)
 
-inline Logger& get_global_logger() { return logger; }
+inline Logger& get_global_logger() { return glogger; }
 
 class StreamLogger
 {
 public:
     template<typename T>
     StreamLogger& operator<<(const T& t) {
-        logger.get_stream() << t;
+        glogger.get_stream() << t;
         return *this;
     }
 
     // Overload for I/O manipulators (e.g. std::endl)
     StreamLogger& operator<<(std::ostream& (*manip)(std::ostream&)) {
-        logger.get_stream() << manip;
+        glogger.get_stream() << manip;
         return *this;
     }
 };

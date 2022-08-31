@@ -38,9 +38,10 @@ ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
     , m_percent(0.0f)
     , m_fDisplayPercentage(true)
 {
-    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
+    pStyle = (pStyle == nullptr ? create_default_style() : pStyle);
+    m_styleId = pStyle->get_id();
 
-    m_textColor = m_style->color();
+    m_textColor = pStyle->color();
     m_barColor = Color(0,255,0,255);  //green solid
 
     measure();
@@ -75,7 +76,7 @@ USize ProgressBarCtrl::measure()
 GmoBoxControl* ProgressBarCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
-    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
+    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, get_style());
     return m_pMainBox;
 }
 

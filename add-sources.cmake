@@ -146,6 +146,7 @@ set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_model_builder.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_relobj_cloner.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_staffobjs_cursor.cpp

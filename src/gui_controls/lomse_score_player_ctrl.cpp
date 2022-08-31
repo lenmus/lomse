@@ -35,7 +35,6 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
                                  Document* pDoc)
     : Control(libScope, pDoc, nullptr)
     , PlayerGui()
-    , m_pOwnerImo(pOwner)
     , m_pMainBox(nullptr)
     , m_width(1000.0f)
     , m_height(600.0f)
@@ -44,9 +43,11 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
     , m_playButtonState(k_play)
     , m_fFullView(false)
 {
-    m_style = create_default_style();
+    set_owner_imo(pOwner);
 
-    m_normalColor = m_style->color();
+    ImoStyle* pStyle = create_default_style();
+    m_styleId = pStyle->get_id();
+    m_normalColor = pStyle->color();
     m_currentColor = m_normalColor;
 
     measure();
@@ -71,7 +72,7 @@ USize ScorePlayerCtrl::measure()
 GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
-    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
+    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, get_style());
     return m_pMainBox;
 }
 
@@ -120,7 +121,7 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
             WpInteractor wpIntor = pEv->get_interactor();
             if (SpInteractor p = wpIntor.lock())
             {
-                ImoScore* pScore = m_pOwnerImo->get_score();
+                ImoScore* pScore = static_cast<ImoScorePlayer*>(get_owner_imo())->get_score();
                 SpEventPlayCtrl event(
                         LOMSE_NEW EventPlayCtrl(evType, wpIntor, pEv->get_document(),
                                                 pScore, this) );

@@ -84,21 +84,23 @@ void StaffObjsCursor::save_octave_shift_at_end(ImoStaffObj* pSO)
 {
     if (pSO->get_num_relations() > 0)
     {
-        ImoRelations* pRelObjs = pSO->get_relations();
-        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
-        list<ImoRelObj*>::iterator it;
-        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        ImoRelations* pRels = pSO->get_relations();
+        list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+        if (relobjs.size() > 0)
         {
-            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
-
-            if (pRO->is_octave_shift())
+            list<ImoRelObj*>::iterator it;
+            for (it = relobjs.begin(); it != relobjs.end(); ++it)
             {
-		        if (pSO == pRO->get_end_object())
-		        {
-                    int idx = m_staffIndex[num_instrument()] + staff();
-                    m_octave_shifts[idx] = 0;
-                    break;
-		        }
+                ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                if (pRO->is_octave_shift())
+                {
+                    if (pSO == pRO->get_end_object())
+                    {
+                        int idx = m_staffIndex[num_instrument()] + staff();
+                        m_octave_shifts[idx] = 0;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -111,20 +113,22 @@ void StaffObjsCursor::save_octave_shift_at_start(ImoStaffObj* pSO)
     bool fOctaveShift = false;
     if (pSO->get_num_relations() > 0)
     {
-        ImoRelations* pRelObjs = pSO->get_relations();
-        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
-        list<ImoRelObj*>::iterator it;
-        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        ImoRelations* pRels = pSO->get_relations();
+        list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+        if (relobjs.size() > 0)
         {
-            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
-
-            if (pRO->is_octave_shift())
+            list<ImoRelObj*>::iterator it;
+            for (it = relobjs.begin(); it != relobjs.end(); ++it)
             {
-		        if (pSO == pRO->get_start_object())
-		        {
-                    fOctaveShift = true;
-		            steps = static_cast<ImoOctaveShift*>(pRO)->get_shift_steps();
-		        }
+                ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                if (pRO->is_octave_shift())
+                {
+                    if (pSO == pRO->get_start_object())
+                    {
+                        fOctaveShift = true;
+                        steps = static_cast<ImoOctaveShift*>(pRO)->get_shift_steps();
+                    }
+                }
             }
         }
     }

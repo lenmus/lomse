@@ -274,52 +274,56 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
 
     if (pBar->get_num_relations() > 0)
     {
-        ImoRelations* pRelObjs = pBar->get_relations();
-        int size = pRelObjs->get_num_items();
-        for (int i=0; i < size; ++i)
+        ImoRelations* pRels = pBar->get_relations();
+        list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+        if (relobjs.size() > 0)
         {
-            ImoRelObj* pRO = pRelObjs->get_item(i);
-            if (pRO->is_volta_bracket())
+            list<ImoRelObj*>::iterator it;
+            for (it = relobjs.begin(); it != relobjs.end(); ++it)
             {
-                ImoVoltaBracket* pVB = static_cast<ImoVoltaBracket*>(pRO);
-                if (pBar == pRO->get_start_object())
+                ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                if (pRO->is_volta_bracket())
                 {
-                    if (pVB->is_first_repeat())
+                    ImoVoltaBracket* pVB = static_cast<ImoVoltaBracket*>(pRO);
+                    if (pBar == pRO->get_start_object())
                     {
-                        //First volta bracket of a repetition set starts here.
-                        //Add all jumps for voltas in this set
-                        m_pending.clear();
-
-                        //jump for first volta
-                        int times = pVB->get_number_of_repetitions();
-                        JumpEntry* pJump = create_jump(measure, measure+1, times);
-                        add_jump(cursor, measure, pJump);
-
-                        //jumps for the other voltas in this set
-                        int numVoltas = pVB->get_total_voltas();
-                        for (int j=2; j <= numVoltas; ++j)
+                        if (pVB->is_first_repeat())
                         {
-                            times = (j == numVoltas ? 0 : 1);
-                            pJump = create_jump(measure, 0, times);
-                            add_jump(cursor, measure, pJump);
-                            m_pending.push_back(pJump);
-                        }
-                        m_iJump = 0;
-                    }
-                    else
-                    {
-                        //volta bracket other than first starts here.
-                        //Update:
-                        //- measure to jump
-                        //- number of repeat times if not last volta
-                        JumpEntry* pJump = m_pending[m_iJump];
-                        pJump->set_measure(measure+1);
-                        if (pJump->get_times_valid() != 0)
-                        {
+                            //First volta bracket of a repetition set starts here.
+                            //Add all jumps for voltas in this set
+                            m_pending.clear();
+
+                            //jump for first volta
                             int times = pVB->get_number_of_repetitions();
-                            pJump->set_times_valid(times);
+                            JumpEntry* pJump = create_jump(measure, measure+1, times);
+                            add_jump(cursor, measure, pJump);
+
+                            //jumps for the other voltas in this set
+                            int numVoltas = pVB->get_total_voltas();
+                            for (int j=2; j <= numVoltas; ++j)
+                            {
+                                times = (j == numVoltas ? 0 : 1);
+                                pJump = create_jump(measure, 0, times);
+                                add_jump(cursor, measure, pJump);
+                                m_pending.push_back(pJump);
+                            }
+                            m_iJump = 0;
                         }
-                        ++m_iJump;
+                        else
+                        {
+                            //volta bracket other than first starts here.
+                            //Update:
+                            //- measure to jump
+                            //- number of repeat times if not last volta
+                            JumpEntry* pJump = m_pending[m_iJump];
+                            pJump->set_measure(measure+1);
+                            if (pJump->get_times_valid() != 0)
+                            {
+                                int times = pVB->get_number_of_repetitions();
+                                pJump->set_times_valid(times);
+                            }
+                            ++m_iJump;
+                        }
                     }
                 }
             }

@@ -35,14 +35,12 @@ void ImoTreeAlgoritms::remove_staffobj(Document* pDoc, ImoStaffObj* pSO)
     ImoRelations* pRels = pSO->get_relations();
     if (pRels)
     {
-        list<ImoRelObj*>& relations = pRels->get_relations();
-        if (relations.size() > 0)
+        list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+        if (relobjs.size() > 0)
         {
             list<ImoRelObj*>::iterator it;
-            for (it = relations.begin(); it != relations.end(); ++it)
-            {
+            for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 relIds.push_back( (*it)->get_id() );
-            }
         }
     }
 
@@ -112,9 +110,9 @@ void ImoTreeAlgoritms::add_note_to_chord(ImoNote* pBaseNote, ImoNote* pNewNote,
     {
         //chord didn't exist. Create it
         pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-        pBaseNote->include_in_relation(pDoc, pChord);
+        pBaseNote->include_in_relation(pChord);
     }
-    pNewNote->include_in_relation(pDoc, pChord);
+    pNewNote->include_in_relation(pChord);
 }
 
 //---------------------------------------------------------------------------------------

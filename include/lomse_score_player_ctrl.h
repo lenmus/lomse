@@ -30,7 +30,6 @@ class Metronome;
 class ScorePlayerCtrl : public Control, public PlayerGui
 {
 protected:
-    ImoScorePlayer* m_pOwnerImo;
     GmoBoxControl* m_pMainBox;
     UPoint  m_pos;
     LUnits  m_width;
@@ -46,7 +45,6 @@ protected:
 
 public:
     ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner, Document* pDoc);
-    virtual ~ScorePlayerCtrl() {}
 
     //Control mandatory overrides
     USize measure() override;

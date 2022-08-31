@@ -31,7 +31,7 @@ class LdpAnalyser;
 class ImoObj;
 class ImoNote;
 class ImoRest;
-class TypeMeasureInfo;
+struct TypeMeasureInfo;
 
 
 //---------------------------------------------------------------------------------------

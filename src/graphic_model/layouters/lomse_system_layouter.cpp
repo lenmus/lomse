@@ -810,13 +810,16 @@ void SystemLayouter::engrave_system_details(int iSystem)
             if (pSO->get_num_relations() > 0)
             {
                 //rel objs
-                ImoRelations* pRelObjs = pSO->get_relations();
-                list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
-                list<ImoRelObj*>::iterator itR;
-                for(itR = relObjs.begin(); itR != relObjs.end(); ++itR)
+                ImoRelations* pRels = pSO->get_relations();
+                list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+                if (relobjs.size() > 0)
                 {
-                    systemAuxObjs.push_back( make_pair(*itR, pParent) );
-                    used.set( (*itR)->get_obj_type() );
+                    list<ImoRelObj*>::iterator itR;
+                    for (itR = relobjs.begin(); itR != relobjs.end(); ++itR)
+                    {
+                        systemAuxObjs.push_back( make_pair(*itR, pParent) );
+                        used.set( (*itR)->get_obj_type() );
+                    }
                 }
             }
             if (pSO->get_num_attachments() > 0)

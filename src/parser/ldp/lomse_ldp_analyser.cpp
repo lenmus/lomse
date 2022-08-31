@@ -468,15 +468,15 @@ protected:
     {
         ImoStyle* pStyle = nullptr;
 
-        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
-        if (pDoc)
+        ImoDocument* pImoDoc = m_pAnalyser->get_root_imo_document();
+        if (pImoDoc)
         {
-            pStyle = pDoc->find_style(styleName);
+            pStyle = pImoDoc->find_style(styleName);
             if (!pStyle)
             {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                         "Style '" + styleName + "' is not defined. Default style will be used.");
-                pStyle = pDoc->get_style_or_default(styleName);
+                pStyle = pImoDoc->get_style_or_default(styleName);
             }
         }
 
@@ -784,8 +784,8 @@ public:
     void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLineStyle* pLine = static_cast<ImoLineStyle*>(
-                                    ImFactory::inject(k_imo_line_style, pDoc) );
+        ImoLineStyleDto* pLine = static_cast<ImoLineStyleDto*>(
+                                    ImFactory::inject(k_imo_line_style_dto, pDoc) );
         pLine->set_start_point( TPoint(0.0f, 0.0f) );
         pLine->set_start_edge(k_edge_normal);
         pLine->set_start_cap(k_cap_none);
@@ -2945,7 +2945,7 @@ public:
             else
             {
                 pInstrument->set_id( get_node_id() );
-                pDoc->assign_id(pInstrument);
+                pDoc->get_doc_model()->assign_id(pInstrument);
             }
             pInstrument->set_instr_id(partId);
 
@@ -3068,8 +3068,6 @@ public:
 
         error_if_more_elements();
 
-        pKey->set_staff(-1);
-
         add_to_model(pKey);
     }
 
@@ -3143,8 +3141,7 @@ public:
         analyse_optional(k_meta, pImoDoc);
 
         // [<styles>]
-        if (!analyse_optional(k_styles, pImoDoc))
-            add_default(pImoDoc);
+        analyse_optional(k_styles, pImoDoc);
 
         // [<pageLayout>*]
         while (analyse_optional(k_pageLayout, pImoDoc));
@@ -3167,17 +3164,6 @@ protected:
     string get_language()
     {
         return m_pParamToAnalyse->get_parameter(1)->get_value();
-    }
-
-    void add_default(ImoDocument* pImoDoc)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        Linker linker(pDoc);
-        ImoStyles* pStyles = static_cast<ImoStyles*>(
-                        ImFactory::inject(k_imo_styles, pDoc, get_node_id()));
-        linker.add_child_to_model(pImoDoc, pStyles, k_styles);
-        ImoStyle* pDefStyle = pImoDoc->get_default_style();
-        pImoDoc->set_style(pDefStyle);
     }
 
 };
@@ -3564,9 +3550,9 @@ public:
             else if (get_optional(k_label))
             {
                 // case 2: <NoteType><NoteType>
-                NoteTypeAndDots figdots = get_note_type_and_dots();
-                pMtr->set_right_note_type( figdots.noteType );
-                pMtr->set_right_dots( figdots.dots );
+                NoteTypeAndDots typedots = get_note_type_and_dots();
+                pMtr->set_right_note_type( typedots.noteType );
+                pMtr->set_right_dots( typedots.dots );
                 pMtr->set_mark_type(ImoMetronomeMark::k_note_note);
             }
             else
@@ -3831,7 +3817,7 @@ public:
 
         // add fermata
         if (m_pFermata)
-            add_attachment(pNR, m_pFermata);
+            pNR->add_attachment(m_pFermata);
 
         //tie
         if (fStartOldTie)
@@ -4215,12 +4201,6 @@ protected:
             m_pSlurDto->set_note(pNR);
             m_pAnalyser->add_relation_info(m_pSlurDto);
         }
-    }
-
-    void add_attachment(ImoNoteRest* pNR, ImoFermata* pFermata)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        pNR->add_attachment(pDoc, pFermata);
     }
 
 };
@@ -5173,15 +5153,25 @@ public:
     void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoStyles* pStyles = static_cast<ImoStyles*>(
-                         ImFactory::inject(k_imo_styles, pDoc, get_node_id()) );
+        ImoDocument* pImoDoc = pDoc->get_im_root();
+        ImoStyles* pStyles = nullptr;
+        if (pImoDoc)
+            pStyles = pImoDoc->get_styles();
+        else
+        {
+            //unit tests, parsing only a "(styles ...)" element
+            pStyles = static_cast<ImoStyles*>(
+                             ImFactory::inject(k_imo_styles, pDoc, get_node_id()) );
+        }
 
         // [<defineStyle>*]
         while (analyse_optional(k_defineStyle, pStyles));
 
         error_if_more_elements();
 
-        add_to_model(pStyles);
+        //for unit tests, to return the created ImoStyles node
+        if (pImoDoc == nullptr)
+            add_to_model(pStyles);
     }
 
 };
@@ -5560,7 +5550,7 @@ protected:
         if (pImo)
         {
             if (pImo->is_line_style())
-                pTB->set_anchor_line( static_cast<ImoLineStyle*>(pImo) );
+                pTB->set_anchor_line( static_cast<ImoLineStyleDto*>(pImo) );
             delete pImo;
         }
     }
@@ -6341,12 +6331,17 @@ void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
     //@ <staffobjOptions> = { <staffNum> | <printOptions> }
     //@ <staffNum> = pn | (staffNum n)
 
+    bool fStaffFound = false;
+
     // [p1]
     if (get_optional(k_label))
     {
         char type = (m_pParamToAnalyse->get_value())[0];
         if (type == 'p')
+        {
             get_num_staff();
+            fStaffFound = true;
+        }
         else
             error_invalid_param();
     }
@@ -6357,10 +6352,14 @@ void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         long nStaff = get_long_value(1L);
         m_pAnalyser->set_current_staff(--nStaff);
+        fStaffFound = true;
     }
 
     //set staff: either found value or inherited one
-    pSO->set_staff( m_pAnalyser->get_current_staff() );
+    if (pSO->is_key_signature() && !fStaffFound)
+        static_cast<ImoKeySignature*>(pSO)->set_staff_common_for_all( m_pAnalyser->get_current_staff() );
+    else
+        pSO->set_staff( m_pAnalyser->get_current_staff() );
 
     analyse_scoreobj_options(pSO);
 }
@@ -7183,10 +7182,10 @@ void TiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
     pTie->set_color( pStartDto->get_color() );
 
     ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, pStartDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+    pStartNote->include_in_relation(pTie, pStartData);
 
     ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, pEndDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
@@ -7279,12 +7278,12 @@ void OldTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
     ImoTieDto startDto;
     startDto.set_start(true);
     ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, &startDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+    pStartNote->include_in_relation(pTie, pStartData);
 
     ImoTieDto endDto;
     endDto.set_start(false);
     ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, &endDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
@@ -7309,7 +7308,7 @@ void SlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
     {
         ImoNote* pNote = (*it)->get_note();
         ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
-        pNote->include_in_relation(pDoc, pSlur, pData);
+        pNote->include_in_relation(pSlur, pData);
     }
 }
 
@@ -7331,7 +7330,7 @@ void BeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
+        pNR->include_in_relation(pBeam, pData);
     }
 
     //AWARE: LDP v1.6 requires full item description, Autobeamer is not needed
@@ -7403,11 +7402,10 @@ void OldBeamsBuilder::do_create_old_beam()
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
+        pNR->include_in_relation(pBeam, pData);
         delete *it;
     }
     m_pendingOldBeams.clear();
-
     AutoBeamer autobeamer(pBeam);
     autobeamer.do_autobeam();
 }
@@ -7431,7 +7429,7 @@ void TupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
     {
         //add tuplet to the note/rest
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, m_pTuplet, nullptr);
+        pNR->include_in_relation(m_pTuplet, nullptr);
 
         //if not only graphical (LDP < 2.0) add time modification the note/rest
         if (!pStartDto->is_only_graphical())

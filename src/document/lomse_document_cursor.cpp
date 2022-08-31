@@ -238,7 +238,7 @@ ImoId DocContentCursor::get_prev_id()
 void DocContentCursor::find_parent()
 {
     if (m_pCurItem)
-        m_parent = m_pCurItem->get_contentobj_parent();
+        m_parent = m_pCurItem->get_block_level_parent();
 }
 
 //---------------------------------------------------------------------------------------
@@ -514,9 +514,9 @@ bool DocCursor::is_out_of_jailer(ImoObj* pImo)
 {
     if (pImo)
     {
-        ImoObj* pParent = pImo->get_contentobj_parent();
+        ImoObj* pParent = pImo->get_block_level_parent();
         while (pParent && pParent->get_id() != m_idJailer)
-            pParent = pParent->get_contentobj_parent();
+            pParent = pParent->get_block_level_parent();
         return pParent == nullptr;
     }
     else

@@ -15,7 +15,8 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <algorithm>   //min
+#include <algorithm>    //min
+#include <cmath>        //fabs
 
 
 

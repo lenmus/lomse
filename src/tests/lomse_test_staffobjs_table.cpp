@@ -455,10 +455,10 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 50 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 50 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 44 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 53 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 44 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 53 --))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
@@ -486,9 +486,9 @@ SUITE(ColStaffObjsBuilderTest)
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1 p1 (stem up))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +f4 s v1 p1 (stem up)(beam 44 ==))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 47 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +f4 s v1 p1 (stem up)(beam 47 ==))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 47 --))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
     }
 
@@ -518,9 +518,9 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n d4 e v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      0,  32,     1, "(barline simple)" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace b4 s v1 p1 (stem up)(beam 57 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +c5 s v1 p1 (stem up)(beam 57 ==))" );
-        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +d5 s v1 p1 (stem up)(beam 57 --))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace b4 s v1 p1 (stem up)(beam 61 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +c5 s v1 p1 (stem up)(beam 61 ==))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +d5 s v1 p1 (stem up)(beam 61 --))" );
         CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(n e5 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 1,    0,      1,  32,     1, "(n c4 q v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      1,  96,     0, "(barline simple)" );
@@ -601,8 +601,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pScore != nullptr );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
 
-//        cout << test_name() << endl;
-//        cout << pTable->dump();
+//        cout << test_name() << endl << pTable->dump();
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 28 );
@@ -616,26 +615,26 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(clef G p1)" );
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(key C)" );
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(time 3 4)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(dir empty)" );
-        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(dir empty)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(dir 0 p1 (TODO:  No LdpGenerator for sound-change))" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(dir 0 p1 (TODO:  No LdpGenerator for sound-change))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,	   0, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
         CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
-        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   192,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(barline simple)" );
         CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(time 2 4)" );
         CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(time 2 4)" );
         CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(n b5 h v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(n b5 h v1 p1 (stem down))" );
-        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,    0,      1,   320,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(barline simple)" );
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(time 4 4)" );
         CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(time 4 4)" );
         CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(n b5 w v1 p1)" );
         CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(n +a5 w v1 p1)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
-        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,    0,      2,   576,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );
     }
@@ -1072,8 +1071,7 @@ SUITE(ColStaffObjsBuilderTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
         ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
+//        cout << test_name() << endl << pColStaffObjs->dump();
 
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 4 );
@@ -1367,8 +1365,7 @@ SUITE(ColStaffObjsBuilderTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
         ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
+//        cout << test_name() << endl << pColStaffObjs->dump();
 
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 8 );
@@ -1737,7 +1734,7 @@ SUITE(ColStaffObjsBuilderTest)
     {
         //@10. notes in other voices intermixed in beamed group
         create_score(
-            "(score (vers 2.0)(instrument#100 (musicData "
+            "(score (vers 2.0)(instrument#90L (musicData#101L "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(n c2 w v3)(barline)"
             ")))"
@@ -1797,8 +1794,8 @@ SUITE(ColStaffObjsBuilderTest)
         //@12. barlines properly ordered and with right time
         create_score(
             "(score (vers 2.0)"
-            "(instrument#100 (staves 2)"
-            "(musicData (clef G p1)(clef F4 p2)"
+            "(instrument#90L (staves 2)"
+            "(musicData#101L (clef G p1)(clef F4 p2)"
             "(key D)(time 2 4)(n f4 h p1 v1)"
             "(n c3 e g+ p2 v2)"
             "(n c3 e g-)(n d3 q)"
@@ -1887,7 +1884,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 32 ++))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 34 ++))" );
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 
@@ -1927,7 +1924,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 32 ++))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 34 ++))" );
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 
@@ -1955,11 +1952,11 @@ SUITE(ColStaffObjsBuilderTest)
 
         ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 44 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 41 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 44 --))" );
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n b4 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
@@ -2185,18 +2182,18 @@ SUITE(ColStaffObjsBuilderTest)
             CHECK_MD_OBJECT(it, "(key C)" );
             CHECK_MD_OBJECT(it, "(time 2 4)" );
             CHECK_MD_OBJECT(it, "(goFwd q v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(r e v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(n g4 e v1 p1)" );
             CHECK_MD_OBJECT(it, "(n g4 q v2 p1)" );
             CHECK_MD_OBJECT(it, "(n d3 q v2 p2)" );
             CHECK_MD_OBJECT(it, "(r q v3 p2)" );
             CHECK_MD_OBJECT(it, "(barline simple)" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(n f5 q v1 p1 (stem down))" );
             CHECK_MD_OBJECT(it, "(n b4 e v1 p1 (stem down))" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(n g4 e v1 p1 (stem down))" );
             CHECK_MD_OBJECT(it, "(n e3 q v3 p2 (stem down))" );
             CHECK_MD_OBJECT(it, "(r q v3 p2)" );
@@ -2205,8 +2202,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
 
-//        cout << test_name() << endl;
-//        cout << pTable->dump();
+//        cout << test_name() << endl << pTable->dump();
 
         CHECK( pTable->num_lines() == 4 );
         CHECK( pTable->num_entries() == 23 );
@@ -2224,18 +2220,18 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,	    0,	    0,	  0,    0,	"(goFwd q v1 p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	  0,	2,	"(n g4 q v2 p1)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	  0,	3,	"(r q v3 p2)" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,   64,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,   64,    0,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	 64,	0,	"(r e v1 p1)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	 64,	1,	"(n d3 q v2 p2)" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	 96,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	 96,    0,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	 96,	0,	"(n g4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	128,    0,	"(barline simple)" );
-        CHECK_ENTRY0(it, 0,	    0,	    1,	128,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	128,    0,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    1,	128,	0,	"(n f5 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,	    1,	    1,	128,	3,	"(n e3 q v3 p2 (stem down))" );
         CHECK_ENTRY0(it, 0,	    0,	    1,	192,	0,	"(n b4 e v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,	    1,	    1,	192,	3,	"(r q v3 p2)" );
-        CHECK_ENTRY0(it, 0,	    0,	    1,	224,    0,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    1,	224,    0,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it, 0,	    0,	    1,	224,	0,	"(n g4 e v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,	    0,	    1,	256,    0,	"(barline simple)" );
     }
@@ -2263,9 +2259,9 @@ SUITE(ColStaffObjsBuilderTest)
             CHECK_MD_OBJECT(it, "(clef G p2)" );
             CHECK_MD_OBJECT(it, "(key C)" );
             CHECK_MD_OBJECT(it, "(time 3 8)" );
-            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 43 +))" );
-            CHECK_MD_OBJECT(it, "(n g3 e v2 p2 (stem up)(beam 43 =))" );
-            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 43 -))" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 47 +))" );
+            CHECK_MD_OBJECT(it, "(n g3 e v2 p2 (stem up)(beam 47 =))" );
+            CHECK_MD_OBJECT(it, "(n g4 e v2 p1 (stem down)(beam 47 -))" );
             CHECK_MD_OBJECT(it, "(barline simple)" );
             CHECK_MD_OBJECT(it, "(clef F4 p2)" );
             CHECK_MD_OBJECT(it, "(r q. v1 p1)" );
@@ -2291,9 +2287,9 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it,	0,	1,	    0,	0,	    1,	"(key C)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(time 3 8)" );
         CHECK_ENTRY0(it,	0,	1,	    0,	0,	    1,	"(time 3 8)" );
-        CHECK_ENTRY0(it,	0,	0,	    0,	0,      0,	"(n g4 e v2 p1 (stem down)(beam 43 +))" );
-        CHECK_ENTRY0(it,	0,	1,	    0,	32,	    1,	"(n g3 e v2 p2 (stem up)(beam 43 =))" );
-        CHECK_ENTRY0(it,	0,	0,	    0,	64,	    0,	"(n g4 e v2 p1 (stem down)(beam 43 -))" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,      0,	"(n g4 e v2 p1 (stem down)(beam 47 +))" );
+        CHECK_ENTRY0(it,	0,	1,	    0,	32,	    1,	"(n g3 e v2 p2 (stem up)(beam 47 =))" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	64,	    0,	"(n g4 e v2 p1 (stem down)(beam 47 -))" );
         CHECK_ENTRY0(it,	0,	1,	    1,	96,	    1,	"(clef F4 p2)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	96,	    0,	"(barline simple)" );
         CHECK_ENTRY0(it,	0,	0,	    1,	96,	    2,	"(r q. v1 p1)" );
@@ -2324,9 +2320,9 @@ SUITE(ColStaffObjsBuilderTest)
             CHECK_MD_OBJECT(it, "(key C)" );
             CHECK_MD_OBJECT(it, "(time 3 4)" );
             CHECK_MD_OBJECT(it, "(n e3 h. v1 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(goFwd f v2 p1)" );
-            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+            CHECK_MD_OBJECT(it, "(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
             CHECK_MD_OBJECT(it, "(barline simple)" );
             CHECK_MD_OBJECT(it, "(r w v1 p1)" );
             CHECK_MD_OBJECT(it, "(barline simple)" );
@@ -2348,10 +2344,10 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(clef F4 p1)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(key C)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(time 3 4)" );
-        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    1,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	0,	    1,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    0,	"(n e3 h. v1 p1)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	0,	    1,	"(goFwd f v2 p1)" );
-        CHECK_ENTRY0(it,	0,	0,	    0,	12,	    1,	"(dir 0 (TODO:  No LdpGenerator for Imo. Name=wedge) p1)" );
+        CHECK_ENTRY0(it,	0,	0,	    0,	12,	    1,	"(dir 0 (TODO:  No LdpGenerator for wedge) p1)" );
         CHECK_ENTRY0(it,	0,	0,	    0,	192,	0,	"(barline simple)" );
         CHECK_ENTRY0(it,	0,	0,	    1,	192,	0,	"(r w v1 p1)" );
         CHECK_ENTRY0(it,	0,	0,	    1,	384,	0,	"(barline simple)" );
@@ -2440,11 +2436,11 @@ SUITE(ColStaffObjsBuilderTest)
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2)" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n c3 e v1 p2 (beam 31 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n c4 e v1 p1 (beam 31 =))" );
-        CHECK_ENTRY0(it, 0,    1,      0,  64,     1, "(n e3 e v1 p2 (beam 31 =))" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n c3 e v1 p2 (beam 34 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n c4 e v1 p1 (beam 34 =))" );
+        CHECK_ENTRY0(it, 0,    1,      0,  64,     1, "(n e3 e v1 p2 (beam 34 =))" );
         CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(clef F4 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e4 e v1 p1 (beam 31 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e4 e v1 p1 (beam 34 -))" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
@@ -2472,7 +2468,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0, 	 0,     0, "(r e v1 p1)" );
         CHECK_ENTRY0(it, 0,	   1,      0,	 0,     1, "(r e v2 p2)" );
         CHECK_ENTRY0(it, 0,    0,      0,	32,     0, "(barline simple)" );
-        CHECK_ENTRY0(it, 0,    0,      1,	32,     0, "(dir empty)" );
+        CHECK_ENTRY0(it, 0,    0,      1,	32,     0, "(dir 0 p1 (TODO:  No LdpGenerator for sound-change))" );
         CHECK_ENTRY0(it, 0,    0,      1,	32,     0, "(r e v1 p1 (dyn \"p\" below))" );
         CHECK_ENTRY0(it, 0,    1,      1,	32,     1, "(n g3 q v2 p2 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      1,	64,     0, "(n d5 e v1 p1 (stem down))" );
@@ -3014,10 +3010,10 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(time 2 4)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(time 2 4)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1 p1)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 110 +))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 112 +))" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1 p1)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2 p2)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 110 -))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 112 -))" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2 p2)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2 p2)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1)" );
@@ -3054,11 +3050,11 @@ SUITE(ColStaffObjsBuilderTest)
 
         ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 44 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 41 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 44 --))" );
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n b4 q v1 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
@@ -3123,19 +3119,19 @@ SUITE(ColStaffObjsBuilderTest)
 
         ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 44 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 50 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 53 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 44 --))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 50 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 53 --))" );
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );

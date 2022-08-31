@@ -75,11 +75,6 @@ public:
     inline long element_id() { return m_pImo->get_id(); }
     inline TimeUnits duration() const { return m_pImo->get_duration(); }
 
-    //setters
-    inline void decrement_time(TimeUnits timeShift) {
-        m_pImo->set_time( m_pImo->get_time() - timeShift );
-    }
-
     //debug
     std::string dump(bool fWithIds=true);
     std::string to_string();
@@ -308,10 +303,10 @@ protected:
 
 public:
     virtual ~ColStaffObjsBuilderEngine();
-    ColStaffObjsBuilderEngine(const ColStaffObjsBuilderEngine&) = delete;               //copy constructor
-    ColStaffObjsBuilderEngine& operator= (const ColStaffObjsBuilderEngine&) = delete;   //copy assignment
-    ColStaffObjsBuilderEngine(ColStaffObjsBuilderEngine&&) = delete;                    //move constructor
-    ColStaffObjsBuilderEngine& operator= (ColStaffObjsBuilderEngine&&) = delete;        //move assignment
+    ColStaffObjsBuilderEngine(const ColStaffObjsBuilderEngine&) = delete;
+    ColStaffObjsBuilderEngine& operator= (const ColStaffObjsBuilderEngine&) = delete;
+    ColStaffObjsBuilderEngine(ColStaffObjsBuilderEngine&&) = delete;
+    ColStaffObjsBuilderEngine& operator= (ColStaffObjsBuilderEngine&&) = delete;
 
     ColStaffObjs* do_build();
 

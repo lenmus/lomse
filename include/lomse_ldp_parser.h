@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <set>
+#include <stack>
 
 #include "lomse_ldp_factory.h"
 #include "lomse_tokenizer.h"

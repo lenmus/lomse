@@ -28,6 +28,7 @@
 #include "lomse_im_attributes.h"
 #include "lomse_im_measures_table.h"
 #include "lomse_score_utilities.h"
+#include "lomse_relobj_cloner.h"
 
 
 using namespace std;
@@ -97,13 +98,7 @@ static string m_unknown = "unknown";
 //=======================================================================================
 // AttrObj implementation
 //=======================================================================================
-AttrObj::~AttrObj()
-{
-    delete m_next;
-}
-
-//---------------------------------------------------------------------------------------
-const string AttrObj::get_name()
+const string AttrObj::get_name() const
 {
     return get_name(m_attrbIdx);
 }
@@ -130,39 +125,57 @@ AttrObj* AttrObj::replace_by(AttrObj* newAttr)
 }
 
 //---------------------------------------------------------------------------------------
-int AttrObj::get_int_value()
+int AttrObj::get_int_value() const
 {
-    return static_cast< Attr<int>* >(this)->get_value();
+    const Attr<int>* p1 = static_cast< Attr<int> const * >(this);
+    Attr<int>* p2 = const_cast< Attr<int>* >(p1);
+    return p2->get_value();
+//    return static_cast< Attr<int>* >(this)->get_value();
 }
 
 //---------------------------------------------------------------------------------------
-double AttrObj::get_double_value()
+double AttrObj::get_double_value() const
 {
-    return static_cast< Attr<double>* >(this)->get_value();
+    const Attr<double>* p1 = static_cast< Attr<double> const * >(this);
+    Attr<double>* p2 = const_cast< Attr<double>* >(p1);
+    return p2->get_value();
+//    return static_cast< Attr<double>* >(this)->get_value();
 }
 
 //---------------------------------------------------------------------------------------
-std::string AttrObj::get_string_value()
+std::string AttrObj::get_string_value() const
 {
-    return static_cast< Attr<string>* >(this)->get_value();
+    const Attr<string>* p1 = static_cast< Attr<string> const * >(this);
+    Attr<string>* p2 = const_cast< Attr<string>* >(p1);
+    return p2->get_value();
+//    return static_cast< Attr<string>* >(this)->get_value();
 }
 
 //---------------------------------------------------------------------------------------
-bool AttrObj::get_bool_value()
+bool AttrObj::get_bool_value() const
 {
-    return static_cast< Attr<bool>* >(this)->get_value();
+    const Attr<bool>* p1 = static_cast< Attr<bool> const * >(this);
+    Attr<bool>* p2 = const_cast< Attr<bool>* >(p1);
+    return p2->get_value();
+//    return static_cast< Attr<bool>* >(this)->get_value();
 }
 
 //---------------------------------------------------------------------------------------
-float AttrObj::get_float_value()
+float AttrObj::get_float_value() const
 {
-    return static_cast< Attr<float>* >(this)->get_value();
+    const Attr<float>* p1 = static_cast< Attr<float> const * >(this);
+    Attr<float>* p2 = const_cast< Attr<float>* >(p1);
+    return p2->get_value();
+//    return static_cast< Attr<float>* >(this)->get_value();
 }
 
 //---------------------------------------------------------------------------------------
-Color AttrObj::get_color_value()
+Color AttrObj::get_color_value() const
 {
-    return static_cast< Attr< Color >* >(this)->get_value();
+    const Attr< Color >* p1 = static_cast< Attr< Color > const * >(this);
+    Attr< Color >* p2 = const_cast< Attr< Color >* >(p1);
+    return p2->get_value();
+//    return static_cast< const Attr< Color >* >(this)->get_value();
 }
 
 
@@ -214,6 +227,17 @@ AttrVariant::AttrVariant(int idx, Color value)
 //=======================================================================================
 // AttrList implementation
 //=======================================================================================
+AttrList& AttrList::clone(const AttrList& a)
+{
+    if (a.m_first)
+        m_first = a.m_first->clone();
+    else
+        m_first = nullptr;
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
 size_t AttrList::size()
 {
     AttrObj* pAttr = m_first;
@@ -299,6 +323,149 @@ AttrObj* AttrList::find(TIntAttribute idx)
 
 
 //=======================================================================================
+// AttribValue implementation
+//=======================================================================================
+AttribValue::operator int() const
+{
+    check_type(vt_int);
+    return intValue;
+}
+
+//---------------------------------------------------------------------------------------
+AttribValue::operator float() const
+{
+    check_type(vt_float);
+    return floatValue;
+}
+
+//---------------------------------------------------------------------------------------
+AttribValue::operator double() const
+{
+    check_type(vt_double);
+    return doubleValue;
+}
+
+//---------------------------------------------------------------------------------------
+AttribValue::operator bool() const
+{
+    check_type(vt_bool);
+    return boolValue;
+}
+//---------------------------------------------------------------------------------------
+AttribValue::operator string() const
+{
+    check_type(vt_string);
+    return stringValue;
+}
+
+//---------------------------------------------------------------------------------------
+AttribValue::operator Color() const
+{
+    check_type(vt_color);
+    return colorValue;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(int value)
+{
+    cleanup();
+    intValue = value;
+    m_type = vt_int;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(float value)
+{
+    cleanup();
+    floatValue = value;
+    m_type = vt_float;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(double value)
+{
+    cleanup();
+    doubleValue = value;
+    m_type = vt_double;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(bool value)
+{
+    cleanup();
+    boolValue = value;
+    m_type = vt_bool;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(const std::string& value)
+{
+    cleanup();
+    // placement new (http://en.cppreference.com/w/cpp/language/union)
+    new (&stringValue) string(value);
+    m_type = vt_string;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::operator=(const Color& value)
+{
+    cleanup();
+    // placement new (http://en.cppreference.com/w/cpp/language/union)
+    new (&colorValue) Color(value);
+    m_type = vt_color;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::cleanup()
+{
+    if (m_type == vt_string)
+    {
+        // explicit destructor call (http://en.cppreference.com/w/cpp/language/union)
+        stringValue.~string();
+    }
+    else if (m_type == vt_color)
+    {
+        // explicit destructor call (http://en.cppreference.com/w/cpp/language/union)
+        colorValue.~Color();
+    }
+    m_type = vt_empty;
+}
+
+//---------------------------------------------------------------------------------------
+void AttribValue::check_type(AttribType type) const
+{
+    if (type != m_type)
+    {
+        std::stringstream ss;
+        ss << "[AttribValue::operator(<type>)]. Type mismatch. Expected type=" <<
+            type << ", real type=" << m_type;
+        LOMSE_LOG_ERROR(ss.str());
+        throw std::runtime_error(ss.str());
+    }
+}
+
+//---------------------------------------------------------------------------------------
+AttribValue& AttribValue::clone(const AttribValue& a)
+{
+    switch (a.m_type)
+    {
+        case vt_int:        intValue = a.intValue;          break;
+        case vt_string:     stringValue = a.stringValue;    break;
+        case vt_bool:       boolValue = a.boolValue;        break;
+        case vt_float:      floatValue = a.floatValue;      break;
+        case vt_double:     doubleValue = a.doubleValue;    break;
+        case vt_color:      colorValue = a.colorValue;      break;
+        default:
+        {
+            string msg("[AttribValue::clone]. Invalid type in source object");
+            LOMSE_LOG_ERROR(msg);
+            throw std::runtime_error(msg);
+        }
+    }
+    return *this;
+}
+
+//=======================================================================================
 // implementation of standard interface for ImoObj objects containing an ImoSounds child
 //=======================================================================================
 #define LOMSE_IMPLEMENT_IMOSOUNDS_INTERFACE(xxxxx)                                       \
@@ -312,8 +479,7 @@ void xxxxx::add_sound_info(ImoSoundInfo* pInfo)                                 
     ImoSounds* pColSounds = get_sounds();                                                \
     if (!pColSounds)                                                                     \
     {                                                                                    \
-        Document* pDoc = get_the_document();                                             \
-        pColSounds = static_cast<ImoSounds*>( ImFactory::inject(k_imo_sounds, pDoc) );   \
+        pColSounds = static_cast<ImoSounds*>( ImFactory::inject(k_imo_sounds, m_pDocModel) );   \
         append_child_imo(pColSounds);                                                    \
     }                                                                                    \
     pColSounds->add_sound_info(pInfo);                                                   \
@@ -348,157 +514,85 @@ ImoSoundInfo* xxxxx::get_sound_info(int iSound)                                 
 
 
 //=======================================================================================
-// InlineLevelCreatorApi implementation
+// implementation of standard interface for ImoObj objects having inline-level content
 //=======================================================================================
-ImoTextItem* InlineLevelCreatorApi::add_text_item(const string& text, ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoTextItem* pImo = static_cast<ImoTextItem*>(
-                            ImFactory::inject(k_imo_text_item, pDoc) );
-    pImo->set_text(text);
-    pImo->set_style(pStyle);
-    pImo->set_language( pDoc->get_language() );
-    m_pParent->append_child_imo(pImo);
-    return pImo;
+#define LOMSE_IMPLEMENT_INLINE_LEVEL_INTERFACE(xxxxx)                                    \
+                                                                                         \
+ImoTextItem* xxxxx::add_text_item(const string& text, ImoStyle* pStyle)                  \
+{                                                                                        \
+    ImoTextItem* pImo = static_cast<ImoTextItem*>(                                       \
+                            ImFactory::inject(k_imo_text_item, m_pDocModel) );                \
+    pImo->set_text(text);                                                                \
+    pImo->set_style(pStyle);                                                             \
+    pImo->set_language( m_pDocModel->get_language() );                                        \
+    append_child_imo(pImo);                                                              \
+    return pImo;                                                                         \
+}                                                                                        \
+                                                                                         \
+ButtonCtrl* xxxxx::add_button(LibraryScope& libScope, const string& label,               \
+                                             const USize& size, ImoStyle* pStyle)        \
+{                                                                                        \
+    ImoButton* pImo = static_cast<ImoButton*>(ImFactory::inject(k_imo_button, m_pDocModel));  \
+    ImoDocument* pImoDoc = m_pDocModel->get_im_root();                                        \
+    pImo->set_label(label);                                                              \
+    pImo->set_language( pImoDoc->get_language() );                                       \
+    pImo->set_size(size);                                                                \
+    pImo->set_style(pStyle);                                                             \
+                                                                                         \
+    ButtonCtrl* pCtrol = LOMSE_NEW ButtonCtrl(libScope, nullptr, m_pDocModel->get_owner_document(), label,          \
+                                              size.width, size.height, pStyle);          \
+                                                                                         \
+    pImo->attach_control(pCtrol);                                                        \
+                                                                                         \
+    append_child_imo(pImo);                                                              \
+                                                                                         \
+    return pCtrol;                                                                       \
+}                                                                                        \
+                                                                                         \
+ImoInlineWrapper* xxxxx::add_inline_box(LUnits width, ImoStyle* pStyle)                  \
+{                                                                                        \
+    ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(                             \
+                                ImFactory::inject(k_imo_inline_wrapper, m_pDocModel) );       \
+    pImo->set_width(width);                                                              \
+    pImo->set_style(pStyle);                                                             \
+    append_child_imo(pImo);                                                              \
+    return pImo;                                                                         \
+}                                                                                        \
+                                                                                         \
+ImoLink* xxxxx::add_link(const string& url, ImoStyle* pStyle)                            \
+{                                                                                        \
+    ImoLink* pImo = static_cast<ImoLink*>( ImFactory::inject(k_imo_link, m_pDocModel) );      \
+    pImo->set_url(url);                                                                  \
+    pImo->set_style(pStyle);                                                             \
+    append_child_imo(pImo);                                                              \
+    return pImo;                                                                         \
+}                                                                                        \
+                                                                                         \
+ImoImage* xxxxx::add_image(unsigned char* imgbuf, VSize bmpSize,                         \
+                                           EPixelFormat format, USize imgSize,           \
+                                           ImoStyle* pStyle)                             \
+{                                                                                        \
+    ImoImage* pImo = ImFactory::inject_image(m_pDocModel, imgbuf, bmpSize, format, imgSize);  \
+    pImo->set_style(pStyle);                                                             \
+    append_child_imo(pImo);                                                              \
+    return pImo;                                                                         \
+}                                                                                        \
+                                                                                         \
+ImoControl* xxxxx::add_control(Control* pCtrol)                                          \
+{                                                                                        \
+    ImoControl* pImo = ImFactory::inject_control(m_pDocModel);                           \
+    pImo->attach_control(pCtrol);                                                        \
+    append_child_imo(pImo);                                                              \
+    return pImo;                                                                         \
 }
 
-//---------------------------------------------------------------------------------------
-ButtonCtrl* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const string& label,
-                                             const USize& size, ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoButton* pImo = static_cast<ImoButton*>(ImFactory::inject(k_imo_button, pDoc));
-    ImoDocument* pImoDoc = pDoc->get_im_root();
-    pImo->set_label(label);
-    pImo->set_language( pImoDoc->get_language() );
-    pImo->set_size(size);
-    pImo->set_style(pStyle);
-
-    ButtonCtrl* pCtrol = LOMSE_NEW ButtonCtrl(libScope, nullptr, pDoc, label,
-                                              size.width, size.height, pStyle);
-    pImo->attach_control(pCtrol);
-
-    m_pParent->append_child_imo(pImo);
-
-    return pCtrol;   //pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoInlineWrapper* InlineLevelCreatorApi::add_inline_box(LUnits width, ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-                                ImFactory::inject(k_imo_inline_wrapper, pDoc) );
-    pImo->set_width(width);
-    pImo->set_style(pStyle);
-    m_pParent->append_child_imo(pImo);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoLink* InlineLevelCreatorApi::add_link(const string& url, ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoLink* pImo = static_cast<ImoLink*>( ImFactory::inject(k_imo_link, pDoc) );
-    pImo->set_url(url);
-    pImo->set_style(pStyle);
-    m_pParent->append_child_imo(pImo);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoImage* InlineLevelCreatorApi::add_image(unsigned char* imgbuf, VSize bmpSize,
-                                           EPixelFormat format, USize imgSize,
-                                           ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoImage* pImo = ImFactory::inject_image(pDoc, imgbuf, bmpSize, format, imgSize);
-    pImo->set_style(pStyle);
-    m_pParent->append_child_imo(pImo);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoControl* InlineLevelCreatorApi::add_control(Control* pCtrol)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoControl* pImo = ImFactory::inject_control(pDoc, pCtrol);
-    pImo->attach_control(pCtrol);
-    m_pParent->append_child_imo(pImo);
-    return pImo;
-}
-
-
-//=======================================================================================
-// BlockLevelCreatorApi implementation
-//=======================================================================================
-ImoParagraph* BlockLevelCreatorApi::add_paragraph(ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoParagraph* pImo = static_cast<ImoParagraph*>(
-                                    ImFactory::inject(k_imo_para, pDoc) );
-    add_to_model(pImo, pStyle);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoList* BlockLevelCreatorApi::add_list(int type, ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoList* pImo = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
-    pImo->set_list_type(type);
-    add_to_model(pImo, pStyle);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoContent* BlockLevelCreatorApi::add_content_wrapper(ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoContent* pImo = static_cast<ImoContent*>(
-                                    ImFactory::inject(k_imo_content, pDoc) );
-    add_to_model(pImo, pStyle);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoMultiColumn* BlockLevelCreatorApi::add_multicolumn_wrapper(int numCols,
-                                                              ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoMultiColumn* pImo = ImFactory::inject_multicolumn(pDoc);
-    add_to_model(pImo, pStyle);
-    pImo->create_columns(numCols, pDoc);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoScore* BlockLevelCreatorApi::add_score(ImoStyle* pStyle)
-{
-    Document* pDoc = m_pParent->get_the_document();
-    ImoScore* pImo = static_cast<ImoScore*>(
-                                ImFactory::inject(k_imo_score, pDoc) );
-    pImo->set_version(200);   //version 2.0
-    add_to_model(pImo, pStyle);
-    return pImo;
-}
-
-//---------------------------------------------------------------------------------------
-void BlockLevelCreatorApi::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle)
-{
-    pImo->set_style(pStyle);
-    ImoObj* pNode = m_pParent->is_document() ?
-                    static_cast<ImoDocument*>(m_pParent)->get_content()
-                    : m_pParent;
-    pNode->append_child_imo(pImo);
-}
 
 
 //=======================================================================================
 // ImoObj implementation
 //=======================================================================================
 ImoObj::ImoObj(int objtype, ImoId id)
-    : m_pDoc(nullptr)
+    : m_pDocModel(nullptr)
     , m_id(id)
     , m_objtype(objtype)
     , m_flags(k_dirty)
@@ -521,33 +615,52 @@ ImoObj::~ImoObj()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoObj::initialize_object(Document* UNUSED(pDoc))
+ImoObj& ImoObj::clone(const ImoObj& a)
 {
+    m_pDocModel = a.m_pDocModel;
+    m_id = a.m_id;
+    m_objtype = a.m_objtype;
+    m_flags = a.m_flags;
+    m_attribs = a.m_attribs;
 
+    //clone children
+    ImoObj* node = a.m_firstChild;
+    while (node)
+    {
+        ImoObj* newImo = ImFactory::clone(node);
+        if (newImo)
+            append_child(newImo);
+
+        node = node->get_next_sibling();
+    }
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_owner_model(DocModel* pDocModel)
+{
+    m_pDocModel = pDocModel;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::remove_id()
 {
-    if (get_id() != k_no_imoid)
-    {
-        Document* pDoc = get_the_document();
-        if (pDoc)
-            pDoc->on_removed_from_model(this);
-    }
+    if (get_id() != k_no_imoid && m_pDocModel)
+        m_pDocModel->on_removed_from_model(this);
 }
 
 //---------------------------------------------------------------------------------------
 std::string ImoObj::get_xml_id()
 {
-    return (m_pDoc ? m_pDoc->get_xml_id_for(m_id) : "");
+    return (m_pDocModel ? m_pDocModel->get_xml_id_for(m_id) : "");
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_xml_id(const std::string& value)
 {
-    if (m_pDoc)
-        m_pDoc->set_xml_id_for(m_id, value);
+    if (m_pDocModel)
+        m_pDocModel->set_xml_id_for(m_id, value);
 }
 
 //---------------------------------------------------------------------------------------
@@ -608,7 +721,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_figured_bass_info] = "figured-bass";
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
-        m_TypeToName[k_imo_line_style] = "line-style";
+        m_TypeToName[k_imo_line_style_dto] = "line-style-dto";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_octave_shift] = "octave-shift";
@@ -646,7 +759,9 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
         m_TypeToName[k_imo_styles] = "styles";
+        m_TypeToName[k_imo_score_titles] = "score-titles";
         m_TypeToName[k_imo_sounds] = "sounds";
+        m_TypeToName[k_imo_parameters] = "parameters";
         m_TypeToName[k_imo_table_head] = "table-head";
         m_TypeToName[k_imo_table_body] = "table-body";
 
@@ -759,16 +874,19 @@ const string& ImoObj::get_name() const
 //---------------------------------------------------------------------------------------
 Document* ImoObj::get_the_document()
 {
-    return m_pDoc;
+    return (m_pDocModel ? m_pDocModel->get_owner_document() : nullptr);
 }
 
 //---------------------------------------------------------------------------------------
 ImoDocument* ImoObj::get_document()
 {
-    if (m_pDoc)
-        return m_pDoc->get_im_root();
-    else
-        return nullptr;
+    return (m_pDocModel ? m_pDocModel->get_im_root() : nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+DocModel* ImoObj::get_doc_model()
+{
+    return m_pDocModel;
 }
 
 //---------------------------------------------------------------------------------------
@@ -780,19 +898,25 @@ Observable* ImoObj::get_observable_parent()
         return static_cast<Observable*>( pDoc );
     }
     else
-        return static_cast<Observable*>( get_contentobj_parent() );
+        return static_cast<Observable*>( get_block_level_parent() );
 }
 
 //---------------------------------------------------------------------------------------
-ImoContentObj* ImoObj::get_contentobj_parent()
+ImoContentObj* ImoObj::get_block_level_parent()
 {
-    //TODO: Reorganize/re-design ImoTree.
-    // It is badly designed for at least two reasons:
-    //  1. not all objects have an Imo parent, as some objects are not children
-    //     but are included in std collections.
-    //  2. There is no a chain of ImoContentObj children. This problem affects this
-    //     method. Instead of using virtual methods I've preferred to implement
-    //     the exceptions here for simplicity and for better trace when problems.
+    //Returns the ImoBlockLevelObj parent (the editable block in a Document) of this
+    //ImoObj. Should be:
+    //- ImoScore,
+    //- ImoBlocksContainer (ImoList, ImoTable, ImoMultiColumn or ImoDocument),
+    //- or ImoInlinesContainer (ImoAnonymousBlock, ImoHeading or ImoParagraph).
+
+    //TODO: Review this method code. It does not match method name and this
+    //method is only used for supporting other methods related to Document edition.
+    //I will postpone this review until having time to continue developping the editor
+    //or until an issue forces to do it.
+    //Currently this method does not return the ImoBlockLevelObj parent of all
+    //ImoObj (e.g. not for ImoStyle) but only of some objects (the renderizable ones?)
+    //and it is not clear what are the real needs and use cases.
 
     if (this->is_staffobj())            //parent is ImoMusicData (ImoSimpleObj)
         return static_cast<ImoStaffObj*>(this)->get_score();
@@ -808,6 +932,8 @@ ImoContentObj* ImoObj::get_contentobj_parent()
 
     else if (this->is_relobj())     //no single parent! use first of relation
         return static_cast<ImoRelObj*>(this)->get_start_object();
+        //TODO: Should be as follows?
+        //return static_cast<ImoRelObj*>(this)->get_start_object()->get_block_level_parent();
 
     else
     {
@@ -843,7 +969,7 @@ ImoBlockLevelObj* ImoObj::find_block_level_parent()
 
     while (pParent && !pParent->is_block_level_obj())
     {
-        pParent = pParent->get_contentobj_parent();
+        pParent = pParent->get_block_level_parent();
     }
 
     return static_cast<ImoBlockLevelObj*>( pParent );
@@ -875,13 +1001,23 @@ void ImoObj::visit_children(BaseVisitor& v)
 //---------------------------------------------------------------------------------------
 ImoObj* ImoObj::get_child_of_type(int objtype)
 {
-    for (int i=0; i < get_num_children(); i++)
+    children_iterator it(this);
+    for (it=this->begin(); it != this->end(); ++it)
     {
-        ImoObj* pChild = get_child(i);
-        if (pChild->get_obj_type() == objtype)
-            return pChild;
+        if ((*it)->get_obj_type() == objtype)
+            return *it;
     }
     return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* ImoObj::get_ancestor_of_type(int objtype)
+{
+    ImoObj* pImo = get_parent_imo();
+    while (pImo && pImo->get_obj_type() != objtype)
+        pImo = pImo->get_parent_imo();
+
+    return pImo;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1068,25 +1204,34 @@ ImoStaffObj* ImoAuxObj::get_parent_staffobj()
 //=======================================================================================
 ImoAuxRelObj::~ImoAuxRelObj()
 {
-    if (m_nextARO)
-        m_nextARO->set_prev_ARO(m_prevARO);
+    if (m_nextId != k_no_imoid)
+        get_ARO_imo(m_nextId)->set_prev_ARO(m_prevId);
 
-    if (m_prevARO)
-        m_prevARO->link_to_next_ARO(m_nextARO);
+    if (m_prevId != k_no_imoid)
+        get_ARO_imo(m_prevId)->link_to_next_ARO(m_nextId);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAuxRelObj::link_to_next_ARO(ImoAuxRelObj* pNext)
+void ImoAuxRelObj::link_to_next_ARO(ImoId idNext)
 {
-    m_nextARO = pNext;
-    if (pNext)
-        pNext->set_prev_ARO(this);
+    m_nextId = idNext;
+    if (idNext != k_no_imoid)
+        get_ARO_imo(idNext)->set_prev_ARO(this->get_id());
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAuxRelObj::set_prev_ARO(ImoAuxRelObj* pPrev)
+void ImoAuxRelObj::set_prev_ARO(ImoId idPrev)
 {
-    m_prevARO = pPrev;
+    m_prevId = idPrev;
+}
+
+//---------------------------------------------------------------------------------------
+ImoAuxRelObj* ImoAuxRelObj::get_ARO_imo(ImoId id)
+{
+    if (m_pDocModel)
+        return static_cast<ImoAuxRelObj*>( m_pDocModel->get_pointer_to_imo(id) );
+
+    return nullptr;
 }
 
 
@@ -1095,17 +1240,74 @@ void ImoAuxRelObj::set_prev_ARO(ImoAuxRelObj* pPrev)
 //=======================================================================================
 ImoRelObj::~ImoRelObj()
 {
+#if (LOMSE_RELOBJ_USES_ID == 1)
+    delete m_pointersList;
+#endif
+}
+
+//---------------------------------------------------------------------------------------
+ImoRelObj& ImoRelObj::clone(const ImoRelObj& a)
+{
+    std::list< pair<ImoId, ImoRelDataObj*> >::const_iterator it;
+    for (it = a.m_relatedObjects.begin(); it != a.m_relatedObjects.end(); ++it)
+    {
+        if ((*it).second)
+            m_relatedObjects.emplace_back(
+                (*it).first, static_cast<ImoRelDataObj*>( ImFactory::clone((*it).second) ));
+        else
+            m_relatedObjects.emplace_back((*it).first, nullptr);
+    }
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoRelObj::accept_visitor_for_data(BaseVisitor& v, ImoStaffObj* pSO)
+{
+    ImoRelDataObj* pImo = get_data_for(pSO);
+    if (pImo)
+        pImo->accept_visitor(v);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoRelObj::push_back(ImoStaffObj* pSO, ImoRelDataObj* pData)
 {
+#if (LOMSE_RELOBJ_USES_ID == 1)
+    m_relatedObjects.emplace_back(pSO->get_id(), pData);
+    delete m_pointersList;
+    m_pointersList = nullptr;
+#else
     m_relatedObjects.push_back( make_pair(pSO, pData));
+#endif
 }
 
 //---------------------------------------------------------------------------------------
 void ImoRelObj::remove(ImoStaffObj* pSO)
 {
+#if (LOMSE_RELOBJ_USES_ID == 1)
+    ImoId id = pSO->get_id();
+    std::list< pair<ImoId, ImoRelDataObj*> >::iterator it;
+    for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
+    {
+        if ((*it).first == id)
+        {
+            delete (*it).second;
+            m_relatedObjects.erase(it);
+            break;
+        }
+    }
+    if (m_pointersList)
+    {
+        std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it2;
+        for (it2 = m_pointersList->begin(); it2 != m_pointersList->end(); ++it2)
+        {
+            if ((*it2).first == pSO)
+            {
+                m_pointersList->erase(it2);
+                return;
+            }
+        }
+    }
+#else
     std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
     for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
     {
@@ -1116,24 +1318,38 @@ void ImoRelObj::remove(ImoStaffObj* pSO)
             return;
         }
     }
+#endif
 }
 
 //---------------------------------------------------------------------------------------
 void ImoRelObj::remove_all()
 {
-    //This is recursive. If there are objects, we delete the first one by
+    //This is recursive. If there are objects, the first one is deleted by
     //invoking "pSO->remove_but_not_delete_relation(this);" . And it, in turn,
     //invokes this method, until all items get deleted!
     while (m_relatedObjects.size() > 0)
     {
-        ImoStaffObj* pSO = m_relatedObjects.front().first;
+        ImoStaffObj* pSO = get_start_object();
         pSO->remove_but_not_delete_relation(this);
     }
+
+    delete m_pointersList;
+    m_pointersList = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
 ImoRelDataObj* ImoRelObj::get_data_for(ImoStaffObj* pSO)
 {
+#if (LOMSE_RELOBJ_USES_ID == 1)
+    ImoId id = pSO->get_id();
+    std::list< pair<ImoId, ImoRelDataObj*> >::iterator it;
+    for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
+    {
+        if ((*it).first == id)
+            return (*it).second;
+    }
+    return nullptr;
+#else
     std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
     for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
     {
@@ -1141,8 +1357,42 @@ ImoRelDataObj* ImoRelObj::get_data_for(ImoStaffObj* pSO)
             return (*it).second;
     }
     return nullptr;
+#endif
 }
 
+#if (LOMSE_RELOBJ_USES_ID == 1)
+//---------------------------------------------------------------------------------------
+ImoStaffObj* ImoRelObj::get_start_object()
+{
+    ImoId id = m_relatedObjects.front().first;
+    return static_cast<ImoStaffObj*>( m_pDocModel->get_pointer_to_imo(id) );
+}
+
+//---------------------------------------------------------------------------------------
+ImoStaffObj* ImoRelObj::get_end_object()
+{
+    ImoId id = m_relatedObjects.back().first;
+    return static_cast<ImoStaffObj*>( m_pDocModel->get_pointer_to_imo(id) );
+}
+
+//---------------------------------------------------------------------------------------
+std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& ImoRelObj::get_related_objects()
+{
+    if (m_pointersList)
+        return *m_pointersList;
+
+    m_pointersList = LOMSE_NEW std::list< pair<ImoStaffObj*, ImoRelDataObj*> >;
+    std::list< pair<ImoId, ImoRelDataObj*> >::iterator it;
+    for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
+    {
+        ImoId id = (*it).first;
+        m_pointersList->emplace_back(
+                static_cast<ImoStaffObj*>( m_pDocModel->get_pointer_to_imo(id) ),
+                (*it).second );
+    }
+    return *m_pointersList;
+}
+#endif
 
 //=======================================================================================
 // ImoScoreObj implementation
@@ -1203,23 +1453,33 @@ ImoStaffObj::~ImoStaffObj()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoStaffObj::add_relation(Document* pDoc, ImoRelObj* pRO)
+ImoStaffObj& ImoStaffObj::clone(const ImoStaffObj& a)
+{
+    m_staff = a.m_staff;
+    m_nVoice = a.m_nVoice;
+    m_time = a.m_time;
+    m_pEntry = nullptr;  //will be instantiated when the model is built
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::add_relation(ImoRelObj* pRO)
 {
     ImoRelations* pRelObjs = get_relations();
     if (!pRelObjs)
     {
         pRelObjs = static_cast<ImoRelations*>(
-                        ImFactory::inject(k_imo_relations, pDoc) );
+                        ImFactory::inject(k_imo_relations, m_pDocModel) );
         append_child_imo(pRelObjs);
     }
     pRelObjs->add_relation(pRO);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoStaffObj::include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
-                                      ImoRelDataObj* pData)
+void ImoStaffObj::include_in_relation(ImoRelObj* pRelObj, ImoRelDataObj* pData)
 {
-    add_relation(pDoc, pRelObj);
+    add_relation(pRelObj);
     pRelObj->push_back(this, pData);
 }
 
@@ -1238,8 +1498,10 @@ void ImoStaffObj::remove_from_relation(ImoRelObj* pRelObj)
 //---------------------------------------------------------------------------------------
 void ImoStaffObj::remove_but_not_delete_relation(ImoRelObj* pRelObj)
 {
+    //Remove this ImoStaffObj from the ImoRelObj
     pRelObj->remove(this);
 
+    //detach this ImoRelObj from the relations in this ImoStaffObj
     ImoRelations* pRelObjs = get_relations();
     pRelObjs->remove_relation(pRelObj);
 }
@@ -1629,25 +1891,6 @@ ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
 //=======================================================================================
 // ImoBlocksContainer implementation
 //=======================================================================================
-//ImoContentObj* ImoBlocksContainer::get_container_node()
-//{
-//    return this;
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoParagraph* ImoBlocksContainer::add_paragraph(ImoStyle* pStyle)
-//{
-//    Document* pDoc = get_the_document();
-//    ImoParagraph* pPara = static_cast<ImoParagraph*>(
-//                                    ImFactory::inject(k_imo_para, pDoc) );
-//    pPara->set_style(pStyle);
-//
-//    ImoContentObj* node = get_container_node();
-//    node->append_child_imo(pPara);
-//    return pPara;
-//}
-
-//---------------------------------------------------------------------------------------
 int ImoBlocksContainer::get_num_content_items()
 {
     ImoContent* pContent = get_content();
@@ -1661,10 +1904,16 @@ int ImoBlocksContainer::get_num_content_items()
 ImoContentObj* ImoBlocksContainer::get_content_item(int iItem)
 {
     ImoContent* pContent = get_content();
-    if (pContent && iItem < pContent->get_num_children())
-        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
-    else
-        return nullptr;
+    if (pContent)
+    {
+        int numChild = 0;
+        children_iterator it = pContent->begin();
+        for (; it != pContent->end() && numChild < iItem; ++it, ++numChild);
+        if (it != pContent->end() && iItem == numChild)
+            return dynamic_cast<ImoContentObj*>(*it);
+    }
+
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1694,9 +1943,9 @@ ImoContent* ImoBlocksContainer::get_content()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoBlocksContainer::create_content_container(Document* pDoc)
+void ImoBlocksContainer::create_content_container()
 {
-    append_child_imo( ImFactory::inject(k_imo_content, pDoc) );
+    append_child_imo( ImFactory::inject(k_imo_content, m_pDocModel) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1708,12 +1957,88 @@ void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
     pContent->append_child_imo(pItem);
 }
 
+//---------------------------------------------------------------------------------------
+ImoParagraph* ImoBlocksContainer::add_paragraph(ImoStyle* pStyle)
+{
+    ImoParagraph* pImo = static_cast<ImoParagraph*>(
+                                    ImFactory::inject(k_imo_para, m_pDocModel) );
+    add_to_model(pImo, pStyle);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoList* ImoBlocksContainer::add_list(int type, ImoStyle* pStyle)
+{
+    ImoList* pImo = static_cast<ImoList*>(ImFactory::inject(k_imo_list, m_pDocModel) );
+    pImo->set_list_type(type);
+    add_to_model(pImo, pStyle);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoContent* ImoBlocksContainer::add_content_wrapper(ImoStyle* pStyle)
+{
+    ImoContent* pImo = static_cast<ImoContent*>(
+                                    ImFactory::inject(k_imo_content, m_pDocModel) );
+    add_to_model(pImo, pStyle);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoMultiColumn* ImoBlocksContainer::add_multicolumn_wrapper(int numCols, ImoStyle* pStyle)
+{
+    ImoMultiColumn* pImo =
+        static_cast<ImoMultiColumn*>( ImFactory::inject(k_imo_multicolumn, m_pDocModel) );
+
+    add_to_model(pImo, pStyle);
+    pImo->create_columns(numCols);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore* ImoBlocksContainer::add_score(ImoStyle* pStyle)
+{
+    ImoScore* pImo = static_cast<ImoScore*>( ImFactory::inject(k_imo_score, m_pDocModel) );
+    pImo->set_version(200);   // version 2.0
+    add_to_model(pImo, pStyle);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoBlocksContainer::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle)
+{
+    pImo->set_style(pStyle);
+    ImoObj* pNode = this->is_document() ?
+                    static_cast<ImoDocument*>(this)->get_content()
+                    : this;
+    pNode->append_child_imo(pImo);
+}
+
+
+
 //=======================================================================================
 // ImoBarline implementation
 //=======================================================================================
 ImoBarline::~ImoBarline()
 {
     delete m_pMeasureInfo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoBarline& ImoBarline::clone(const ImoBarline& a)
+{
+    m_barlineType = a.m_barlineType;
+    m_fMiddle = a.m_fMiddle;
+    m_fTKChange = a.m_fTKChange;
+    m_times = a.m_times;
+    m_winged = a.m_winged;
+
+    if (a.m_pMeasureInfo)
+        m_pMeasureInfo = LOMSE_NEW TypeMeasureInfo(*a.m_pMeasureInfo);
+    else
+        m_pMeasureInfo = nullptr;
+
+    return *this;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1919,17 +2244,29 @@ Color& ImoColorDto::set_from_string(const std::string& hex)
 void ImoChord::update_cross_staff_data()
 {
     m_fCrossStaff = false;
-    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
-    it = m_relatedObjects.begin();
+
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it = notes.begin();
     ImoNote* pNote = static_cast<ImoNote*>((*it).first);
     int staff = pNote->get_staff();
 
-    for (++it; it != m_relatedObjects.end(); ++it)
+    for (++it; it != notes.end(); ++it)
     {
         ImoNote* pN = static_cast<ImoNote*>((*it).first);
         if ((m_fCrossStaff = (pN->get_staff() != staff) ))
             break;
     }
+
+//    list< pair<ImoId, ImoRelDataObj*> >::iterator it = m_relatedObjects.begin();
+//    ImoNote* pNote = static_cast<ImoNote*>(m_pDocModel->get_pointer_to_imo((*it).first));
+//    int staff = pNote->get_staff();
+//
+//    for (++it; it != m_relatedObjects.end(); ++it)
+//    {
+//        ImoNote* pN = static_cast<ImoNote*>(m_pDocModel->get_pointer_to_imo((*it).first));
+//        if ((m_fCrossStaff = (pN->get_staff() != staff) ))
+//            break;
+//    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -2131,15 +2468,22 @@ DiatonicPitch ImoClef::get_first_ledger_line_pitch()
 //=======================================================================================
 // ImoControl implementation
 //=======================================================================================
-ImoControl::~ImoControl()
+ImoControl::ImoControl(Control* ctrol)
+    : ImoInlineLevelObj(k_imo_control)
+    , m_ctrol( std::shared_ptr<Control>(ctrol) )
 {
-    delete m_ctrol;
 }
+
+////---------------------------------------------------------------------------------------
+//ImoControl::~ImoControl()
+//{
+//    delete m_ctrol;
+//}
 
 //---------------------------------------------------------------------------------------
 void ImoControl::attach_control(Control* ctrol)
 {
-    m_ctrol = ctrol;
+    m_ctrol = std::shared_ptr<Control>(ctrol);
     ctrol->set_owner_imo(this);
 }
 
@@ -2153,6 +2497,33 @@ GmoBoxControl* ImoControl::layout(LibraryScope& libraryScope, UPoint pos)
 USize ImoControl::measure()
 {
     return m_ctrol->measure();
+}
+
+//---------------------------------------------------------------------------------------
+Control* ImoControl::get_control()
+{
+    return m_ctrol.get();
+}
+
+
+//=======================================================================================
+// ImoDirection implementation
+//=======================================================================================
+ImoNoteRest* ImoDirection::get_noterest_for_transferred_dynamics()
+{
+    if (m_pDocModel->get_owner_document() && m_idNR != k_no_imoid)
+        return static_cast<ImoNoteRest*>( m_pDocModel->get_pointer_to_imo(m_idNR) );
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoDirection::mark_as_dynamics_removed(ImoNoteRest* pNR)
+{
+    if (pNR)
+        m_idNR = pNR->get_id();
+    else
+        m_idNR = k_no_imoid;
 }
 
 
@@ -2169,6 +2540,18 @@ ImoRelations::~ImoRelations()
 }
 
 //---------------------------------------------------------------------------------------
+ImoRelations& ImoRelations::clone(const ImoRelations& a)
+{
+    RelObjCloner* pCloner = m_pDocModel->get_relobj_cloner();
+    std::list<ImoRelObj*>::const_iterator it;
+    for(it = a.m_relations.begin(); it != a.m_relations.end(); ++it)
+    {
+        m_relations.emplace_back( pCloner->clone_relobj(*it) );
+    }
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoRelations::accept_visitor(BaseVisitor& v)
 {
     Visitor<ImoObj>* vObj = nullptr;
@@ -2180,7 +2563,10 @@ void ImoRelations::accept_visitor(BaseVisitor& v)
     //visit_children
     std::list<ImoRelObj*>::iterator it;
     for(it = m_relations.begin(); it != m_relations.end(); ++it)
+    {
         (*it)->accept_visitor(v);
+        (*it)->accept_visitor_for_data(v, static_cast<ImoStaffObj*>(get_parent()));
+    }
 
     if (vObj)
         vObj->end_visit(this);
@@ -2206,54 +2592,7 @@ void ImoRelations::remove_relation(ImoRelObj* pRO)
 //---------------------------------------------------------------------------------------
 void ImoRelations::add_relation(ImoRelObj* pRO)
 {
-    //attachments must be ordered by renderization priority
-
-    int priority = get_priority( pRO->get_obj_type() );
-    if (priority > 1000)
-        m_relations.push_back(pRO);
-    else
-    {
-        std::list<ImoRelObj*>::iterator it;
-        for(it = m_relations.begin(); it != m_relations.end(); ++it)
-        {
-            if (get_priority((*it)->get_obj_type()) > priority)
-                break;
-        }
-
-        if (it == m_relations.end())
-            m_relations.push_back(pRO);
-        else
-            m_relations.insert(it, pRO);
-    }
-}
-
-//---------------------------------------------------------------------------------------
-int ImoRelations::get_priority(int type)
-{
-    //not listed objects are low priority (order not important, added at end)
-    static bool fMapInitialized = false;
-    static map<int, int> priority;
-
-    if (!fMapInitialized)
-    {
-        priority[k_imo_tie] = 0;
-        priority[k_imo_beam] = 1;
-        priority[k_imo_chord] = 2;
-        priority[k_imo_tuplet] = 3;
-        priority[k_imo_volta_bracket] = 4;
-        priority[k_imo_slur] = 5;
-        priority[k_imo_fermata] = 6;
-        priority[k_imo_text_repetition_mark] = 7;
-        priority[k_imo_wedge] = 8;
-        priority[k_imo_octave_shift] = 8;
-        fMapInitialized = true;
-    };
-
-	map<int, int>::const_iterator it = priority.find( type );
-	if (it !=  priority.end())
-		return it->second;
-
-    return 5000;
+    m_relations.push_back(pRO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2274,34 +2613,21 @@ void ImoRelations::remove_from_all_relations(ImoStaffObj* pSO)
     std::list<ImoRelObj*>::iterator it = m_relations.begin();
     while (it != m_relations.end())
     {
-        if ((*it)->is_relobj())
-        {
+//        if ((*it)->is_relobj())
+//        {
             ImoRelObj* pRO = static_cast<ImoRelObj*>( *it );
             ++it;
             pSO->remove_from_relation(pRO);
-        }
-        else
-        {
-            ImoRelObj* pRO = *it;
-            ++it;
-            delete pRO;
-        }
+//        }
+//        else    // ????? Must be ImoRelObj. Moreover, code in elso is non-sense
+//        {
+//            ImoRelObj* pRO = *it;
+//            ++it;
+//            delete pRO;
+//        }
     }
     m_relations.clear();
 }
-
-////---------------------------------------------------------------------------------------
-//void ImoRelations::remove_all_attachments()
-//{
-//    std::list<ImoRelObj*>::iterator it = m_relations.begin();
-//    while (it != m_relations.end())
-//    {
-//        ImoRelObj* pRO = *it;
-//        ++it;
-//        delete pRO;
-//    }
-//    m_relations.clear();
-//}
 
 
 //=======================================================================================
@@ -2310,7 +2636,7 @@ void ImoRelations::remove_from_all_relations(ImoStaffObj* pSO)
 ImoContentObj::ImoContentObj(int objtype)
     : ImoObj(objtype)
     , Observable()
-    , m_pStyle(nullptr)
+    , m_styleId(k_no_imoid)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
     , m_txUserRefPoint(0.0f)
@@ -2323,7 +2649,7 @@ ImoContentObj::ImoContentObj(int objtype)
 ImoContentObj::ImoContentObj(ImoId id, int objtype)
     : ImoObj(id, objtype)
     , Observable()
-    , m_pStyle(nullptr)
+    , m_styleId(k_no_imoid)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
     , m_txUserRefPoint(0.0f)
@@ -2333,13 +2659,13 @@ ImoContentObj::ImoContentObj(ImoId id, int objtype)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoContentObj::add_attachment(Document* pDoc, ImoAuxObj* pAO)
+void ImoContentObj::add_attachment(ImoAuxObj* pAO)
 {
     ImoAttachments* pAuxObjs = get_attachments();
     if (!pAuxObjs)
     {
         pAuxObjs = static_cast<ImoAttachments*>(
-                        ImFactory::inject(k_imo_attachments, pDoc) );
+                        ImFactory::inject(k_imo_attachments, m_pDocModel) );
         append_child_imo(pAuxObjs);
     }
     pAuxObjs->add(pAO);
@@ -2408,13 +2734,22 @@ ImoAuxObj* ImoContentObj::find_attachment(int type)
 //---------------------------------------------------------------------------------------
 ImoStyle* ImoContentObj::get_style(bool fInherit)
 {
-    if (m_pStyle)
-        return m_pStyle;
+    if (m_styleId != k_no_imoid)
+        return get_style_imo();
 
     if (fInherit)
         return get_inherited_style();
 
     return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoContentObj::get_style_imo()
+{
+    if (m_styleId != k_no_imoid)
+        return dynamic_cast<ImoStyle*>(get_the_document()->get_pointer_to_imo(m_styleId));
+    else
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2438,7 +2773,7 @@ ImoStyle* ImoContentObj::get_inherited_style()
             break;
 
         default:
-            ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( get_contentobj_parent() );
+            ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( get_block_level_parent() );
             if (pParent)
                 return pParent->get_style();
             else if (this->is_document())
@@ -2447,9 +2782,9 @@ ImoStyle* ImoContentObj::get_inherited_style()
                 return nullptr;
     }
 
-    ImoDocument* pDoc = this->get_document();
-    if (pDoc)
-        return pDoc->find_style(name);
+    ImoDocument* pImoDoc = this->get_document();
+    if (pImoDoc)
+        return pImoDoc->find_style(name);
     else
         return nullptr;
 }
@@ -2457,17 +2792,19 @@ ImoStyle* ImoContentObj::get_inherited_style()
 //---------------------------------------------------------------------------------------
 ImoStyle* ImoContentObj::copy_style_as(const std::string& name)
 {
-    Document* pDoc = get_the_document();
-    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
+    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name(name);
-    pStyle->set_parent_style(m_pStyle);
+    pStyle->set_parent_style( get_style_imo() );
     return pStyle;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoContentObj::set_style(ImoStyle* pStyle)
 {
-    m_pStyle = pStyle;
+    if (pStyle)
+        m_styleId = pStyle->get_id();
+    else
+        m_styleId = k_no_imoid;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2591,7 +2928,10 @@ string ImoContentObj::get_string_attribute(TIntAttribute attrib)
     switch(attrib)
     {
         case k_attr_style:
-            return (m_pStyle ? m_pStyle->get_name() : "");
+        {
+            ImoStyle* pStyle = get_style_imo();
+            return (pStyle ? pStyle->get_name() : "");
+        }
         default:
             return get_attribute_value<string>(attrib);
     }
@@ -2633,7 +2973,6 @@ ImoDocument::ImoDocument(const std::string& version)
     , m_scale(1.0f)
     , m_version(version)
     , m_language("en")
-    , m_pageInfo()
 {
 }
 
@@ -2646,42 +2985,91 @@ ImoDocument::~ImoDocument()
     m_privateStyles.clear();
 }
 
-////---------------------------------------------------------------------------------------
-//int ImoDocument::get_num_content_items()
-//{
-//    ImoContent* pContent = get_content();
-//    if (pContent)
-//        return pContent->get_num_children();
-//    else
-//        return 0;
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoContentObj* ImoDocument::get_content_item(int iItem)
-//{
-//    ImoContent* pContent = get_content();
-//    if (iItem < pContent->get_num_children())
-//        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
-//    else
-//        return nullptr;
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoContent* ImoDocument::get_content()
-//{
-//    return dynamic_cast<ImoContent*>( get_child_of_type(k_imo_content) );
-//}
+//---------------------------------------------------------------------------------------
+ImoDocument& ImoDocument::clone(const ImoDocument& a)
+{
+    m_scale = a.m_scale;
+    m_version = a.m_version;
+    m_language = a.m_language;
+
+    std::list<ImoStyle*>::const_iterator it;
+    for (it = a.m_privateStyles.begin(); it != a.m_privateStyles.end(); ++it)
+        m_privateStyles.push_back( static_cast<ImoStyle*>( ImFactory::clone(*it) ));
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoDocument::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoDocument>* vThis = nullptr;
+    Visitor<ImoObj>* vObj = nullptr;
+
+    vThis = dynamic_cast<Visitor<ImoDocument>*>(&v);
+    if (vThis)
+        vThis->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    //visit_children
+    std::list<ImoStyle*>::const_iterator it;
+    for (it = m_privateStyles.begin(); it != m_privateStyles.end(); ++it)
+        (*it)->accept_visitor(v);
+    visit_children(v);
+
+    if (vThis)
+        vThis->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoDocument::has_visitable_children()
+{
+    return has_children() || m_privateStyles.size() > 0;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoDocument::initialize_object()
+{
+    add_default_styles();
+    append_child( ImFactory::inject(k_imo_page_info, m_pDocModel) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoDocument::add_default_styles()
+{
+    //AWARE: default styles are automatically added in ImoStyles constructor
+    append_child( ImFactory::inject(k_imo_styles, m_pDocModel) );
+}
 
 //---------------------------------------------------------------------------------------
 void ImoDocument::add_page_info(ImoPageInfo* pPI)
 {
-    m_pageInfo = *pPI;
+    ImoPageInfo* pInfo = get_page_info();
+    if (pInfo)
+    {
+        remove_child_imo(pInfo);
+        delete pInfo;
+    }
+
+    append_child_imo(pPI);
+}
+
+//---------------------------------------------------------------------------------------
+ImoPageInfo* ImoDocument::get_page_info()
+{
+    return static_cast<ImoPageInfo*>( get_child_of_type(k_imo_page_info) );
 }
 
 //---------------------------------------------------------------------------------------
 ImoStyles* ImoDocument::get_styles()
 {
-    return dynamic_cast<ImoStyles*>( this->get_child_of_type(k_imo_styles) );
+    return static_cast<ImoStyles*>( get_child_of_type(k_imo_styles) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -2717,9 +3105,8 @@ ImoStyle* ImoDocument::get_style_or_default(const std::string& name)
 //---------------------------------------------------------------------------------------
 ImoStyle* ImoDocument::create_style(const string& name, const string& parent)
 {
-    Document* pDoc = get_the_document();
     ImoStyle* pParent = find_style(parent);
-    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
+    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name(name);
     pStyle->set_parent_style(pParent);
     add_style(pStyle);
@@ -2729,9 +3116,8 @@ ImoStyle* ImoDocument::create_style(const string& name, const string& parent)
 //---------------------------------------------------------------------------------------
 ImoStyle* ImoDocument::create_private_style(const string& parent)
 {
-    Document* pDoc = get_the_document();
     ImoStyle* pParent = get_style_or_default(parent);
-    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
+    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("");
     pStyle->set_parent_style(pParent);
     add_private_style(pStyle);
@@ -2776,12 +3162,35 @@ void ImoArpeggio::reorganize_after_object_deletion()
 //=======================================================================================
 // ImoDynamic implementation
 //=======================================================================================
-ImoDynamic::~ImoDynamic()
+void ImoDynamic::add_param(ImoParamInfo* pParam)
 {
-    std::list<ImoParamInfo*>::iterator it;
-    for (it = m_params.begin(); it != m_params.end(); ++it)
-        delete *it;
-    m_params.clear();
+    ImoParameters* params = get_parameters();
+    if (params == nullptr)
+    {
+        params = static_cast<ImoParameters* >(ImFactory::inject(k_imo_parameters, m_pDocModel));
+        append_child_imo(params);
+    }
+    params->append_child_imo(pParam);
+}
+
+//---------------------------------------------------------------------------------------
+std::list<ImoParamInfo*> ImoDynamic::get_params()
+{
+    std::list<ImoParamInfo*> parmlist;
+    ImoParameters* params = get_parameters();
+    ImoObj::children_iterator it;
+    for (it = params->begin(); it != params->end(); ++it)
+    {
+        parmlist.push_back( static_cast<ImoParamInfo*>(*it) );
+    }
+
+    return parmlist;
+}
+
+//---------------------------------------------------------------------------------------
+ImoParameters* ImoDynamic::get_parameters()
+{
+    return static_cast<ImoParameters*>( get_child_of_type(k_imo_parameters) );
 }
 
 
@@ -2841,7 +3250,6 @@ void ImoHeading::accept_visitor(BaseVisitor& v)
 //=======================================================================================
 ImoInstrument::ImoInstrument()
     : ImoContainerObj(k_imo_instrument)
-    , m_pScore(nullptr)
     , m_name()
     , m_abbrev()
     , m_partId("")
@@ -2850,7 +3258,6 @@ ImoInstrument::ImoInstrument()
     , m_pMeasures(nullptr)
     , m_pLastMeasureInfo(nullptr)
 {
-    add_staff();
 }
 
 //---------------------------------------------------------------------------------------
@@ -2866,6 +3273,71 @@ ImoInstrument::~ImoInstrument()
 }
 
 //---------------------------------------------------------------------------------------
+ImoInstrument& ImoInstrument::clone(const ImoInstrument& a)
+{
+    m_name = a.m_name;
+    m_abbrev = a.m_abbrev;
+    m_nameStyle = a.m_nameStyle;
+    m_abbrevStyle = a.m_abbrevStyle;
+    m_partId = a.m_partId;
+
+    std::list<ImoStaffInfo*>::const_iterator it;
+    for (it = a.m_staves.begin(); it != a.m_staves.end(); ++it)
+        m_staves.push_back( static_cast<ImoStaffInfo*>( ImFactory::clone(*it) ));
+
+    m_barlineLayout = a.m_barlineLayout;
+    m_measuresNumbering = a.m_measuresNumbering;
+
+    m_pMeasures = nullptr;      //will be instantiated when the table is built, in ModelBuilder
+    if (a.m_pLastMeasureInfo)
+        m_pLastMeasureInfo = LOMSE_NEW TypeMeasureInfo(*a.m_pLastMeasureInfo);
+    else
+        m_pLastMeasureInfo = nullptr;
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::initialize_object()
+{
+    add_staff();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoInstrument>* vThis = nullptr;
+    Visitor<ImoObj>* vObj = nullptr;
+
+    vThis = dynamic_cast<Visitor<ImoInstrument>*>(&v);
+    if (vThis)
+        vThis->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    //visit_children
+    std::list<ImoStaffInfo*>::iterator it;
+    for (it = m_staves.begin(); it != m_staves.end(); ++it)
+        (*it)->accept_visitor(v);
+    visit_children(v);
+
+    if (vThis)
+        vThis->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoInstrument::has_visitable_children()
+{
+    return has_children() || m_staves.size() > 0;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::set_measures_table(ImMeasuresTable* pTable)
 {
     delete m_pMeasures;
@@ -2875,7 +3347,8 @@ void ImoInstrument::set_measures_table(ImMeasuresTable* pTable)
 //---------------------------------------------------------------------------------------
 ImoStaffInfo* ImoInstrument::add_staff()
 {
-    ImoStaffInfo* pStaff = LOMSE_NEW ImoStaffInfo();
+    ImoStaffInfo* pStaff = static_cast<ImoStaffInfo*>(
+                                ImFactory::inject(k_imo_staff_info, m_pDocModel) );
     m_staves.push_back(pStaff);
     return pStaff;
 }
@@ -2892,7 +3365,12 @@ void ImoInstrument::replace_staff_info(ImoStaffInfo* pInfo)
         ImoStaffInfo* pOld = *it;
         it = m_staves.erase(it);
         delete pOld;
-        m_staves.insert(it, LOMSE_NEW ImoStaffInfo(*pInfo));
+        m_staves.insert(it, static_cast<ImoStaffInfo*>(
+                                ImFactory::clone(pInfo)) );
+
+        //pInfo is going to be deleted. Remove id to avoid removing it from IdAssigner
+        //as this id is reused by cloned ImoStaffInfo
+        pInfo->set_id(k_no_imoid);
     }
     delete pInfo;
 }
@@ -2942,9 +3420,36 @@ void ImoInstrument::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::set_name_style(ImoStyle* style)
+{
+    if (style)
+        m_nameStyle = style->get_id();
+    else
+        m_nameStyle = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::set_abbrev_style(ImoStyle* style)
+{
+    if (style)
+        m_abbrevStyle = style->get_id();
+    else
+        m_abbrevStyle = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoInstrument::get_style_imo(ImoId id)
+{
+    if (id != k_no_imoid)
+        return dynamic_cast<ImoStyle*>(get_the_document()->get_pointer_to_imo(id));
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 ImoMusicData* ImoInstrument::get_musicdata()
 {
-    return dynamic_cast<ImoMusicData*>( get_child_of_type(k_imo_music_data) );
+    return static_cast<ImoMusicData*>( get_child_of_type(k_imo_music_data) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -2980,6 +3485,12 @@ LUnits ImoInstrument::tenths_to_logical(Tenths value, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+ImoScore* ImoInstrument::get_score()
+{
+    return static_cast<ImoScore*>(get_ancestor_of_type(k_imo_score));
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::reserve_space_for_lyrics(int iStaff, LUnits space)
 {
     ImoStaffInfo* pInfo = get_staff(iStaff);
@@ -2998,7 +3509,7 @@ ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoBarline* pImo = static_cast<ImoBarline*>(
-                                ImFactory::inject(k_imo_barline, m_pDoc) );
+                                ImFactory::inject(k_imo_barline, m_pDocModel) );
     pImo->set_type(type);
     pImo->set_visible(fVisible);
     pMD->append_child_imo(pImo);
@@ -3009,7 +3520,7 @@ ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
 ImoClef* ImoInstrument::add_clef(int type, int nStaff, bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
-    ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDoc) );
+    ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDocModel) );
     pImo->set_clef_type(type);
     pImo->set_staff(nStaff - 1);
     pImo->set_visible(fVisible);
@@ -3022,7 +3533,7 @@ ImoKeySignature* ImoInstrument::add_key_signature(int type, bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
-                                ImFactory::inject(k_imo_key_signature, m_pDoc) );
+                                ImFactory::inject(k_imo_key_signature, m_pDocModel) );
     pImo->set_key_type(type);
     pImo->set_visible(fVisible);
     pMD->append_child_imo(pImo);
@@ -3034,7 +3545,7 @@ ImoDirection* ImoInstrument::add_spacer(Tenths space)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoDirection* pImo =
-            static_cast<ImoDirection*>( ImFactory::inject(k_imo_direction, m_pDoc) );
+            static_cast<ImoDirection*>( ImFactory::inject(k_imo_direction, m_pDocModel) );
     pImo->set_width(space);
     pMD->append_child_imo(pImo);
     return pImo;
@@ -3046,7 +3557,7 @@ ImoTimeSignature* ImoInstrument::add_time_signature(int top, int bottom,
 {
     ImoMusicData* pMD = get_musicdata();
     ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
-                                ImFactory::inject(k_imo_time_signature, m_pDoc) );
+                                ImFactory::inject(k_imo_time_signature, m_pDocModel) );
     pImo->set_top_number(top);
     pImo->set_bottom_number(bottom);
     pImo->set_visible(fVisible);
@@ -3057,7 +3568,7 @@ ImoTimeSignature* ImoInstrument::add_time_signature(int top, int bottom,
 //---------------------------------------------------------------------------------------
 ImoObj* ImoInstrument::add_object(const string& ldpsource)
 {
-    ImoObj* pImo = m_pDoc->create_object_from_ldp(ldpsource);
+    ImoObj* pImo = m_pDocModel->get_owner_document()->create_object_from_ldp(ldpsource);
     ImoMusicData* pMD = get_musicdata();
     pMD->append_child_imo(pImo);
     return pImo;
@@ -3067,7 +3578,7 @@ ImoObj* ImoInstrument::add_object(const string& ldpsource)
 void ImoInstrument::add_staff_objects(const string& ldpsource)
 {
     ImoMusicData* pMD = get_musicdata();
-    m_pDoc->add_staff_objects(ldpsource, pMD);
+    m_pDocModel->get_owner_document()->add_staff_objects(ldpsource, pMD);
 }
 
 //---------------------------------------------------------------------------------------
@@ -3088,7 +3599,7 @@ ImoStaffObj* ImoInstrument::insert_staffobj_at(ImoStaffObj* pAt, const string& l
                                                ostream& reporter)
 {
     ImoStaffObj* pImo =
-        static_cast<ImoStaffObj*>( m_pDoc->create_object_from_ldp(ldpsource, reporter) );
+        static_cast<ImoStaffObj*>( m_pDocModel->get_owner_document()->create_object_from_ldp(ldpsource, reporter) );
 
     if (pImo)
         return insert_staffobj_at(pAt, pImo);
@@ -3100,7 +3611,7 @@ ImoStaffObj* ImoInstrument::insert_staffobj_at(ImoStaffObj* pAt, const string& l
 void ImoInstrument::delete_staffobj(ImoStaffObj* pSO)
 {
     //high level method. Can not be used if ColStaffObjs not build
-    ColStaffObjs* pColStaffObjs = m_pScore->get_staffobjs_table();
+    ColStaffObjs* pColStaffObjs = get_score()->get_staffobjs_table();
     if (pColStaffObjs)
     {
         //General houskeeping:
@@ -3163,7 +3674,7 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
 {
     string data = "(musicData " + ldpsource + ")";
     ImoMusicData* pObjects =
-        static_cast<ImoMusicData*>( m_pDoc->create_object_from_ldp(data, reporter) );
+        static_cast<ImoMusicData*>( m_pDocModel->get_owner_document()->create_object_from_ldp(data, reporter) );
 
     if (pObjects)
         return insert_staff_objects_at(pAt, pObjects);
@@ -3206,18 +3717,8 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
 //=======================================================================================
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
-    , m_pScore(nullptr)
     , m_joinBarlines(EJoinBarlines::k_joined_barlines)
     , m_symbol(k_group_symbol_none)
-    , m_name()
-    , m_abbrev()
-    , m_numInstrs(0)
-    , m_iFirstInstr(-1)
-{
-}
-
-//---------------------------------------------------------------------------------------
-ImoInstrGroup::~ImoInstrGroup()
 {
 }
 
@@ -3246,10 +3747,43 @@ void ImoInstrGroup::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrGroup::set_name_style(ImoStyle* style)
+{
+    if (style)
+        m_nameStyle = style->get_id();
+    else
+        m_nameStyle = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrGroup::set_abbrev_style(ImoStyle* style)
+{
+    if (style)
+        m_abbrevStyle = style->get_id();
+    else
+        m_abbrevStyle = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoInstrGroup::get_style_imo(ImoId id)
+{
+    if (id != k_no_imoid)
+        return dynamic_cast<ImoStyle*>(get_the_document()->get_pointer_to_imo(id));
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore* ImoInstrGroup::get_score()
+{
+    return static_cast<ImoScore*>(get_ancestor_of_type(k_imo_score));
+}
+
+//---------------------------------------------------------------------------------------
 ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 {
     if (iInstr < m_numInstrs && m_iFirstInstr >= 0)
-        return m_pScore->get_instrument(iInstr + m_iFirstInstr);
+        return get_score()->get_instrument(iInstr + m_iFirstInstr);
     else
         return nullptr;
 }
@@ -3257,19 +3791,19 @@ ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 //---------------------------------------------------------------------------------------
 ImoInstrument* ImoInstrGroup::get_first_instrument()
 {
-    return m_pScore->get_instrument(m_iFirstInstr);
+    return get_score()->get_instrument(m_iFirstInstr);
 }
 
 //---------------------------------------------------------------------------------------
 ImoInstrument* ImoInstrGroup::get_last_instrument()
 {
-    return m_pScore->get_instrument(m_iFirstInstr + m_numInstrs - 1);
+    return get_score()->get_instrument(m_iFirstInstr + m_numInstrs - 1);
 }
 
 //---------------------------------------------------------------------------------------
 bool ImoInstrGroup::contains_instrument(ImoInstrument* pInstr)
 {
-    int index = m_pScore->get_instr_number_for(pInstr);
+    int index = get_score()->get_instr_number_for(pInstr);
     return (index >= m_iFirstInstr) && (index < m_iFirstInstr + m_numInstrs);
 }
 
@@ -3332,7 +3866,7 @@ void ImoKeySignature::set_non_standard_key(const KeyAccidental (&acc)[7])
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoKeySignature::has_accidentals()
+bool ImoKeySignature::has_accidentals() const
 {
     if (m_fStandard)
         return m_fifths != 0;
@@ -3345,6 +3879,19 @@ bool ImoKeySignature::has_accidentals()
         }
         return false;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::set_staff(int staff)
+{
+    m_fForAllStaves = false;
+    ImoStaffObj::set_staff(staff);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::set_staff_common_for_all(int staff)
+{
+    ImoStaffObj::set_staff(staff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -3385,40 +3932,37 @@ void ImoKeySignature::transpose(const int semitones)
 //=======================================================================================
 // ImoLink implementation
 //=======================================================================================
-string& ImoLink::get_language()
+string ImoLink::get_language()
 {
     if (!m_language.empty())
         return m_language;
+    else if (m_pDocModel)
+        return m_pDocModel->get_language();
     else
-    {
-        ImoDocument* pDoc = get_document();
-        if (pDoc)
-            return pDoc->get_language();
-        else
-        {
-            LOMSE_LOG_ERROR("[ImoLink::get_language] No owner Document.");
-            throw runtime_error("[ImoLink::get_language] No owner Document.");
-        }
-    }
+        return "en";
 }
 
 
 //=======================================================================================
 // ImoList implementation
 //=======================================================================================
-ImoList::ImoList(Document* pDoc)
+ImoList::ImoList()
     : ImoBlocksContainer(k_imo_list)
     , m_listType(k_itemized)
 {
-    create_content_container(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoList::initialize_object()
+{
+    create_content_container();
 }
 
 //---------------------------------------------------------------------------------------
 ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
 {
-    Document* pDoc = get_the_document();
     ImoListItem* pImo = static_cast<ImoListItem*>(
-                            ImFactory::inject(k_imo_listitem, pDoc) );
+                            ImFactory::inject(k_imo_listitem, m_pDocModel) );
     pImo->set_style(pStyle);
     append_content_item(pImo);
     return pImo;
@@ -3428,45 +3972,21 @@ ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
 //=======================================================================================
 // ImoListItem implementation
 //=======================================================================================
-ImoListItem::ImoListItem(Document* pDoc)
+ImoListItem::ImoListItem()
     : ImoBlocksContainer(k_imo_listitem)
 {
-    create_content_container(pDoc);
 }
 
-////---------------------------------------------------------------------------------------
-//void ImoListItem::accept_visitor(BaseVisitor& v)
-//{
-//    Visitor<ImoListItem>* vLi = nullptr;
-//    Visitor<ImoObj>* vObj = nullptr;
-//
-//    vLi = dynamic_cast<Visitor<ImoListItem>*>(&v);
-//    if (vLi)
-//        vLi->start_visit(this);
-//    else
-//    {
-//        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
-//        if (vObj)
-//            vObj->start_visit(this);
-//    }
-//
-//    visit_children(v);
-//
-//    if (vLi)
-//        vLi->end_visit(this);
-//    else if (vObj)
-//        vObj->end_visit(this);
-//}
+//---------------------------------------------------------------------------------------
+void ImoListItem::initialize_object()
+{
+    create_content_container();
+}
 
 
 //=======================================================================================
 // ImoLyric implementation
 //=======================================================================================
-ImoLyric::~ImoLyric()
-{
-}
-
-//---------------------------------------------------------------------------------------
 ImoLyricsTextInfo* ImoLyric::get_text_item(int iText)
 {
     if (iText >= m_numTextItems)
@@ -3490,6 +4010,27 @@ void ImoLyric::add_text_item(ImoLyricsTextInfo* pText)
 
 
 //=======================================================================================
+// ImoLyricsTextInfo implementation
+//=======================================================================================
+void ImoLyricsTextInfo::set_syllable_style(ImoStyle* pStyle)
+{
+    if (pStyle)
+        m_styleId = pStyle->get_id();
+    else
+        m_styleId = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoLyricsTextInfo::get_syllable_style()
+{
+    if (m_styleId != k_no_imoid)
+        return dynamic_cast<ImoStyle*>(get_the_document()->get_pointer_to_imo(m_styleId));
+    else
+        return nullptr;
+}
+
+
+//=======================================================================================
 // ImoMusicData implementation
 //=======================================================================================
 ImoInstrument* ImoMusicData::get_instrument()
@@ -3501,21 +4042,26 @@ ImoInstrument* ImoMusicData::get_instrument()
 //=======================================================================================
 // ImoMultiColumn implementation
 //=======================================================================================
-ImoMultiColumn::ImoMultiColumn(Document* pDoc)
+ImoMultiColumn::ImoMultiColumn()
     : ImoBlocksContainer(k_imo_multicolumn)
 {
-    create_content_container(pDoc);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoMultiColumn::create_columns(int numCols, Document* pDoc)
+void ImoMultiColumn::initialize_object()
+{
+    create_content_container();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoMultiColumn::create_columns(int numCols)
 {
     m_widths.reserve(numCols);
     float width = 100.0f / float(numCols);
     for (int i=numCols; i > 0; i--)
     {
         append_content_item(
-            static_cast<ImoContentObj*>( ImFactory::inject(k_imo_content, pDoc) ));
+            static_cast<ImoContentObj*>( ImFactory::inject(k_imo_content, m_pDocModel) ));
         m_widths.push_back(width);
     }
 }
@@ -3643,18 +4189,12 @@ static const LongOption m_LongOptions[] =
 };
 
 //---------------------------------------------------------------------------------------
-ImoScore::ImoScore(Document* pDoc)
+ImoScore::ImoScore()
     : ImoBlockLevelObj(k_imo_score)
     , m_scaling(LOMSE_STAFF_LINE_SPACING / 10.0f)     //default staff: 7.2mm = 40 tenths
     , m_systemInfoFirst()
     , m_systemInfoOther()
 {
-    set_edit_terminal(true);
-    m_pDoc = pDoc;
-    append_child_imo( ImFactory::inject(k_imo_options, pDoc) );
-    append_child_imo( ImFactory::inject(k_imo_instruments, pDoc) );
-    set_defaults_for_system_info();
-    set_defaults_for_options();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3663,6 +4203,46 @@ ImoScore::~ImoScore()
     delete m_pColStaffObjs;
     delete_text_styles();
     delete m_pMidiTable;
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore& ImoScore::clone(const ImoScore& a)
+{
+    m_version = a.m_version;
+    m_sourceFormat = a.m_sourceFormat;
+    m_accidentalsModel = a.m_accidentalsModel;
+    m_pColStaffObjs = nullptr;
+    m_pMidiTable = nullptr;
+    m_scaling = a.m_scaling;
+    m_systemInfoFirst = a.m_systemInfoFirst;
+    m_systemInfoOther = a.m_systemInfoOther;
+
+    std::map<std::string, ImoStyle*>::const_iterator it;
+    for (it = a.m_nameToStyle.begin(); it != a.m_nameToStyle.end(); ++it)
+        m_nameToStyle[it->first] = static_cast<ImoStyle*>(
+                                        ImFactory::clone(it->second) );
+
+    m_numLyricFonts = a.m_numLyricFonts;
+
+    std::map<int, std::string>::const_iterator it2;
+    for (it2 = a.m_lyricLanguages.begin(); it2 != a.m_lyricLanguages.end(); ++it2)
+        m_lyricLanguages[it2->first] = string(it2->second);
+
+    m_staffDistance = a.m_staffDistance;
+    m_modified = a.m_modified;
+
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::initialize_object()
+{
+    set_edit_terminal(true);
+    append_child_imo( ImFactory::inject(k_imo_options, m_pDocModel) );
+    append_child_imo( ImFactory::inject(k_imo_score_titles, m_pDocModel) );
+    append_child_imo( ImFactory::inject(k_imo_instruments, m_pDocModel) );
+    set_defaults_for_system_info();
+    set_defaults_for_options();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3758,7 +4338,7 @@ void ImoScore::set_defaults_for_options()
     for (unsigned i=0; i < sizeof(m_BoolOptions)/sizeof(BoolOption); i++)
     {
         ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+                                    ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(m_BoolOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_boolean);
         pOpt->set_bool_value( m_BoolOptions[i].fBoolValue );
@@ -3769,7 +4349,7 @@ void ImoScore::set_defaults_for_options()
     for (unsigned i=0; i < sizeof(m_LongOptions)/sizeof(LongOption); i++)
     {
         ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+                                    ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(m_LongOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_number_long);
         pOpt->set_long_value( m_LongOptions[i].nLongValue );
@@ -3780,7 +4360,7 @@ void ImoScore::set_defaults_for_options()
     for (unsigned i=0; i < sizeof(m_FloatOptions)/sizeof(FloatOption); i++)
     {
         ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+                                    ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(m_FloatOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_number_float);
         pOpt->set_float_value( m_FloatOptions[i].rFloatValue );
@@ -3815,7 +4395,7 @@ void ImoScore::set_float_option(const std::string& name, float value)
      }
      else
      {
-        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_number_float);
         pOpt->set_float_value(value);
@@ -3833,7 +4413,7 @@ void ImoScore::set_bool_option(const std::string& name, bool value)
      }
      else
      {
-        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_boolean);
         pOpt->set_bool_value(value);
@@ -3851,7 +4431,7 @@ void ImoScore::set_long_option(const std::string& name, long value)
      }
      else
      {
-        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDocModel) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_number_long);
         pOpt->set_long_value(value);
@@ -3875,12 +4455,22 @@ void ImoScore::accept_visitor(BaseVisitor& v)
             vObj->start_visit(this);
     }
 
+    //visit_children
+    std::map<std::string, ImoStyle*>::const_iterator it;
+    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
+        (it->second)->accept_visitor(v);
     visit_children(v);
 
     if (vThis)
         vThis->end_visit(this);
     else if (vObj)
         vObj->end_visit(this);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoScore::has_visitable_children()
+{
+    return has_children() || m_nameToStyle.size() > 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3930,7 +4520,6 @@ int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
 //---------------------------------------------------------------------------------------
 void ImoScore::add_instrument(ImoInstrument* pInstr, const string& partId)
 {
-    pInstr->set_owner_score(this);
     if (pInstr->get_instr_id() == "")
         pInstr->set_instr_id(partId);
     ImoInstruments* pColInstr = get_instruments();
@@ -3978,7 +4567,7 @@ void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
     if (pOldOpt)
     {
         ImoOptions* pColOpts = get_options();
-        m_pDoc->on_removed_from_model(pOldOpt);
+        m_pDocModel->on_removed_from_model(pOldOpt);
         pColOpts->remove_child_imo(pOldOpt);
         delete pOldOpt;
     }
@@ -4004,7 +4593,7 @@ void ImoScore::add_sytem_info(ImoSystemInfo* pSL)
 //---------------------------------------------------------------------------------------
 ImoInstrGroups* ImoScore::get_instrument_groups()
 {
-    return dynamic_cast<ImoInstrGroups*>( get_child_of_type(k_imo_instrument_groups) );
+    return static_cast<ImoInstrGroups*>( get_child_of_type(k_imo_instrument_groups) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -4032,18 +4621,23 @@ void ImoScore::add_instruments_group(ImoInstrGroup* pGroup)
     if (!pGroups)
     {
         pGroups = static_cast<ImoInstrGroups*>(
-                        ImFactory::inject(k_imo_instrument_groups, m_pDoc) );
+                        ImFactory::inject(k_imo_instrument_groups, m_pDocModel) );
         append_child_imo(pGroups);
     }
     pGroups->append_child_imo(pGroup);
-    pGroup->set_owner_score(this);
+}
+
+//---------------------------------------------------------------------------------------
+ImoScoreTitles* ImoScore::get_titles()
+{
+    return static_cast<ImoScoreTitles*>( get_child_of_type(k_imo_score_titles) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoScore::add_title(ImoScoreTitle* pTitle)
 {
-    m_titles.push_back(pTitle);
-    append_child_imo(pTitle);
+    ImoScoreTitles* pTitles = get_titles();
+    pTitles->append_child_imo(pTitle);
 }
 
 //---------------------------------------------------------------------------------------
@@ -4091,7 +4685,7 @@ ImoStyle* ImoScore::create_default_style()
 {
     //TODO: all code related to creating/storing/findig styles should be
     //removed and use Document Styles instead
-	ImoStyle* pDefStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	ImoStyle* pDefStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pDefStyle->set_name("Default style");
 
             //font properties
@@ -4104,7 +4698,7 @@ ImoStyle* ImoScore::create_default_style()
     //TODO: How to get default values for comparisons (k_default_language) ?
     {
         //get document language
-        ImoDocument* pImoDoc = m_pDoc->get_im_root();
+        ImoDocument* pImoDoc = m_pDocModel->get_im_root();
         if (pImoDoc)    //AWARE: in unit tests there could be no ImoDoc
         {
             string& language = pImoDoc->get_language();
@@ -4175,7 +4769,7 @@ void ImoScore::add_required_text_styles()
     //For tuplets numbers
     if (find_style("Tuplet numbers") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Tuplet numbers");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 10.0f);
@@ -4188,7 +4782,7 @@ void ImoScore::add_required_text_styles()
     //For instrument and group names and abbreviations
     if (find_style("Instrument names") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Instrument names");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 14.0f);
@@ -4199,7 +4793,7 @@ void ImoScore::add_required_text_styles()
     //For metronome marks
     if (find_style("Metronome marks") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Metronome marks");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 7.0f);
@@ -4210,7 +4804,7 @@ void ImoScore::add_required_text_styles()
     //for lyrics
     if (find_style("Lyrics") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Lyrics");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size(10.0f);
@@ -4222,7 +4816,7 @@ void ImoScore::add_required_text_styles()
     //For volta brackets
     if (find_style("Volta brackets") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Volta brackets");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 10.0f);
@@ -4236,7 +4830,7 @@ void ImoScore::add_required_text_styles()
     //For measure numbers
     if (find_style("Measure numbers") == nullptr)
     {
-	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
         pStyle->set_name("Measure numbers");
         pStyle->set_parent_style(pDefStyle);
 	    pStyle->font_size( 10.0f);
@@ -4282,18 +4876,17 @@ SoundEventsTable* ImoScore::get_midi_table()
 ImoInstrument* ImoScore::add_instrument()
 {
     ImoInstrument* pInstr = static_cast<ImoInstrument*>(
-                                ImFactory::inject(k_imo_instrument, m_pDoc) );
+                                ImFactory::inject(k_imo_instrument, m_pDocModel) );
 
     ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
-                                ImFactory::inject(k_imo_sound_info, m_pDoc) );
+                                ImFactory::inject(k_imo_sound_info, m_pDocModel) );
     pInstr->add_sound_info(pInfo);
 
     ImoMusicData* pMD = static_cast<ImoMusicData*>(
-                                ImFactory::inject(k_imo_music_data, m_pDoc));
+                                ImFactory::inject(k_imo_music_data, m_pDocModel));
     pInstr->append_child_imo(pMD);
 
     add_instrument(pInstr);
-    pInstr->set_owner_score(this);
 
     return pInstr;
 }
@@ -4335,45 +4928,65 @@ void ImoScore::end_of_changes()
 //=======================================================================================
 ImoScorePlayer::ImoScorePlayer()
     : ImoControl(k_imo_score_player)
-    , m_pPlayer(nullptr)
-    , m_pScore(nullptr)
+    , m_idScore(k_no_imoid)
     , m_playLabel("Play")
     , m_stopLabel("Stop playing")
 {
 }
 
 //---------------------------------------------------------------------------------------
-ImoScorePlayer::~ImoScorePlayer()
+void ImoScorePlayer::attach_player(ScorePlayerCtrl* pPlayer)
 {
+    ImoControl::attach_control(pPlayer);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoScorePlayer::attach_player(ScorePlayerCtrl* pPlayer)
+ImoScore* ImoScorePlayer::get_score()
 {
-    m_pPlayer = pPlayer;
-    ImoControl::attach_control(m_pPlayer);
+    if (m_pDocModel && m_idScore != k_no_imoid)
+        return static_cast<ImoScore*>( m_pDocModel->get_pointer_to_imo(m_idScore) );
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScorePlayer::attach_score(ImoScore* pScore)
+{
+    if (pScore)
+        m_idScore = pScore->get_id();
+    else
+        m_idScore = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+ScorePlayerCtrl* ImoScorePlayer::get_player()
+{
+    return static_cast<ScorePlayerCtrl*>(m_ctrol.get());
 }
 
 //---------------------------------------------------------------------------------------
 void ImoScorePlayer::set_metronome_mm(int value)
 {
-    if (m_pPlayer)
-        m_pPlayer->set_metronome_mm(value);
+    ScorePlayerCtrl* pPlayer = get_player();
+    if (pPlayer)
+        pPlayer->set_metronome_mm(value);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoScorePlayer::set_play_label(const string& value)
 {
     m_playLabel = value;
-    if (m_pPlayer)
-        m_pPlayer->set_text(value);
+    ScorePlayerCtrl* pPlayer = get_player();
+    if (pPlayer)
+        pPlayer->set_text(value);
 }
 
 //---------------------------------------------------------------------------------------
 int ImoScorePlayer::get_metronome_mm()
 {
-    if (m_pPlayer)
-        return m_pPlayer->get_metronome_mm();
+    ScorePlayerCtrl* pPlayer = get_player();
+    if (pPlayer)
+        return pPlayer->get_metronome_mm();
     else
         return 60;
 }
@@ -4433,10 +5046,10 @@ ImoSoundInfo::ImoSoundInfo()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoSoundInfo::initialize_object(Document* pDoc)
+void ImoSoundInfo::initialize_object()
 {
     ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                ImFactory::inject(k_imo_midi_info, pDoc) );
+                                ImFactory::inject(k_imo_midi_info, m_pDocModel) );
     append_child_imo(pMidi);
 }
 
@@ -4447,7 +5060,6 @@ void ImoSoundInfo::set_score_instr_id(const string& value)
     ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(get_child_of_type(k_imo_midi_info));
     pMidi->set_score_instr_id(value);
 }
-
 
 //---------------------------------------------------------------------------------------
 ImoMidiInfo* ImoSoundInfo::get_midi_info()
@@ -4478,8 +5090,234 @@ ImoMidiInfo* ImoSoundChange::get_midi_info(const string& soundId)
 //=======================================================================================
 // ImoStyle implementation
 //=======================================================================================
-ImoStyle::~ImoStyle()
+void ImoStyle::set_parent_style(ImoStyle* pStyle)
 {
+    if (pStyle)
+        m_idParent = pStyle->get_id();
+    else
+        m_idParent = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoStyle::get_parent_style()
+{
+    if (m_pDocModel && m_idParent != k_no_imoid)
+        return static_cast<ImoStyle*>( m_pDocModel->get_pointer_to_imo(m_idParent) );
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_string_property(int prop, const std::string& value)
+{
+    m_stringProps[prop] = value;
+    switch(prop)
+    {
+        case ImoStyle::k_font_name:    m_modified |= k_modified_font_name;   break;
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_float_property(int prop, float value)
+{
+    m_floatProps[prop] = value;
+    switch(prop)
+    {
+        case ImoStyle::k_font_size:    m_modified |= k_modified_font_size;   break;
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_int_property(int prop, int value)
+{
+    m_intProps[prop] = value;
+    switch(prop)
+    {
+        case ImoStyle::k_font_style:    m_modified |= k_modified_font_style;   break;
+        case ImoStyle::k_font_weight:   m_modified |= k_modified_font_weight;  break;
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_lunits_property(int prop, LUnits value)
+{
+    m_lunitsProps[prop] = value;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_color_property(int prop, Color value)
+{
+    m_colorProps[prop] = value;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_margin_property(LUnits value)
+{
+    set_lunits_property(ImoStyle::k_margin_left, value);
+    set_lunits_property(ImoStyle::k_margin_top, value);
+    set_lunits_property(ImoStyle::k_margin_right, value);
+    set_lunits_property(ImoStyle::k_margin_bottom, value);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_padding_property(LUnits value)
+{
+    set_lunits_property(ImoStyle::k_padding_left, value);
+    set_lunits_property(ImoStyle::k_padding_top, value);
+    set_lunits_property(ImoStyle::k_padding_right, value);
+    set_lunits_property(ImoStyle::k_padding_bottom, value);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyle::set_border_width_property(LUnits value)
+{
+    set_lunits_property(ImoStyle::k_border_width_left, value);
+    set_lunits_property(ImoStyle::k_border_width_top, value);
+    set_lunits_property(ImoStyle::k_border_width_right, value);
+    set_lunits_property(ImoStyle::k_border_width_bottom, value);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStyle::get_float_property(int prop, float* value)
+{
+    map<int, float>::const_iterator it = m_floatProps.find(prop);
+    if (it != m_floatProps.end())
+    {
+        *value = it->second;
+        return true;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStyle::get_lunits_property(int prop, LUnits* value)
+{
+    map<int, LUnits>::const_iterator it = m_lunitsProps.find(prop);
+    if (it != m_lunitsProps.end())
+    {
+        *value = it->second;
+        return true;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStyle::get_string_property(int prop, string* value)
+{
+    map<int, string>::const_iterator it = m_stringProps.find(prop);
+    if (it != m_stringProps.end())
+    {
+        *value = it->second;
+        return true;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStyle::get_int_property(int prop, int* value)
+{
+    map<int, int>::const_iterator it = m_intProps.find(prop);
+    if (it != m_intProps.end())
+    {
+        *value = it->second;
+        return true;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStyle::get_color_property(int prop, Color* value)
+{
+    map<int, Color>::const_iterator it = m_colorProps.find(prop);
+    if (it != m_colorProps.end())
+    {
+        *value = it->second;
+        return true;
+    }
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+float ImoStyle::get_float_property(int prop)
+{
+    map<int, float>::const_iterator it = m_floatProps.find(prop);
+    if (it != m_floatProps.end())
+        return it->second;
+    else if (m_idParent != k_no_imoid)
+        return get_parent_style()->get_float_property(prop);
+    else
+    {
+        LOMSE_LOG_ERROR("Aborting. Style has no parent.");
+        throw std::runtime_error( "[ImoStyle::get_float_property]. No parent" );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ImoStyle::get_lunits_property(int prop)
+{
+    map<int, LUnits>::const_iterator it = m_lunitsProps.find(prop);
+    if (it != m_lunitsProps.end())
+        return it->second;
+    else if (m_idParent != k_no_imoid)
+        return get_parent_style()->get_lunits_property(prop);
+    else
+    {
+        LOMSE_LOG_ERROR("Aborting. Style has no parent.");
+        throw std::runtime_error( "[ImoStyle::get_lunits_property]. No parent" );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+const std::string& ImoStyle::get_string_property(int prop)
+{
+    map<int, string>::const_iterator it = m_stringProps.find(prop);
+    if (it != m_stringProps.end())
+        return it->second;
+    else if (m_idParent != k_no_imoid)
+        return get_parent_style()->get_string_property(prop);
+    else
+    {
+        LOMSE_LOG_ERROR("Aborting. Style has no parent.");
+        throw std::runtime_error( "[ImoStyle::get_string_property]. No parent" );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoStyle::get_int_property(int prop)
+{
+    map<int, int>::const_iterator it = m_intProps.find(prop);
+    if (it != m_intProps.end())
+        return it->second;
+    else if (m_idParent != k_no_imoid)
+        return get_parent_style()->get_int_property(prop);
+    else
+    {
+        LOMSE_LOG_ERROR("Aborting. Style has no parent.");
+        throw std::runtime_error( "[ImoStyle::get_int_property]. No parent" );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+Color ImoStyle::get_color_property(int prop)
+{
+    map<int, Color>::const_iterator it = m_colorProps.find(prop);
+    if (it != m_colorProps.end())
+        return it->second;
+    else if (m_idParent != k_no_imoid)
+        return get_parent_style()->get_color_property(prop);
+    else
+        throw std::runtime_error( "[ImoStyle::get_color_property]. No parent" );
 }
 
 //---------------------------------------------------------------------------------------
@@ -5259,21 +6097,37 @@ double ImoStaffInfo::get_applied_spacing_factor() const
 //=======================================================================================
 // ImoStyles implementation
 //=======================================================================================
-ImoStyles::ImoStyles(Document* pDoc)
+ImoStyles::ImoStyles()
     : ImoSimpleObj(k_imo_styles)
 {
-    m_pDoc = pDoc;
-    create_default_styles();
 }
 
 //---------------------------------------------------------------------------------------
 ImoStyles::~ImoStyles()
 {
-    delete_text_styles();
+    delete_styles();
 }
 
 //---------------------------------------------------------------------------------------
-void ImoStyles::delete_text_styles()
+ImoStyles& ImoStyles::clone(const ImoStyles& a)
+{
+    map<std::string, ImoStyle*>::const_iterator it;
+    for (it = a.m_nameToStyle.begin(); it != a.m_nameToStyle.end(); ++it)
+    {
+        m_nameToStyle[it->first] = static_cast<ImoStyle*>(
+                                        ImFactory::clone(it->second) );
+    }
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyles::initialize_object()
+{
+    create_default_styles();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyles::delete_styles()
 {
     map<std::string, ImoStyle*>::const_iterator it;
     for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
@@ -5338,20 +6192,14 @@ ImoStyle* ImoStyles::get_default_style()
     return find_style("Default style");
 }
 
-////---------------------------------------------------------------------------------------
-//ImoStyle* ImoStyles::get_default_style(ImoObj* pImo)
-//{
-//    return find_style("Default style");
-//}
-
 //---------------------------------------------------------------------------------------
 void ImoStyles::create_default_styles()
 {
-    //AWARE: When modifying this method yo will also to modify method
+    //AWARE: When modifying this method you will have to modify also method
     //       ImoStyle::is_default_style_with_default_values()
 
     // Default style
-	ImoStyle* pDefStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+	ImoStyle* pDefStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pDefStyle->set_name("Default style");
 
         //font properties
@@ -5404,7 +6252,7 @@ void ImoStyles::create_default_styles()
 
 
     //Headers 1-6
-    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-1");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 21.0f);
@@ -5413,7 +6261,7 @@ void ImoStyles::create_default_styles()
     add_style(pStyle);
     pStyle->reset_style_modified();
 
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-2");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 17.0f);
@@ -5423,7 +6271,7 @@ void ImoStyles::create_default_styles()
     add_style(pStyle);
     pStyle->reset_style_modified();
 
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-3");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 14.0f);
@@ -5433,7 +6281,7 @@ void ImoStyles::create_default_styles()
     add_style(pStyle);
     pStyle->reset_style_modified();
 
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-4");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 12.0f);
@@ -5443,7 +6291,7 @@ void ImoStyles::create_default_styles()
     add_style(pStyle);
     pStyle->reset_style_modified();
 
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-5");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 12.0f);
@@ -5454,7 +6302,7 @@ void ImoStyles::create_default_styles()
     add_style(pStyle);
     pStyle->reset_style_modified();
 
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Heading-6");
     pStyle->set_parent_style(pDefStyle);
     pStyle->font_size( 12.0f);
@@ -5466,7 +6314,7 @@ void ImoStyles::create_default_styles()
     pStyle->reset_style_modified();
 
     //table
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Table");
     pStyle->set_parent_style(pDefStyle);
     pStyle->margin_bottom(300);
@@ -5475,7 +6323,7 @@ void ImoStyles::create_default_styles()
     pStyle->reset_style_modified();
 
     //paragraph
-    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+    pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDocModel));
     pStyle->set_name("Paragraph");
     pStyle->set_parent_style(pDefStyle);
     pStyle->margin_bottom(300);
@@ -5483,6 +6331,19 @@ void ImoStyles::create_default_styles()
     pStyle->reset_style_modified();
 }
 
+
+//=======================================================================================
+// ImoBoxInline implementation
+//=======================================================================================
+//methods for adding inline-level content
+LOMSE_IMPLEMENT_INLINE_LEVEL_INTERFACE(ImoBoxInline)
+
+
+//=======================================================================================
+// ImoInlinesContainer implementation
+//=======================================================================================
+//methods for adding inline-level content
+LOMSE_IMPLEMENT_INLINE_LEVEL_INTERFACE(ImoInlinesContainer)
 
 
 //=======================================================================================
@@ -5595,25 +6456,31 @@ ImoSlurData::ImoSlurData(ImoSlurDto* pDto)
     , m_fStart( pDto->is_start() )
     , m_slurNum( pDto->get_slur_number() )
     , m_orientation(k_orientation_default)
-    , m_pBezier(nullptr)
 {
     if (pDto->get_bezier())
-        m_pBezier = LOMSE_NEW ImoBezierInfo( pDto->get_bezier() );
-}
+        append_child_imo( ImFactory::clone(pDto->get_bezier()) );
 
-//---------------------------------------------------------------------------------------
-ImoSlurData::~ImoSlurData()
-{
-    delete m_pBezier;
 }
 
 //---------------------------------------------------------------------------------------
 ImoBezierInfo* ImoSlurData::add_bezier()
 {
-    if (!m_pBezier)
-        m_pBezier = LOMSE_NEW ImoBezierInfo(nullptr);
-    return m_pBezier;
+    ImoBezierInfo* pBezier = get_bezier();
+    if (!pBezier)
+    {
+        pBezier = static_cast<ImoBezierInfo*>(
+                        ImFactory::inject(k_imo_bezier_info, m_pDocModel) );
+        append_child_imo(pBezier);
+    }
+    return pBezier;
 }
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlurData::get_bezier()
+{
+    return dynamic_cast<ImoBezierInfo*>(get_first_child());
+}
+
 
 //=======================================================================================
 // ImoSlurDto implementation
@@ -5644,16 +6511,46 @@ ImoTableBody* ImoTable::get_body()
     return static_cast<ImoTableBody*>( get_child_of_type(k_imo_table_body) );
 }
 
+//---------------------------------------------------------------------------------------
+void ImoTable::add_column_style(ImoStyle* pStyle)
+{
+    m_colStyles.push_back(pStyle ? pStyle->get_id() : k_no_imoid);
+}
+
+//---------------------------------------------------------------------------------------
+std::list<ImoStyle*> ImoTable::get_column_styles()
+{
+    std::list<ImoStyle*> styles;
+    for (auto id : m_colStyles)
+        styles.push_back( get_style_imo(id) );
+
+    return styles;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoTable::get_style_imo(ImoId id)
+{
+    if (id != k_no_imoid)
+        return dynamic_cast<ImoStyle*>(get_the_document()->get_pointer_to_imo(id));
+    else
+        return nullptr;
+}
+
 
 //=======================================================================================
 // ImoTableCell implementation
 //=======================================================================================
-ImoTableCell::ImoTableCell(Document* pDoc)
+ImoTableCell::ImoTableCell()
     : ImoBlocksContainer(k_imo_table_cell)
     , m_rowspan(1)
     , m_colspan(1)
 {
-    create_content_container(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTableCell::initialize_object()
+{
+    create_content_container();
 }
 
 ////---------------------------------------------------------------------------------------
@@ -5684,17 +6581,23 @@ ImoTableCell::ImoTableCell(Document* pDoc)
 //=======================================================================================
 // ImoTableRow implementation
 //=======================================================================================
-ImoTableRow::ImoTableRow(Document* pDoc)
+ImoTableRow::ImoTableRow()
     : ImoBlocksContainer(k_imo_table_row)
 {
-    create_content_container(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTableRow::initialize_object()
+{
+    create_content_container();
 }
 
 //---------------------------------------------------------------------------------------
 ImoStyle* ImoTableRow::get_style(bool fInherit)
 {
-    if (m_pStyle)
-        return m_pStyle;
+    ImoStyle* pStyle = get_style_imo();
+    if (pStyle)
+        return pStyle;
     else
     {
         ImoObj* pParent = get_parent();
@@ -5804,10 +6707,9 @@ ImoTieData::ImoTieData(ImoTieDto* pDto)
     , m_fStart( pDto->is_start() )
     , m_tieNum( pDto->get_tie_number() )
     , m_orientation(k_orientation_default)
-    , m_pBezier(nullptr)
 {
     if (pDto->get_bezier())
-        m_pBezier = LOMSE_NEW ImoBezierInfo( pDto->get_bezier() );
+        append_child_imo( ImFactory::clone(pDto->get_bezier()) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -5816,23 +6718,28 @@ ImoTieData::ImoTieData()
     , m_fStart(false)
     , m_tieNum(0)
     , m_orientation(k_orientation_default)
-    , m_pBezier(nullptr)
 {
-}
-
-//---------------------------------------------------------------------------------------
-ImoTieData::~ImoTieData()
-{
-    delete m_pBezier;
 }
 
 //---------------------------------------------------------------------------------------
 ImoBezierInfo* ImoTieData::add_bezier()
 {
-    if (!m_pBezier)
-        m_pBezier = LOMSE_NEW ImoBezierInfo(nullptr);
-    return m_pBezier;
+    ImoBezierInfo* pBezier = get_bezier();
+    if (!pBezier)
+    {
+        pBezier = static_cast<ImoBezierInfo*>(
+                        ImFactory::inject(k_imo_bezier_info, m_pDocModel) );
+        append_child_imo(pBezier);
+    }
+    return pBezier;
 }
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoTieData::get_bezier()
+{
+    return dynamic_cast<ImoBezierInfo*>(get_first_child());
+}
+
 
 //=======================================================================================
 // ImoTieDto implementation

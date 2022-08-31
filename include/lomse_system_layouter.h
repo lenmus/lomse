@@ -49,8 +49,8 @@ class ScoreMeter;
 class ShapesCreator;
 class SpacingAlgorithm;
 class SystemLayouter;
-class TypeMeasureInfo;
 class VerticalProfile;
+struct TypeMeasureInfo;
 
 struct AuxObjContext;
 enum EAuxShapesAlignmentScope : int;

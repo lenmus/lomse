@@ -60,9 +60,10 @@ CheckboxCtrl::CheckboxCtrl(LibraryScope& libScope, Control* pParent,
     , m_status(false)
     , m_nCurVertex(0)
 {
-    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
+    pStyle = (pStyle == nullptr ? create_default_style() : pStyle);
+    m_styleId = pStyle->get_id();
 
-    m_normalColor = m_style->color();
+    m_normalColor = pStyle->color();
     m_prevColor = m_normalColor;
     m_currentColor = m_normalColor;
 
@@ -101,7 +102,7 @@ USize CheckboxCtrl::measure()
 GmoBoxControl* CheckboxCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
-    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
+    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, get_style());
     return m_pMainBox;
 }
 
@@ -194,18 +195,6 @@ void CheckboxCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
         pDrawer->add_path(*this);
         pDrawer->end_path();
     }
-}
-
-//---------------------------------------------------------------------------------------
-void CheckboxCtrl::select_font()
-{
-    TextMeter meter(m_libraryScope);
-    meter.select_font(m_language,
-                      m_style->font_file(),
-                      m_style->font_name(),
-                      m_style->font_size(),
-                      m_style->is_bold(),
-                      m_style->is_italic() );
 }
 
 //---------------------------------------------------------------------------------------

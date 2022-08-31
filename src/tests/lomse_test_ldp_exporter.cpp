@@ -119,8 +119,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline end)" );
+        string expected("(barline end)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, barline_1)
@@ -128,7 +128,7 @@ SUITE(LdpExporterTest)
         //@01. barline id
 
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6) (instrument#100 (musicData (barline#105 end))))");
+        doc.from_string("(score (vers 1.6) (instrument#90L (musicData#101L (barline#105 end))))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -138,8 +138,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline#105 end)" );
+        string expected("(barline#105 end)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, barline_2)
@@ -153,8 +153,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline double middle)" );
+        string expected("(barline double middle)" );
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
@@ -169,8 +169,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline startRepetition (visible no))" );
+        string expected("(barline startRepetition (visible no))" );
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
@@ -188,8 +188,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline end (text \"Hello\"))" );
+        string expected("(barline end (text \"Hello\"))" );
+        CHECK( check_result(source, expected) );
     }
 
     // @beam ----------------------------------------------------------------------------
@@ -199,7 +199,7 @@ SUITE(LdpExporterTest)
         //@00. beam
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument#100 (musicData "
+            "(score (vers 1.6)(instrument#90L (musicData#101L "
             "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)(barline))) )"
             );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -210,7 +210,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "167: \"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)(n g5 s v1 p1 (beam 106 ++))"
             "(n f5 s v1 p1 (beam 106 =-))(n g5 e v1 p1 (beam 106 -))(barline simple))";
@@ -221,7 +220,7 @@ SUITE(LdpExporterTest)
     {
         //@01. chord: beam only in base note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
+        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#101L (clef G)"
             "(chord (n e4 e. g+ (stem up))(n g4 e.))"
             "(chord (n d4 s g- (stem up))(n f4 s))"
             ")))" );
@@ -233,7 +232,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
             "(chord (n e4 e. v1 p1 (stem up)(beam 111 +))(n g4 e. v1 p1))"
             "(chord (n d4 s v1 p1 (stem up)(beam 111 -b))(n f4 s v1 p1)))";
@@ -244,7 +242,7 @@ SUITE(LdpExporterTest)
     {
         //@02. chord after goBack: beam only in base note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
+        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#101L (clef G)"
             "(n c4 q)(n e4 q)(goBack 64)"
             "(chord (n e4 e. g+ v2 (stem up))(n g4 e. v2))"
             "(chord (n d4 s g- v2 (stem up))(n f4 s v2))"
@@ -257,7 +255,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
             "(n c4 q v1 p1)(n e4 q v1 p1)(goFwd 64 v2 p1)"
             "(chord (n e4 e. v2 p1 (stem up)(beam 114 +))(n g4 e. v2 p1))"
@@ -269,7 +266,7 @@ SUITE(LdpExporterTest)
     {
         //@03. beamed notes must be generated in sequence
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#100 (musicData "
+        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#101L "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(goBack start)(n c2 w v3)(barline)"
             ")))" );
@@ -281,7 +278,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "238: \"" << source << "\"" << endl;
         string expected = "(musicData (clef F4 p1)"
             "(n e3 e v1 p1 (beam 106 +))(n c2 w v3 p1)(n g3 e v1 p1 (beam 106 =))"
             "(n c4 e v1 p1 (beam 106 -))(barline simple))";
@@ -301,7 +297,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pClef);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(clef F4 p1)" );
+        string expected("(clef F4 p1)" );
+        CHECK( check_result(source, expected) );
         delete pClef;
     }
 
@@ -317,7 +314,8 @@ SUITE(LdpExporterTest)
         exporter.set_add_id(true);
         string source = exporter.get_source(pClef);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(clef#27 F4 p1)" );
+        string expected("(clef#27 F4 p1)" );
+        CHECK( check_result(source, expected) );
         delete pClef;
     }
 
@@ -332,8 +330,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pClef);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(clef F4 (symbolSize cue) p1)" );
+        string expected("(clef F4 (symbolSize cue) p1)" );
+        CHECK( check_result(source, expected) );
         delete pClef;
     }
 
@@ -351,8 +349,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(spacer 53.2 p1)" );
+        string expected( "(spacer 53.2 p1)" );
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
@@ -373,8 +371,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(spacer#123 50 p1)" );
+        string expected("(spacer#123 50 p1)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, direction_2)
@@ -391,8 +389,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(dir 50 p1 (text \"Hello\"))" );
+        string expected("(spacer 50 p1 (text \"Hello\"))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, direction_3)
@@ -409,8 +407,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(dir empty)" );
+        string expected("(dir empty)" );
+        CHECK( check_result(source, expected) );
     }
 
 
@@ -434,7 +432,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(key C)"
             "(n g4 q v1 p1 (dyn \"fff\" below))"
@@ -465,8 +462,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument P1 (staves 1)(musicData))" );
+        string expected("(instrument P1 (staves 1)(musicData))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_1)
@@ -484,7 +481,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(instrument P1 (staves 1)(staff 1 (staffType ossia)"
             "(staffLines 5)(staffSpacing 250)(staffDistance 2000)"
             "(lineThickness 15))(musicData))";
@@ -503,8 +499,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument P1 (staves 1)(infoMIDI 9 12)(musicData))" );
+        string expected("(instrument P1 (staves 1)(infoMIDI 9 12)(musicData))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_3)
@@ -519,8 +515,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument P1 (name \"Guitar\")(abbrev \"G.\")(staves 1)(musicData))" );
+        string expected("(instrument P1 (name \"Guitar\")(abbrev \"G.\")(staves 1)(musicData))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_4)
@@ -539,7 +535,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(instrument P1 (name \"Guitar\" (style \"Best1\"))"
             "(abbrev \"G.\" (style \"Best2\"))(staves 1)(musicData))";
         CHECK( check_result(source, expected) );
@@ -558,8 +553,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(key A)" );
+        string expected("(key A)" );
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
@@ -567,7 +562,7 @@ SUITE(LdpExporterTest)
     {
         //@01 key id
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument#100 (musicData (key#123 A))))");
+        doc.from_string("(score (vers 2.0) (instrument#90L (musicData#101L (key#123 A))))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -577,8 +572,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(key#123 A)" );
+        string expected("(key#123 A)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, key_2)
@@ -595,8 +590,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(key A (text \"Hello\"))" );
+        string expected("(key A (text \"Hello\"))" );
+        CHECK( check_result(source, expected) );
     }
 
     // LenmusdocLdpGenerator
@@ -622,13 +617,13 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData (clef G p1)"
+        string expected("(musicData (clef G p1)"
             "(n c4 q v1 p1 (lyric 1 \"This\")(lyric 2 \"A\"))"
             "(n d4 q v1 p1 (lyric 1 \"is\" \"a\")(lyric 2 \"se\" -))"
             "(n e4 q v1 p1 (lyric 1 \"line\")(lyric 2 \"cond\"))"
             "(n f4 q v1 p1 (lyric 1 \"one.\" above)(lyric 2 \"line.\" below))"
             "(barline simple))" );
+        CHECK( check_result(source, expected) );
     }
 
     //@ metronome -----------------------------------------------------------------------
@@ -650,8 +645,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome q 55)" );
+        string expected("(metronome q 55)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, metronome_1)
@@ -672,8 +667,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome#123 q q.)" );
+        string expected("(metronome#123 q q.)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, metronome_2)
@@ -691,8 +686,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome q 80 parenthesis)" );
+        string expected("(metronome q 80 parenthesis)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, metronome_3)
@@ -710,8 +705,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome q 80 (visible no))" );
+        string expected("(metronome q 80 (visible no))" );
+        CHECK( check_result(source, expected) );
     }
 
     // MusicDataLdpGenerator ------------------------------------------------------------
@@ -731,7 +726,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData)" );
+        string expected("(musicData)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_1)
@@ -750,8 +746,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData (clef G p1)(r q v1 p1)(barline simple)(n c4 q v1 p1))" );
+        string expected("(musicData (clef G p1)(r q v1 p1)(barline simple)(n c4 q v1 p1))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_2)
@@ -771,8 +767,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData (clef C3 p1)(n f4 e v1 p1))" );
+        string expected("(musicData (clef C3 p1)(n f4 e v1 p1))" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_3)
@@ -790,7 +786,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         CHECK( source ==
             "(musicData (clef G p1)(n c4 q v1 p1)(goFwd 32 v1 p1)(n a3 e v1 p1))" );
     }
@@ -812,7 +807,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData "
             "(clef G p1)(clef F4 p2)(key C)(time 2 4)(n c4 e v1 p1)"
@@ -835,7 +829,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
             "(n c5 q v1 p1)"
             "(chord (n c4 e v1 p1)(n e4 e v1 p1)(n g4 e v1 p1)))";
@@ -858,7 +851,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
             "(goFwd 64 v1 p1)"
             "(chord (n c4 e v1 p1)(n e4 e v1 p1)(n g4 e v1 p1)))";
@@ -870,7 +862,7 @@ SUITE(LdpExporterTest)
         //multimetrics import 1.6 / export 2.0 example
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument#100 (musicData "
+            "(score (vers 1.6)(instrument#90L (musicData#101L "
             "(clef G)(key G)(time 3 4)(chord (n g3 q)(n d4 q))(r e)(n g5 e)"
             "(n g5 s g+)(n f5 s)(n g5 e g-)(barline)"
             "(chord (n a4 q)(n e5 q))(r q)(chord (n d4 q)(n g4 q)(n f5 q))"
@@ -889,7 +881,6 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)(key G)(time 3 4)(chord (n g3 q v1 p1)(n d4 q v1 p1))"
             "(r e v1 p1)(n g5 e v1 p1)(n g5 s v1 p1 (beam 115 ++))(n f5 s v1 p1 (beam 115 =-))"
@@ -907,7 +898,7 @@ SUITE(LdpExporterTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
-            "(score (vers 1.6)(instrument#100 (musicData "
+            "(score (vers 1.6)(instrument#90L (musicData#101L "
             "(clef G)(n c4 e (t + 3 2))(n e4 e)(n g4 e (t -))"
             "))) ))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -916,12 +907,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(n c4 e v1 p1 (tm 2 3)(t 106 + 3 2))(n e4 e v1 p1 (tm 2 3))"
             "(n g4 e v1 p1 (tm 2 3)(t 106 -))"
             ")))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -941,8 +930,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(n +d4 q v1 p1)" );
+        string expected("(n +d4 q v1 p1)" );
+        CHECK( check_result(source, expected) );
     }
 
     // RestLdpGenerator -----------------------------------------------------------------
@@ -961,10 +950,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(n c4 e v1 p1)(goFwd e v1 p1)(n e4 e v1 p1))))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -986,10 +973,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(style \"Score1\")"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1007,12 +992,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)"
             "(defineStyle \"Score1\" (font-name \"Arial\")(font-size 14pt)"
             "(font-style normal)(font-weight bold)(color #00fe0f7f))"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1030,12 +1013,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(score (vers 2.0)"
             "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1054,13 +1035,11 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(score (vers 2.0)"
             "(systemLayout first (systemMargins 0 0 1700 1200))"
             "(systemLayout other (systemMargins 0 0 1800 2000))"
             "(instrument P1 (staves 1)(musicData (clef G p1))))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1080,14 +1059,12 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(score (vers 2.0)(systemLayout first (systemMargins 0 0 1500 1500))"
             "(systemLayout other (systemMargins 0 0 1500 1000))"
             "(opt Score.FillPageWithEmptyStaves true)"
             "(opt StaffLines.Truncate 0)"
             "(instrument P1 (staves 1)(musicData)))";
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1115,10 +1092,8 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
             "(dir 0 p1 (text \"Largo\" (style \"Notations\")(dx -20)(dy -45))))";
-
         CHECK( check_result(source, expected) );
     }
 #endif
@@ -1143,10 +1118,6 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         string expected = "(musicData (n c4 q v1 p1 (slur 1 start))"
             "(n e4 q v1 p1 (slur 1 stop)))";
-
-//        cout << test_name() << endl;
-//        cout << test_name() << endl << "\"" << source << "\"" << endl;
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1173,9 +1144,6 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         string expected = "(musicData (n c4 q v1 p1 (tie 1 start))"
             "(n c4 q v1 p1 (tie 1 stop)))";
-
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-
         CHECK( check_result(source, expected) );
     }
 
@@ -1193,8 +1161,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(time single-number 10)" );
+        string expected("(time single-number 10)" );
+        CHECK( check_result(source, expected) );
         delete pImo;
     }
 
@@ -1215,8 +1183,8 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(time#123 5 4)" );
+        string expected("(time#123 5 4)" );
+        CHECK( check_result(source, expected) );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, time_signature_2)
@@ -1233,8 +1201,8 @@ SUITE(LdpExporterTest)
         LdpExporter exporter;
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(time common (text \"Hello\"))" );
+        string expected("(time common (text \"Hello\"))" );
+        CHECK( check_result(source, expected) );
     }
 
 //    // score ----------------------------------------------------------------------------
@@ -1325,7 +1293,7 @@ SUITE(LdpExporterTest)
         //@00. tuplet v1.6: tm implicit
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument#100 (musicData (clef G)"
+            "(score (vers 1.6)(instrument#90L (musicData#101L (clef G)"
             "(n c4 e (t 100 + 2 3)(beam 110 +))"
             "(n d4 s (beam 110 =+))"
             "(n c4 s (beam 110 ==))"
@@ -1339,13 +1307,12 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(beam 112 +)(t 107 + 2 3))"
+            "(n c4 e v1 p1 (tm 3 2)(t 107 + 2 3)(beam 112 +))"
             "(n d4 s v1 p1 (tm 3 2)(beam 112 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
+            "(n b3 e v1 p1 (tm 3 2)(t 107 -)(beam 112 --))"
             ")";
         CHECK( check_result(source, expected) );
     }
@@ -1355,7 +1322,7 @@ SUITE(LdpExporterTest)
         //@01. tuplet v2.0: tm explicit
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 2.0)(instrument#100 (musicData (clef G)"
+            "(score (vers 2.0)(instrument#90L (musicData#101L (clef G)"
             "(n c4 e (t 100 + 2 3)(tm 3 2)(beam 131 +))"
             "(n d4 s (beam 131 =+)(tm 3 2))"
             "(n c4 s (beam 131 ==)(tm 3 2))"
@@ -1369,13 +1336,12 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(beam 112 +)(t 107 + 2 3))"
+            "(n c4 e v1 p1 (tm 3 2)(t 107 + 2 3)(beam 112 +))"
             "(n d4 s v1 p1 (tm 3 2)(beam 112 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
+            "(n b3 e v1 p1 (tm 3 2)(t 107 -)(beam 112 --))"
             ")";
         CHECK( check_result(source, expected) );
     }
@@ -1387,7 +1353,7 @@ SUITE(LdpExporterTest)
         //@01 Note
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
-            "(instrument#100 (staves 2)(musicData (n c4 q p1 (stem down))"
+            "(instrument#90L (staves 2)(musicData#101L (n c4 q p1 (stem down))"
             "(n c4 q (slur 1 start))(n e4 q (slur 1 stop))"
             "(n c4 q (tie 2 start))(n c4 q (tie 2 stop))"
             "(n c4 q (lyric 1 \"This\")(lyric 2 \"A\"))"
@@ -1407,9 +1373,6 @@ SUITE(LdpExporterTest)
             "(n c4 q v1 p1 (lyric 1 \"This\")(lyric 2 \"A\"))"
             "(n g5 s v1 p1 (beam 126 ++))(n f5 s v1 p1 (beam 126 =-))"
             "(n g5 e v1 p1 (beam 126 -)))";
-
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-
         CHECK( check_result(source, expected) );
     }
 

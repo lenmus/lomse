@@ -20,11 +20,12 @@ using namespace std;
 using namespace lomse;
 
 
-class Element : virtual public TreeNode<Element>
+class Element : public TreeNode<Element>
 {
 public:
-    Element(const std::string& v) : m_value(v) {}
+    Element(const std::string& v) : TreeNode<Element>(), m_value(v) {}
     virtual ~Element() {}
+    Element(const Element& x) : TreeNode<Element>(), m_value(x.m_value) {}
 
     std::string m_value;
 };
@@ -43,11 +44,11 @@ public:
     }
 
     Tree<Element> m_tree;
-    Element* a;
-    Element* b;
-    Element* c;
+    Element* a1;
+    Element* b1;
+    Element* c1;
     Element* d;
-    Element* e;
+    Element* e1;    //renamed as 'e1' to avoid warning "declaration of ‘e’ shadows a member of ‘SuiteTreeTest ...
     Element* f;
     Element* g;
     Element* h;
@@ -64,26 +65,23 @@ public:
     Element* s;
     Element* t;
 
-//  A ---+--- B ------- C
-//       |
-//       +--- D ---+--- E ---+--- F
-//       |         |         +--- G
-//       |         +--- H
-//       |
-//       +--- I ---+--- J ---+--- K
-//                 |         +--- L ---+--- M
-//                 |                   +--- N
-//                 +--- O
-//                 +--- P ---+--- Q
-//                           +--- R ------- S
-//                           +--- T
+//                      A
+//                      |
+//    B --------------- D --------------------- I
+//    |                 |                       |
+//    C          E ------------ H        J ---- O ---- P
+//               |                       |             |
+//            F --- G                 K --- L     Q -- R -- T
+//                                          |          |
+//                                       M --- N       S
+
     void CreateTree()
     {
-        a = LOMSE_NEW Element("A");
-        b = LOMSE_NEW Element("B");
-        c = LOMSE_NEW Element("C");
+        a1 = LOMSE_NEW Element("A");
+        b1 = LOMSE_NEW Element("B");
+        c1 = LOMSE_NEW Element("C");
         d = LOMSE_NEW Element("D");
-        e = LOMSE_NEW Element("E");
+        e1 = LOMSE_NEW Element("E");
         f = LOMSE_NEW Element("F");
         g = LOMSE_NEW Element("G");
         h = LOMSE_NEW Element("H");
@@ -99,15 +97,15 @@ public:
         r = LOMSE_NEW Element("R");
         s = LOMSE_NEW Element("S");
         t = LOMSE_NEW Element("T");
-        m_tree.set_root(a);
-        a->append_child(b);
-        b->append_child(c);
-        a->append_child(d);
-        d->append_child(e);
-        e->append_child(f);
-        e->append_child(g);
+        m_tree.set_root(a1);
+        a1->append_child(b1);
+        b1->append_child(c1);
+        a1->append_child(d);
+        d->append_child(e1);
+        e1->append_child(f);
+        e1->append_child(g);
         d->append_child(h);
-        a->append_child(i);
+        a1->append_child(i);
         i->append_child(j);
         j->append_child(k);
         j->append_child(l);
@@ -123,11 +121,11 @@ public:
 
     void DeleteTestData()
     {
-        delete a;
-        delete b;
-        delete c;
+        delete a1;
+        delete b1;
+        delete c1;
         delete d;
-        delete e;
+        delete e1;
         delete f;
         delete g;
         delete h;
@@ -143,6 +141,27 @@ public:
         delete r;
         delete s;
         delete t;
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
+    bool check_path(Tree<Element>& tree, const string& expected)
+    {
+        stringstream path;
+        Tree<Element>::depth_first_iterator it;
+        for (it=tree.begin(); it != tree.end(); ++it)
+            path << (*it)->m_value;
+
+        if (path.str() == expected)
+            return true;
+
+        cout << endl << test_name() << ":" << endl;
+        cout << "      result=" << path.str() << endl;
+        cout << "    expected=" << expected << endl;
+        return false;
     }
 
 };
@@ -247,12 +266,8 @@ SUITE(TreeTest)
     {
         CreateTree();
 
-        stringstream path;
-        Tree<Element>::depth_first_iterator it;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHIJKLMNOPQRST" );
+        string expected = "ABCDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
 
         DeleteTestData();
     }
@@ -262,12 +277,8 @@ SUITE(TreeTest)
         //checks that the test tree can be re-built again witout problems
         CreateTree();
 
-        stringstream path;
-        Tree<Element>::depth_first_iterator it;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHIJKLMNOPQRST" );
+        string expected = "ABCDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
 
         DeleteTestData();
     }
@@ -281,11 +292,9 @@ SUITE(TreeTest)
         ++it;   //D
         Tree<Element>::depth_first_iterator itNext = m_tree.erase(it);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCIJKLMNOPQRST" );
+        string expected = "ABCIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "I" );
@@ -309,11 +318,9 @@ SUITE(TreeTest)
         ++it;   //B
         Tree<Element>::depth_first_iterator itNext = m_tree.erase(it);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ADEFGHIJKLMNOPQRST" );
+        string expected = "ADEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "D" );
@@ -346,11 +353,9 @@ SUITE(TreeTest)
         Element* parent = (*it)->get_parent();
         Tree<Element>::depth_first_iterator itNext = m_tree.erase(it);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGH" );
+        string expected = "ABCDEFGH";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode == nullptr );
@@ -375,11 +380,9 @@ SUITE(TreeTest)
         ++it;   //G
         Tree<Element>::depth_first_iterator itNext = m_tree.erase(it);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFHIJKLMNOPQRST" );
+        string expected = "ABCDEFHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         //cout << (*itNext).m_value << endl;
         CHECK( (*itNext)->m_value == "H" );
 
@@ -392,11 +395,9 @@ SUITE(TreeTest)
         Tree<Element>::depth_first_iterator it = m_tree.begin();
         Tree<Element>::depth_first_iterator itNext = m_tree.erase(it);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "" );
+        string expected = "";
+        CHECK( check_path(m_tree, expected) );
+
         CHECK( itNext == m_tree.end() );
 
         DeleteTestData();
@@ -412,11 +413,9 @@ SUITE(TreeTest)
         Element elm("Z");
         Tree<Element>::depth_first_iterator itNext = m_tree.replace_node(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCZIJKLMNOPQRST" );
+        string expected = "ABCZIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
@@ -442,11 +441,9 @@ SUITE(TreeTest)
         Element elm("Z");
         Tree<Element>::depth_first_iterator itNext = m_tree.replace_node(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "AZDEFGHIJKLMNOPQRST" );
+        string expected = "AZDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
@@ -478,11 +475,9 @@ SUITE(TreeTest)
         Element elm("Z");
         Tree<Element>::depth_first_iterator itNext = m_tree.replace_node(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHZ" );
+        string expected = "ABCDEFGHZ";
+        CHECK( check_path(m_tree, expected) );
+
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
@@ -506,11 +501,9 @@ SUITE(TreeTest)
         Element elm("(ALL)");
         Tree<Element>::depth_first_iterator itNext = m_tree.replace_node(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "(ALL)" );
+        string expected = "(ALL)";
+        CHECK( check_path(m_tree, expected) );
+
         //cout << (*itNext).m_value << endl;
         CHECK( (*itNext)->m_value == "(ALL)" );
 
@@ -527,11 +520,9 @@ SUITE(TreeTest)
         Element elm("(NEW)");
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABC(NEW)DEFGHIJKLMNOPQRST" );
+        string expected = "ABC(NEW)DEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -557,11 +548,9 @@ SUITE(TreeTest)
         Element elm("(NEW)");
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "A(NEW)BCDEFGHIJKLMNOPQRST" );
+        string expected = "A(NEW)BCDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -593,11 +582,9 @@ SUITE(TreeTest)
         Element elm("(NEW)");
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGH(NEW)IJKLMNOPQRST" );
+        string expected = "ABCDEFGH(NEW)IJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -625,11 +612,9 @@ SUITE(TreeTest)
 
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABC(NEW)DEFGHIJKLMNOPQRST" );
+        string expected = "ABC(NEW)DEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -656,11 +641,9 @@ SUITE(TreeTest)
 
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "A(NEW)BCDEFGHIJKLMNOPQRST" );
+        string expected = "A(NEW)BCDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -693,11 +676,9 @@ SUITE(TreeTest)
 
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGH(NEW)IJKLMNOPQRST" );
+        string expected = "ABCDEFGH(NEW)IJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+
         Element* newNode = *itNext;
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
@@ -710,19 +691,6 @@ SUITE(TreeTest)
         CHECK( prevSibling && prevSibling->m_value == "D" );
         CHECK( nextSibling->m_value == "I" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
-
-        DeleteTestData();
-    }
-
-    TEST_FIXTURE(TreeTestFixture, TreeSetIterator)
-    {
-        CreateTree();
-        Tree<Element>::depth_first_iterator it;
-        stringstream path;
-        for (it=d; it != d->get_next_sibling(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "DEFGH" );
 
         DeleteTestData();
     }
@@ -916,11 +884,8 @@ SUITE(TreeTest)
         Element* curNode = *it;
         curNode->remove_child(o);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHIJKLMNPQRST" );
+        string expected = "ABCDEFGHIJKLMNPQRST";
+        CHECK( check_path(m_tree, expected) );
 
         DeleteTestData();
     }
@@ -940,11 +905,8 @@ SUITE(TreeTest)
         Element* curNode = *it;
         curNode->remove_child(j);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHIOPQRST" );
+        string expected = "ABCDEFGHIOPQRST";
+        CHECK( check_path(m_tree, expected) );
 
         DeleteTestData();
     }
@@ -964,43 +926,106 @@ SUITE(TreeTest)
         Element* curNode = *it;
         curNode->remove_child(p);
 
-        stringstream path;
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCDEFGHIJKLMNO" );
+        string expected = "ABCDEFGHIJKLMNO";
+        CHECK( check_path(m_tree, expected) );
 
         DeleteTestData();
     }
 
     TEST_FIXTURE(TreeTestFixture, RemoveLastChildAnddAppendNew)
     {
-        Element* a = LOMSE_NEW Element("A");
-        Element* b = LOMSE_NEW Element("B");
-        Element* c = LOMSE_NEW Element("C");
-        Element* d = LOMSE_NEW Element("D");
-        Element* z = LOMSE_NEW Element("Z");
+        Element* a2 = LOMSE_NEW Element("A");
+        Element* b2 = LOMSE_NEW Element("B");
+        Element* c2 = LOMSE_NEW Element("C");
+        Element* d2 = LOMSE_NEW Element("D");
+        Element* z2 = LOMSE_NEW Element("Z");
 
-        m_tree.set_root(a);
-        a->append_child(b);
-        a->append_child(c);
-        a->append_child(d);
+        m_tree.set_root(a2);
+        a2->append_child(b2);
+        a2->append_child(c2);
+        a2->append_child(d2);
 
-        a->remove_child(d);
-        a->append_child(z);
+        a2->remove_child(d2);
+        a2->append_child(z2);
 
-        stringstream path;
-        Tree<Element>::depth_first_iterator it = m_tree.begin();
-        for (it=m_tree.begin(); it != m_tree.end(); ++it)
-            path << (*it)->m_value;
-        //cout << path.str() << endl;
-        CHECK( path.str() == "ABCZ" );
+        string expected = "ABCZ";
+        CHECK( check_path(m_tree, expected) );
 
-        delete a;
-        delete b;
-        delete c;
-        delete d;
-        delete z;
+        delete a2;
+        delete b2;
+        delete c2;
+        delete d2;
+        delete z2;
+    }
+
+    TEST_FIXTURE(TreeTestFixture, tree_clone_01)
+    {
+        Element a2("A");
+        Element b2("B");
+        Element c2("C");
+        Element d2("D");
+        Element z2("Z");
+
+        m_tree.set_root(&a2);
+        a2.append_child(&b2);
+        a2.append_child(&c2);
+        a2.append_child(&d2);
+
+        string expected = "ABCD";
+        CHECK( check_path(m_tree, expected) );
+
+        Tree<Element> dup(m_tree);
+
+        CHECK (m_tree.get_root() != dup.get_root() );
+
+        expected = "ABCD";
+        CHECK( check_path(m_tree, expected) );
+        CHECK( check_path(dup, expected) );
+
+        //get the cloned nodes
+        CHECK (dup.get_root() && dup.get_root()->m_value == "A" );
+        Tree<Element>::depth_first_iterator it = dup.begin();
+        Element* aa = *it;
+        CHECK ( aa && aa->m_value == "A" );
+        Element* bb = *(++it);
+        CHECK ( bb && bb->m_value == "B" );
+        Element* cc = *(++it);
+        CHECK ( cc && cc->m_value == "C" );
+        Element* dd = *(++it);
+        CHECK ( dd && dd->m_value == "D" );
+
+        dup.get_root()->remove_child(dd);
+        dup.get_root()->append_child(&z2);
+
+        expected = "ABCD";
+        CHECK( check_path(m_tree, expected) );
+
+        expected = "ABCZ";
+        CHECK( check_path(dup, expected) );
+    }
+
+    TEST_FIXTURE(TreeTestFixture, tree_clone_02)
+    {
+        CreateTree();
+        Tree<Element> dup(m_tree);
+
+        CHECK (m_tree.get_root() != dup.get_root() );
+
+        string expected = "ABCDEFGHIJKLMNOPQRST";
+        CHECK( check_path(m_tree, expected) );
+        CHECK( check_path(dup, expected) );
+
+        Element z2("Z");
+        m_tree.get_root()->remove_child(i);
+        b1->remove_child(c1);
+        dup.get_root()->append_child(&z2);
+
+        expected = "ABDEFGH";
+        CHECK( check_path(m_tree, expected) );
+        expected = "ABCDEFGHIJKLMNOPQRSTZ";
+        CHECK( check_path(dup, expected) );
+
+        DeleteTestData();
     }
 
 }

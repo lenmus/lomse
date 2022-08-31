@@ -70,7 +70,7 @@ public:
         ImoTupletDto dto1;
         dto1.set_tuplet_type(ImoTupletDto::k_start);
 
-        m_pNote1->include_in_relation(&doc, m_pTuplet, nullptr);
+        m_pNote1->include_in_relation(m_pTuplet, nullptr);
 
         m_pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         m_pNote2->set_notated_pitch(k_step_E, k_octave_4, k_no_accidentals);
@@ -78,14 +78,14 @@ public:
         ImoTupletDto dto2;
         dto2.set_tuplet_type(ImoTupletDto::k_continue);
 
-        m_pNote2->include_in_relation(&doc, m_pTuplet, nullptr);
+        m_pNote2->include_in_relation(m_pTuplet, nullptr);
 
         m_pNote3 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         m_pNote3->set_notated_pitch(k_step_G, k_octave_4, k_no_accidentals);
 
         ImoTupletDto dto3;
         dto3.set_tuplet_type(ImoTupletDto::k_stop);
-        m_pNote3->include_in_relation(&doc, m_pTuplet, nullptr);
+        m_pNote3->include_in_relation(m_pTuplet, nullptr);
 
         m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         m_pStorage = LOMSE_NEW EngraversMap();

@@ -32,7 +32,6 @@ public:
     ButtonCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
                ImoStyle* pStyle=nullptr);
-    virtual ~ButtonCtrl() {}
 
     //Control mandatory overrides
     USize measure() override;

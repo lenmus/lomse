@@ -14,7 +14,7 @@
 #include "lomse_injectors.h"
 
 #include <sstream>
-using namespace std;
+#include <stack>
 
 namespace lomse
 {
@@ -33,11 +33,11 @@ protected:
     bool m_fAddId;
     int m_scoreFormat;
     bool m_fRemoveNewlines;
-    string m_lomseVersion;
-    string m_exportTime;
+    std::string m_lomseVersion;
+    std::string m_exportTime;
 
     //controlling open tags
-    stack<string> m_openTags;
+    std::stack<std::string> m_openTags;
 
 public:
     LmdExporter(LibraryScope& libScope);
@@ -63,22 +63,22 @@ public:
     inline bool get_remove_newlines() { return m_fRemoveNewlines; }
 
     //the main method
-    string get_source(ImoObj* pImo);
+    std::string get_source(ImoObj* pImo);
 
     //auxiliary
-    string get_version_and_time_string();
+    std::string get_version_and_time_string();
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
     //static methods for types ldp names to conversion
-    static string clef_type_to_ldp(int clefType);
-    static string barline_type_to_ldp(int barType);
-    static string color_to_ldp(Color color);
-    static string float_to_string(float num);
+    static std::string clef_type_to_ldp(int clefType);
+    static std::string barline_type_to_ldp(int barType);
+    static std::string color_to_ldp(Color color);
+    static std::string float_to_string(float num);
 
     //helper for controlling open tags
     inline bool are_there_open_tags() { return m_openTags.size() > 0; }
-    inline string current_open_tag() { return m_openTags.top(); }
-    inline void push_tag(const string& tag) { m_openTags.push(tag); }
+    inline std::string current_open_tag() { return m_openTags.top(); }
+    inline void push_tag(const std::string& tag) { m_openTags.push(tag); }
     inline void pop_tag() { m_openTags.pop(); }
 
 protected:

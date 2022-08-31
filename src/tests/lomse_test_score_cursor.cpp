@@ -47,6 +47,10 @@ public:
 class ScoreCursorTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
+    Document* m_pDoc;
+    ImoScore* m_pScore;
 
     ScoreCursorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
@@ -75,11 +79,11 @@ public:
     void create_document_1()
     {
         //very simple,one line score
-        //(clef#103L G)(key#104L C)(time#105L 2 4)(n#106L c4 q)(r#107L q)(barline#108L)(n#109L d4 q)
+        //(clef#104L G)(key#105L C)(time#106L 2 4)(n#107L c4 q)(r#108L q)(barline#109L)(n#110L d4 q)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0) "
-                "(instrument#101L (musicData (clef G)(key C)(time 2 4)(n c4 q)"
+                "(instrument#90L (musicData#103 (clef G)(key C)(time 2 4)(n c4 q)"
                 "(r q)(barline)(n d4 q)"
                 ")))"
             "))" );
@@ -91,17 +95,17 @@ public:
     {
         //An score with empty places in first staff (after 107L, an in second measure)
         //(score#4 (vers 2.0)
-        //(instrument#101L (staves 2) (musicData#102L
-        //(clef#103L G p1)(clef#104L F4 p2)(key#105L C)(time#106L 2 4)
-        //(n#107L e4 e g+ p1 v1)(n#108L g4 e g- v1)
-        //(n#114L c3 e g+ p2 v2)(n#115L e3 e g- v2)(n#121L g3 e g+ v2)(n#122L c4 e g- v2)
-        //(barline#128L)
-        //(n#129L a3 q p2 v2)(n#130L e3 q v2)
-        //(barline#131L) )))
+        //(instrument#90L (staves 2) (musicData#104L
+        //(clef#105L G p1)(clef#106L F4 p2)(key#107L C)(time#108L 2 4)
+        //(n#109L e4 e g+ p1 v1)(n#110L g4 e g- v1)
+        //(n#116L c3 e g+ p2 v2)(n#117L e3 e g- v2)(n#123L g3 e g+ v2)(n#124L c4 e g- v2)
+        //(barline#130L)
+        //(n#131L a3 q p2 v2)(n#132L e3 q v2)
+        //(barline#133L) )))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)"
-               "(instrument#101L (staves 2) (musicData "
+               "(instrument#90L (staves 2) (musicData#104L "
                "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
                "(n e4 e g+ p1 v1)(n g4 e g- v1)"
                "(n c3 e g+ p2 v2)(n e3 e g- v2)(n g3 e g+ v2)(n c4 e g- v2)"
@@ -118,7 +122,7 @@ public:
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)"
-               "(instrument#101L (staves 2) (musicData "
+               "(instrument#90L (staves 2) (musicData#104L "
                "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
                "(n e4 e g+ p1 v1)(n g4 e g- v1)"
                "(n c3 e g+ p2 v2)(n e3 e g- v2)(n g3 e g+ v2)(n c4 e g- v2)"
@@ -131,15 +135,15 @@ public:
     void create_document_4()
     {
         //As score 3 with empty positions over note in second staff
-        //    (instrument#101L (staves 2) (musicData#102L
-        //      (clef#103L G p1)(clef#104L F4 p2)(key#105L C)(time#106L 2 4)
-        //      (n#107L e4 e g+ p1)(n#108L g4 e g-)
-        //      (n#114L c3 e g+ p2)(n#115L e3 e g-)(n#121L g3 q)
-        //      (barline#122L) )))
+        //    (instrument#90L (staves 2) (musicData#104L
+        //      (clef#105L G p1)(clef#106L F4 p2)(key#107L C)(time#108L 2 4)
+        //      (n#109L e4 e g+ p1)(n#110L g4 e g-)
+        //      (n#116L c3 e g+ p2)(n#117L e3 e g-)(n#123L g3 q)
+        //      (barline#124L) )))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)"
-               "(instrument#101L (staves 2) (musicData "
+               "(instrument#90L (staves 2) (musicData#104L "
                "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
                "(n e4 e g+ v1 p1)(n g4 e g- v1 p1)"
                "(n c3 e g+ v2 p2)(n e3 e g- v2 p2)(n g3 q v2 p2)"
@@ -153,13 +157,13 @@ public:
     {
         //A score in 6/8 time signature
         // (score#4 (vers 2.0)
-        //    (instrument#101L (musicData#102L
-        //      (clef#103L G)(key#104L C)(time#105L 6 8)
-        //      (n#106L e4 e g+)(n#107L g4 e)(n#108L c5 e g-)
-        //      (n#116L c4 e g+)(n#117L e4 e)(n#118L g4 e g-)
-        //      (barline#126L)
-        //      (n#127L e4 e g+)(n#128L g4 e)(n#129L c5 e g-)
-        //      (n#137L c4 e g+)(n#138L e4 e)(n#139L g4 e g-)
+        //    (instrument#90L (musicData#104L
+        //      (clef#104L G)(key#105L C)(time#106L 6 8)
+        //      (n#107L e4 e g+)(n#108L g4 e)(n#109L c5 e g-)
+        //      (n#117L c4 e g+)(n#118L e4 e)(n#119L g4 e g-)
+        //      (barline#127L)
+        //      (n#128L e4 e g+)(n#129L g4 e)(n#130L c5 e g-)
+        //      (n#138L c4 e g+)(n#139L e4 e)(n#140L g4 e g-)
         //      (barline#147L) )))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
@@ -180,13 +184,13 @@ public:
     void create_document_6()
     {
         //score with chords
-        //(clef#103L G)(key#104L C)(time#105L 2 4)"
-        //"(chord (n#107L c4 q)(n#109L e4 q)(n#111L g4 q))(n#113L c5 q)"
-        //"(chord (n#115L c4 q)(n#117L e4 q)(n#119L g4 q))"
-        //"(chord (n#122L c4 q)(n#124L e4 q)(n#126L g4 q))"
+        //(clef#104L G)(key#105L C)(time#106L 2 4)"
+        //"(chord (n#108L c4 q)(n#110L e4 q)(n#112L g4 q))(n#114L c5 q)"
+        //"(chord (n#116L c4 q)(n#118L e4 q)(n#120L g4 q))"
+        //"(chord (n#123L c4 q)(n#125L e4 q)(n#127L g4 q))"
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(score (vers 2.0) "
-                "(instrument#101L (musicData (clef G)(key C)(time 2 4)"
+                "(instrument#90L (musicData#103L (clef G)(key C)(time 2 4)"
                 "(chord (n c4 q)(n e4 q)(n g4 q))(n c5 q)"
                 "(chord (n c4 q)(n e4 q)(n g4 q))"
                 "(chord (n c4 q)(n e4 q)(n g4 q))"
@@ -197,29 +201,29 @@ public:
     void create_document_7()
     {
         //score with two instruments (90013)
-        //(instrument#101L (staves 2)(musicData
-        //(clef#103L G p1)(clef#104L F4 p2)(key#105L D)(time#106L 2 4)
-        //(n#107L f4 q v1 p1)(n#108L g4 e g+ v1 p1)(n#109L b4 e g- v1 p1)
-        //(n#115L c3 e g+ v2 p2)(n#116L c3 e g- v2 p2)(n#122L d3 q v2 p2)
-        //(barline#123L)
-        //(n#124L c4 e g+ v1 p1)(n#125L c4 e g- v1 p1)(n#131L d4 q v1 p1)
-        //(n#132L f3 h v2 p2)
-        //(barline#133L) ))
+        //(instrument#90L (staves 2)(musicData#104L
+        //(clef#105L G p1)(clef#106L F4 p2)(key#107L D)(time#108L 2 4)
+        //(n#109L f4 q v1 p1)(n#110L g4 e g+ v1 p1)(n#111L b4 e g- v1 p1)
+        //(n#117L c3 e g+ v2 p2)(n#118L c3 e g- v2 p2)(n#124L d3 q v2 p2)
+        //(barline#125L)
+        //(n#126L c4 e g+ v1 p1)(n#127L c4 e g- v1 p1)(n#133L d4 q v1 p1)
+        //(n#134L f3 h v2 p2)
+        //(barline#135L) ))
         //
-        //(instrument#201L (staves 2)(musicData
-        //(clef#203L G p1)(clef#204L F4 p2)(key#205L D)(time#206L 2 4)
-        //(n#207L f4 q v1 p1)
-        //(n#208L c3 s g+ v2 p2)(n#209L d3 s v2 p2)(n#210L e3 s v2 p2)(n#211L f3 s g- v2 p2)
-        //(n#221L g3 e g+ v2 p2)(n#222L d3 e g- v2 p2)
-        //(barline#228L)
-        //(n#229L a4 e. v1 p1)
-        //(n#230L c3 q v2 p2)(n#231L g3 q v2 p2)
-        //(barline#232L) ))
+        //(instrument#190L (staves 2)(musicData#204L
+        //(clef#205L G p1)(clef#206L F4 p2)(key#207L D)(time#208L 2 4)
+        //(n#209L f4 q v1 p1)
+        //(n#210L c3 s g+ v2 p2)(n#211L d3 s v2 p2)(n#212L e3 s v2 p2)(n#213L f3 s g- v2 p2)
+        //(n#223L g3 e g+ v2 p2)(n#224L d3 e g- v2 p2)
+        //(barline#230L)
+        //(n#231L a4 e. v1 p1)
+        //(n#232L c3 q v2 p2)(n#233L g3 q v2 p2)
+        //(barline#234L) ))
 
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string(
             "(score (vers 2.0)"
-            "    (instrument#101L (staves 2)(musicData"
+            "    (instrument#90L (staves 2)(musicData#104L"
             "        (clef G p1)(clef F4 p2)(key D)(time 2 4)"
             "            (n f4 q v1 p1)(n g4 e g+ v1 p1)(n b4 e g- v1 p1)"
             "            (n c3 e g+ v2 p2)(n c3 e g- v2 p2)(n d3 q v2 p2)"
@@ -228,7 +232,7 @@ public:
             "            (n f3 h v2 p2)"
             "            (barline)"
             "    ))"
-            "    (instrument#201 (staves 2)(musicData "
+            "    (instrument#190L (staves 2)(musicData#204L "
             "        (clef G p1)(clef F4 p2)(key D)(time 2 4)"
             "            (n f4 q v1 p1)"
             "            (n c3 s g+ v2 p2)(n d3 s v2 p2)(n e3 s v2 p2)(n f3 s g- v2 p2)(n g3 e g+ v2 p2)(n d3 e g- v2 p2)"
@@ -245,19 +249,19 @@ public:
     void create_document_8()
     {
         //score with one staff and two voices
-        //(score#4 (vers 2.0)(instrument##101L (musicData#22L
-        //(clef#103L G p1)(key#104L F)(time#105L 4 4)
-        //(n#106L c5 q v1  (stem up) p1)(n#110L g4 e v2  (stem down) p1)
-        //(n#111L a4 q v2  (stem down) p1)(goFwd#107L q v1 p1)
-        //(n#112L f4 e v2  (stem down) p1)(n#108L d5 q v1  (stem up) p1)
-        //(n#113L e4 e v2  (stem down) p1)(r#114L e v2 p1)
-        //(goFwd#109L e v1 p1)(n#115L d4 q v2  (stem down) p1)
-        //(n#109L e5 e v1  (stem up) p1)(barline#116L simple)
-        //(n#117L c5 e v1 (stem up))
-        //(n#118L g4 q v2 (stem down))(n#119L a4 e v2 (stem down))
+        //(score#4 (vers 2.0)(instrument#90L (musicData#103L
+        //(clef#104L G p1)(key#105L F)(time#106L 4 4)
+        //(n#107L c5 q v1  (stem up) p1)(n#111L g4 e v2  (stem down) p1)
+        //(n#112L a4 q v2  (stem down) p1)(goFwd#108L q v1 p1)
+        //(n#113L f4 e v2  (stem down) p1)(n#108L d5 q v1  (stem up) p1)
+        //(n#113L e4 e v2  (stem down) p1)(r#115L e v2 p1)
+        //(goFwd#110L e v1 p1)(n#116L d4 q v2  (stem down) p1)
+        //(n#110L e5 e v1  (stem up) p1)(barline#117L simple)
+        //(n#118L c5 e v1 (stem up))
+        //(n#119L g4 q v2 (stem down))(n#120L a4 e v2 (stem down))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string(
-            "(score (vers 2.0)(instrument#101L (musicData "
+            "(score (vers 2.0)(instrument#90L (musicData#103L "
             "    (clef G)(key F)(time 4 4)"
             "    (n c5 q v1 (stem up))(goFwd q v1)(n d5 q v1 (stem up))(n e5 e v1 (stem up))"
             "    (n g4 e v2 (stem down))(n a4 q v2 (stem down))(n f4 e v2 (stem down))"
@@ -272,11 +276,11 @@ public:
     void create_document_9()
     {
         //two staves, only clef, key and time signature
-        //(score#5L (vers 2.0)(instrument#21L (musicData#22L
-        //(clef#103L G p1)(clef#104L F4 p2)(key#105L D)(time#106L 4 4)
+        //(score (vers 2.0)(instrument (musicData#104L
+        //(clef#105L G p1)(clef#106L F4 p2)(key#107L D)(time#108L 4 4)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string(
-            "(score (vers 2.0)(instrument#101L (staves 2)(musicData "
+            "(score (vers 2.0)(instrument#90L (staves 2)(musicData#104L "
             "    (clef G p1)(clef F4 p2)(key D)(time 4 4)"
             ")))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
@@ -304,23 +308,64 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
-    LibraryScope m_libraryScope;
-    std::string m_scores_path;
-    Document* m_pDoc;
-    ImoScore* m_pScore;
+    inline void failure_header()
+    {
+        cout << endl << "*** Failure in " << test_name() << ":" << endl;
+    }
+
+    bool check_current_state(MyScoreCursor& cursor, int instr, int staff, int measure,
+                             TimeUnits time, ImoId id, ImoId refId)
+    {
+        bool fOK = true;
+        if (cursor.instrument() != instr)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    intrument is " << cursor.instrument() << "  but expected " << instr << endl;
+        }
+        if (cursor.staff() != staff)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    staff is " << cursor.staff() << "  but expected " << staff << endl;
+        }
+        if (cursor.measure() != measure)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    measure is " << cursor.measure() << "  but expected " << measure << endl;
+        }
+        if (cursor.time() != time)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    time is " << cursor.time() << "  but expected " << time << endl;
+        }
+        if (cursor.id() != id)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    id is " << cursor.id() << "  but expected " << id << endl;
+        }
+        if (cursor.staffobj_id_internal() != refId)
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    staffobj id is " << cursor.staffobj_id_internal() << "  but expected " << refId << endl;
+        }
+        if (cursor.is_at_end_of_score())
+        {
+            if (fOK) failure_header();
+            fOK = false;
+            cout << "    cursor is at end of score but this is not expected." << endl;
+        }
+        return fOK;
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
 // helper macros
-#define CHECK_CURRENT_STATE(_cursor, _instr, _staff, _measure, _time, _id, _refId) \
-                CHECK( _cursor.instrument() == _instr );                    \
-                CHECK( _cursor.staff() == _staff );                         \
-                CHECK( _cursor.measure() == _measure );                     \
-                CHECK( _cursor.time() == _time );                           \
-                CHECK( _cursor.id() == _id );                               \
-                CHECK( _cursor.staffobj_id_internal() == _refId );          \
-                CHECK( _cursor.is_at_end_of_score() == false );
-
 #define CHECK_CURRENT_STATE_AT_END_OF_STAFF(_cursor, _instr, _staff, _measure, _time)  \
                 CHECK( _cursor.instrument() == _instr );                    \
                 CHECK( _cursor.staff() == _staff );                         \
@@ -360,7 +405,7 @@ SUITE(ScoreCursorTest)
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         CHECK( (*cursor)->is_clef() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, creation_002)
@@ -397,9 +442,9 @@ SUITE(ScoreCursorTest)
         create_document_1();
 //        dump_col_staff_objs();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(107L);
+        cursor.point_to(108L);
         CHECK( (*cursor)->is_rest() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
 //        cout << cursor.dump_cursor();
     }
 
@@ -409,10 +454,10 @@ SUITE(ScoreCursorTest)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 
-        cursor.point_to(122L);
+        cursor.point_to(124L);
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 96.0, 122L, 122L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 96.0, 124L, 124L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, point_to_103)
@@ -429,10 +474,10 @@ SUITE(ScoreCursorTest)
         //104. when at end, point to an object by object ID does it ok
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(137L);   //move to end (invalid object)
-        cursor.point_to(107L);
+        cursor.point_to(138L);   //move to end (invalid object)
+        cursor.point_to(108L);
         CHECK( (*cursor)->is_rest() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, point_to_105)
@@ -441,9 +486,9 @@ SUITE(ScoreCursorTest)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 
-        cursor.point_to_barline(131L, 1);   //to barline, second staff
+        cursor.point_to_barline(133L, 1);   //to barline, second staff
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 256.0, 131L, 131L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 256.0, 133L, 133L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -457,12 +502,12 @@ SUITE(ScoreCursorTest)
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         CHECK( (*cursor)->is_clef() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_key_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_152)
@@ -471,38 +516,38 @@ SUITE(ScoreCursorTest)
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         CHECK( (*cursor)->is_clef() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_key_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_time_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_note() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_next();
 //        cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_rest() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( cursor.my_is_pointing_barline() == true );
         CHECK( (*cursor)->is_barline() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_note() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, 109L, 109L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, 110L, 110L) );
 
         cursor.move_next();
 //        cout << cursor.dump_cursor();
@@ -515,7 +560,7 @@ SUITE(ScoreCursorTest)
         //153. if at end of score, remains there
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(109L);       //move to last note
+        cursor.point_to(110L);       //move to last note
 
         cursor.move_next();
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 1, 192.0);
@@ -534,54 +579,54 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
         CHECK( (*cursor)->is_clef() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_key_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_time_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_note() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 110L, 110L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 111L, 111L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 111L, 111L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 112L, 112L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0, 112L, 112L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 96.0, 113L, 113L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 113L, 113L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 114L, 114L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 160.0, 114L, 114L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 160.0, 115L, 115L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 115L, 115L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 116L, 116L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 256.0, 116L, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 256.0, 117L, 117L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 118L, 118L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 119L, 119L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 320.0, 119L, 119L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 320.0, 120L, 120L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
@@ -597,45 +642,45 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(1);
         CHECK( (*cursor)->is_clef() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_key_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_time_signature() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_note() == true );
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 109L, 109L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 110L, 110L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 224.0, k_cursor_at_empty_place, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 224.0, k_cursor_at_empty_place, 117L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 256.0, 116L, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 256.0, 117L, 117L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 117L, 117L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 118L, 118L) );
 
         cursor.move_next();
         //cout << cursor.dump_cursor();
@@ -650,12 +695,12 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
-        cursor.point_to(107L);   //first note in chord
+        cursor.point_to(108L);   //first note in chord
 
         cursor.move_next();
 
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 113L, 113L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 114L, 114L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_162)
@@ -663,12 +708,12 @@ SUITE(ScoreCursorTest)
         //162. skips notes in chord: chord after chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(115L);   //first note in chord
+        cursor.point_to(116L);   //first note in chord
 
         cursor.move_next();
 
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 122L, 122L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 123L, 123L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_163)
@@ -676,7 +721,7 @@ SUITE(ScoreCursorTest)
         //163. skips notes in chord: end of score after chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(122L);   //first note in chord
+        cursor.point_to(123L);   //first note in chord
 
         cursor.move_next();
 
@@ -691,12 +736,12 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
-        cursor.point_to(107L);   //first note first staff
+        cursor.point_to(109L);   //first note first staff
 
         cursor.move_next();
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 110L, 110L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_172)
@@ -704,13 +749,13 @@ SUITE(ScoreCursorTest)
         //172. cross barline
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(122L);   //last note first measure second staff
+        cursor.point_to(124L);   //last note first measure second staff
 
         cursor.move_next();     //to barline
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 128.0, 128L, 128L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 128.0, 130L, 130L) );
 
         cursor.move_next();     //to first note in second measure second staff
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 128.0, 129L, 129L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 128.0, 131L, 131L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_173)
@@ -718,8 +763,8 @@ SUITE(ScoreCursorTest)
         //173. cross last barline: move to end of staff
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //to last barline
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 131L, 131L);
+        cursor.point_to(133L);   //to last barline
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 133L, 133L) );
 
         cursor.move_next();     //to end of staff
 
@@ -733,13 +778,13 @@ SUITE(ScoreCursorTest)
         //174. from end of staff to next staff in same instrument
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //to barline
+        cursor.point_to(133L);   //to barline
         cursor.move_next();     //to end of staff
 
         cursor.move_next();     //to clef F4 on second staff
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_175)
@@ -750,13 +795,13 @@ SUITE(ScoreCursorTest)
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
 
-        cursor.point_to(132L);   //to last note instr 1, staff 2
+        cursor.point_to(134L);   //to last note instr 1, staff 2
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 128.0, 132L, 132L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 128.0, 134L, 134L) );
 
-        cursor.move_next();     //to barline 132L
+        cursor.move_next();     //to barline 135L
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 256.0, 133L, 133L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 256.0, 135L, 135L) );
 
         cursor.move_next();     //to end of instr 1, staff 2
 //        cout << cursor.dump_cursor();
@@ -765,7 +810,7 @@ SUITE(ScoreCursorTest)
 
         cursor.move_next();     //to clef F4 on instr 2, staff 1
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 203L, 203L);
+        CHECK( check_current_state(cursor, 1, 0, 0, 0.0, 205L, 205L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_176)
@@ -775,8 +820,8 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
-        cursor.point_to(166L);   //to last note instr 2, staff 2
-        cursor.move_next();     //to barline 164L
+        cursor.point_to(168L);   //to last note instr 2, staff 2
+        cursor.move_next();     //to barline 166L
 
         cursor.move_next();     //to end of score
 
@@ -799,37 +844,37 @@ SUITE(ScoreCursorTest)
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
 
-        cursor.point_to(208L);   //first note in instr 2, staff 2
+        cursor.point_to(210L);   //first note in instr 2, staff 2
         cursor.set_current_voice(2);
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 0.0, 208L, 208L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 0.0, 210L, 210L) );
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 16.0, 209L, 209L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 16.0, 211L, 211L) );
 //        cout << cursor.dump_cursor();
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 32.0, 210L, 210L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 32.0, 212L, 212L) );
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 48.0, 211L, 211L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 48.0, 213L, 213L) );
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 64.0, 221L, 221L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 64.0, 223L, 223L) );
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 96.0, 222L, 222L);
+        CHECK( check_current_state(cursor, 1, 1, 0, 96.0, 224L, 224L) );
 
-        cursor.move_next();     //to barline 228L
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 128.0, 228L, 228L);
-
-        cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 230L, 230L);
+        cursor.move_next();     //to barline 230L
+        CHECK( check_current_state(cursor, 1, 1, 0, 128.0, 230L, 230L) );
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 192.0, 231L, 231L);
+        CHECK( check_current_state(cursor, 1, 1, 1, 128.0, 232L, 232L) );
 
-        cursor.move_next();     //to barline 232L
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 256.0, 232L, 232L);
+        cursor.move_next();
+        CHECK( check_current_state(cursor, 1, 1, 1, 192.0, 233L, 233L) );
+
+        cursor.move_next();     //to barline 234L
+        CHECK( check_current_state(cursor, 1, 1, 1, 256.0, 234L, 234L) );
 
         cursor.move_next();     //to end of score
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 1, 1, 2, 256.0f);
@@ -842,7 +887,7 @@ SUITE(ScoreCursorTest)
         create_document_3();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(130L);   //last note staff 2
+        cursor.point_to(132L);   //last note staff 2
 
         cursor.move_next();     //to end of staff
 
@@ -856,16 +901,16 @@ SUITE(ScoreCursorTest)
         //179. to next object at same time: clef -> key -> time -> note
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(105L);   //clef in staff 1
 
         cursor.move_next();     //key
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_next();     //time
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 108L, 108L) );
 
         cursor.move_next();     //note
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 109L, 109L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_180)
@@ -873,13 +918,13 @@ SUITE(ScoreCursorTest)
         //180. skip implicit shapes: clef -> (skip key, time) -> note
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef in staff 2
+        cursor.point_to(106L);   //clef in staff 2
         cursor.set_current_voice(2);
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
 
         cursor.move_next();     //note (skips key & time)
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 114L, 114L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 116L, 116L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -888,12 +933,12 @@ SUITE(ScoreCursorTest)
         //181. from barline to start of next measure (empty)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(128L);   //barline
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 128L, 128L);
+        cursor.point_to(130L);   //barline
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 130L, 130L) );
 
         cursor.move_next();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 129L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 131L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -902,12 +947,12 @@ SUITE(ScoreCursorTest)
         //182. from note to empty pos. after the note
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);   //second note first staff
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 108L, 108L);
+        cursor.point_to(110L);   //second note first staff
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 110L, 110L) );
 
         cursor.move_next();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -916,13 +961,13 @@ SUITE(ScoreCursorTest)
         //183. from empty place (after note) to object (next barline)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);   //second note first staff
+        cursor.point_to(110L);   //second note first staff
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
 
         cursor.move_next();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 128L, 128L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 130L, 130L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -931,13 +976,13 @@ SUITE(ScoreCursorTest)
         //184. from empty place (start of measure) to object (next barline)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(128L);   //barline
+        cursor.point_to(130L);   //barline
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 129L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 131L) );
 
         cursor.move_next();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 131L, 131L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 133L, 133L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -946,15 +991,15 @@ SUITE(ScoreCursorTest)
         //185. bug1: from end of staff to next instrument
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(133L);   //last barline, instr.1, stf.1
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 133L, 133L);
+        cursor.point_to(135L);   //last barline, instr.1, stf.1
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 135L, 135L) );
         cursor.move_next();     //to end of instr.0, stf.0
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
         CHECK( cursor.is_at_end_of_score() == false );
 
         cursor.move_next();     //to clef F4 on instr.1, stf.2
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -963,8 +1008,8 @@ SUITE(ScoreCursorTest)
         //186. bug. only prolog, from clef to end of score, skipping implicit shapes
         create_document_9();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef F4, second staff
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        cursor.point_to(106);   //clef F4, second staff
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106, 106L) );
         //cout << cursor.dump_cursor();
 
         cursor.move_next();     //to end of score
@@ -983,11 +1028,11 @@ SUITE(ScoreCursorTest)
         //201. single voice: move back in sequence
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(109L);   //last note
+        cursor.point_to(110L);   //last note
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -996,26 +1041,26 @@ SUITE(ScoreCursorTest)
         //202. single voice: move back in sequence until start of score
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(109L);   //last note
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, 109L, 109L);
+        cursor.point_to(110L);   //last note
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, 110L, 110L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
         //CHECK( cursor.is_   = true );
     }
 
@@ -1024,12 +1069,12 @@ SUITE(ScoreCursorTest)
         //203. if at start of score, remains there
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(103L);   //clef
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        cursor.point_to(104L);   //clef
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_204)
@@ -1038,7 +1083,7 @@ SUITE(ScoreCursorTest)
         create_document_8();
         //dump_col_staff_objs();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(119L);   //last note voice 2
+        cursor.point_to(120L);   //last note voice 2
         ++cursor;               //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 1, 288.0);
         CHECK( cursor.is_at_end_of_score() == true );
@@ -1047,55 +1092,55 @@ SUITE(ScoreCursorTest)
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 320.0, 119L, 119L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 320.0, 120L, 120L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 118L, 118L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 119L, 119L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 256.0, 116L, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 256.0, 117L, 117L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 115L, 115L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 116L, 116L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 160.0, 114L, 114L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 160.0, 115L, 115L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 113L, 113L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 114L, 114L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0, 112L, 112L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 96.0, 113L, 113L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 111L, 111L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 112L, 112L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 110L, 110L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 111L, 111L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_205)
@@ -1105,7 +1150,7 @@ SUITE(ScoreCursorTest)
         //dump_col_staff_objs();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(119L);   //last note in voice 2
+        cursor.point_to(120L);   //last note in voice 2
         ++cursor;               //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 1, 352.0);
         CHECK( cursor.is_at_end_of_score() == true );
@@ -1118,47 +1163,47 @@ SUITE(ScoreCursorTest)
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 117L, 117L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 118L, 118L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 256.0, 116L, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 256.0, 117L, 117L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 224.0, k_cursor_at_empty_place, 116L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 224.0, k_cursor_at_empty_place, 117L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 109L, 109L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 110L, 110L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
 
         cursor.move_prev();
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_206)
@@ -1169,14 +1214,14 @@ SUITE(ScoreCursorTest)
             "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(103L);   //clef
+        cursor.point_to(104L);   //clef
         cursor.move_next();
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
         CHECK( cursor.is_at_end_of_score() == true );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_211)
@@ -1184,14 +1229,14 @@ SUITE(ScoreCursorTest)
         //211. skips notes in chord: simple note before chord moves to first in chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(113L);
+        cursor.point_to(114L);
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 108L, 108L) );
         //cout << cursor.dump_cursor();
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1200,13 +1245,13 @@ SUITE(ScoreCursorTest)
         //212. skips notes in chord: chord before chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(126L);   //top note in last chord
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 126L, 126L);
+        cursor.point_to(127L);   //top note in last chord
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 127L, 127L) );
         //cout << cursor.dump_cursor();
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 115L, 115L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 116L, 116L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1215,13 +1260,13 @@ SUITE(ScoreCursorTest)
         //213. skips notes in chord: start of score before chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(111L);   //top note in first chord
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 111L, 111L);
+        cursor.point_to(112L);   //top note in first chord
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 112L, 112L) );
         //cout << cursor.dump_cursor();
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1231,13 +1276,13 @@ SUITE(ScoreCursorTest)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(122L);   //last note staff 2, measure 1
+        cursor.point_to(124L);   //last note staff 2, measure 1
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 64.0, 121L, 121L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 64.0, 123L, 123L) );
 
         cursor.move_prev();     //must skip note in staff 1
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 32.0, 115L, 115L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 32.0, 117L, 117L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1246,12 +1291,12 @@ SUITE(ScoreCursorTest)
         //222. back from object in second staff to barline. Continues in second staff
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(129L);   //note after barline, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 128.0, 129L, 129L);
+        cursor.point_to(131L);   //note after barline, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 1, 128.0, 131L, 131L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 128.0, 128L, 128L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 128.0, 130L, 130L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_223)
@@ -1259,8 +1304,8 @@ SUITE(ScoreCursorTest)
         //223. from start of staff to end of previous staff in same instrument (barline)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef in instrument 1, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        cursor.point_to(106L);   //clef in instrument 1, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
 
@@ -1274,8 +1319,8 @@ SUITE(ScoreCursorTest)
         //224. from start of staff to end of previous staff in same instrument (note)
         create_document_3();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef in instrument 1, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        cursor.point_to(106L);   //clef in instrument 1, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
 
@@ -1289,14 +1334,14 @@ SUITE(ScoreCursorTest)
         //225. from end of staff to object
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef in instrument 1, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        cursor.point_to(106L);   //clef in instrument 1, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
 
         cursor.move_prev();
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0);
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 131L, 131L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 133L, 133L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1305,14 +1350,14 @@ SUITE(ScoreCursorTest)
         //226. from end of staff to chord
         create_document_6();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(126L);   //last note
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 126L, 126L);
+        cursor.point_to(127L);   //last note
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 127L, 127L) );
         cursor.move_next();
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 256.0);
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 122L, 122L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 123L, 123L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1321,12 +1366,12 @@ SUITE(ScoreCursorTest)
         //227. from barline to start of measure (empty measure)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //barline
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 256.0, 131L, 131L);
+        cursor.point_to(133L);   //barline
+        CHECK( check_current_state(cursor, 0, 0, 1, 256.0, 133L, 133L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 129L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 131L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1335,17 +1380,17 @@ SUITE(ScoreCursorTest)
         //228. to prev object at same time: note -> time --> key -> clef
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(107L);   //first note in instrument 1, staff 1
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 107L, 107L);
+        cursor.point_to(109L);   //first note in instrument 1, staff 1
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 109L, 109L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 108L, 108L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 107L, 107L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_229)
@@ -1353,12 +1398,12 @@ SUITE(ScoreCursorTest)
         //229. at start of score: remains there (=203)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(103L);   //clef in instrument 1, staff 1
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        cursor.point_to(105L);   //clef in instrument 1, staff 1
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.move_prev();     //to time. prev state is key signature
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1369,8 +1414,8 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         //cout << m_pDoc->to_string(true) << endl;
         //dump_col_staff_objs();
-        cursor.point_to(203L);   //clef instr 2, staff 1
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 203L, 203L);
+        cursor.point_to(205L);   //clef instr 2, staff 1
+        CHECK( check_current_state(cursor, 1, 0, 0, 0.0, 205L, 205L) );
 
         cursor.move_prev();
 
@@ -1383,12 +1428,12 @@ SUITE(ScoreCursorTest)
         //231. skip implicit shapes: note -> (skip time & key) -> clef
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(114L);   //first note in instrument 1, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 114L, 114L);
+        cursor.point_to(116L);   //first note in instrument 1, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 116L, 116L) );
 
         cursor.move_prev();     //to clef (skip time and key signatures)
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1397,12 +1442,12 @@ SUITE(ScoreCursorTest)
         //232. back from object to empty place
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(128L);   //first barline
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 128L, 128L);
+        cursor.point_to(130L);   //first barline
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 130L, 130L) );
 
         cursor.move_prev();     //after note in staff 1
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1411,13 +1456,13 @@ SUITE(ScoreCursorTest)
         //233. back from empty place (start of measure) to object (prev. barline)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //barline
+        cursor.point_to(133L);   //barline
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 129L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 131L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 128L, 128L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 130L, 130L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1426,13 +1471,13 @@ SUITE(ScoreCursorTest)
         //234. back from empty place (after note) to object (the note)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(128L);   //first barline
+        cursor.point_to(130L);   //first barline
         cursor.move_prev();     //after note in staff 1
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 110L, 110L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1441,14 +1486,14 @@ SUITE(ScoreCursorTest)
         //235. from start of staff -> to end of prev staff -> to barline
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(203L);   //start of instr 2, staff 1
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 203L, 203L);
+        cursor.point_to(205L);   //start of instr 2, staff 1
+        CHECK( check_current_state(cursor, 1, 0, 0, 0.0, 205L, 205L) );
 
         cursor.move_prev();     //end of instr 1, staff 2
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 2, 256.0f);
 
         cursor.move_prev();     //barline of instr 1, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 256.0, 133L, 133L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 256.0, 135L, 135L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1461,12 +1506,12 @@ SUITE(ScoreCursorTest)
             ")))");
         m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(&doc, m_pScore);
-        cursor.point_to(105L);   //last note
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 105L, 105L);
+        cursor.point_to(106L);   //last note
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 106L, 106L) );
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1475,14 +1520,14 @@ SUITE(ScoreCursorTest)
         //237. bug. only prolog. move back when at end of staff
         create_document_9();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(106L);   //time signature
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        cursor.point_to(108L);   //time signature
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 108L, 108L) );
         cursor.move_next();     //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 0, 0.0f);
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 106L, 106L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 108L, 108L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1491,14 +1536,14 @@ SUITE(ScoreCursorTest)
         //238. bug. only prolog. back when at end of score
         create_document_9();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef F4, staff 2
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        cursor.point_to(106L);   //clef F4, staff 2
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         cursor.move_next();     //end of score
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 1, 0, 0.0f);
 
         cursor.move_prev();
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1511,9 +1556,9 @@ SUITE(ScoreCursorTest)
         //301. iter_object_is_barline is true when pointing barline
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);       //move to barline
+        cursor.point_to(109L);       //move to barline
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( cursor.my_is_pointing_barline() == true );
     }
@@ -1523,9 +1568,9 @@ SUITE(ScoreCursorTest)
         //302. iter_object_is_barline is false when not pointing barline
         create_document_1();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(107L);       //rest
+        cursor.point_to(108L);       //rest
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, 107L, 107L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, 108L, 108L) );
         CHECK( (*cursor)->is_rest() == true );
         CHECK( cursor.my_is_pointing_barline() == false );
     }
@@ -1538,7 +1583,7 @@ SUITE(ScoreCursorTest)
 
         cursor.to_measure(1, -1, -1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, 124L, 124L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, 126L, 126L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1551,7 +1596,7 @@ SUITE(ScoreCursorTest)
 
         cursor.to_measure(1, -1, 1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 1, 128.0, 132L, 132L);
+        CHECK( check_current_state(cursor, 0, 1, 1, 128.0, 134L, 134L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1560,11 +1605,11 @@ SUITE(ScoreCursorTest)
         //322. to measure, same instr, lower staff
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);       //staff 1
+        cursor.point_to(106L);       //staff 1
 
         cursor.to_measure(1, -1, 0);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, 124L, 124L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, 126L, 126L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1577,7 +1622,7 @@ SUITE(ScoreCursorTest)
 
         cursor.to_measure(1, 1, 1);
 
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 230L, 230L);
+        CHECK( check_current_state(cursor, 1, 1, 1, 128.0, 232L, 232L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1602,7 +1647,7 @@ SUITE(ScoreCursorTest)
 
         cursor.to_measure(1, -1, -1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 129L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 128.0, k_cursor_at_empty_place, 131L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1611,11 +1656,11 @@ SUITE(ScoreCursorTest)
         //326. to first measure
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(130L);       //measure 1, staff 1
+        cursor.point_to(132L);       //measure 1, staff 1
 
         cursor.to_measure(0, -1, -1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1624,7 +1669,7 @@ SUITE(ScoreCursorTest)
 //        //340. to_next_note_in_chord()
 //        create_document_6();
 //        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(115L);
+//        cursor.point_to(116L);
 //    }
 //
 //    TEST_FIXTURE(ScoreCursorTestFixture, prev_note_in_chord_341)
@@ -1632,7 +1677,7 @@ SUITE(ScoreCursorTest)
 //        //341. to_prev_note_in_chord()
 //        create_document_6();
 //        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(115L);
+//        cursor.point_to(116L);
 //    }
 
     TEST_FIXTURE(ScoreCursorTestFixture, change_active_voice_350)
@@ -1640,13 +1685,13 @@ SUITE(ScoreCursorTest)
         //350. cursor doesn't move when current pos. is empty for new voice.
         create_document_8();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(119L);
+        cursor.point_to(120L);
         cursor.set_current_voice(2);
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 320.0, 119L, 119L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 320.0, 120L, 120L) );
 
         cursor.change_voice_to(1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 320.0, k_cursor_at_empty_place, 119L);
+        CHECK( check_current_state(cursor, 0, 0, 1, 320.0, k_cursor_at_empty_place, 120L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1655,17 +1700,17 @@ SUITE(ScoreCursorTest)
         //351. cursor doesn't move when current pos. is inside a gap for new voice.
         create_document_8();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(112L);
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0, 112L, 112L);
+        cursor.point_to(113L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 96.0, 113L, 113L) );
         cursor.set_current_voice(2);
 
         cursor.change_voice_to(1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0, k_cursor_at_empty_place, 112L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 96.0, k_cursor_at_empty_place, 113L) );
         //cout << cursor.dump_cursor();
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1674,13 +1719,12 @@ SUITE(ScoreCursorTest)
         //352. object in new voice at same timepos: cursor moves to it.
         create_document_8();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 108L, 108L);
+        cursor.point_to(109L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 109L, 109L) );
 
         cursor.change_voice_to(2);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0, 113L, 113L);
-        //cout << cursor.dump_cursor();
+        CHECK( check_current_state(cursor, 0, 0, 0, 128.0, 114L, 114L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, change_active_voice_353)
@@ -1689,12 +1733,12 @@ SUITE(ScoreCursorTest)
         create_document_8();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(114L);
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 160.0, 114L, 114L);
+        cursor.point_to(115L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 160.0, 115L, 115L) );
 
         cursor.change_voice_to(1);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 192.0, 109L, 109L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 192.0, 110L, 110L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1705,7 +1749,7 @@ SUITE(ScoreCursorTest)
         //dump_col_staff_objs();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(119L);   //last note in voice 2
+        cursor.point_to(120L);   //last note in voice 2
         ++cursor;               //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 1, 352.0);
         CHECK( cursor.is_at_end_of_score() == true );
@@ -1724,7 +1768,7 @@ SUITE(ScoreCursorTest)
         //dump_col_staff_objs();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.set_current_voice(2);
-        cursor.point_to(119L);   //last note in voice 2
+        cursor.point_to(120L);   //last note in voice 2
         ++cursor;               //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 1, 352.0);
         CHECK( cursor.is_at_end_of_score() == true );
@@ -1744,14 +1788,14 @@ SUITE(ScoreCursorTest)
         //360. to start of second staff
         create_document_9();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(104L);   //clef F4 in staff 2
+        cursor.point_to(106L);   //clef F4 in staff 2
         ++cursor;               //end of staff
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 1, 0, 0.0);
         CHECK( cursor.is_at_end_of_score() == true );
 
         cursor.to_time(0, 1, 0.0);
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 0.0, 106L, 106L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1799,12 +1843,12 @@ SUITE(ScoreCursorTest)
         //401. get state: pointing object
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(132L);   //first half note, instr 1, staff 2, measure 2
+        cursor.point_to(134L);   //first half note, instr 1, staff 2, measure 2
 
         SpElementCursorState spState = cursor.get_state();
 
         ScoreCursorState* state = static_cast<ScoreCursorState*>( spState.get() );
-        CHECK_STATE(state, 0, 1, 1, 128.0, 132L, 132L);
+        CHECK_STATE(state, 0, 1, 1, 128.0, 134L, 134L);
         //dump_cursor_state(state);
     }
 
@@ -1813,7 +1857,7 @@ SUITE(ScoreCursorTest)
         //402. get state: pointing to end of score
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //to barline
+        cursor.point_to(133L);   //to barline
         cursor.move_next();     //to end of staff
 
         SpElementCursorState spState = cursor.get_state();
@@ -1828,13 +1872,13 @@ SUITE(ScoreCursorTest)
         //403. get state: pointing to empty place
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);   //second note firt staff
+        cursor.point_to(110L);   //second note firt staff
         cursor.move_next();     //empty place
 
         SpElementCursorState spState = cursor.get_state();
 
         ScoreCursorState* state = static_cast<ScoreCursorState*>( spState.get() );
-        CHECK_STATE(state, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK_STATE(state, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L);
         //dump_cursor_state(state);
     }
 
@@ -1843,13 +1887,13 @@ SUITE(ScoreCursorTest)
         //404. restore state: pointing object
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(122L);   //last note in staff 2, measure 1
+        cursor.point_to(124L);   //last note in staff 2, measure 1
         SpElementCursorState spState = cursor.get_state();
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(105L);   //clef in staff 1
 
         cursor.restore_state(spState);
 
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 96.0, 122L, 122L);
+        CHECK( check_current_state(cursor, 0, 1, 0, 96.0, 124L, 124L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1858,11 +1902,11 @@ SUITE(ScoreCursorTest)
         //405. restore state: pointing to end of staff
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(131L);   //to barline
+        cursor.point_to(133L);   //to barline
         cursor.move_next();     //to end of staff
         SpElementCursorState spState = cursor.get_state();
         CHECK( cursor.is_at_end_of_score() == false );
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(105L);   //clef in staff 1
 
         cursor.restore_state(spState);
 
@@ -1876,15 +1920,15 @@ SUITE(ScoreCursorTest)
         //406. restore state: pointing to empty place
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(108L);   //second note firt staff
+        cursor.point_to(110L);   //second note firt staff
         cursor.move_next();     //to empty place
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
         SpElementCursorState spState = cursor.get_state();
-        cursor.point_to(131L);   //to barline
+        cursor.point_to(133L);   //to barline
 
         cursor.restore_state(spState);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 121L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 123L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, get_restore_state_407)
@@ -1892,11 +1936,11 @@ SUITE(ScoreCursorTest)
         //407. restore state: pointing to end of score
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to_barline(131L, 1);   //to barline, second staff
+        cursor.point_to_barline(133L, 1);   //to barline, second staff
         cursor.move_next();     //to end of score
         CHECK( cursor.is_at_end_of_score() == true );
         SpElementCursorState spState = cursor.get_state();
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(105L);   //clef in staff 1
 
         cursor.restore_state(spState);
 
@@ -1910,7 +1954,7 @@ SUITE(ScoreCursorTest)
         //408. bug1. restore end of staff state: bad instrument
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(203L);   //start of instr 2, staff 1
+        cursor.point_to(205L);   //start of instr 2, staff 1
         cursor.move_prev();     //end of instr 1, staff 2
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 2, 256.0f);
         SpElementCursorState spState = cursor.get_state();
@@ -1926,22 +1970,22 @@ SUITE(ScoreCursorTest)
     {
         //409. bug. moved to end of score
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#101L (musicData "
+        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#103L"
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
         m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(&doc, m_pScore);
-        cursor.point_to(105L);   //last note
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 105L, 105L);
+        cursor.point_to(106L);   //last note
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 106L, 106L) );
         SpElementCursorState spState = cursor.get_state();
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
 
         cursor.restore_state(spState);
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 105L, 105L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 32.0, 106L, 106L) );
 
         cursor.move_prev();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 105L, 105L) );
         //cout << cursor.dump_cursor();
     }
 
@@ -1968,7 +2012,7 @@ SUITE(ScoreCursorTest)
         cursor.reset_and_point_to(id);
 
         //cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, id, id);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0f, id, id) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_510)
@@ -1991,14 +2035,14 @@ SUITE(ScoreCursorTest)
         //511. reset and point after: previous before_start_of_child
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
+            "(score (vers 2.0)(instrument#90L (musicData#102L (clef G))))))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 103L, 103L) );
         SpElementCursorState spState = cursor.find_previous_pos_state();
         ImoId idPrev = spState->pointee_id();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 103L, 103L) );
         ImoClef* pImo = static_cast<ImoClef*>( cursor.get_pointee() );
 
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
@@ -2016,15 +2060,15 @@ SUITE(ScoreCursorTest)
         //512. reset and point after: previous an Imo and next Imo exists
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 2.0)(instrument#101L (musicData (clef G)(key C))))))" );
+            "(score (vers 2.0)(instrument#90L (musicData#102L (clef G)(key C))))))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 103L, 103L) );
 
         cursor.reset_and_point_after(103L);
 
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 104L, 104L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0f, 104L, 104L) );
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_513)
@@ -2032,11 +2076,11 @@ SUITE(ScoreCursorTest)
         //513. reset and point after: previous an Imo and next is end of score
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
+            "(score (vers 2.0)(instrument#90L (musicData#102L (clef G))))))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
+        CHECK( check_current_state(cursor, 0, 0, 0, 0.0, 103L, 103L) );
 
         cursor.reset_and_point_after(103L);
 
@@ -2083,7 +2127,7 @@ SUITE(ScoreCursorTest)
         create_document_5();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 
-        cursor.point_to(128L);   //2nd note in 2nd bar
+        cursor.point_to(129L);   //2nd note in 2nd bar
 
         TimeInfo ti = cursor.get_time_info();
         CHECK( ti.get_timepos() == 224.0 );
@@ -2098,7 +2142,7 @@ SUITE(ScoreCursorTest)
         create_document_5();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 
-        cursor.point_to_barline(126L, 0);   //1st barline
+        cursor.point_to_barline(127L, 0);   //1st barline
 
         TimeInfo ti = cursor.get_time_info();
         CHECK( ti.get_timepos() == 192.0 );
@@ -2112,7 +2156,7 @@ SUITE(ScoreCursorTest)
         //612. move_next() updates time related info
         create_document_5();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(104L);   //clef in staff 1
 
         cursor.move_next();     //key
         CHECK( cursor.get_time_info().get_current_beat_duration() == k_duration_quarter );
@@ -2130,7 +2174,7 @@ SUITE(ScoreCursorTest)
         create_document_5();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 
-        cursor.point_to(127L);   //1st note in 2nd bar
+        cursor.point_to(128L);   //1st note in 2nd bar
 
         TimeInfo ti = cursor.get_time_info();
         CHECK( ti.get_timepos() == 192.0 );
@@ -2170,9 +2214,9 @@ SUITE(ScoreCursorTest)
         //614. restore_state() updates time related info
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(122L);   //last note in staff 2, measure 1
+        cursor.point_to(124L);   //last note in staff 2, measure 1
         SpElementCursorState spState = cursor.get_state();
-        cursor.point_to(103L);   //clef in staff 1
+        cursor.point_to(105L);   //clef in staff 1
 
         cursor.restore_state(spState);
 

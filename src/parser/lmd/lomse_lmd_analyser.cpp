@@ -560,15 +560,15 @@ protected:
     {
         ImoStyle* pStyle = nullptr;
 
-        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
-        if (pDoc)
+        ImoDocument* pImoDoc = m_pAnalyser->get_root_imo_document();
+        if (pImoDoc)
         {
-            pStyle = pDoc->find_style(styleName);
+            pStyle = pImoDoc->find_style(styleName);
             if (!pStyle)
             {
                 report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                         "Style '" + styleName + "' is not defined. Default style will be used.");
-                pStyle = pDoc->get_style_or_default(styleName);
+                pStyle = pImoDoc->get_style_or_default(styleName);
             }
         }
 
@@ -832,8 +832,8 @@ public:
     ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLineStyle* pLine = static_cast<ImoLineStyle*>(
-                                    ImFactory::inject(k_imo_line_style, pDoc) );
+        ImoLineStyleDto* pLine = static_cast<ImoLineStyleDto*>(
+                                    ImFactory::inject(k_imo_line_style_dto, pDoc) );
         pLine->set_start_point( TPoint(0.0f, 0.0f) );
         pLine->set_start_edge(k_edge_normal);
         pLine->set_start_cap(k_cap_none);
@@ -2616,7 +2616,6 @@ public:
         m_pAnalyser->save_root_imo_document(pImoDoc);
         pDoc->set_imo_doc(pImoDoc);
 
-
         //// [<settings>]
         //analyse_optional(k_settings, pImoDoc);
 
@@ -2624,8 +2623,7 @@ public:
         //analyse_optional(k_meta, pImoDoc);
 
         // [<styles>]
-        if (!analyse_optional(k_styles, pImoDoc))
-            add_default(pImoDoc);
+        analyse_optional(k_styles, pImoDoc);
 
         //// [<pageLayout>*]
         //while (analyse_optional(k_pageLayout, pImoDoc));
@@ -2643,17 +2641,6 @@ protected:
     string get_version()
     {
         return m_childToAnalyse.first_child().value();
-    }
-
-    void add_default(ImoDocument* pImoDoc)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        Linker linker(pDoc);
-        ImoStyles* pStyles = static_cast<ImoStyles*>(
-                                    ImFactory::inject(k_imo_styles, pDoc));
-        linker.add_child_to_model(pImoDoc, pStyles, k_styles);
-        ImoStyle* pDefStyle = pImoDoc->get_default_style();
-        pImoDoc->set_style(pDefStyle);
     }
 
 };
@@ -2871,9 +2858,9 @@ public:
             else if (get_optional(k_label))
             {
                 // case 2: <NoteType><NoteType>
-                NoteTypeAndDots figdots = get_note_type_and_dots();
-                pMtr->set_right_note_type( figdots.noteType );
-                pMtr->set_right_dots( figdots.dots );
+                NoteTypeAndDots typedots = get_note_type_and_dots();
+                pMtr->set_right_note_type( typedots.noteType );
+                pMtr->set_right_dots( typedots.dots );
                 pMtr->set_mark_type(ImoMetronomeMark::k_note_note);
             }
             else
@@ -3110,7 +3097,7 @@ public:
 
         // add fermata
         if (m_pFermata)
-            add_attachment(pNR, m_pFermata);
+            pNR->add_attachment(m_pFermata);
 
         //tie
         if (fStartOldTie)
@@ -3153,13 +3140,11 @@ public:
             {
                 //previous note is the base note. Create the chord
                 pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                pStartOfChordNote->include_in_relation(pDoc, pChord);
+                pStartOfChordNote->include_in_relation(pChord);
             }
 
             //add current note to chord
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pNote->include_in_relation(pDoc, pChord);
+            pNote->include_in_relation(pChord);
 
         //TODO: check if note in chord has the same duration than base note
       //  if (fInChord && m_pLastNote
@@ -3523,12 +3508,6 @@ protected:
         }
     }
 
-    void add_attachment(ImoNoteRest* pNR, ImoFermata* pFermata)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        pNR->add_attachment(pDoc, pFermata);
-    }
-
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3776,14 +3755,11 @@ public:
 
     ImoObj* do_analysis() override
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        //ImoPageInfo dto;
         ImoPageInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_page_info())
             pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
-            return nullptr;         //what is this for?
-            //pDto = &dto;
+            return nullptr;
 
         //left
         LUnits left = 1500.0f;
@@ -3836,14 +3812,11 @@ public:
 
     ImoObj* do_analysis() override
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        //ImoPageInfo dto;
         ImoPageInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_page_info())
             pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
-            return nullptr;     //what is this for?
-            //pDto = &dto;
+            return nullptr;
 
         //width
         if (get_mandatory(k_number))
@@ -4536,14 +4509,22 @@ public:
     ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoStyles* pStyles = static_cast<ImoStyles*>(ImFactory::inject(k_imo_styles, pDoc));
+        ImoDocument* pImoDoc = pDoc->get_im_root();
+        ImoStyles* pStyles = nullptr;
+        if (pImoDoc)
+            pStyles = pImoDoc->get_styles();
+        else
+        {
+            //unit tests, parsing only a "<styles> ... </styles>" element
+            pStyles = static_cast<ImoStyles*>(
+                             ImFactory::inject(k_imo_styles, pDoc, get_node_id()) );
+        }
 
         // [<defineStyle>*]
         while (analyse_optional(k_defineStyle, pStyles));
 
         error_if_more_elements();
 
-        add_to_model(pStyles);
         return pStyles;
     }
 
@@ -4942,7 +4923,7 @@ protected:
         if (pImo)
         {
             if (pImo->is_line_style())
-                pTB->set_anchor_line( static_cast<ImoLineStyle*>(pImo) );
+                pTB->set_anchor_line( static_cast<ImoLineStyleDto*>(pImo) );
             delete pImo;
         }
     }
@@ -5688,18 +5669,23 @@ void LmdElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
     //@ <numStaff> = pn
 
     // [<numStaff>]
+    bool fStaffFound = false;
     if (more_children_to_analyse())
     {
         m_childToAnalyse = get_child_to_analyse();
         if (m_childToAnalyse.name() == "staff")
         {
             get_num_staff();
+            fStaffFound = true;
             move_to_next_child();
         }
     }
 
     //set staff: either found value or inherited one
-    pSO->set_staff( m_pAnalyser->get_current_staff() );
+    if (pSO->is_key_signature() && !fStaffFound)
+        static_cast<ImoKeySignature*>(pSO)->set_staff_common_for_all( m_pAnalyser->get_current_staff() );
+    else
+        pSO->set_staff( m_pAnalyser->get_current_staff() );
 
     analyse_scoreobj_options(pSO);
 }
@@ -6318,10 +6304,10 @@ void LmdTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
     pTie->set_color( pStartDto->get_color() );
 
     ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, pStartDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+    pStartNote->include_in_relation(pTie, pStartData);
 
     ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, pEndDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
@@ -6415,12 +6401,12 @@ void OldLmdTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
     ImoTieDto startDto;
     startDto.set_start(true);
     ImoTieData* pStartData = ImFactory::inject_tie_data(pDoc, &startDto);
-    pStartNote->include_in_relation(pDoc, pTie, pStartData);
+    pStartNote->include_in_relation(pTie, pStartData);
 
     ImoTieDto endDto;
     endDto.set_start(false);
     ImoTieData* pEndData = ImFactory::inject_tie_data(pDoc, &endDto);
-    pEndNote->include_in_relation(pDoc, pTie, pEndData);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
@@ -6442,7 +6428,7 @@ void LmdSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
     {
         ImoNote* pNote = (*it)->get_note();
         ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
-        pNote->include_in_relation(pDoc, pSlur, pData);
+        pNote->include_in_relation(pSlur, pData);
     }
 }
 
@@ -6462,7 +6448,7 @@ void LmdBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
+        pNR->include_in_relation(pBeam, pData);
     }
 
     //AWARE: LDP v1.6 requires full item description, Autobeamer is not needed
@@ -6534,7 +6520,7 @@ void OldLmdBeamsBuilder::do_create_old_beam()
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pBeam, pData);
+        pNR->include_in_relation(pBeam, pData);
         delete *it;
     }
     m_pendingOldBeams.clear();
@@ -6560,7 +6546,7 @@ void LmdTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, pTuplet, nullptr);
+        pNR->include_in_relation(pTuplet, nullptr);
     }
 }
 

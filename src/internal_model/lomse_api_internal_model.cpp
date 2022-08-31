@@ -2338,7 +2338,6 @@ AInstrGroup AScore::group_instruments(int iFirstInstr, int iLastInstr)
         ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                                         ImFactory::inject(k_imo_instr_group, m_pDoc));
 
-        pGrp->set_owner_score(pimpl());
         pGrp->set_range(iFirstInstr, iLastInstr);
         pimpl()->add_instruments_group(pGrp);
         return AInstrGroup(pGrp, m_pDoc, m_imVersion);

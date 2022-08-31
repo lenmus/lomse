@@ -47,7 +47,6 @@ public:
         , m_builder(builder)
     {
     }
-	virtual ~VisitorForStructurizables() {}
 
     void start_visit(ImoScore* pImo) override { m_builder->structurize(pImo); }
     //void start_visit(ImoOtherStructurizable* pImo) { m_builder->structurize(pImo); }
@@ -56,6 +55,29 @@ public:
     //void end_visit(ImoOtherStructurizable* pImo) {}
 
 };
+
+class CloneFixerVisitor : public Visitor<ImoScore>
+//                                , public Visitor<ImoOtherStructurizable>
+{
+protected:
+    ModelBuilder* m_builder;
+
+public:
+    CloneFixerVisitor(ModelBuilder* builder)
+        : Visitor<ImoScore>()
+        //, Visitor<ImoOtherStructurizable>()
+        , m_builder(builder)
+    {
+    }
+
+    void start_visit(ImoScore* pImo) override { m_builder->fix_model(pImo); }
+    //void start_visit(ImoOtherStructurizable* pImo) { m_builder->structurize(pImo); }
+
+	void end_visit(ImoScore* UNUSED(pImo)) override {}
+    //void end_visit(ImoOtherStructurizable* pImo) {}
+
+};
+
 
 
 //=======================================================================================
@@ -100,6 +122,31 @@ void ModelBuilder::structurize(ImoObj* pImo)
     }
 }
 
+//---------------------------------------------------------------------------------------
+ImoDocument* ModelBuilder::fix_cloned_model(ImoDocument* pImoDoc)
+{
+    if (pImoDoc)
+    {
+        CloneFixerVisitor v(this);
+        pImoDoc->accept_visitor(v);
+    }
+    return pImoDoc;
+}
+
+//---------------------------------------------------------------------------------------
+void ModelBuilder::fix_model(ImoObj* pImo)
+{
+    if (pImo && pImo->is_score())
+    {
+        ImoScore* pScore = static_cast<ImoScore*>(pImo);
+
+        ColStaffObjsBuilder builder;
+        builder.build(pScore);
+
+        MeasuresTableBuilder measures;
+        measures.build(pScore);
+    }
+}
 
 //=======================================================================================
 // PitchAssigner implementation
@@ -450,9 +497,8 @@ void MidiAssigner::collect_sounds_info(ImoScore* pScore)
         }
         else
         {
-            Document* pDoc = pInstr->get_the_document();
             ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
-                                        ImFactory::inject(k_imo_sound_info, pDoc) );
+                                        ImFactory::inject(k_imo_sound_info, pInstr->get_doc_model()) );
             pInstr->add_sound_info(pInfo);
             m_sounds.push_back(pInfo);
         }

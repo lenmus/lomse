@@ -34,7 +34,7 @@ StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, Control* pParent,
     , m_xCenter(0.0f)
     , m_yCenter(0.0f)
 {
-    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
+    m_styleId = (pStyle == nullptr ? create_default_style() : pStyle)->get_id();
 
     measure();
 
@@ -67,7 +67,7 @@ USize StaticTextCtrl::measure()
 GmoBoxControl* StaticTextCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
-    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
+    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, get_style());
     return m_pMainBox;
 }
 
@@ -95,7 +95,8 @@ void StaticTextCtrl::set_text(const string& text)
 //---------------------------------------------------------------------------------------
 URect StaticTextCtrl::determine_text_position_and_size()
 {
-    int align = m_style->text_align();
+    ImoStyle* pStyle = get_style();
+    int align = pStyle->text_align();
     URect pos;
 
     //select_font();    //AWARE: not needed as font is already selected
@@ -134,14 +135,15 @@ void StaticTextCtrl::set_tooltip(const string& UNUSED(text))
 //---------------------------------------------------------------------------------------
 void StaticTextCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
+    ImoStyle* pStyle = get_style();
     select_font();
-    Color color = m_style->color();
+    Color color = pStyle->color();
     pDrawer->set_text_color(color);
     URect pos = determine_text_position_and_size();
     pDrawer->draw_text(pos.x, pos.y, m_label);
 
     //text decoration
-    if (m_style->text_decoration() == ImoStyle::k_decoration_underline)
+    if (pStyle->text_decoration() == ImoStyle::k_decoration_underline)
     {
         LUnits y = pos.y + pos.height * 0.12f;
         pDrawer->begin_path();

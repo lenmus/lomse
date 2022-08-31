@@ -44,7 +44,7 @@ LomseDoorway::LomseDoorway(std::ostream* logStream, std::ostream* forensicLogStr
     , m_pObj_notify(nullptr)
     , m_pObj_request(nullptr)
 {
-    logger.init(logStream, forensicLogStream);
+    glogger.init(logStream, forensicLogStream);
 
     //initialize lomse library with some default values, to facilitate using SVG
     //as these values doesn't matter in SVG

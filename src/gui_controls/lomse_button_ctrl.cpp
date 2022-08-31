@@ -37,7 +37,7 @@ ButtonCtrl::ButtonCtrl(LibraryScope& libScope, Control* pParent,
     , m_xLabel(0.0f)
     ,  m_yLabel(0.0f)
 {
-    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
+    m_styleId = (pStyle == nullptr ? create_default_style() : pStyle)->get_id();
 
     measure();
 
@@ -70,7 +70,7 @@ USize ButtonCtrl::measure()
 GmoBoxControl* ButtonCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
-    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
+    m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, get_style());
     return m_pMainBox;
 }
 

@@ -46,6 +46,8 @@ namespace lomse
 
 
 //forward declarations
+class Document;
+class DocModel;
 class DocCommand;
 class DocCommandExecuter;
 class Compiler;
@@ -56,10 +58,10 @@ class ImoMusicData;
 class ImoScore;
 class ImoStyle;
 class ImoObj;
-
 class ImoButton;
 class ImoParagraph;
 class ImoTextItem;
+class RelObjCloner;
 
 
 //---------------------------------------------------------------------------------------
@@ -73,6 +75,86 @@ enum EDocLayoutOptions
     k_infinite_width        = 0x0004,   //No width constrains
     k_infinite_height       = 0x0008,   //No height constrains
     k_use_viewport_width    = 0x0010,   //Use viewport width to determine constrains
+};
+
+
+//------------------------------------------------------------------------------------
+/** %DocModel is a container object for all data representing the current content of
+    a document, basically the internal model tree (ImoDocument), and the IdAssigner
+    object associated to this tree. The internal model tree also owns some other
+    internal objects, in particular the ColStaffObj and the ImMeasuresTable, that
+    have to be cloned when %DocModel is cloned.
+
+    All this data is encapsulated in this class to facilitate managing and restoring
+    backup copies, for supporting edition undo/redo.
+*/
+class DocModel
+{
+protected:
+    friend class Document;
+    Document*       m_pDoc = nullptr;           //owner document
+    IdAssigner*     m_pIdAssigner = nullptr;    //basically a map id <--> ptr to ImoObj
+    ImoDocument*    m_pImoDoc = nullptr;        //the internal model tree
+    RelObjCloner*   m_pRelObjCloner = nullptr;  //helper to clone ImoRelObj nodes
+    unsigned int    m_flags = k_dirty;
+    long            m_imRef = -1L;               //this model unique id number
+
+
+    DocModel(Document* pDoc);
+
+public:
+
+    //the five special
+    ~DocModel();
+    DocModel(const DocModel& a) { clone(a); }
+    DocModel& operator= (const DocModel& a) { clone(a); return *this; }
+    DocModel(DocModel&&) = delete;
+    DocModel& operator= (DocModel&&) = delete;
+
+    ///Values for flags
+    enum EDocumentFlags {
+        k_dirty             = 0x0001,   ///< dirty: modified since last "clear_dirty()" ==> need to rebuild GModel
+    };
+
+    //access to key objects
+    inline ImoDocument* get_im_root() { return m_pImoDoc; }
+    inline Document* get_owner_document() { return m_pDoc; }
+    inline IdAssigner* get_id_assigner() { return m_pIdAssigner; }
+    RelObjCloner* get_relobj_cloner();
+
+    //information
+    inline std::string get_language() { return (m_pImoDoc ? m_pImoDoc->get_language() : "en"); }
+
+
+    //id management
+    void assign_id(ImoObj* pImo);
+    void assign_id(Control* pControl);
+    ImoId reserve_id(ImoId id);
+    string get_xml_id_for(ImoId id) const;
+    void set_xml_id_for(ImoId id, const string& value);
+    size_t id_assigner_size() const;
+    string dump_id_assigner() const;
+    ImoObj* get_pointer_to_imo(const std::string& xmlId) const;
+    ImoObj* get_pointer_to_imo(ImoId id) const;
+    Control* get_pointer_to_control(ImoId id) const;
+    void reset_id_assigner();
+    void on_removed_from_model(ImoObj* pImo);
+
+    //dirty flag
+    inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
+    inline void set_dirty() { m_flags |= k_dirty; }
+    inline void clear_dirty() { m_flags &= ~k_dirty; }
+
+    //unique model reference
+    void add_unique_model_ref();
+    inline bool is_valid_model(long imRef) const { return m_imRef == imRef; }
+    inline long get_model_ref() const { return m_imRef; }
+
+
+protected:
+    DocModel& clone(const DocModel& a);
+
+
 };
 
 
@@ -108,8 +190,7 @@ enum EDocLayoutOptions
     analogous to the HTML @<object@> tag.
 
 */
-class LOMSE_EXPORT Document : public BlockLevelCreatorApi
-                            , public EventNotifier
+class LOMSE_EXPORT Document : public EventNotifier
                             , public Observable
                             , public std::enable_shared_from_this<Document>
 {
@@ -117,21 +198,14 @@ protected:
     LibraryScope&   m_libraryScope;
     ostream&        m_reporter;
     DocumentScope   m_docScope;
-    IdAssigner*     m_pIdAssigner;
-    ImoDocument*    m_pImoDoc;
-    unsigned int    m_flags;
-    int             m_modified;
-    long            m_imRef;            //to validate the model
+    int             m_modified;         //modified since last 'save to file' operation
+    DocModel*       m_pModel = nullptr;         //the document content
+    DocModel*       m_pModelCopy = nullptr;     //backup
 
 public:
     /// Constructor
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
     ~Document() override;
-
-    ///Values for flags
-    enum EDocumentFlags {
-        k_dirty             = 0x0001,   ///< dirty: modified since last "clear_dirty()" ==> need to rebuild GModel
-    };
 
     ///Supported file formats
     enum EFileFormat {
@@ -223,14 +297,14 @@ public:
     /** Returns a pointer to the root object of the internal model. It is always an
         ImoDocument object. Access to this object is not always necessary as
         %Document provides facade methods for the most common operations. */
-    inline ImoDocument* get_im_root() const { return m_pImoDoc; }
+    inline ImoDocument* get_im_root() const { return m_pModel->m_pImoDoc; }
 
     /** Returns an ADocument object for interacting with the internal model.  */
     ADocument get_document_api();
 
 
     //LMD version used in the source or "0.0" in other cases
-    inline std::string& get_version() { return m_pImoDoc->m_version; }
+    inline std::string& get_version() { return m_pModel->m_pImoDoc->m_version; }
 
     // ptr to ImoDocument or nullptr if no object found with the given ID.
     ImoObj* get_pointer_to_imo(ImoId id) const;
@@ -250,11 +324,12 @@ public:
         'en' (English).
     */
     inline std::string get_language() {
-        return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
+        return (m_pModel->m_pImoDoc ? m_pModel->m_pImoDoc->get_language() : "en");
     }
 
+
     inline float get_page_content_scale() {
-        return (m_pImoDoc != nullptr ? m_pImoDoc->get_page_content_scale() : 1.0f);
+        return (m_pModel->m_pImoDoc != nullptr ? m_pModel->m_pImoDoc->get_page_content_scale() : 1.0f);
     }
 
     //@}    //Access to the internal model
@@ -266,11 +341,11 @@ public:
     /** Set the language used in this %Document. Parameter 'language' is a language code
     drawn from ISO 639, optionally extended with a country code drawn from ISO 3166, as
     'en-US'. It represents the default language for all texts in the document. */
-    inline void set_language(const std::string& language) { m_pImoDoc->m_language = language; }
+    inline void set_language(const std::string& language) { m_pModel->m_pImoDoc->m_language = language; }
 
     inline void set_page_content_scale(float scale) {
-        if (m_pImoDoc)
-            m_pImoDoc->set_page_content_scale(scale);
+        if (m_pModel->m_pImoDoc)
+            m_pModel->m_pImoDoc->set_page_content_scale(scale);
     }
 
     void end_of_changes();
@@ -285,19 +360,19 @@ public:
         pPageInfo->set_page_width(29700.0f);
         @endcode
     */
-    inline ImoPageInfo* get_page_info() { return &(m_pImoDoc->m_pageInfo); }
+    inline ImoPageInfo* get_page_info() { return m_pModel->m_pImoDoc->get_page_info(); }
 
-    inline LUnits get_paper_width() { return m_pImoDoc->m_pageInfo.get_page_width(); }
-    inline LUnits get_paper_height() { return m_pImoDoc->m_pageInfo.get_page_height(); }
+    inline LUnits get_paper_width() { return m_pModel->m_pImoDoc->get_paper_width(); }
+    inline LUnits get_paper_height() { return m_pModel->m_pImoDoc->get_paper_height(); }
 
-    /** Append a ImoPageInfo node with default values.
+    /** Append a ImoPageInfo node.
 
         <b>Remarks</b>
         - There should be only one ImoPageInfo child in ImoDocument. This method
             should not be used in applications using Lomse, unless they know very well
             what they are doing.
     */
-    void add_page_info(ImoPageInfo* pPI) { m_pImoDoc->add_page_info(pPI); }
+    void add_page_info(ImoPageInfo* pPI) { m_pModel->m_pImoDoc->add_page_info(pPI); }
 
     //@}    //Low level edition API: ImoDocument related
 
@@ -312,28 +387,28 @@ public:
 
     /** Append a new empty score (no instruments) at the end of the %Document. Returns a
         pointer to the created ImoScore object. */
-    ImoScore* add_score(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_score(pStyle); }
+    ImoScore* add_score(ImoStyle* pStyle=nullptr) { return m_pModel->m_pImoDoc->add_score(pStyle); }
 
     /** Append a new empty paragraph at the end of the %Document. Returns a
         pointer to the created ImoParagraph object. */
-    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_paragraph(pStyle); }
+    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr) { return m_pModel->m_pImoDoc->add_paragraph(pStyle); }
 
     /** Append a new empty list at the end of the %Document. Returns a
         pointer to the created ImoList object. */
-    ImoList* add_list(int type, ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_list(type, pStyle); }
+    ImoList* add_list(int type, ImoStyle* pStyle=nullptr) { return m_pModel->m_pImoDoc->add_list(type, pStyle); }
 
     /** Append a block level object (a node of class ImoBlockLevelObj, such as ImoScore or
         ImoParagraph) to the document. */
-    void append_content_item(ImoBlockLevelObj* pItem) { return m_pImoDoc->append_content_item(pItem); }
+    void append_content_item(ImoBlockLevelObj* pItem) { m_pModel->m_pImoDoc->append_content_item(pItem); }
 
     /** Insert a block level object (a node of class ImoBlockLevelObj, such as ImoScore or
         ImoParagraph) before the pointed node 'pAt'. If 'pAt' is nullptr
         then the block level object will be appended to the end of the %Document. */
-    void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew) { m_pImoDoc->insert_block_level_obj(pAt, pImoNew); }
+    void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew) { m_pModel->m_pImoDoc->insert_block_level_obj(pAt, pImoNew); }
 
     /** Remove from the internal model (and delete) the block level object referenced
         by pointer 'pAt'.  */
-    void delete_block_level_obj(ImoBlockLevelObj* pAt) { m_pImoDoc->delete_block_level_obj(pAt); }
+    void delete_block_level_obj(ImoBlockLevelObj* pAt) { m_pModel->m_pImoDoc->delete_block_level_obj(pAt); }
 
     //@}    //Low level edition API: adding first level objects
 
@@ -450,16 +525,16 @@ public:
 
 
     // traversing the document
-    ImoContent* get_content() { return m_pImoDoc->get_content(); }
-    int get_num_content_items() { return m_pImoDoc->get_num_content_items(); }
+    ImoContent* get_content() { return m_pModel->m_pImoDoc->get_content(); }
+    int get_num_content_items() { return m_pModel->m_pImoDoc->get_num_content_items(); }
     ImoBlockLevelObj* get_content_item(int iItem) {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_content_item(iItem) );
+        return dynamic_cast<ImoBlockLevelObj*>( m_pModel->m_pImoDoc->get_content_item(iItem) );
     }
     ImoBlockLevelObj* get_first_content_item() {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_first_content_item() );
+        return dynamic_cast<ImoBlockLevelObj*>( m_pModel->m_pImoDoc->get_first_content_item() );
     }
     ImoBlockLevelObj* get_last_content_item() {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_last_content_item() );
+        return dynamic_cast<ImoBlockLevelObj*>( m_pModel->m_pImoDoc->get_last_content_item() );
     }
 
 
@@ -489,15 +564,17 @@ public:
     /** Return the style whose name is passed as parameter. If the style name is not
         defined returns the default style.
     */
-    ImoStyle* get_style_or_default(const std::string& name) { return m_pImoDoc->get_style_or_default(name); }
+    ImoStyle* get_style_or_default(const std::string& name) {
+        return m_pModel->m_pImoDoc->get_style_or_default(name);
+    }
 
     /** Return the ImoStyles object associated to this %Document. The returned object
         contains all the styles defined in this %Document.
     */
-    ImoStyles* get_styles() { return m_pImoDoc->get_styles(); }
+    ImoStyles* get_styles() { return m_pModel->m_pImoDoc->get_styles(); }
 
     /** Add the style passed as parameter to the sets of styles. */
-    void add_style(ImoStyle* pStyle) { m_pImoDoc->add_style(pStyle); }
+    void add_style(ImoStyle* pStyle) { m_pModel->m_pImoDoc->add_style(pStyle); }
 
 
 
@@ -528,7 +605,7 @@ public:
         document is created and when an EventDoc of type `k_doc_modified_event`
         is issued.
     */
-    inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
+    inline bool is_dirty() { return m_pModel->is_dirty(); }
 
     /** Send an EventDoc of type `k_doc_modified_event` if the document has been
         modified (if it is dirty).
@@ -558,18 +635,22 @@ public:
     ImoObj* create_object_from_lmd(const std::string& source);
 
     /** Add to the document a child object of type ImoContent. */
-    ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_content_wrapper(pStyle); }
+    ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr) {
+        return m_pModel->m_pImoDoc->add_content_wrapper(pStyle);
+    }
 
     /** Add to the document a child object of type ImoMultiColumn. */
-    ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_multicolumn_wrapper(numCols, pStyle); }
+    ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=nullptr) {
+        return m_pModel->m_pImoDoc->add_multicolumn_wrapper(numCols, pStyle);
+    }
 
         //dirty
 
     //TODO: public to be used by exercises (reconfigure buttons), To be changed to
     //protected as soon as buttons changed to controls
-    inline void set_dirty() { m_flags |= k_dirty; }
+    inline void set_dirty() { m_pModel->set_dirty(); }
 
-    inline void clear_dirty() { m_flags &= ~k_dirty; }
+    inline void clear_dirty() { m_pModel->clear_dirty(); }
 
         //events
     /** Mandatory override from Observable. Returns the EventNotifier associated to
@@ -580,11 +661,11 @@ public:
 
     Observable* get_observable_child(int childType, ImoId childId) override;
 
+    //undo/redo support based on re-running all commands
+    void create_backup_copy();
+    void restore_from_backup_copy();
 
-    //internal model and ID management
-    void on_removed_from_model(ImoObj* pImo);
-
-    //undo/redo support
+    //undo/redo support based on checkpoints
     int from_checkpoint(const std::string& data);
     int replace_object_from_checkpoint_data(ImoId id, const std::string& data);
     std::string get_checkpoint_data();
@@ -601,6 +682,8 @@ public:
     size_t id_assigner_size() const;
     std::string dump_tree() const;
     std::string to_string(bool fWithIds = false);
+    inline DocModel* debug_get_backup_copy() { return m_pModelCopy; }
+    inline DocModel* get_doc_model() { return m_pModel; }
 
     //inherited from LenMos 3.0. Not yet used
     void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
@@ -611,19 +694,6 @@ protected:
     void initialize();
     Compiler* get_compiler_for_format(int format);
     void fix_malformed_musicxml();
-
-    friend class ImFactory;
-    friend class InstrumentAnalyser;
-    void assign_id(ImoObj* pImo);
-    ImoId reserve_id(ImoId id);
-
-    friend class ImoObj;
-    std::string get_xml_id_for(ImoId id);
-    void set_xml_id_for(ImoId id, const std::string& value);
-
-    friend class Control;
-    void assign_id(Control* pControl);
-
 
     //There is a design bug: ImoControl constructor needs to access ImoDocument for
     //setting the language. But when the control is created (in LdpAnalyser or

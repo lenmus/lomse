@@ -1529,7 +1529,7 @@ protected:
             ImoBeamData* pData = static_cast<ImoBeamData*>(
                                         ImFactory::inject(k_imo_beam_data, pDoc) );
             pData->set_beam_type(0, type);
-            pNR->include_in_relation(pDoc, pBeam, pData);
+            pNR->include_in_relation(pBeam, pData);
 
 //            //check if beam is congruent with note type
 //            int level = 0;
@@ -2352,13 +2352,13 @@ public:
                 {
                     //this note is the base note. Create the chord
                     ImoChord* pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-                    pNR->include_in_relation(pDoc, pChord);
+                    pNR->include_in_relation(pChord);
                 }
                 else
                 {
                     //chord already created. just add this note to itN
                     ImoChord* pChord = pPrevNote->get_chord();
-                    pNR->include_in_relation(pDoc, pChord);
+                    pNR->include_in_relation(pChord);
                 }
             }
             pPrevNote = pNR;
@@ -2437,7 +2437,7 @@ public:
         pRM->set_language("it");
         pRM->set_text("Fine");
 
-        pDirection->add_attachment(pDoc, pRM);
+        pDirection->add_attachment(pRM);
 
         set_result( LOMSE_NEW ImoData(pDirection) );
         return true;    //success
@@ -2599,7 +2599,7 @@ protected:
             ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
                                         ImFactory::inject(k_imo_grace_relobj, pDoc));
 
-            pNote->include_in_relation(pDoc, pGraceRO);
+            pNote->include_in_relation(pGraceRO);
             pGraceRO->set_grace_type(m_graceType);
             pGraceRO->set_slash(m_fSlash);
             pGraceRO->set_percentage(m_percentage);
@@ -2615,10 +2615,7 @@ protected:
     {
         ImoNote* pNote = get_grace_note();
         if (pNote)
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pNote->include_in_relation(pDoc, pGraceRO);
-        }
+            pNote->include_in_relation(pGraceRO);
     }
 
 };
@@ -2796,7 +2793,7 @@ protected:
 //            pRM->set_?????              //TODO: left justification
 
 
-        pDirection->add_attachment(pDoc, pRM);
+        pDirection->add_attachment(pRM);
         return pDirection;
     }
 
@@ -3272,9 +3269,6 @@ public:
 
         ImoScore* pScore = create_score();
 
-        // add default styles
-        add_default(pImoDoc);
-
         //stylesheet?
         //TODO
 
@@ -3347,16 +3341,6 @@ protected:
         //TODO: mark the score
     }
 
-    void add_default(ImoDocument* pImoDoc)
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        Linker linker(pDoc);
-        ImoStyles* pStyles = static_cast<ImoStyles*>(
-                                    ImFactory::inject(k_imo_styles, pDoc));
-        linker.add_child_to_model(pImoDoc, pStyles, k_styles);
-        ImoStyle* pDefStyle = pImoDoc->get_default_style();
-        pImoDoc->set_style(pDefStyle);
-    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3931,7 +3915,7 @@ public:
             ImFactory::inject(k_imo_symbol_repetition_mark, pDoc) );
         pImo->set_symbol(ImoSymbolRepetitionMark::k_segno);
 
-        pDirection->add_attachment(pDoc, pImo);
+        pDirection->add_attachment(pImo);
         add_to_model(pDirection);
 
         set_result( LOMSE_NEW ImoData(pDirection) );
@@ -4258,11 +4242,11 @@ protected:
 
         ImoTieData* pStartData = static_cast<ImoTieData*>(
                                     ImFactory::inject(k_imo_tie_data, pDoc) );
-        pStartNote->include_in_relation(pDoc, pTie, pStartData);
+        pStartNote->include_in_relation(pTie, pStartData);
 
         ImoTieData* pEndData = static_cast<ImoTieData*>(
                                     ImFactory::inject(k_imo_tie_data, pDoc) );
-        pEndNote->include_in_relation(pDoc, pTie, pEndData);
+        pEndNote->include_in_relation(pTie, pEndData);
 
         pStartNote->set_tie_next(pTie);
         pEndNote->set_tie_prev(pTie);
@@ -4558,10 +4542,9 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_event_to_tuplet()
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
         std::unique_ptr<EventData> data = get_event_result();
         ImoNoteRest* pNR = data->pNR;
-        pNR->include_in_relation(pDoc, m_pTuplet, nullptr);
+        pNR->include_in_relation(m_pTuplet, nullptr);
     }
 
     //-----------------------------------------------------------------------------------
@@ -5069,7 +5052,6 @@ ImoInstrGroup* MnxAnalyser::start_part_group(int number)
     Document* pDoc = get_document_being_analysed();
     ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, pDoc));
-    pGrp->set_owner_score(get_score_being_analysed());
 
     m_partGroups.start_group(number, pGrp);
     return pGrp;
@@ -5808,7 +5790,7 @@ void MnxSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
     {
         ImoNote* pNote = (*it)->get_note();
         ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
-        pNote->include_in_relation(pDoc, pSlur, pData);
+        pNote->include_in_relation(pSlur, pData);
     }
 }
 
@@ -5827,7 +5809,7 @@ void MnxTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* UNUSED(pEndDto))
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, pTuplet, nullptr);
+        pNR->include_in_relation(pTuplet, nullptr);
     }
 }
 
@@ -5892,7 +5874,7 @@ void MnxVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoBarline* pBarline = (*it)->get_barline();
-        pBarline->include_in_relation(pDoc, pVB, nullptr);
+        pBarline->include_in_relation(pVB, nullptr);
     }
 }
 

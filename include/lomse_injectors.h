@@ -224,14 +224,11 @@ class DocumentScope
 {
 protected:
     ostream& m_reporter;
-    IdAssigner* m_idAssigner;
 
 public:
-    DocumentScope(ostream& reporter=std::cout);
-    ~DocumentScope();
+    DocumentScope(ostream& reporter=std::cout) : m_reporter(reporter) {}
 
     ostream& default_reporter() { return m_reporter; }
-    IdAssigner* id_assigner() { return m_idAssigner; }
 
 };
 

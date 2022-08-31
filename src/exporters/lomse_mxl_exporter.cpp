@@ -362,23 +362,27 @@ protected:
     {
         if (m_pObj->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pObj->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pObj->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (pRO->is_volta_bracket() )
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    ImoVoltaBracket* pVolta = static_cast<ImoVoltaBracket*>(pRO);
-                    if (pVolta->get_start_barline() == m_pObj)
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (pRO->is_volta_bracket() )
                     {
-                        m_left.pVoltaBracket = pVolta;
-                        m_left.pVoltaParent = m_pObj;
-                    }
-                    else
-                    {
-                        m_right.pVoltaBracket = pVolta;
-                        m_right.pVoltaParent = m_pObj;
+                        ImoVoltaBracket* pVolta = static_cast<ImoVoltaBracket*>(pRO);
+                        if (pVolta->get_start_barline() == m_pObj)
+                        {
+                            m_left.pVoltaBracket = pVolta;
+                            m_left.pVoltaParent = m_pObj;
+                        }
+                        else
+                        {
+                            m_right.pVoltaBracket = pVolta;
+                            m_right.pVoltaParent = m_pObj;
+                        }
                     }
                 }
             }
@@ -1171,26 +1175,30 @@ protected:
     {
         if (m_pObj->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pObj->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pObj->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (pRO->is_wedge() )
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    add_wedge(static_cast<ImoWedge*>(pRO));
-                }
-                else if (pRO->is_pedal_line() )
-                {
-                    //ignore. It has been already exported
-                }
-                else
-                {
-                    stringstream msg;
-                    msg << "Direction not supported in MusicXL exporter. RelObj="
-                        << pRO->get_name();
-                    LOMSE_LOG_ERROR(msg.str());
-                    m_source << "<!-- " << msg.str() << " -->";
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (pRO->is_wedge() )
+                    {
+                        add_wedge(static_cast<ImoWedge*>(pRO));
+                    }
+                    else if (pRO->is_pedal_line() )
+                    {
+                        //ignore. It has been already exported
+                    }
+                    else
+                    {
+                        stringstream msg;
+                        msg << "Direction not supported in MusicXL exporter. RelObj="
+                            << pRO->get_name();
+                        LOMSE_LOG_ERROR(msg.str());
+                        m_source << "<!-- " << msg.str() << " -->";
+                    }
                 }
             }
         }
@@ -2819,14 +2827,18 @@ protected:
     {
         if (m_pNR->get_num_relations() > 0)
         {
-            ImoRelations* pRelObjs = m_pNR->get_relations();
-            int size = pRelObjs->get_num_items();
-            for (int i=0; i < size; ++i)
+            ImoRelations* pRels = m_pNR->get_relations();
+            list<ImoRelObj*>& relobjs = pRels->get_relobjs();
+            if (relobjs.size() > 0)
             {
-                ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (pRO->is_tuplet() || pRO->is_slur() || pRO->is_arpeggio())
+                list<ImoRelObj*>::iterator it;
+                for (it = relobjs.begin(); it != relobjs.end(); ++it)
                 {
-                    add_source_for(pRO, m_pNR);
+                    ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+                    if (pRO->is_tuplet() || pRO->is_slur() || pRO->is_arpeggio())
+                    {
+                        add_source_for(pRO, m_pNR);
+                    }
                 }
             }
         }

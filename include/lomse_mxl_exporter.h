@@ -16,6 +16,7 @@
 
 #include <sstream>
 #include <array>
+#include <stack>
 
 ///@cond INTERNALS
 namespace lomse

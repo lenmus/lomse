@@ -32,7 +32,6 @@ using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
-
 class LdpAnalyserTestFixture
 {
 public:
@@ -3367,7 +3366,8 @@ SUITE(LdpAnalyserTest)
         ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_G );
-        CHECK( pKeySignature->get_staff() == -1 );
+        CHECK( pKeySignature->get_staff() == 0 );
+        CHECK( pKeySignature->is_common_for_all_staves() == true );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -3429,7 +3429,8 @@ SUITE(LdpAnalyserTest)
         ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_d );
-        CHECK( pKeySignature->get_staff() == -1 );
+        CHECK( pKeySignature->get_staff() == 0 );
+        CHECK( pKeySignature->is_common_for_all_staves() == true );
         CHECK( pKeySignature->is_visible() );
         CHECK( pKeySignature->get_user_location_x() == 70.0f );
         CHECK( pKeySignature->get_user_location_y() == 0.0f );
@@ -6082,6 +6083,7 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6247,13 +6249,13 @@ SUITE(LdpAnalyserTest)
         pNote1->set_note_type(k_16th);
         ImoBeamDto dto1;
         ImoBeamData* pData1 = ImFactory::inject_beam_data(&doc, &dto1);
-        pNote1->include_in_relation(&doc, pBeam, pData1);
+        pNote1->include_in_relation(pBeam, pData1);
 
         ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote2->set_note_type(k_eighth);
         ImoBeamDto dto2;
         ImoBeamData* pData2 = ImFactory::inject_beam_data(&doc, &dto2);
-        pNote2->include_in_relation(&doc, pBeam, pData2);
+        pNote2->include_in_relation(pBeam, pData2);
 
         AutoBeamer autobeamer(pBeam);
         autobeamer.do_autobeam();
@@ -6285,13 +6287,13 @@ SUITE(LdpAnalyserTest)
         pNote1->set_note_type(k_eighth);
         ImoBeamDto dto1;
         ImoBeamData* pData1 = ImFactory::inject_beam_data(&doc, &dto1);
-        pNote1->include_in_relation(&doc, pBeam, pData1);
+        pNote1->include_in_relation(pBeam, pData1);
 
         ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote2->set_note_type(k_eighth);
         ImoBeamDto dto2;
         ImoBeamData* pData2 = ImFactory::inject_beam_data(&doc, &dto2);
-        pNote2->include_in_relation(&doc, pBeam, pData2);
+        pNote2->include_in_relation(pBeam, pData2);
 
         AutoBeamer autobeamer(pBeam);
         autobeamer.do_autobeam();
@@ -8743,10 +8745,10 @@ SUITE(LdpAnalyserTest)
 
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        std::list<ImoScoreTitle*>& titles = pScore->get_titles();
-        std::list<ImoScoreTitle*>::iterator it = titles.begin();
-        CHECK( it != titles.end() );
-        ImoScoreTitle* pTitle = *it;
+        ImoScoreTitles* pTitles = pScore->get_titles();
+        ImoObj::children_iterator it = pTitles->begin();
+        CHECK( it != pTitles->end() );
+        ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>(*it);
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
@@ -8801,10 +8803,10 @@ SUITE(LdpAnalyserTest)
 
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        std::list<ImoScoreTitle*>& titles = pScore->get_titles();
-        std::list<ImoScoreTitle*>::iterator it = titles.begin();
-        CHECK( it != titles.end() );
-        ImoScoreTitle* pTitle = *it;
+        ImoScoreTitles* pTitles = pScore->get_titles();
+        ImoObj::children_iterator it = pTitles->begin();
+        CHECK( it != pTitles->end() );
+        ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>(*it);
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
@@ -9133,18 +9135,16 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo && pInfo->get_border_style() == k_line_dot );
 
         CHECK( pTB->has_anchor_line() == true );
-        ImoLineStyle* pLine = pTB->get_anchor_line_info();
-        CHECK( pLine != nullptr );
-        CHECK( pLine->is_line_style() == true );
-        CHECK( pLine->get_start_point() == TPoint(0.0f, 0.0f) );
-        CHECK( pLine->get_end_point() == TPoint(40.0f, 70.0f) );
-        CHECK( pLine->get_line_style() == k_line_dot );
-        CHECK( pLine->get_start_edge() == k_edge_normal );
-        CHECK( pLine->get_end_edge() == k_edge_normal );
-        CHECK( pLine->get_start_cap() == k_cap_none );
-        CHECK( pLine->get_end_cap() == k_cap_arrowhead );
-        CHECK( is_equal(pLine->get_color(), Color(255,10,0,255)) );
-        CHECK( pLine->get_width() == 3.5f );
+        TypeLineStyle& style = pTB->get_anchor_line_info();
+        CHECK( style.get_start_point() == TPoint(0.0f, 0.0f) );
+        CHECK( style.get_end_point() == TPoint(40.0f, 70.0f) );
+        CHECK( style.get_line_style() == k_line_dot );
+        CHECK( style.get_start_edge() == k_edge_normal );
+        CHECK( style.get_end_edge() == k_edge_normal );
+        CHECK( style.get_start_cap() == k_cap_none );
+        CHECK( style.get_end_cap() == k_cap_arrowhead );
+        CHECK( is_equal(style.get_color(), Color(255,10,0,255)) );
+        CHECK( style.get_width() == 3.5f );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -10247,7 +10247,7 @@ SUITE(LdpAnalyserTest)
 
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn->get_classid() == "test" );
-        std::list<ImoParamInfo*>& params = pDyn->get_params();
+        std::list<ImoParamInfo*> params = pDyn->get_params();
         CHECK( params.size() == 1 );
         ImoParamInfo* pParm = params.front();
         CHECK( pParm->get_name() == "play" );
@@ -11074,7 +11074,7 @@ SUITE(LdpAnalyserTest)
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
-        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        std::list<ImoStyle*> cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
         std::list<ImoStyle*>::iterator it = cols.begin();
         CHECK( (*it)->get_name() == "table1-col1" );
@@ -11121,7 +11121,7 @@ SUITE(LdpAnalyserTest)
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
-        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        std::list<ImoStyle*> cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
 
         ImoTableHead* pHead = pTable->get_head();

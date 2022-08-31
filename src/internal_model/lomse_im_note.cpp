@@ -10,6 +10,7 @@
 #include "lomse_im_note.h"
 
 #include "lomse_im_attributes.h"
+#include "private/lomse_document_p.h"
 
 
 namespace lomse
@@ -184,8 +185,8 @@ ImoNote::ImoNote(int type)
     , m_notated_acc(k_invalid_accidentals)
     , m_options(0)
     , m_stemDirection(k_stem_default)
-    , m_pTieNext(nullptr)
-    , m_pTiePrev(nullptr)
+    , m_idTieNext(k_no_imoid)
+    , m_idTiePrev(k_no_imoid)
     , m_computedStem(k_computed_stem_undecided)
 {
 }
@@ -198,8 +199,8 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_notated_acc(accidentals)
     , m_options(0)
     , m_stemDirection(stem)
-    , m_pTieNext(nullptr)
-    , m_pTiePrev(nullptr)
+    , m_idTieNext(k_no_imoid)
+    , m_idTiePrev(k_no_imoid)
     , m_computedStem(k_computed_stem_undecided)
 {
     m_step = step;
@@ -213,11 +214,44 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
 ImoNote::~ImoNote()
 {
     //if tied, inform the other note
-    if (m_pTieNext)
-        m_pTieNext->get_end_note()->set_tie_prev(nullptr);
+    //AWARE: Ties will be deleted in ImoStaffObj destructor. But it is necesary to
+    //inform the other notes to remove the tie Ids
 
-    if (m_pTiePrev)
-        m_pTiePrev->get_start_note()->set_tie_next(nullptr);
+    if (m_idTieNext != k_no_imoid)
+        get_tie_next()->get_end_note()->set_tie_prev(nullptr);
+
+    if (m_idTiePrev != k_no_imoid)
+        get_tie_prev()->get_start_note()->set_tie_next(nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+ImoTie* ImoNote::get_tie_next()
+{
+    if (m_pDocModel && m_idTieNext != k_no_imoid)
+        return static_cast<ImoTie*>( m_pDocModel->get_pointer_to_imo(m_idTieNext) );
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoTie* ImoNote::get_tie_prev()
+{
+    if (m_pDocModel && m_idTiePrev != k_no_imoid)
+        return static_cast<ImoTie*>( m_pDocModel->get_pointer_to_imo(m_idTiePrev) );
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNote::set_tie_next(ImoTie* pStartTie)
+{
+    m_idTieNext = (pStartTie ? pStartTie->get_id() : k_no_imoid);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNote::set_tie_prev(ImoTie* pEndTie)
+{
+    m_idTiePrev = (pEndTie ? pEndTie->get_id() : k_no_imoid);
 }
 
 //---------------------------------------------------------------------------------------
