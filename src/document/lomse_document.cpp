@@ -313,8 +313,15 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
 //---------------------------------------------------------------------------------------
 Document::~Document()
 {
-    delete m_pModel;
-    delete m_pModelCopy;
+    //set pointers to nullptr to avoid callbacks (e.g. set_dirty()) while deleting them
+    DocModel* pModel = m_pModel;
+    DocModel* pModelCopy = m_pModelCopy;
+    m_pModel = nullptr;
+    m_pModelCopy = nullptr;
+
+    //now it is safe to delete the models
+    delete pModel;
+    delete pModelCopy;
 
     delete_observers();
 }
@@ -401,53 +408,6 @@ int Document::from_string(const string& source, int format)
 }
 
 //---------------------------------------------------------------------------------------
-int Document::from_checkpoint(const string& data)
-{
-    //delete old internal model
-    delete m_pModel->m_pImoDoc;
-    m_pModel->m_pImoDoc = nullptr;
-    m_pModel->set_dirty();
-
-    //reset IdAssigner
-    m_pModel->reset_id_assigner();
-
-    //observers are external to the Document. Therefore, they do not change by
-    //modifying the Document. So, nothing to do about observers.
-    //Nevertheless, in future, if undo data includes other actions (not only
-    //those to modify the Document) such as for instance, creating a second View for
-    //the Document, these actions could imply reviewing Document observers.
-
-    //finally, load document from checkpoint source data
-    return from_string(data, k_format_lmd);
-}
-
-//---------------------------------------------------------------------------------------
-int Document::replace_object_from_checkpoint_data(ImoId id, const string& data)
-{
-    //object to replace
-    ImoObj* pOldImo = get_pointer_to_imo(id);
-    ImoObj* pParent = pOldImo->get_parent();
-
-    //new object
-    IdAssigner assigner;
-    IdAssigner* pSave = m_pModel->m_pIdAssigner;
-    m_pModel->m_pIdAssigner = &assigner;
-    ImoObj* pNewImo = create_object_from_lmd(data);
-    m_pModel->m_pIdAssigner = pSave;
-
-    //replace old object
-    //TODO: check that new and old have the same id?
-    ImoObj::depth_first_iterator it(pOldImo);
-    pParent->replace_node(it, pNewImo);
-    delete pOldImo;
-
-    //add new ids
-    assigner.copy_ids_to(m_pModel->m_pIdAssigner, id);
-
-    return 0;
-}
-
-//---------------------------------------------------------------------------------------
 int Document::from_input(LdpReader& reader)
 {
     initialize();
@@ -526,6 +486,22 @@ void Document::create_backup_copy()
 }
 
 //---------------------------------------------------------------------------------------
+DocModel* Document::create_model_copy()
+{
+    return LOMSE_NEW DocModel(*m_pModel);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::replace_model(DocModel* pNewModel)
+{
+    delete m_pModel;
+    m_pModel = pNewModel;
+
+    delete m_pModelCopy;
+    m_pModelCopy = nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 void Document::restore_from_backup_copy()
 {
     if (m_pModelCopy)
@@ -534,31 +510,6 @@ void Document::restore_from_backup_copy()
         m_pModel = m_pModelCopy;
         m_pModelCopy = nullptr;
     }
-}
-
-//---------------------------------------------------------------------------------------
-string Document::get_checkpoint_data()
-{
-    return get_checkpoint_data_for( m_pModel->m_pImoDoc->get_id() );
-}
-
-//---------------------------------------------------------------------------------------
-string Document::get_checkpoint_data_for(ImoId id)
-{
-    ImoObj* pImo = get_pointer_to_imo(id);
-    //TODO: check that ImoObj is a terminal node?
-
-    LmdExporter exporter(m_libraryScope);
-    //exporter.set_remove_newlines(true);   //TODO: Commented out to facilitate debugging
-    exporter.set_add_id(true);
-    exporter.set_score_format(LmdExporter::k_format_ldp);
-    return exporter.get_source(pImo);
-
-    //code if Ldp format:
-        //LdpExporter exporter;
-        //exporter.set_remove_newlines(true);
-        //exporter.set_add_id(true);
-        //return exporter.get_source(m_pImo);
 }
 
 //---------------------------------------------------------------------------------------

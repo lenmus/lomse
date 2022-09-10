@@ -40,6 +40,7 @@ protected:
 
 public:
     RelObjCloner() {}
+    ~RelObjCloner();
 
     ImoRelObj* clone_relobj(ImoRelObj* pRelObj);
 

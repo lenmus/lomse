@@ -17,8 +17,9 @@ using namespace std;
 namespace lomse
 {
 
-/*! A simple stack class, but contrary to std::stack, the pile can be inspected. */
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+/** A simple stack class, but contrary to std::stack, the pile can be inspected.
+*/
 template <typename T>
 class Stack
 {
@@ -60,14 +61,14 @@ public:
 };
 
 
-/*! A undo/redo stack class.
+//---------------------------------------------------------------------------------------
+/** A undo/redo stack class.
     It maintains the history of pop() operations, so a undo_pop() operation
     restores the previous pop(). undo_pop() only can be used after pop() one or more
     pop() operations, and as many times as consecutive pop() operations.
     The push() operation clears the pop() history so undo_pop() is no longer
     valid after a push().
 */
-//------------------------------------------------------------------
 template <typename T>
 class UndoableStack
 {

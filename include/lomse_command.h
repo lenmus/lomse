@@ -19,7 +19,7 @@
 #include "lomse_interval.h"
 
 #include <sstream>
-using namespace std;
+#include <list>
 
 ///@cond INTERNALS
 namespace lomse
@@ -61,11 +61,9 @@ enum EEditMode
 class DocCommand
 {
 protected:
-    string m_name;          //displayable name for undo/redo actions display
-    string m_checkpoint;    //checkpoint data
-    ImoId m_idChk;          //id for target object in case of partial checkpoint
-    ImoId m_idRefresh;      //id for cursor object, for k_refresh policy
-    string m_error;
+    std::string m_name;         //displayable name for undo/redo actions display
+    ImoId m_idRefresh;          //id for cursor object, for k_refresh policy
+    std::string m_error;
     uint_least16_t m_flags;
 
     enum {
@@ -75,9 +73,8 @@ protected:
         k_included_in_composite_cmd     = 0x0008,
     };
 
-    DocCommand(const string& name)
+    DocCommand(const std::string& name)
         : m_name(name)
-        , m_idChk(k_no_imoid)
         , m_idRefresh(k_no_imoid)
         , m_flags(0)
     {
@@ -105,7 +102,7 @@ public:
         k_undo_policy_full_checkpoint=0,    ///< Undo based on a full checkpoint
         k_undo_policy_partial_checkpoint,   ///< Undo based on a partial checkpoint
         k_undo_policy_specific,             ///< Undo implemented by the command
-        k_undo_policy_replay_from_scratch,  ///< Undo based on replaying commands
+        k_undo_policy_replay_from_start,    ///< Undo based on replaying commands
     };
 
     /** Returns a value from #ECmdUndoPolicy that indicates the undo policy
@@ -152,7 +149,7 @@ public:
     /** Returns an error message with the error explanation. This method should be
         invoked after executing a command that fails. Otherwise it will return an
         empty string.    */
-    inline string get_error() { return m_error; }
+    inline std::string get_error() { return m_error; }
 
     /// Returns @true if the command is composite.
     virtual bool is_composite() = 0;
@@ -182,10 +179,9 @@ public:
 ///@endcond
 
 protected:
-    void create_checkpoint(Document* pDoc);
     void log_forensic_data(Document* pDoc, DocCursor* pCursor);
-    void set_command_name(const string& name, ImoObj* pImo);
-    int validate_source(const string& source);
+    void set_command_name(const std::string& name, ImoObj* pImo);
+    int validate_source(const std::string& source);
     virtual void log_command(ostream &logger);
 
 };
@@ -197,7 +193,7 @@ class DocCmdSimple : public DocCommand
 {
 protected:
 
-    DocCmdSimple(const string& name) : DocCommand(name) {}
+    DocCmdSimple(const std::string& name) : DocCommand(name) {}
 
 public:
 	/// Destructor
@@ -214,12 +210,12 @@ public:
 class DocCmdComposite : public DocCommand
 {
 protected:
-    list<DocCommand*> m_commands;
+    std::list<DocCommand*> m_commands;
     int m_undoPolicy;
 
 public:
 	/// Constructor
-    DocCmdComposite(const string& name);
+    DocCmdComposite(const std::string& name);
 	/// Destructor
     virtual ~DocCmdComposite();
 
@@ -290,34 +286,45 @@ typedef UndoableStack< UndoElement* >   UndoStack;
 
 
 //---------------------------------------------------------------------------------------
-/// Keeps the stack of executed commands and performs undo/redo
+/** %DocCommandExecuter class is responsible of maintaining the stack of executed
+    commands and performing undo/redo.
+*/
 class DocCommandExecuter
 {
 private:
-    Document*   m_pDoc;
-    UndoStack   m_stack;
-    string      m_error;
+    Document*   m_pDoc = nullptr;           //the document to edit
+    DocModel*   m_pModelStart = nullptr;    //document state at start of edition
+    UndoStack   m_stack;                    //stack of executed commands
+    std::string m_error;
 
 public:
     /// Constructor
     DocCommandExecuter(Document* target);
-    virtual ~DocCommandExecuter() {}
 
-    /** Executes a command and saves the necessary information for undo/redo operation.
+    ///the five special
+    virtual ~DocCommandExecuter();
+    DocCommandExecuter(const ImoStyles&) = delete;
+    DocCommandExecuter& operator= (const ImoStyles&) = delete;
+    DocCommandExecuter(ImoStyles&&) = delete;
+    DocCommandExecuter& operator= (ImoStyles&&) = delete;
+
+    /** Executes a command and saves the necessary information for undo/redo operations.
         Returns value 0 if the command successfully executed. Otherwise returns value 1
         and a relevant error message can be retrieved by invoking
         method get_error().    */
     virtual int execute(DocCursor* pCursor, DocCommand* pCmd,
                         SelectionSet* pSelection);
 
-    /// Undo the command
+    /// Pop a command from the stack and undo it
     virtual void undo(DocCursor* pCursor, SelectionSet* pSelection);
 
-    /// Redo the command
+    /// Redo the last undo command
     virtual void redo(DocCursor* pCursor, SelectionSet* pSelection);
 
-    /// In case and execute() operation Returns an string with the error message
-    inline string get_error() { return m_error; }
+    /** In case an comand failed, this method provides an string with the
+        error message
+    */
+    inline std::string get_error() { return m_error; }
 
     //info
     /// Returns @true if there are undo-able commands in the undo/redo stack.
@@ -332,6 +339,9 @@ protected:
     void update_cursor(DocCursor* pCursor, DocCommand* pCmd);
     void update_selection(SelectionSet* pSelection, DocCommand* pCmd);
 
+    void replay_until(UndoElement* pUE, DocCursor* pCursor, SelectionSet* pSelection);
+    void replay_command(UndoElement* pUE, DocCursor* pCursor, SelectionSet* pSelection);
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -345,7 +355,7 @@ class CmdAddChordNote : public DocCmdSimple
 protected:
     ImoId m_baseId;
     ImoId m_noteId;
-    string m_pitch;
+    std::string m_pitch;
     int m_step;
     int m_octave;
     EAccidentals m_accidentals;
@@ -396,11 +406,11 @@ public:
         }
         @endcode
     */
-    CmdAddChordNote(const string& pitch, const string& name="Add chord note");
+    CmdAddChordNote(const std::string& pitch, const std::string& name="Add chord note");
     virtual ~CmdAddChordNote() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_command_specific; }
 
     ///@cond INTERNALS
@@ -423,7 +433,7 @@ class CmdAddNoteRest : public DocCmdSimple
 {
 protected:
     ImoId m_idAt;
-    string m_source;
+    std::string m_source;
 
 public:
     /**
@@ -475,11 +485,11 @@ public:
         }
         @endcode
     */
-    CmdAddNoteRest(const string& source, int editMode, const string& name="");
+    CmdAddNoteRest(const std::string& source, int editMode, const std::string& name="");
     virtual ~CmdAddNoteRest() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_command_specific; }
 
     ///@cond INTERNALS
@@ -500,9 +510,9 @@ protected:
     TimeUnits m_insertionTime;
     TimeUnits m_newDuration;
     ImoStaffObj* m_pAt;
-    list<OverlappedNoteRest*> m_overlaps;
-    string m_finalSrc;
-    list<ImoStaffObj*> m_insertedObjs;
+    std::list<OverlappedNoteRest*> m_overlaps;
+    std::string m_finalSrc;
+    std::list<ImoStaffObj*> m_insertedObjs;
     ImoNoteRest* m_pLastOverlapped;
 
     void get_data_about_insertion_point();
@@ -565,17 +575,16 @@ public:
         }
         @endcode
     */
-    CmdAddTie(const string& name="Add tie");
+    CmdAddTie(const std::string& name="Add tie");
     virtual ~CmdAddTie() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
@@ -593,7 +602,7 @@ protected:
     ImoId m_startId;
     ImoId m_endId;
     ImoId m_tupletId;
-    string m_source;
+    std::string m_source;
 
 public:
     /**
@@ -633,17 +642,16 @@ public:
         }
         @endcode
     */
-    CmdAddTuplet(const string& src, const string& name="Add tuplet");
+    CmdAddTuplet(const std::string& src, const std::string& name="Add tuplet");
     virtual ~CmdAddTuplet() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
@@ -691,11 +699,11 @@ public:
         }
         @endcode
     */
-    CmdBreakBeam(const string& name="Break beam");
+    CmdBreakBeam(const std::string& name="Break beam");
     virtual ~CmdBreakBeam() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -716,8 +724,8 @@ class CmdChangeAccidentals : public DocCmdSimple
 {
 protected:
     EAccidentals m_acc;
-    list<ImoId> m_notes;
-    list<FPitch> m_oldPitch;
+    std::list<ImoId> m_notes;
+    std::list<FPitch> m_oldPitch;
 
 public:
     /**
@@ -748,17 +756,16 @@ public:
         }
         @endcode
     */
-    CmdChangeAccidentals(EAccidentals acc, const string& name="Change accidentals");
+    CmdChangeAccidentals(EAccidentals acc, const std::string& name="Change accidentals");
     virtual ~CmdChangeAccidentals() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
@@ -777,13 +784,9 @@ protected:
     ImoId           m_targetId;
     EImoAttribute   m_attrb;
     EDataType       m_dataType;
-    string          m_oldString;
-    string          m_newString;
-    double          m_oldDouble;
+    std::string     m_newString;
     double          m_newDouble;
-    int             m_oldInt;
     int             m_newInt;
-    Color           m_oldColor;
     Color           m_newColor;
 
 public:
@@ -804,14 +807,14 @@ public:
             - the selection will not be changed.
             - the cursor will not change its position.
     */
-    CmdChangeAttribute(EImoAttribute attrb, const string& value,
-                       const string& cmdName="");
+    CmdChangeAttribute(EImoAttribute attrb, const std::string& value,
+                       const std::string& cmdName="");
     CmdChangeAttribute(EImoAttribute attrb, double value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
     CmdChangeAttribute(EImoAttribute attrb, int value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
     CmdChangeAttribute(EImoAttribute attrb, Color value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
     ///@}
 
 
@@ -847,8 +850,8 @@ public:
         }
         @endcode
     */
-    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, const string& value,
-                       const string& cmdName="");
+    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, const std::string& value,
+                       const std::string& cmdName="");
 
     /**
         This command changes the value of an attribute in the passed object.
@@ -868,7 +871,7 @@ public:
         @todo Replace parameter pImo to use object ID instead of a pointer (?)
     */
     CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, double value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
 
     /**
         This command changes the value of an attribute in the passed object.
@@ -888,7 +891,7 @@ public:
         @todo Replace parameter pImo to use object ID instead of a pointer (?)
     */
     CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, int value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
 
     /**
         This command changes the value of an attribute in the passed object.
@@ -908,24 +911,22 @@ public:
         @todo Replace parameter pImo to use object ID instead of a pointer (?)
     */
     CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, Color value,
-                       const string& cmdName="");
+                       const std::string& cmdName="");
 
 	/// Destructor
     virtual ~CmdChangeAttribute() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
     void set_default_name();
-    void save_current_value(ImoObj* pImo);
     int set_target(ImoObj* pImo);
 
 };
@@ -939,8 +940,7 @@ class CmdChangeDots : public DocCmdSimple
 {
 protected:
     int m_dots;
-    list<ImoId> m_noteRests;
-    list<int> m_oldDots;
+    std::list<ImoId> m_noteRests;
 
 public:
     /**
@@ -970,17 +970,16 @@ public:
         }
         @endcode
     */
-    CmdChangeDots(int dots, const string& name="Change dots");
+    CmdChangeDots(int dots, const std::string& name="Change dots");
     virtual ~CmdChangeDots() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 };
@@ -1045,7 +1044,7 @@ public:
             - After executing the command:
                 - the selection will not be changed.
                 - the cursor will point to a new position.
-            - %CmdCursor is a non-reversible command, meaning that it is not saved in
+            - %CmdCursor is a transient command, meaning that it is not saved in
                 the undo/redo history and, therefore, undo and redo operations are not
                 available for this command.
 
@@ -1145,7 +1144,7 @@ public:
         }
         @endcode
     */
-    CmdCursor(ECursorAction cmd, const string& name="");
+    CmdCursor(ECursorAction cmd, const std::string& name="");
 
     /**
         This command moves the cursor for pointing to element specified by parameter <i>id</i>.
@@ -1157,12 +1156,12 @@ public:
             - After executing the command:
                 - the selection will not be changed.
                 - the cursor will point to a new position.
-            - %CmdCursor is a non-reversible command, meaning that it is not saved in
+            - %CmdCursor is a transient command, meaning that it is not saved in
                 the undo/redo history and, therefore, undo and redo operations are not
                 available for this command.
 
     */
-    CmdCursor(ImoId id, const string& name="");
+    CmdCursor(ImoId id, const std::string& name="");
 
     /**
         When the cursor is inside a music score, this command moves the cursor for
@@ -1182,7 +1181,7 @@ public:
             - After executing the command:
                 - the selection will not be changed.
                 - the cursor will point to a new position.
-            - %CmdCursor is a non-reversible command, meaning that it is not saved in
+            - %CmdCursor is a transient command, meaning that it is not saved in
                 the undo/redo history and, therefore, undo and redo operations are not
                 available for this command.
 
@@ -1223,7 +1222,7 @@ public:
         }
         @endcode
     */
-    CmdCursor(int measure, int instr, int staff, const string& name="");
+    CmdCursor(int measure, int instr, int staff, const std::string& name="");
 
     /**
         When the cursor is inside a music score, this command moves the cursor for
@@ -1242,11 +1241,11 @@ public:
             - After executing the command:
                 - the selection will not be changed.
                 - the cursor will point to a new position.
-            - %CmdCursor is a non-reversible command, meaning that it is not saved in
+            - %CmdCursor is a transient command, meaning that it is not saved in
                 the undo/redo history and, therefore, undo and redo operations are not
                 available for this command.
     */
-    CmdCursor(TimeUnits time, int instr, int staff, const string& name="");
+    CmdCursor(TimeUnits time, int instr, int staff, const std::string& name="");
 
     /**
         This command moves the cursor to the state specified by parameter <i>state</i>.
@@ -1258,12 +1257,12 @@ public:
             - After executing the command:
                 - the selection will not be changed.
                 - the cursor will point to a new position.
-            - %CmdCursor is a non-reversible command, meaning that it is not saved in
+            - %CmdCursor is a transient command, meaning that it is not saved in
                 the undo/redo history and, therefore, undo and redo operations are not
                 available for this command.
 
     */
-    CmdCursor(DocCursorState& state, const string& name="");
+    CmdCursor(DocCursorState& state, const std::string& name="");
     virtual ~CmdCursor() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
@@ -1293,7 +1292,7 @@ protected:
     //the first object to be deleted. The ID of this object is saved here.
     ImoId m_cursorFinalId;
 
-    CmdDelete(const string& name) : DocCmdSimple(name), m_cursorFinalId(k_no_imoid) {}
+    CmdDelete(const std::string& name) : DocCmdSimple(name), m_cursorFinalId(k_no_imoid) {}
 
 public:
     virtual ~CmdDelete() {}
@@ -1330,11 +1329,11 @@ public:
             - the selection will not be changed.
             - the cursor will point to the object after the deleted one.
     */
-    CmdDeleteBlockLevelObj(const string& name="");
+    CmdDeleteBlockLevelObj(const std::string& name="");
     virtual ~CmdDeleteBlockLevelObj() {};
 
     int get_cursor_update_policy() override { return k_update_after_deletion; }
-    int get_undo_policy() override { return k_undo_policy_full_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1352,7 +1351,7 @@ class CmdDeleteRelation : public CmdDelete
 {
 protected:
     int m_type;
-    list<ImoId> m_relobjs;
+    std::list<ImoId> m_relobjs;
 
 public:
     /**
@@ -1368,7 +1367,7 @@ public:
             - the selection will not be changed.
             - the cursor will not change its position.
     */
-    CmdDeleteRelation(const string& name="");
+    CmdDeleteRelation(const std::string& name="");
 
     /**
         This command deletes all selected relation objects of type given by parameter <i>type</i>.
@@ -1398,11 +1397,11 @@ public:
         }
         @endcode
     */
-    CmdDeleteRelation(int type, const string& name="");
+    CmdDeleteRelation(int type, const std::string& name="");
     virtual ~CmdDeleteRelation() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1423,10 +1422,10 @@ private:
 class CmdDeleteSelection : public CmdDelete
 {
 protected:
-    list<ImoId> m_idSO;     //StaffObjs to delete
-    list<ImoId> m_idRO;     //RelObjs to delete
-    list<ImoId> m_idAO;     //AuxObjs to delete
-    list<ImoId> m_idOther;  //other objects to delete
+    std::list<ImoId> m_idSO;     //StaffObjs to delete
+    std::list<ImoId> m_idRO;     //RelObjs to delete
+    std::list<ImoId> m_idAO;     //AuxObjs to delete
+    std::list<ImoId> m_idOther;  //other objects to delete
 
 public:
     /**
@@ -1456,11 +1455,11 @@ public:
         }
         @endcode
     */
-    CmdDeleteSelection(const string& name="Delete selection");
+    CmdDeleteSelection(const std::string& name="Delete selection");
     virtual ~CmdDeleteSelection() {};
 
     int get_cursor_update_policy() override { return k_update_after_deletion; }
-    int get_undo_policy() override { return k_undo_policy_full_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1469,7 +1468,7 @@ public:
     ///@endcond
 
 protected:
-    list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
+    std::list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
                             //staffobjs are temporarily saved here
 
     void prepare_cursor_for_deletion(DocCursor* pCursor) override;
@@ -1528,11 +1527,11 @@ public:
         }
         @endcode
     */
-    CmdDeleteStaffObj(const string& name="");
+    CmdDeleteStaffObj(const std::string& name="");
     virtual ~CmdDeleteStaffObj() {};
 
     int get_cursor_update_policy() override { return k_update_after_deletion; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1547,16 +1546,11 @@ public:
 class CmdInsert : public DocCmdSimple
 {
 protected:
-    ImoId m_idAt;
-    ImoId m_lastInsertedId;
-    string m_source;
+    ImoId m_idAt = k_no_imoid;
+    ImoId m_lastInsertedId = k_no_imoid;
+    std::string m_source;
 
-    CmdInsert(const string& name)
-        : DocCmdSimple(name)
-        , m_idAt(k_no_imoid)
-        , m_lastInsertedId(k_no_imoid)
-    {
-    }
+    CmdInsert(const std::string& name) : DocCmdSimple(name) {}
 
 public:
     ~CmdInsert() {}
@@ -1617,7 +1611,7 @@ public:
         }
         @endcode
     */
-    CmdInsertBlockLevelObj(int type, const string& name="");
+    CmdInsertBlockLevelObj(int type, const std::string& name="");
 
     /**
         This command inserts a new block level object (e.g. paragraph, music score, header, image, etc.).
@@ -1643,16 +1637,15 @@ public:
             SpInteractor->exec_command( new CmdInsertBlockLevelObj(k_imo_para, "Add empty paragraph") );
         @endcode
     */
-    CmdInsertBlockLevelObj(const string& source, const string& name="");
+    CmdInsertBlockLevelObj(const std::string& source, const std::string& name="");
     virtual ~CmdInsertBlockLevelObj() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
@@ -1669,7 +1662,6 @@ protected:
 class CmdInsertManyStaffObjs : public CmdInsert
 {
 protected:
-    bool m_fSaved;
 
 public:
     /**
@@ -1688,13 +1680,13 @@ public:
             - the selection will not be altered.
             - the cursor will not change its position. The last inserted object will be just behind the cursor.
     */
-    CmdInsertManyStaffObjs(const string& source,
-                           const string& name="Insert staff objects");
+    CmdInsertManyStaffObjs(const std::string& source,
+                           const std::string& name="Insert staff objects");
 
     virtual ~CmdInsertManyStaffObjs() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_partial_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1703,7 +1695,6 @@ public:
     ///@endcond
 
 protected:
-    void save_source_code_with_ids(Document* pDoc, const list<ImoStaffObj*>& objects);
 
 };
 
@@ -1752,17 +1743,16 @@ public:
         }
         @endcode
     */
-    CmdInsertStaffObj(const string& source, const string& name="");
+    CmdInsertStaffObj(const std::string& source, const std::string& name="");
     virtual ~CmdInsertStaffObj() {};
 
     int get_cursor_update_policy() override { return k_refresh; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 };
 
@@ -1774,7 +1764,7 @@ public:
 class CmdJoinBeam : public DocCmdSimple
 {
 protected:
-    list<ImoId> m_noteRests;
+    std::list<ImoId> m_noteRests;
 
 public:
     /**
@@ -1808,11 +1798,11 @@ public:
         }
         @endcode
     */
-    CmdJoinBeam(const string& name="Join beam");
+    CmdJoinBeam(const std::string& name="Join beam");
     virtual ~CmdJoinBeam() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_full_checkpoint; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
@@ -1852,7 +1842,7 @@ public:
             replaced by the string "Move object point".
     */
     CmdMoveObjectPoint(int pointIndex, UPoint shift,
-                       const string& name="Move object point");
+                       const std::string& name="Move object point");
     virtual ~CmdMoveObjectPoint() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
@@ -1903,7 +1893,7 @@ public:
         As parameter <i>cmd</i> must be always <i>k_clear</i>, a convenience class
         CmdClearSelection(const string& name="") has been defined.
     */
-    CmdSelection(int cmd, const string& name="");
+    CmdSelection(int cmd, const std::string& name="");
 
     /**
         This command changes the content of the set of selected objects.
@@ -1937,8 +1927,8 @@ public:
         }
         @endcode
     */
-    CmdSelection(int cmd, ImoId id, const string& name="");
-    //CmdSelection(DocCursorState& state, const string& name="");
+    CmdSelection(int cmd, ImoId id, const std::string& name="");
+    //CmdSelection(DocCursorState& state, const std::string& name="");
     virtual ~CmdSelection() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
@@ -1983,7 +1973,7 @@ public:
         This command is just a convenience class for a CmdSelection command using the
         parameter <i>k_clear</i>.
     */
-    CmdClearSelection(const string& name="")
+    CmdClearSelection(const std::string& name="")
         : CmdSelection(ESelectionAction::k_clear, name)
     {
     }
@@ -1998,23 +1988,22 @@ public:
 class CmdTranspose : public DocCmdSimple
 {
 protected:
-    list<ImoId> m_notes;
-    list<ImoId> m_keys;
+    std::list<ImoId> m_notes;
+    std::list<ImoId> m_keys;
 
-    CmdTranspose(const string& name="");
+    CmdTranspose(const std::string& name="");
 
 public:
 
     virtual ~CmdTranspose() {};
 
     int get_cursor_update_policy() override { return k_do_nothing; }
-    int get_undo_policy() override { return k_undo_policy_specific; }
+    int get_undo_policy() override { return k_undo_policy_replay_from_start; }
     int get_selection_update_policy() override { return k_sel_do_nothing; }
 
     ///@cond INTERNALS
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
     int perform_action(Document* pDoc, DocCursor* pCursor) override;
-    void undo_action(Document* pDoc, DocCursor* pCursor) override;
     ///@endcond
 
 protected:
@@ -2081,7 +2070,7 @@ public:
         }
         @endcode
     */
-    CmdTransposeChromatically(FIntval interval, const string& name="");
+    CmdTransposeChromatically(FIntval interval, const std::string& name="");
 
     virtual ~CmdTransposeChromatically() {};
 
@@ -2141,7 +2130,7 @@ public:
         }
         @endcode
     */
-    CmdTransposeDiatonically(int steps, bool fUp=true, const string& name="");
+    CmdTransposeDiatonically(int steps, bool fUp=true, const std::string& name="");
 
     virtual ~CmdTransposeDiatonically() {};
 
@@ -2233,7 +2222,7 @@ public:
         }
         @endcode
     */
-    CmdTransposeKey(FIntval interval, const string& name="");
+    CmdTransposeKey(FIntval interval, const std::string& name="");
 
     virtual ~CmdTransposeKey() {};
 

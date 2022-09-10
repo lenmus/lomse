@@ -571,6 +571,7 @@ T* TreeNode<T>::deep_clone(TreeNode<T>* parent)
 
     //clone the instance of T
     T* newT = LOMSE_NEW T(*oldT);
+    std::cout << "TreeNode<T>::deep_clone. old=" << oldT << ", new=" << newT << std::endl;
     if (parent)
         parent->append_child(newT);
 

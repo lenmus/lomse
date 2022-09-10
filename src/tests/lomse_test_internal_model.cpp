@@ -26,6 +26,18 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
+// MyDocument5:  Helper class to use Document protected members
+class MyDocument5 : public Document
+{
+public:
+    MyDocument5(LibraryScope& libraryScope) : Document(libraryScope) {}
+   ~MyDocument5() override {}
+
+    void my_clear_dirty() { clear_dirty(); }
+};
+
+
+//---------------------------------------------------------------------------------------
 class InternalModelTestFixture
 {
 public:
@@ -1576,7 +1588,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, clear_dirty)
     {
         //@ clear dirty clears both: dirty and children dirty. But does'n propagate down
-        Document doc(m_libraryScope);
+        MyDocument5 doc(m_libraryScope);
         doc.create_empty();
         ImoScore* pScore = doc.add_score();
         ImoInstrument* pInstr = pScore->add_instrument();
@@ -1588,7 +1600,7 @@ SUITE(InternalModelTest)
         CHECK( pClef->is_dirty() == true );
         CHECK( doc.is_dirty() == true );
 
-        doc.clear_dirty();
+        doc.my_clear_dirty();
 
         CHECK( pClef->is_dirty() == true );
         CHECK( doc.is_dirty() == false );
@@ -1597,7 +1609,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, set_dirty_propagates_up)
     {
         //@ set_dirty_propagates_up
-        Document doc(m_libraryScope);
+        MyDocument5 doc(m_libraryScope);
         doc.create_empty();
         ImoScore* pScore = doc.add_score();
         pScore->set_dirty(false);
@@ -1608,7 +1620,7 @@ SUITE(InternalModelTest)
         pInstr->set_dirty(false);
         pMD->set_dirty(false);
         pClef->set_dirty(false);
-        doc.clear_dirty();
+        doc.my_clear_dirty();
 
         ImoKeySignature* pKey = pInstr->add_key_signature(k_key_C);
 
@@ -1740,14 +1752,14 @@ SUITE(InternalModelTest)
         AttrString b(1, std::string("string"));
         AttrDouble c(2, 2.7);
         AttrFloat d(3, 2.5f);
-        AttrBool e(4, true);
+        AttrBool e1(4, true);
         AttrColor f(5, Color(80,70,55));
 
         CHECK( a.get_int_value() == 2 );
         CHECK( b.get_string_value() == "string" );
         CHECK( c.get_double_value() == 2.7 );
         CHECK( d.get_float_value() == 2.5f );
-        CHECK( e.get_bool_value() == true );
+        CHECK( e1.get_bool_value() == true );
         CHECK( is_equal(f.get_color_value(), Color(80,70,55)) == true );
     }
 
@@ -1783,7 +1795,7 @@ SUITE(InternalModelTest)
         AttrString b(1, std::string("string"));
         AttrDouble c(2, 2.7);
         AttrFloat d(3, 2.5f);
-        AttrBool e(4, true);
+        AttrBool e1(4, true);
         AttrColor f(5, Color(80,70,55));
 
         AttrInt aa(a);
@@ -1810,11 +1822,11 @@ SUITE(InternalModelTest)
         CHECK( dd.get_float_value() == 1.41f );
         CHECK( d.get_float_value() == 2.5f );
 
-        AttrBool ee(e);
+        AttrBool ee(e1);
         CHECK( ee.get_bool_value() == true );
         ee.set_value(false);
         CHECK( ee.get_bool_value() == false );
-        CHECK( e.get_bool_value() == true );
+        CHECK( e1.get_bool_value() == true );
 
         AttrColor ff(f);
         CHECK( is_equal(ff.get_color_value(), Color(80,70,55)) == true );
@@ -1831,7 +1843,7 @@ SUITE(InternalModelTest)
         AttrString b(1, std::string("string"));
         AttrDouble c(2, 2.7);
         AttrFloat d(3, 2.5f);
-        AttrBool e(4, true);
+        AttrBool e1(4, true);
         AttrColor f(5, Color(80,70,55));
 
         AttrInt aa = a;
@@ -1858,11 +1870,11 @@ SUITE(InternalModelTest)
         CHECK( dd.get_float_value() == 1.41f );
         CHECK( d.get_float_value() == 2.5f );
 
-        AttrBool ee = e;
+        AttrBool ee = e1;
         CHECK( ee.get_bool_value() == true );
         ee.set_value(false);
         CHECK( ee.get_bool_value() == false );
-        CHECK( e.get_bool_value() == true );
+        CHECK( e1.get_bool_value() == true );
 
         AttrColor ff = f;
         CHECK( is_equal(ff.get_color_value(), Color(80,70,55)) == true );

@@ -366,6 +366,7 @@ SUITE(ChineseTextSplitterTest)
         {
             CHECK( splitter.more_text() == true );
 
+            delete pEngr;
             pEngr = splitter.get_next_text_engrouter(10000.0f, false);
             CHECK( pEngr != nullptr );
             pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );

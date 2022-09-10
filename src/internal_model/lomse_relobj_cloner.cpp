@@ -21,6 +21,16 @@ namespace lomse
 //=======================================================================================
 // RelObjCloner implementation
 //=======================================================================================
+RelObjCloner::~RelObjCloner()
+{
+	unordered_map<ImoId, CloneData*>::iterator it = m_pending.begin();
+    while (it != m_pending.end())
+        delete (*it).second;
+
+    m_pending.clear();
+}
+
+//---------------------------------------------------------------------------------------
 ImoRelObj* RelObjCloner::clone_relobj(ImoRelObj* pRelObj)
 {
     ImoRelObj* pNewRelObj = nullptr;
@@ -34,7 +44,10 @@ ImoRelObj* RelObjCloner::clone_relobj(ImoRelObj* pRelObj)
         CloneData* data = it->second;
         pNewRelObj = data->relobj;
         if (++data->numObjs == pNewRelObj->get_num_objects())
+        {
+            delete data;
             m_pending.erase(pRelObj->get_id());
+        }
     }
     else
     {

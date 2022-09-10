@@ -47,11 +47,6 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeNote::~GmoShapeNote()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     if (pDrawer->accepts_id_class())
