@@ -2728,7 +2728,12 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-//An abstract object relating two or more StaffObjs
+/** %ImoRelObj: An abstract object relating two or more StaffObjs. Exception: All grace
+    notes preceeding a regular note are tied by a ImoGraceRelObj relationship. But if
+    only one grace note preceedes the regular note, the ImoGraceRelObj is maintained.
+    Thus, grace notes can have a ImoGraceRelObj with only one participant: the grace
+    note itself.
+*/
 # define LOMSE_RELOBJ_USES_ID    1
 
 class ImoRelObj : public ImoScoreObj
@@ -4656,6 +4661,9 @@ public:
 //---------------------------------------------------------------------------------------
 /** When one or more consecutive grace notes appear in the score, this auxiliary RelObj
     is responsible for relating all the grace notes in a group
+    Important: All grace notes preceeding a regular note are tied by a ImoGraceRelObj
+    relationship. But if only one grace note preceedes the regular note, the
+    ImoGraceRelObj is maintained. Thus, ImoGraceRelObj can have only one participant.
 */
 class ImoGraceRelObj : public ImoRelObj
 {
@@ -4705,7 +4713,8 @@ public:
     inline void set_percentage(float value) { m_percentage = value; }
     inline void set_time_to_make(TimeUnits value) { m_makeTime = value; }
 
-    //required override for ImoRelObj
+    //overrides for ImoRelObj
+    int get_min_number_for_autodelete() override { return 1; }
     void reorganize_after_object_deletion() override;
 };
 

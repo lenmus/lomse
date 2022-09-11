@@ -3209,11 +3209,12 @@ FingerData& ImoFingering::add_fingering(const string& value)
 //=======================================================================================
 void ImoGraceRelObj::reorganize_after_object_deletion()
 {
-    //A grace notes relobj involves the grace notes and their principal note.
-    //Thehe grace relationship must be deleted when the principal note
-    //is deleted (it should also delete the grace notes) or when the last grace note
-    //is deleted. In both cases, the grace relationship is automatically deleted when
-    //only one note remains in the relationship. So nothing to do here.
+    //A grace notes relobj involves the grace notes preceeding their principal note.
+    //But if only one grace note preceedes the regular note, the ImoGraceRelObj is
+    //maintained. Thus, ImoGraceRelObj can have only one participant.
+    //The grace relationship must be deleted when the last grace note
+    //is deleted. It is automatically deleted when a grace note is deleted, as
+    //no note remains in the relationship. So nothing to do here.
 }
 
 

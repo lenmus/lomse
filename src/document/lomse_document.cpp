@@ -160,6 +160,7 @@ DocModel::DocModel(Document* pDoc)
     : m_pDoc(pDoc)
     , m_pIdAssigner( LOMSE_NEW IdAssigner() )
     , m_pImoDoc(nullptr)
+    , m_pRelObjCloner(nullptr)
     , m_flags(k_dirty)
     , m_imRef(-1L)
 {
@@ -200,6 +201,9 @@ DocModel& DocModel::clone(const DocModel& a)
     builder.fix_cloned_model(m_pImoDoc); //build_model(m_pImoDoc);
 
     add_unique_model_ref();
+
+    delete m_pRelObjCloner;
+    m_pRelObjCloner = nullptr;
 
     return *this;
 }
