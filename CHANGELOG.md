@@ -1,16 +1,44 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.29.0
+[Since last version] 0.30.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.28.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.30.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.30.0] (11/Sep/2022)
+==============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.29.0
+
+- Global logger `logger` renamed as `glogger` to differentiate it from other
+  variables also named `logger` and to avoid mistakes. I also avoids many
+  compilation warnings about shadowed variables.
+
+##### COMPATIBLE CHANGES
+
+#### More music notation supported:
+- Support all MusicXML barline styles
+- Add mute information to notes and suppress playback for muted notes
+- Add marker to highlight a measure
+- Add support to render tablature notation
+
+#### Improvements in MusicXML support:
+- Add MusicXML exporter
+
+#### Other changes:
+- New strategy for undo/redo
+- Add script for MusicXML exporter visual round-trip tests
+- Add API method to get info about mouse click point
+- Change project license to MIT license
 
 
 
@@ -59,7 +87,7 @@ Version [0.28.0] (11/Jan/2021)
 - Transposing instruments are now correctly taken into account for playback.
 - Auto-scaling has been implemented. Now, when the paper height is too small to render just one system, instead of rendering an error message, the scale is automatically adjusted so that the score can fit on the available space.
 - Pitch computation when clefs with octave numbers has been fixed.
-- The quality of scores renderization has been greatly improved in several areas: full support for grace notes, layout of slurs, beams, correct engraving of wedges and volta-brackets when at start and end of system, intermediate shapes in volta-brackets, octave shifts, slur, and other spanners are now rendered, clef change is now correctly  laid out, and some other minor fixes.
+- The quality of scores rendition has been greatly improved in several areas: full support for grace notes, layout of slurs, beams, correct engraving of wedges and volta-brackets when at start and end of system, intermediate shapes in volta-brackets, octave shifts, slur, and other spanners are now rendered, clef change is now correctly  laid out, and some other minor fixes.
 
 
 #### MusicXML support
@@ -113,11 +141,11 @@ Improvements in music layout:
     - Full-measure rests are now centered in the measure.
     - The space between systems and staves is now dynamically increased to
       avoid collisions between notation symbols.
-	- A `VerticalProfile` object tracks ocupied space and provides the infrastructure
+	- A `VerticalProfile` object tracks occupied space and provides the infrastructure
 	  for avoiding vertical collisions.
 	- The order for engraving auxiliary notation symbols has been changed. Until now,
 	  once a note was engraved, all its additional attached notation symbols were also
-	  engraved. From now, all aditional notation symbols in a system are engraved by type
+	  engraved. From now, all additional notation symbols in a system are engraved by type
 	  for all the system, following a predefined order (defined, in general, by music
 	  engraving rules). For example, first all beams for a system are engraved, then all
 	  the articulations for all the notes in the system, etc.
@@ -130,7 +158,7 @@ Improvements in music layout:
 Other changes:
     - The log file is now created at user home folder.
     - The height for single system view is now computed by adding top and bottom paper margins
-      to the real height of the system, once it is layouted. Previously, the height was fixed
+      to the real height of the system, once it is laid out. Previously, the height was fixed
       and was defined by paper height.
     - Added methods in `Interactor` to add/remove visual application markings. Created the
       first application markings class: `FragmentMark`. This class allows to display on any
@@ -239,7 +267,7 @@ Version [0.25.0] (29/Jun/2018)
 ##### COMPATIBLE CHANGES
 
 * Added method `Interactor::set_visual_tracking_mode(int mode)` for
-  selecting the visual trackin effect to use. A new enum `EVisualTrackingMode`
+  selecting the visual tracking effect to use. A new enum `EVisualTrackingMode`
   defines valid modes.
 * Changes to allow extension '.musicxml' for uncompressed MusicXML files.
 * Added some initial code to deal with `global` elements in experimental
@@ -277,7 +305,7 @@ Version [0.23.0] (24/Feb/2018)
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.22.0
 
 - While documenting class Document and starting to document the internal
-  model, some methods were renamed to use more meaningfull names:
+  model, some methods were renamed to use more meaningful names:
 	- `Document::removed_from_model()` renamed to `Document::on_removed_from_model()`.
 	- `Document::get_imodoc()` renamed to `Document::get_im_root()`.
 	- `ImoScore::close()` renamed to `ImoScore::end_of_changes()`.
@@ -305,7 +333,7 @@ Version [0.22.0] (9/Jan/2018)
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.21.0
 
 While documenting Lomse events some issues where found (see issue #111)
-and it was decided to refactor some events. Unfortunatelly most of these
+and it was decided to refactor some events. Unfortunately most of these
 changes create incompatibilities due to renames. In particular:
 
 - Some useless event classification methods in EventInfo have been removed.
@@ -340,13 +368,13 @@ changes create incompatibilities due to renames. In particular:
 
 - Playback improvements: playback now takes into account repetitions 
   implied by barlines with repetition dots and volta brackets, as well
-  as repetions implied by textual repetition marks (i.e. Da Capo, 
+  as repetitions implied by textual repetition marks (i.e. Da Capo, 
   To Coda, etc, ...) (issue #79).
 
 - Auto-scroll during playback (issue #88): When playing back an score
   it is necessary to ensure that current played notes are visible. 
   Therefore, as the playback advances, the score should auto-scroll to
-  maintaint the viewport on the notes being played back. The implemented
+  maintain the viewport on the notes being played back. The implemented
   solution defines a new Lomse event, *EventUpdateViewport*, that
   informs about the need to change the viewport and provides the
   coordinates for the new viewport origin. It is up to the user
@@ -380,12 +408,12 @@ Version [0.21.0] (9/Nov/2017)
 	- Fix beams in malformed MusicXML files (issue #67).
 	- Assume some default value for clef in MusicXML importer (issue #68)
 	- Added options for controlling behaviour of MusicXML importer when
-  	  uncomplete or malformed MusicXML files.
+  	  incomplete or malformed MusicXML files.
 	- MusicXML importer now deals with all midi information in score-part
       (MusicXML 3.0) and is added to the internal model (issue #82).
 	- Fixed error in the MusicXML importer: the pitch for notes with
   	  accidentals was computed wrong (issue #77).
-- Improvements in tuplets renderization and support:
+- Improvements in tuplets rendition and support:
     - Nested tuplets now fully supported.
     - MusicXML importer now imports tuplets.
     - Nested tuplets now fully supported in LDP.
