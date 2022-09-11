@@ -124,6 +124,7 @@ SUITE(SvgDrawerTest)
             << "viewBox='0 0 21000 4000'><path d=' M 0 0 H 21000 V 4000 H 0 V 0' "
             << "fill='#fff' stroke='#fff'/></svg>";
         check_expected(svg.str(), expected.str());
+        delete pPresenter;
     }
 
 

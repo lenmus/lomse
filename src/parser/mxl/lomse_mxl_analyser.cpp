@@ -9379,7 +9379,7 @@ ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
 //---------------------------------------------------------------------------------------
 void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
 {
-//    cout << "add_to_model: pImo=" << pImo->get_name();
+//    cout << "add_to_model: pImo=" << pImo->get_name() << ", " << pImo;
     if (pAnchor && pAnchor->is_music_data() && pImo->is_staffobj() && m_fWaitingForVoice)
     {
 //        cout << ", anchor && staffobj && m_fWaitingForVoice";
@@ -9397,6 +9397,7 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
 
             Linker linker( get_document_being_analysed() );
             linker.add_child_to_model(pAnchor, pImo, k_imo_barline);
+            //AWARE: pImo is deleted by Linker. Don't use it after this line
 
             set_current_voice(0);
 //            cout << " voice set to 0 --> add to model" << endl;
@@ -9417,6 +9418,7 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
                 static_cast<ImoStaffObj*>(pImo)->set_voice(voice);
                 Linker linker( get_document_being_analysed() );
                 linker.add_child_to_model(pAnchor, pImo, pImo->get_obj_type());
+                //AWARE: pImo is deleted by Linker. Don't use it after this line
 //                cout << ", voice > 0 --> add to model" << endl;
             }
             else
@@ -9430,8 +9432,6 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
     {
 //        cout << ", no musicData, no staffobj or not m_fWaitingForVoice --> add to model" << endl;
         //no anchor, it is not StaffObj or no pending <backup> or <forward>. Add to model
-        Linker linker( get_document_being_analysed() );
-        linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
         if (pImo->is_staffobj())
         {
             if (!pImo->is_barline())
@@ -9443,6 +9443,9 @@ void MxlAnalyser::add_to_model(ImoObj* pImo, int type, ImoObj* pAnchor)
 //                cout << "     Barline: voice set to 0 and m_fWaitingForVoice set to true" << endl;
             }
         }
+        //AWARE: pImo is deleted by Linker
+        Linker linker( get_document_being_analysed() );
+        linker.add_child_to_model(pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
     }
 }
 

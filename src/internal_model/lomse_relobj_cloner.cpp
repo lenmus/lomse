@@ -21,12 +21,36 @@ namespace lomse
 //=======================================================================================
 // RelObjCloner implementation
 //=======================================================================================
+RelObjCloner::~RelObjCloner()
+{
+    //AWARE: For a properly cloned tree m_pending must be empty
+    if (m_pending.size() > 0)
+    {
+        stringstream msg;
+        msg << "RelObjCloner not empty! Num.elements= " << m_pending.size()<< ", ";
+
+        unordered_map<ImoId, CloneData*>::iterator it;
+        for (it=m_pending.begin(); it != m_pending.end(); ++it)
+        {
+            CloneData* data = it->second;
+            ImoRelObj* pNewRelObj = data->relobj;
+            msg << pNewRelObj->get_name() << "#" << it->first << ", ";
+            delete data;
+        }
+        LOMSE_LOG_ERROR(msg.str());
+    }
+
+    m_pending.clear();
+}
+
+//---------------------------------------------------------------------------------------
 ImoRelObj* RelObjCloner::clone_relobj(ImoRelObj* pRelObj)
 {
     ImoRelObj* pNewRelObj = nullptr;
 
     //find RelObj in map of pending RelObjs
-	unordered_map<ImoId, CloneData*>::const_iterator it = m_pending.find(pRelObj->get_id());
+    ImoId id = pRelObj->get_id();
+	unordered_map<ImoId, CloneData*>::const_iterator it = m_pending.find(id);
 	if (it != m_pending.end())
     {
         //increment numObjs. If numObjs == ImoRelObj.num_participants() remove ImoRelObj
@@ -34,13 +58,17 @@ ImoRelObj* RelObjCloner::clone_relobj(ImoRelObj* pRelObj)
         CloneData* data = it->second;
         pNewRelObj = data->relobj;
         if (++data->numObjs == pNewRelObj->get_num_objects())
-            m_pending.erase(pRelObj->get_id());
+        {
+            delete data;
+            m_pending.erase(it);
+        }
     }
     else
     {
         //clone the ImoRelObj and add it to the pending map
         pNewRelObj = static_cast<ImoRelObj*>( ImFactory::clone(pRelObj));
-        m_pending[pRelObj->get_id()] = LOMSE_NEW CloneData(pNewRelObj);
+        if (pRelObj->get_num_objects() > 1)    //AWARE: grace notes can have only one
+            m_pending.emplace(id, LOMSE_NEW CloneData(pNewRelObj));
     }
 
     //in any case, return the cloned ImoRelObj to the caller ImoRelations

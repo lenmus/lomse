@@ -26,7 +26,6 @@ set(DOCUMENT_FILES
     ${LOMSE_SRC_DIR}/document/lomse_command.cpp
     ${LOMSE_SRC_DIR}/document/lomse_document.cpp
     ${LOMSE_SRC_DIR}/document/lomse_document_cursor.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_id_assigner.cpp
 )
 
 set(EXPORTERS_FILES
@@ -138,6 +137,7 @@ set(GUI_CONTROLS_FILES
 
 set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_api_internal_model.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_id_assigner.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_attributes.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_factory.cpp

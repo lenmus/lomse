@@ -564,6 +564,7 @@ SUITE(InteractorTest)
         ClickPointData data = pIntor->find_click_info_at(1, 1);
 
         CHECK( check_click_data(data, -1, -1, -1, 0.0, "nullptr", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_200)
@@ -579,8 +580,8 @@ SUITE(InteractorTest)
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
 
         //get graphic model clicked object
-        LUnits x = 13453.9;
-        LUnits y = 8551.37;
+        LUnits x = 13453.9f;
+        LUnits y = 8551.37f;
         GraphicModel* pGM = pIntor->get_graphic_model(); //this also forces to engrave the score
         GmoObj* pGmo = pGM->hit_test(0, x, y);
 
@@ -588,6 +589,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 1, 1, 256.0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_201)
@@ -612,6 +614,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 1, 1, 0.0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_202)
@@ -636,6 +639,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 0, 0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_203)
@@ -660,6 +664,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 1, 32, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_204)
@@ -683,6 +688,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 1, 128, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_205)
@@ -707,6 +713,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 4, 128.0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_300)
@@ -731,6 +738,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 2, 96, "note", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_301)
@@ -755,6 +763,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 1, 64, "note", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_302)
@@ -779,6 +788,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 1, 0, "barline", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_303)
@@ -803,6 +813,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 8, 0, "clef", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_304)
@@ -827,6 +838,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 3, 0, "clef", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_305)
@@ -851,6 +863,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 1, 64, "clef", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_306)
@@ -875,6 +888,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 6, 0, "key-signature", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_401)
@@ -899,6 +913,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 3, 0, "fermata", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_501)
@@ -923,6 +938,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 1, 0, 1, 0, "beam", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_502)
@@ -947,6 +963,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 12, 0, "wedge", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_503)
@@ -971,6 +988,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, 0, 0, 6, 0, "octave-shift", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_600)
@@ -995,6 +1013,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "paragraph", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_601)
@@ -1020,6 +1039,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_602)
@@ -1045,6 +1065,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_603)
@@ -1069,6 +1090,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "score", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_604)
@@ -1093,6 +1115,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "instrument", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_900)
@@ -1117,6 +1140,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "score", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_901)
@@ -1140,6 +1164,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "score", test_name()) );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(InteractorTestFixture, click_info_902)
@@ -1163,6 +1188,7 @@ SUITE(InteractorTest)
         ClickPointData data = GModelAlgorithms::find_info_for_point(x, y, pGmo);
 
         CHECK( check_click_data(data, -1, -1, -1, 0, "lenmusdoc", test_name()) );
+        delete pPresenter;
     }
 
 

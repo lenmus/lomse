@@ -26,8 +26,22 @@ using namespace std;
 using namespace lomse;
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// MyDocument3:  Helper class to use Document protected members
+//=======================================================================================
+class MyDocument3 : public Document
+{
+public:
+    MyDocument3(LibraryScope& libraryScope) : Document(libraryScope) {}
+   ~MyDocument3() override {}
+
+    void my_clear_dirty() { clear_dirty(); }
+};
+
+
+//=======================================================================================
 // helper class
+//=======================================================================================
 class MySelectionSet : public SelectionSet
 {
 public:
@@ -65,6 +79,9 @@ public:
 class DocCommandTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
+    MyDocument3* m_pDoc;
 
     DocCommandTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
@@ -86,25 +103,25 @@ public:
         //        "(time#24 2 4)(n#25 c4 q)(r#25 q) )))"
         //    "(para#27 (txt#28 \"Hello world!\"))"
         //"))"
-        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc = LOMSE_NEW MyDocument3(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score#94 (vers 2.0) "
-                "(instrument#90L (musicData#122L (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
+                "(instrument#90 (musicData#122 (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
-        m_pDoc->clear_dirty();
+        m_pDoc->my_clear_dirty();
     }
 
     void create_document_2()
     {
         //(score (vers 2.0)(instrument#20 (musicData#21
         //(clef#22 G)(key#23 C)(time#24 2 4)(n#25 c4 q)(r#26 q)
-        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc = LOMSE_NEW MyDocument3(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score#94 (vers 2.0) "
-                "(instrument#90L (musicData#122L (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
+                "(instrument#90 (musicData#122 (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "))" );
-        m_pDoc->clear_dirty();
+        m_pDoc->my_clear_dirty();
     }
 
     inline const char* test_name()
@@ -112,9 +129,6 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
-    LibraryScope m_libraryScope;
-    std::string m_scores_path;
-    Document* m_pDoc;
 };
 
 SUITE(DocCommandTest)
@@ -131,17 +145,17 @@ SUITE(DocCommandTest)
         //          +-- add t=0 (n a4 e v1)
         //  (clef G)(n a4 e v1)
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to end of score
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( pCmd->get_cursor_update_policy() == DocCommand::k_refresh );
 
         MySelectionSet sel(&doc);
@@ -169,11 +183,11 @@ SUITE(DocCommandTest)
     {
         //101. undo/redo
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -216,17 +230,16 @@ SUITE(DocCommandTest)
         //                     |
         //                     +-- t=32, v=1, obj=f4 e
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4 e
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n e4 e v1 p1)" );
 
@@ -256,11 +269,11 @@ SUITE(DocCommandTest)
     {
         //@201. undo/redo
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -303,11 +316,11 @@ SUITE(DocCommandTest)
 //        //                                 |
 //        //                                 +-- t=64, v=1, obj=f4 q
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 q v1)(n f4 q v1)(n g4 q v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -316,7 +329,6 @@ SUITE(DocCommandTest)
 //        //cout << pSC->dump_cursor() << endl;
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
-//        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
@@ -346,11 +358,11 @@ SUITE(DocCommandTest)
 //    {
 //        //@202. undo/redo
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 q v1)(n f4 q v1)(n g4 q v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -397,18 +409,17 @@ SUITE(DocCommandTest)
         //                     |
         //                     +-- t=16, v=1, obj=e4 e.
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 q v1)(n f4 q v1)(n g4 q v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4 q
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -436,11 +447,11 @@ SUITE(DocCommandTest)
     {
         //@203. undo/redo.
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 q v1)(n f4 q v1)(n g4 q v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -484,18 +495,17 @@ SUITE(DocCommandTest)
         //                      |
         //                      +-- t=48, v=1, obj=f4 s
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4 e
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e. v1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -523,11 +533,11 @@ SUITE(DocCommandTest)
     {
         //@204. undo/redo
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -571,11 +581,11 @@ SUITE(DocCommandTest)
 //        //                                |
 //        //                                +-- t=144, v=1, obj=b4 e.
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 q v1)(n f4 e v1)(n g4 e v1)(n b4 q v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -583,7 +593,6 @@ SUITE(DocCommandTest)
 //        pSC->to_time(0, 0, 16.0);   //instr=0, staff=0, time=16
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 h v1)", k_edit_mode_replace);
-//        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
@@ -612,11 +621,11 @@ SUITE(DocCommandTest)
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0205_ur)
 //    {
 //        //@205. undo/redo.
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 q v1)(n f4 e v1)(n g4 e v1)(n b4 q v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -663,11 +672,11 @@ SUITE(DocCommandTest)
         //                                            |
         //                      t=32, v=1, obj=f4 e --+
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -675,7 +684,6 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to f4 e
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -711,11 +719,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0301_ur)
     {
         //301. undo/redo
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -769,11 +777,11 @@ SUITE(DocCommandTest)
 //        //                                                                             |
 //        //                                               t=96, v=1, obj=end-of-score --+
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 e v1)(n c5 e v2)(n f4 e v1)(n g4 e v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -783,7 +791,6 @@ SUITE(DocCommandTest)
 //        cursor.move_next();         //points to g4 e v1
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
-//        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
@@ -821,11 +828,11 @@ SUITE(DocCommandTest)
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0302_ur)
 //    {
 //        //302. undo/redo
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 e v1)(n c5 e v2)(n f4 e v1)(n g4 e v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -880,11 +887,11 @@ SUITE(DocCommandTest)
 //        //                                                                |
 //        //                          t=128, v=2, obj=empty, ref_obj=g4 e --+
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 e v1)(barline)(n f4 e v1)(n g4 e v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -894,7 +901,6 @@ SUITE(DocCommandTest)
 //        cursor.move_next();         //points to g4 e v1
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
-//        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
@@ -926,11 +932,11 @@ SUITE(DocCommandTest)
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0303_ur)
 //    {
 //        //303. undo/redo
-//        Document doc(m_libraryScope);
-//        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+//        MyDocument3 doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
 //            "(clef G)(n e4 e v1)(barline)(n f4 e v1)(n g4 e v1)"
 //            ")))");
-//        doc.clear_dirty();
+//        doc.my_clear_dirty();
 //        DocCursor cursor(&doc);
 //        DocCommandExecuter executer(&doc);
 //        cursor.enter_element();     //points to clef
@@ -972,21 +978,20 @@ SUITE(DocCommandTest)
     {
 		//0401. if replaced note is beamed new note (< quarter) should continue beamed
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(time 6 8)"
             "(n e4 e v1 p1 (beam 129 +))(n g4 e v1 p1 (beam 129 =))(n c5 e v1 p1 (beam 129 -))"
             "(n c4 e v1 p1 (beam 139 +))(n e4 e v1 p1 (beam 139 =))(n g4 e v1 p1 (beam 139 -))"
             "(barline simple)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         //cout << test_name() << doc.to_string(true) << endl;
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.point_to(124L);       //points to first note
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 e. v1 p1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -1019,20 +1024,19 @@ SUITE(DocCommandTest)
     {
 		//0402. if replaced note is beamed new note (> eighth) should not be beamed. Beam rearranged
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(time 2 4)"
             "(n e4 e v1 p1 (beam 129 +))(n g4 e v1 p1 (beam 129 =))"
             "(n c5 e v1 p1 (beam 129 =))(n e5 e v1 p1 (beam 129 -))"
             "(barline simple)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.point_to(125L);       //points to first note
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 q v1 p1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -1061,20 +1065,19 @@ SUITE(DocCommandTest)
     {
 		//0403. if replaced note is beamed new note (> eighth) should not be beamed. Beam removed
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(time 6 8)"
             "(n e4 e v1 p1 (beam 129 +))(n g4 e v1 p1 (beam 129 =))(n c5 e v1 p1 (beam 129 -))"
             "(n c4 e v1 p1 (beam 139 +))(n e4 e v1 p1 (beam 139 =))(n g4 e v1 p1 (beam 139 -))"
             "(barline simple)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.point_to(125L);       //points to first note
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 q v1 p1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -1105,8 +1108,8 @@ SUITE(DocCommandTest)
     {
 		//0900. bug. replace triplet eighth note by eight dotted
 
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(time 6 8)"
             "(n e4 e v1 p1 (beam 129 +))(n g4 e v1 p1 (beam 129 =))(n c5 e v1 p1 (beam 129 -))"
             "(n c4 e v1 p1 (beam 139 +))(n e4 e v1 p1 (beam 139 =))(n g4 e v1 p1 (beam 139 -))"
@@ -1114,14 +1117,13 @@ SUITE(DocCommandTest)
             ")))");
 //        cout << test_name() << endl;
 //        cout << doc.to_string(true) << endl;
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.point_to(136L);       //points to first note of second beamed group
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n d4 e. v1 p1)", k_edit_mode_replace);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -1156,18 +1158,20 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_tie_1001)
     {
         //add tie
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n e4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4 e
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote1 = pNote1->get_id();
         cursor.move_next();         //points to e4 q
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote2 = pNote2->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdAddTie();
 
         MySelectionSet sel(&doc);
@@ -1175,16 +1179,18 @@ SUITE(DocCommandTest)
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Add tie" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        pNote2 = static_cast<ImoNote*>( *cursor );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
+        CHECK( pNote2 == *cursor );
         CHECK( pNote2->is_tied_prev() == true );
         CHECK( pNote2->is_tied_next() == false );
         cursor.move_prev();
-        pNote1 = static_cast<ImoNote*>( *cursor );
+        pNote1 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote1) );
+        CHECK( pNote1 == *cursor );
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pNote1->is_tied_next() == true );
 
@@ -1200,11 +1206,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_tuplet_1101)
     {
         //add tuplet
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1213,6 +1219,7 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n f4 e
         cursor.move_next();         //points to n g4 e
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote2 = pNote2->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdAddTuplet("(t + 2 3)");
 
         MySelectionSet sel(&doc);
@@ -1220,12 +1227,13 @@ SUITE(DocCommandTest)
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Add tuplet" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( idNote2 == static_cast<ImoNote*>( *cursor )->get_id() );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2->is_in_tuplet() == true );
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -1238,11 +1246,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_tuplet_1102)
     {
         //add tuplet error
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1272,11 +1280,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_tuplet_1103)
     {
         //undo add tuplet
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1285,6 +1293,7 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n f4 e
         cursor.move_next();         //points to n g4 e
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote2 = pNote2->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdAddTuplet("(t + 2 3)");
 
         MySelectionSet sel(&doc);
@@ -1293,10 +1302,11 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( idNote2 == static_cast<ImoNote*>( *cursor )->get_id() );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2->is_in_tuplet() == false );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
@@ -1308,7 +1318,8 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( idNote2 == static_cast<ImoNote*>( *cursor )->get_id() );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2->is_in_tuplet() == true );
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -1323,11 +1334,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, break_beam_1201)
     {
         //1201. break beam. note + note = beam removed
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n a4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1338,7 +1349,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         int result = executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Break beam" );
@@ -1362,11 +1373,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, break_beam_1202)
     {
         //1202. break beam: note + beam
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 s)(n a4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1413,11 +1424,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, break_beam_1203)
     {
         //1203. break beam: beam + note
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 s g+)(n f4 s)(n a4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1466,11 +1477,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, break_beam_1204)
     {
         //1204. break beam: two beams
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 s g+)(n f4 s)(n g4 s)(n a4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1529,13 +1540,13 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, break_beam_1205)
     {
         //1205. bug: undo break beam
-        Document doc(m_libraryScope);
+        MyDocument3 doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)"
-			"(instrument#90L (musicData#122L "
+			"(instrument#90 (musicData#122 "
 			"(clef G)(n e4 e g+)(n g4 e)(n c5 e g-)"
 			"))) ))" );
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1555,7 +1566,7 @@ SUITE(DocCommandTest)
 //        cout << doc.id_assigner_size() << endl;
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
@@ -1591,27 +1602,29 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, change_accidentals_1301)
     {
         //change accidentals
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        ImoId idNote = pNote->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAccidentals(k_sharp);
 
         MySelectionSet sel(&doc);
         sel.debug_add(pNote);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change accidentals" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote) );
         CHECK( pNote == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote->get_notated_accidentals() == k_sharp );
     }
@@ -1619,18 +1632,20 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, change_accidentals_1302)
     {
         //undo change accidentals
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote1 = pNote1->get_id();
         cursor.move_next();         //points to n g4 s
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote2 = pNote2->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAccidentals(k_flat_flat);
         MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
@@ -1638,18 +1653,22 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_notated_accidentals() == 0 );
         cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote1) );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_notated_accidentals() == 0 );
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_notated_accidentals() == k_flat_flat );
         cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote1) );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_notated_accidentals() == k_flat_flat );
 
@@ -1665,16 +1684,16 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, change_attribute_int_1401)
     {
         //change barline type
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(barline simple)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to barline
-        ImoObj* pImo = *cursor;
+        ImoId id = (*cursor)->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAttribute(k_attr_barline,
                                                         k_barline_double,
                                                         "Change barline type");
@@ -1682,29 +1701,31 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change barline type" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
+        ImoObj* pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         ImoBarline* pBar = static_cast<ImoBarline*>(pImo);
+        CHECK( pBar->get_id() == id );
         CHECK( pBar->get_type() == k_barline_double );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, change_attribute_int_1402)
     {
         //undo/redo change barline type
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(barline simple)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to barline
-        ImoObj* pImo = *cursor;
+        ImoId id = (*cursor)->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAttribute(k_attr_barline,
                                                         k_barline_double,
                                                         "Change barline type");
@@ -1713,35 +1734,39 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
+        ImoObj* pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         ImoBarline* pBar = static_cast<ImoBarline*>(pImo);
+        CHECK( pBar->get_id() == id );
         CHECK( pBar->get_type() == k_barline_simple );
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
+        pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         pBar = static_cast<ImoBarline*>(pImo);
+        CHECK( pBar->get_id() == id );
         CHECK( pBar->get_type() == k_barline_double );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, change_attribute_int_1403)
     {
         //toggle note stem
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n c4 q (stem up))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to barline
-        ImoObj* pImo = *cursor;
+        ImoId id = (*cursor)->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAttribute(k_attr_stem_type,
                                                         k_stem_down,
                                                         "Toggle note stem");
@@ -1753,24 +1778,26 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Toggle note stem" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
+        ImoObj* pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         ImoNote* pNote = static_cast<ImoNote*>(pImo);
+        CHECK( pNote->get_id() == id );
         CHECK( pNote->get_stem_direction() == k_stem_down );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, change_attribute_int_1404)
     {
         //undo/redo toggle note stem
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n c4 q (stem up))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to barline
-        ImoObj* pImo = *cursor;
+        ImoId id = (*cursor)->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeAttribute(k_attr_stem_type,
                                                         k_stem_down,
                                                         "Toggle note stem");
@@ -1779,19 +1806,23 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
+        ImoObj* pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         ImoNote* pNote = static_cast<ImoNote*>(pImo);
+        CHECK( pNote->get_id() == id );
         CHECK( pNote->get_stem_direction() == k_stem_up );
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
+        pImo = doc.get_pointer_to_imo(id);
         CHECK( pImo == *cursor );
         pNote = static_cast<ImoNote*>(pImo);
+        CHECK( pNote->get_id() == id );
         CHECK( pNote->get_stem_direction() == k_stem_down );
     }
 
@@ -1800,27 +1831,29 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, change_dots_1501)
     {
         //change dots
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        ImoId idNote = pNote->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeDots(1);
 
         MySelectionSet sel(&doc);
         sel.debug_add(pNote);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change dots" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote) );
         CHECK( pNote == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote->get_dots() == 1 );
     }
@@ -1828,18 +1861,20 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, change_dots_1502)
     {
         //undo change dots
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote1 = pNote1->get_id();
         cursor.move_next();         //points to n g4 s
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote2 = pNote2->get_id();
         DocCommand* pCmd = LOMSE_NEW CmdChangeDots(2);
 
         MySelectionSet sel(&doc);
@@ -1848,18 +1883,22 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);      //cursor is pointing to note2
 
         executer.undo(&cursor, &sel);     //cursor restored to note2
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_dots() == 0 );
         cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote1) );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_dots() == 0 );
 
         executer.redo(&cursor, &sel);     //cursor pointing to note1 but redo restores original pos
         CHECK( doc.is_dirty() == true );
+        pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_dots() == 2 );
         cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote1) );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_dots() == 2 );
 
@@ -1910,7 +1949,7 @@ SUITE(DocCommandTest)
         //cout << m_pDoc->to_string(true) << endl;
         //cout << "cmd name = " << pCmd->get_name() << endl;
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( pCmd->get_name() == "Delete score" );
         CHECK( m_pDoc->get_im_root()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
@@ -1935,7 +1974,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
         executer.undo(&cursor, &sel);
         CHECK( m_pDoc->get_im_root()->get_num_content_items() == 2 );
-        CHECK( m_pDoc->is_dirty() == true );
+        CHECK( m_pDoc->is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
 
@@ -1952,11 +1991,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1801)
     {
         //delete relation (tuplet)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+ (t + 2 3))(n f4 e)(n g4 e g- (t -))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -1969,7 +2008,7 @@ SUITE(DocCommandTest)
         sel.debug_add(pTuplet);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Delete tuplet" );
         CHECK( *cursor != nullptr );
@@ -1987,11 +2026,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1802)
     {
         //delete relation (beam)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -2025,11 +2064,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1803)
     {
         //delete relation (beam)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -2042,7 +2081,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2073,11 +2112,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1804)
     {
         //delete relation (old tie)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n f4 e l)(n f4 q)(n e4 e l)(n e4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -2106,7 +2145,7 @@ SUITE(DocCommandTest)
         CHECK( pNote->is_tied_prev() == false );
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2142,11 +2181,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1805)
     {
         //delete relation (new tie, notes appart)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n f4 e v1 (tie 1 start))(n a4 q v2)(n f4 e v1 (tie 1 stop))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -2192,7 +2231,7 @@ SUITE(DocCommandTest)
 //        cout << pTable->dump();
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );      // f4
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2232,11 +2271,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_relation_1806)
     {
         //delete relation (alternative constructor)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+ (t + 2 3))(n f4 e)(n g4 e g- (t -))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -2270,8 +2309,8 @@ SUITE(DocCommandTest)
     {
         //delete staffobjs
         //cursor positioned at first object after first deleted one
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
@@ -2288,7 +2327,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( pCmd->get_name() == "Delete my selection" );
         CHECK( doc.is_dirty() == true );
 
@@ -2311,8 +2350,8 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_selection_1902)
     {
         //1902. delete staffobjs. First staffobj deleted
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
@@ -2328,7 +2367,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( pCmd->get_name() == "Delete selection" );
         CHECK( doc.is_dirty() == true );
 
@@ -2351,8 +2390,8 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_selection_1903)
     {
         //delete relation
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
@@ -2395,8 +2434,8 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_selection_1904)
     {
         //delete auxobj
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e (text \"This is a note\"))(n f4 e)(n g4 q)"
             ")))");
 
@@ -2454,7 +2493,7 @@ SUITE(DocCommandTest)
         //cout << pScore->get_staffobjs_table()->dump() << endl;
         //cout << "cmd name = " << pCmd->get_name() << endl;
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( pCmd->get_name() == "Delete note" );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_rest() == true );
@@ -2486,17 +2525,17 @@ SUITE(DocCommandTest)
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == 126L );
-        CHECK( m_pDoc->is_dirty() == true );
+        CHECK( m_pDoc->is_dirty() == false );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2003)
     {
         //delete beamed note
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n c4 e g+)(n e4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -2534,11 +2573,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2004)
     {
         //undo delete beamed note
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n c4 e g+)(n e4 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -2578,11 +2617,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2005)
     {
         //delete beamed note. Still two notes in beam
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n g5 s
@@ -2621,11 +2660,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2006)
     {
         //undo delete beamed note when still two notes in beam
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n g5 s
@@ -2666,11 +2705,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2007)
     {
         //delete note in chord. Still two notes in chord
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(chord (n c4 s)(n e4 s)(n g4 s))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 s
@@ -2709,11 +2748,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2008)
     {
         //delete note in chord. One note left: chord removed
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(chord (n e4 s)(n g4 s))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 s
@@ -2753,11 +2792,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2009)
     {
         //delete tied note. Tie removed
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n g4 s l+)(n g4 s l-)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n g4 s
@@ -2798,11 +2837,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2010)
     {
         //delete start note of tuplet. Tuplet removed
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n g4 s (t + 2 3))(n e4 s (t -))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n g4 s
@@ -2844,11 +2883,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2011)
     {
         //delete end note of tuplet. Tuplet removed
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 s (t + 2 3))(n g4 s (t -))"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 s
@@ -2892,11 +2931,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2012)
     {
         //@2012. delete first staffobj in score
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n f4 e)(n g4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         DocCommandExecuter executer(&doc);
@@ -2924,11 +2963,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2013)
     {
         //@2013. delete the only staffobj in score
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         DocCommandExecuter executer(&doc);
@@ -2954,13 +2993,13 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_block_2101)
     {
         //push_back_blocks_container
-        Document doc(m_libraryScope);
+        MyDocument3 doc(m_libraryScope);
         doc.create_empty();
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj(k_imo_para);
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == false );
 
         MySelectionSet sel(&doc);
@@ -2977,26 +3016,28 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 1 );
+        pImoDoc = doc.get_im_root();
+        pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_block_2102)
     {
         //insert_blocks_container
-        Document doc(m_libraryScope);
+        MyDocument3 doc(m_libraryScope);
         doc.create_empty();
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj(k_imo_para);
@@ -3024,7 +3065,7 @@ SUITE(DocCommandTest)
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == true );    //paragraph still inserted
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
@@ -3041,15 +3082,15 @@ SUITE(DocCommandTest)
         pImoDoc = doc.get_im_root();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 0 );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_block_2103)
     {
         //insert_block_from_source
-        Document doc(m_libraryScope);
+        MyDocument3 doc(m_libraryScope);
         doc.create_empty();
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj("<para>Hello world!</para>");
@@ -3070,18 +3111,20 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 1 );
+        pImoDoc = doc.get_im_root();
+        pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
     }
 
     // CmdInsertManyStaffObjs -----------------------------------------------------------
@@ -3089,12 +3132,12 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_many_staffobjs_2201)
     {
         //objects inserted and cursor updated
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3126,9 +3169,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_many_staffobjs_2202)
     {
         //undo insertion
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
@@ -3144,7 +3187,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->time() == 0 );
 //        cout << pSC->dump_cursor() << endl;
 
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument P1 (staves 1)(musicData)))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
@@ -3155,9 +3198,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_many_staffobjs_2203)
     {
         //redo insertion
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
@@ -3178,8 +3221,8 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_staff() == true );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument P1 (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 139 +))"
-              "(n c4 e v1 p1 (beam 139 -)))))))" );
+              "(instrument P1 (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 130 +))"
+              "(n c4 e v1 p1 (beam 130 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3190,42 +3233,60 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_many_staffobjs_2204)
     {
         //undo/redo when cursor repositioned
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
-        DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
         cursor.enter_element();
         MySelectionSet sel(&doc);
-        executer.execute(&cursor, pCmd, &sel);
 
-        DocCommand* pCmd1 = LOMSE_NEW CmdCursor(128L);     //point to first note
+        //1. insert two beamed notes, cursor remains at end
+        DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
+        executer.execute(&cursor, pCmd, &sel);
+        CHECK( *cursor == nullptr );
+
+        //point to first note, transient cmd: no undo/redo
+        DocCommand* pCmd1 = LOMSE_NEW CmdCursor(128L);
         executer.execute(&cursor, pCmd1, &sel);
-        ImoObj* pNoteE4 = *cursor;
-
-        pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
-        executer.execute(&cursor, pCmd, &sel);
-
-        executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note e4
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == pNoteE4->get_id() );
+        ImoId idNoteE4 = (*cursor)->get_id();
+        CHECK( (*cursor)->get_id() == idNoteE4 );
 
-        DocCommand* pCmd2 = LOMSE_NEW CmdCursor(CmdCursor::k_move_next);     //point note c4
+        //2. insert note after 128L, cursor remains pointing to note e4 (128L)
+        pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
+        executer.execute(&cursor, pCmd, &sel);
+        CHECK( *cursor != nullptr );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->get_id() == idNoteE4 );
+
+        //undo 2: remove note d4. Cursor points to note e4 (128L)
+        executer.undo(&cursor, &sel);
+        CHECK( *cursor != nullptr );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->get_id() == idNoteE4 );
+
+        //point note c4, transient cmd
+        DocCommand* pCmd2 = LOMSE_NEW CmdCursor(CmdCursor::k_move_next);
         executer.execute(&cursor, pCmd2, &sel);
         CHECK ( (*cursor)->is_note() );
         ImoNote* pNoteC4 = static_cast<ImoNote*>(*cursor);
         CHECK ( pNoteC4->get_fpitch() == C4_FPITCH );
 
-        executer.undo(&cursor, &sel);    //remove initial insertions
+        //undo 1: remove initial insertions
+        executer.undo(&cursor, &sel);
         CHECK( *cursor == nullptr );
 
-        executer.redo(&cursor, &sel);    //insert again all staffobjs. Cursor points to end of score
+        //redo 1: insert again all staffobjs. Cursor points to end of score
+        executer.redo(&cursor, &sel);
         CHECK( *cursor == nullptr );
 
-        executer.redo(&cursor, &sel);    //insert note d4. Cursor points to end of score
-        CHECK( *cursor == nullptr );
+        //redo 2: insert note d4, cursor will point to note e4 (128L)
+        executer.redo(&cursor, &sel);
+        CHECK( *cursor != nullptr );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->get_id() == idNoteE4 );
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
@@ -3236,12 +3297,12 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2301)
     {
         //clef inserted and cursor updated
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3267,9 +3328,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2302)
     {
         //undo insertion
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
         DocCursor cursor(&doc);
@@ -3281,7 +3342,7 @@ SUITE(DocCommandTest)
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         string expected = "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
             "(instrument P1 (staves 1)(musicData)))))";
         CHECK( doc.to_string() == expected );
@@ -3294,9 +3355,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2303)
     {
         //source code validated
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clof G)");
         DocCursor cursor(&doc);
@@ -3315,9 +3376,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2304)
     {
         //undo/redo with cursor changes
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3329,9 +3390,14 @@ SUITE(DocCommandTest)
         DocCommand* pCmd2 = LOMSE_NEW CmdInsertStaffObj("(n c4 q)");
         executer.execute(&cursor, pCmd2, &sel);
 
-        DocCommand* pCmd3 = LOMSE_NEW CmdCursor(CmdCursor::k_move_prev);     //to inserted note
+        DocCommand* pCmd3 = LOMSE_NEW CmdCursor(CmdCursor::k_move_prev);     //to inserted note c4
         executer.execute(&cursor, pCmd3, &sel);
-        ImoObj* pNoteC4 = *cursor;
+        ImoId idNoteC4 = (*cursor)->get_id();
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << doc.to_string() << endl;
+//        cout << pScore->get_staffobjs_table()->dump() << endl;
+//        cout << pSC->dump_cursor() << endl;
 
         DocCommand* pCmd4 = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
         executer.execute(&cursor, pCmd4, &sel);
@@ -3339,7 +3405,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note c4
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == pNoteC4->get_id() );
+        CHECK( (*cursor)->get_id() == idNoteC4 );
 
         executer.undo(&cursor, &sel);    //remove note c4. Cursor points to end of score
         CHECK( *cursor == nullptr );
@@ -3348,19 +3414,16 @@ SUITE(DocCommandTest)
         CHECK( *cursor == nullptr );
 
         executer.redo(&cursor, &sel);    //insert note d4. Cursor points to note c4
-        pNoteC4 = *cursor;
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == pNoteC4->get_id() );
-
-        //cout << doc.to_string() << endl;
+        CHECK( (*cursor)->get_id() == idNoteC4 );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2305)
     {
         //validate source code: start/end parenthesis
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3377,9 +3440,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2306)
     {
         //validate source code: more than one LDP elements
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3396,9 +3459,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2307)
     {
         //validate source code: parenthesis mismatch
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#90L (musicData#122L)))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument#90 (musicData#122)))");
+        doc.my_clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();
@@ -3415,9 +3478,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2308)
     {
         //add note in second voice
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L (clef G)(n c4 q))))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 (clef G)(n c4 q))))");
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -3461,9 +3524,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2309)
     {
         //undo insertion in second voice
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L (clef G)(n c4 q))))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 (clef G)(n c4 q))))");
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -3474,7 +3537,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
 
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
@@ -3502,9 +3565,9 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2310)
     {
         //redo insertion in second voice
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L (clef G)(n c4 q))))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 (clef G)(n c4 q))))");
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -3547,9 +3610,9 @@ SUITE(DocCommandTest)
     {
         //undo/redo when cursor repositioned (two consecutive commands but
         //with a cursor reposition before second command)
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L (clef G)(n c4 q))))");
-        doc.clear_dirty();
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 (clef G)(n c4 q))))");
+        doc.my_clear_dirty();
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
@@ -3571,18 +3634,19 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1 p1)" );
-        //Fcout << pTable->dump();
+//        cout << pTable->dump();
 
         executer.undo(&cursor, &sel);    //remove note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
+        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
 
         executer.redo(&cursor, &sel);    //add note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
+        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
     }
 
     // CmdJoinBeam ----------------------------------------------------------------------
@@ -3590,11 +3654,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, join_beam_2401)
     {
         //join beam
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n f4 e)(n g4 e)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3612,7 +3676,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Join beam" );
         CHECK( *cursor != nullptr );
@@ -3640,12 +3704,12 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2501)
     {
-        //Composite cmd: checkpoint undo
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        //Composite cmd: undo
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n f4 e)(n g4 e)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3667,7 +3731,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Join beam and change dots" );
         CHECK( *cursor != nullptr );
@@ -3696,12 +3760,12 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2502)
     {
-        //Composite cmd: checkpoint undo. Undo works
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        //Composite cmd: Undo works
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n f4 e)(n g4 e)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3725,7 +3789,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -3751,12 +3815,12 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2503)
     {
-        //Composite cmd: checkpoint undo. Redo works
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        //Composite cmd: Redo works
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n f4 e)(n g4 e)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3809,11 +3873,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2504)
     {
         //Composite cmd: specific undo
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n e4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3839,7 +3903,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Tie notes and change dots" );
         CHECK( *cursor != nullptr );
@@ -3858,11 +3922,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2505)
     {
         //Composite cmd: specific undo. Undo works
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n e4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -3890,7 +3954,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
@@ -3907,11 +3971,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, composite_cmd_2506)
     {
         //Composite cmd: specific undo. Redo works
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e)(n e4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -4105,7 +4169,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("e4");
         CHECK( pCmd->get_cursor_update_policy() == DocCommand::k_refresh );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         MySelectionSet sel(m_pDoc);
         sel.debug_add(pNote1);
@@ -4163,7 +4227,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( m_pDoc->is_dirty() == true );
+        CHECK( m_pDoc->is_dirty() == false );
 
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -4219,11 +4283,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2702)
     {
         //@2702. To note at end. Success. Added note selected. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -4249,7 +4313,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
 
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -4305,11 +4369,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2703)
     {
         //@2703. Add chord note fails. No note selected
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -4346,11 +4410,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2704)
     {
         //@2704. Add two notes to chord
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(n e4 e v1)(n f4 e v1)(n c4 e v1)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
@@ -4419,11 +4483,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_by_interval_2831)
     {
         //@2831. Do. Whole score. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +f4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4439,7 +4503,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeChromatically(FIntval("p4"));
         CHECK( pCmd->get_name() == "Chromatic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4482,11 +4546,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_by_interval_2832)
     {
         //@2832. Undo. Whole score. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +f4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4502,7 +4566,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeChromatically(FIntval("p4"));
         CHECK( pCmd->get_name() == "Chromatic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4524,7 +4588,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4545,11 +4609,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_by_interval_2833)
     {
         //@2833. Do. Whole score. Down, Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +f4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4565,7 +4629,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeChromatically(FIntval("p4", k_descending));
         CHECK( pCmd->get_name() == "Chromatic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4608,11 +4672,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_by_interval_2834)
     {
         //@2834. Undo. Whole score. Down. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +f4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4628,7 +4692,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeChromatically(FIntval("p4", k_descending));
         CHECK( pCmd->get_name() == "Chromatic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4650,7 +4714,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4673,11 +4737,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2851)
     {
         //@2851. Do. Whole score. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4693,7 +4757,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeDiatonically(3);
         CHECK( pCmd->get_name() == "Diatonic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4736,11 +4800,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2852)
     {
         //@2852. Undo. Whole score. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4756,7 +4820,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeDiatonically(3);
         CHECK( pCmd->get_name() == "Diatonic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4778,7 +4842,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4799,11 +4863,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2853)
     {
         //@2853. Do. Whole score. Down, Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4819,7 +4883,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeDiatonically(3, false /*down*/);
         CHECK( pCmd->get_name() == "Diatonic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4862,11 +4926,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2854)
     {
         //@2854. Undo. Whole score. Down. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4882,7 +4946,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeDiatonically(3, false /*down*/);
         CHECK( pCmd->get_name() == "Diatonic transposition" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4904,7 +4968,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4927,11 +4991,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_key_01)
     {
         //@01. Do. Selection. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -4948,7 +5012,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeKey(FIntval("M3"));
         CHECK( pCmd->get_name() == "Transpose key signature" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -4982,11 +5046,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_key_02)
     {
         //@02. Do. Selection. Key not in selection. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n +c4 q)(n g4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -5002,7 +5066,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeKey(FIntval("M2", true));
         CHECK( pCmd->get_name() == "Transpose key signature" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -5036,11 +5100,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_key_03)
     {
         //@03. Undo. Selection. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n c4 q)(n +b4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -5057,7 +5121,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeKey(FIntval("M3"));
         CHECK( pCmd->get_name() == "Transpose key signature" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
@@ -5079,7 +5143,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -5102,11 +5166,11 @@ SUITE(DocCommandTest)
     TEST_FIXTURE(DocCommandTestFixture, transpose_key_04)
     {
         //@04. Undo. Selection. Key not in selection. Success. Cursor doesn't move.
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#90L (musicData#122L "
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
             "(clef G)(key C)(n +c4 q)(n g4 q)"
             ")))");
-        doc.clear_dirty();
+        doc.my_clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         MySelectionSet sel(&doc);
@@ -5122,29 +5186,18 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW
             CmdTransposeKey(FIntval("M2", true));
         CHECK( pCmd->get_name() == "Transpose key signature" );
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start );
 
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-//        cout << pTable->dump();
-//        cout << sel.dump_selection() << endl;
-//        LdpExporter exporter(&m_libraryScope);
-//        //exporter.set_remove_newlines(true);
-//        exporter.set_add_id(true);
-//        cout << exporter.get_source(pScore) << endl;
-
         //selection unchanged
         CHECK( sel.num_selected() == 2 );
-
         //cursor has not moved
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -5162,6 +5215,111 @@ SUITE(DocCommandTest)
         CHECK( pNote && pNote->get_octave() == 4 );
         CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
         CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, undo_9001)
+    {
+        //9001. undo: only one item restores model, selection and cursor
+
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
+            "(clef G)"
+            ")))");
+        doc.my_clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to end of score
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        cout << test_name() << ". before:" << endl << pScore->to_string(true) << endl;
+        CHECK( doc.is_dirty() == true );
+        //cursor points after inserted note
+        CHECK( *cursor == nullptr );
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        CHECK( pSC->is_at_end_of_staff() == true );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
+
+        executer.undo(&cursor, &sel);
+
+        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        cout << test_name() << ". after:" << endl << pScore->to_string(true) << endl;
+//        cout << endl << pSC->dump_cursor() << endl;
+//        cout << (*cursor)->to_string() << endl;
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        CHECK( doc.is_dirty() == false );
+        //cursor points after inserted note
+        CHECK( *cursor == nullptr );
+        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        CHECK( pSC->is_at_end_of_staff() == true );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 1 );
+
+        cursor.move_prev();         //prev is the clef
+//        cout << endl << pSC->dump_cursor() << endl;
+//        cout << endl << cursor.dump_cursor() << endl;
+        CHECK( (*cursor)->is_clef() == true );
+        CHECK( (*cursor)->to_string() == "(clef G p1)" );
+//        cout << "cursor points to: " << (*cursor)->to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, undo_9002)
+    {
+        //9002. undo: more undo items
+
+        MyDocument3 doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#90 (musicData#122 "
+            "(clef G)"
+            ")))");
+        doc.my_clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to end of score
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        pCmd = LOMSE_NEW CmdAddNoteRest("(n f4 e v1)", k_edit_mode_replace);
+        executer.execute(&cursor, pCmd, &sel);
+
+        pCmd = LOMSE_NEW CmdAddNoteRest("(n g4 e v1)", k_edit_mode_replace);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        cout << test_name() << ". before:" << endl << pScore->to_string(true) << endl;
+        CHECK( doc.is_dirty() == true );
+        //cursor points after inserted note
+        CHECK( *cursor == nullptr );
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        CHECK( pSC->is_at_end_of_staff() == true );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
+
+        executer.undo(&cursor, &sel);
+
+        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        cout << test_name() << ". after:" << endl << pScore->to_string(true) << endl;
+//        cout << endl << pSC->dump_cursor() << endl;
+//        cout << (*cursor)->to_string() << endl;
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        CHECK( doc.is_dirty() == true );
+        //cursor points after inserted note
+        CHECK( *cursor == nullptr );
+        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        CHECK( pSC->is_at_end_of_staff() == true );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
+
+        cursor.move_prev();         //prev note is the inserted one
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n f4 e v1 p1)" );
     }
 
 }

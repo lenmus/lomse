@@ -36,64 +36,26 @@ namespace lomse
 //=======================================================================================
 // DocCommand
 //=======================================================================================
-void DocCommand::create_checkpoint(Document* pDoc)
-{
-    if (!is_included_in_composite_cmd())
-    {
-        if (m_checkpoint.empty())
-        {
-            if (get_undo_policy() == k_undo_policy_partial_checkpoint)
-                m_checkpoint = pDoc->get_checkpoint_data_for(m_idChk);
-            else
-                m_checkpoint = pDoc->get_checkpoint_data();
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
+void DocCommand::undo_action(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
     //default implementation based on restoring from saved checkpoint data
     //log command for forensic analysis
-    ostream& logger = get_global_logger().get_forensic_log_stream();
-
-    logger << "---------------------------------------------"
-           << "---------------------------------------------" << endl;
-    logger << "Before Undo, time="
-           << to_simple_string(chrono::system_clock::now()) << endl;
-    if (get_undo_policy() == k_undo_policy_partial_checkpoint)
-        logger << "Undo policy: Partial checkpoint. Obj: " << m_idChk << endl;
-    else
-        logger << "Undo policy: Full checkpoint" << endl;
-
-    logger << "IdAssigner. Before: " << pDoc->dump_ids() << endl;
-
-    //execute undo
-    if (get_undo_policy() == k_undo_policy_partial_checkpoint)
-        pDoc->replace_object_from_checkpoint_data(m_idChk, m_checkpoint);
-    else
-        pDoc->from_checkpoint(m_checkpoint);
-
-    logger << "IdAssigner. After: " << pDoc->dump_ids() << endl;
-    get_global_logger().close_forensic_log();
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* pCursor)
+void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
-    //save data for forensic analysis if a crash
-
-    ostream& logger = get_global_logger().get_forensic_log_stream();
-
-    logger << "---------------------------------------------"
-           << "---------------------------------------------" << endl;
-    logger << "Before executing command, time="
-           << to_simple_string(chrono::system_clock::now()) << endl;
-    log_command(logger);
-    logger << "Cursor: " << pCursor->dump_cursor();
-    logger << "Checkpoint data (last id " << m_idChk << "):" << endl;
-    logger << m_checkpoint << endl;
-    get_global_logger().close_forensic_log();
+//    //save data for forensic analysis if a crash
+//
+//    ostream& logger = get_global_logger().get_forensic_log_stream();
+//
+//    logger << "---------------------------------------------"
+//           << "---------------------------------------------" << endl;
+//    logger << "Before executing command, time="
+//           << to_simple_string(chrono::system_clock::now()) << endl;
+//    log_command(logger);
+//    logger << "Cursor: " << pCursor->dump_cursor();
+//    get_global_logger().close_forensic_log();
 }
 
 //---------------------------------------------------------------------------------------
@@ -168,7 +130,7 @@ int DocCommand::validate_source(const string& source)
 //=======================================================================================
 DocCmdComposite::DocCmdComposite(const string& name)
     : DocCommand(name)
-    , m_undoPolicy(k_undo_policy_specific)
+    , m_undoPolicy(k_undo_policy_replay_from_start)   //k_undo_policy_specific)
 {
     m_flags = k_recordable | k_reversible;
 }
@@ -190,8 +152,6 @@ void DocCmdComposite::add_child_command(DocCommand* pCmd)
 {
     m_commands.push_back(pCmd);
     pCmd->mark_as_included_in_composite_cmd();
-    if (pCmd->get_undo_policy() == k_undo_policy_full_checkpoint)
-        m_undoPolicy = k_undo_policy_full_checkpoint;
 }
 
 //---------------------------------------------------------------------------------------
@@ -213,12 +173,7 @@ int DocCmdComposite::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     int result = k_success;
 
-    if (m_undoPolicy == k_undo_policy_full_checkpoint
-        || m_undoPolicy == k_undo_policy_partial_checkpoint)
-    {
-        create_checkpoint(pDoc);
-        log_forensic_data(pDoc, pCursor);
-    }
+    log_forensic_data(pDoc, pCursor);
 
     list<DocCommand*>::iterator it;
     for (it=m_commands.begin(); it != m_commands.end(); ++it)
@@ -235,18 +190,10 @@ int DocCmdComposite::perform_action(Document* pDoc, DocCursor* pCursor)
 //---------------------------------------------------------------------------------------
 void DocCmdComposite::undo_action(Document* pDoc, DocCursor* pCursor)
 {
-    if (m_undoPolicy == k_undo_policy_full_checkpoint
-        || m_undoPolicy == k_undo_policy_partial_checkpoint)
+    list<DocCommand*>::reverse_iterator it;
+    for (it=m_commands.rbegin(); it != m_commands.rend(); ++it)
     {
-        DocCommand::undo_action(pDoc, pCursor);
-    }
-    else
-    {
-        list<DocCommand*>::reverse_iterator it;
-        for (it=m_commands.rbegin(); it != m_commands.rend(); ++it)
-        {
-            (*it)->undo_action(pDoc, pCursor);
-        }
+        (*it)->undo_action(pDoc, pCursor);
     }
 }
 
@@ -278,6 +225,13 @@ void DocCmdComposite::update_selection(SelectionSet* pSelection,
 DocCommandExecuter::DocCommandExecuter(Document* target)
     : m_pDoc(target)
 {
+    m_pModelStart = target->create_model_copy();
+}
+
+//---------------------------------------------------------------------------------------
+DocCommandExecuter::~DocCommandExecuter()
+{
+    delete m_pModelStart;
 }
 
 //---------------------------------------------------------------------------------------
@@ -304,13 +258,15 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
         m_error = pCmd->get_error();
         if ( result == k_success && pCmd->is_reversible())
         {
+            //by design, all commands that modify the document are reversible and must
+            //support undo/redo
             m_stack.push( pUE );
             update_cursor(pCursor, pCmd);
             update_selection(pSelection, pCmd);
             m_pDoc->set_modified();
         }
         else if (pCmd->is_reversible())
-            delete pUE;
+            delete pUE;     //cmd ownership transferred to UE; this deletes cmd
         else
             delete pCmd;
     }
@@ -417,14 +373,52 @@ void DocCommandExecuter::undo(DocCursor* pCursor, SelectionSet* pSelection)
     if (pUE)
     {
         DocCommand* cmd = pUE->pCmd;
-        cmd->undo_action(m_pDoc, pCursor);
-
-        pCursor->restore_state( pUE->cursorState );
-        pSelection->restore_state( pUE->selState );
-
-        if (cmd->is_reversible())
-            m_pDoc->reset_modified();
+        if (cmd->get_undo_policy() == DocCommand::k_undo_policy_replay_from_start)
+            replay_until(pUE, pCursor, pSelection);
+        else
+        {
+            cmd->undo_action(m_pDoc, pCursor);
+            pCursor->restore_state( pUE->cursorState );
+            pSelection->restore_state( pUE->selState );
+        }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void DocCommandExecuter::replay_until(UndoElement* pUE, DocCursor* pCursor,
+                                      SelectionSet* pSelection)
+{
+    //restore initial model
+    m_pDoc->replace_model(m_pModelStart);
+    m_pModelStart = LOMSE_NEW DocModel(*m_pModelStart);
+
+    //re-play all commands until the desired one
+    for (size_t i=0; i < m_stack.size(); ++i)
+    {
+        UndoElement* pUEi = m_stack.get_item(i);
+        if (pUEi == pUE)
+            break;
+
+        replay_command(pUEi, pCursor, pSelection);
+    }
+
+    //restore selection and cursor state
+    pCursor->restore_state( pUE->cursorState );
+    pSelection->restore_state( pUE->selState );
+}
+
+//---------------------------------------------------------------------------------------
+void DocCommandExecuter::replay_command(UndoElement* pUE, DocCursor* pCursor,
+                                        SelectionSet* pSelection)
+{
+    pCursor->restore_state( pUE->cursorState );
+    pSelection->restore_state( pUE->selState );
+    DocCommand* cmd = pUE->pCmd;
+    cmd->perform_action(m_pDoc, pCursor);
+
+    //by design, all commands that modify the document are reversible
+    if (cmd->is_reversible())
+        m_pDoc->set_modified();
 }
 
 //---------------------------------------------------------------------------------------
@@ -441,6 +435,7 @@ void DocCommandExecuter::redo(DocCursor* pCursor, SelectionSet* pSelection)
         update_cursor(pCursor, cmd);
         update_selection(pSelection, cmd);
 
+        //by design, all commands that modify the document are reversible
         if (cmd->is_reversible())
             m_pDoc->set_modified();
     }
@@ -511,10 +506,6 @@ int CmdAddChordNote::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCurso
     m_type = td.noteType;
     m_dots = td.dots;
 
-    //undo based on partial checkpoint: get id of element to save
-    ImoScore* pScore = pBaseNote->get_score();
-    m_idChk = pScore->get_id();
-
     //validate pitch and extract components
     if (LdpAnalyser::ldp_pitch_to_components(m_pitch, &m_step, &m_octave, &m_accidentals))
         return k_failure;
@@ -525,8 +516,6 @@ int CmdAddChordNote::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCurso
 //---------------------------------------------------------------------------------------
 int CmdAddChordNote::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Checkpoint, as more notes are involved in the changes
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     //get data about insertion context
@@ -600,12 +589,8 @@ void CmdAddNoteRest::log_command(ostream &logger)
 int CmdAddNoteRest::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
                                SelectionSet* UNUSED(pSelection))
 {
-    //undo based on partial checkpoint: get id of element to save
-    ImoObj* pParent = pCursor->get_parent_object();
     if (pCursor->get_parent_object()->is_score())
     {
-        m_idChk = pParent->get_id();
-
         //target will be set when performing the action. Here just a couple of checks
         return validate_source(m_source);
     }
@@ -616,8 +601,6 @@ int CmdAddNoteRest::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
 //---------------------------------------------------------------------------------------
 int CmdAddNoteRest::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Checkpoint, as more notes/rests can be modified/deleted.
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     m_pDoc = pDoc;
@@ -927,8 +910,6 @@ void CmdAddTie::log_command(ostream &logger)
 //---------------------------------------------------------------------------------------
 int CmdAddTie::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies deleting the tuplet
-
     stringstream msg;
     ImoNote* pStart = static_cast<ImoNote*>(
                                     pDoc->get_pointer_to_imo(m_startId) );
@@ -944,18 +925,6 @@ int CmdAddTie::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 
     m_error = msg.str();
     return (pTie != nullptr ? k_success : k_failure);
-}
-
-//---------------------------------------------------------------------------------------
-void CmdAddTie::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    if (m_tieId != k_no_imoid)
-    {
-        ImoTie* pTie = static_cast<ImoTie*>(
-                                pDoc->get_pointer_to_imo(m_tieId) );
-        pDoc->delete_relation(pTie);
-        m_tieId = k_no_imoid;
-    }
 }
 
 
@@ -1002,8 +971,6 @@ void CmdAddTuplet::log_command(ostream &logger)
 //---------------------------------------------------------------------------------------
 int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies deleting the tuplet
-
     stringstream msg;
     ImoNoteRest* pStart = static_cast<ImoNoteRest*>(
                                         pDoc->get_pointer_to_imo(m_startId) );
@@ -1020,18 +987,18 @@ int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     m_error = msg.str();
     return (pTuplet != nullptr ? k_success : k_failure);
 }
-
-//---------------------------------------------------------------------------------------
-void CmdAddTuplet::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    if (m_tupletId != k_no_imoid)
-    {
-        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(
-                                pDoc->get_pointer_to_imo(m_tupletId) );
-        pDoc->delete_relation(pTuplet);
-        m_tupletId = k_no_imoid;
-    }
-}
+//
+////---------------------------------------------------------------------------------------
+//void CmdAddTuplet::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
+//{
+//    if (m_tupletId != k_no_imoid)
+//    {
+//        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(
+//                                pDoc->get_pointer_to_imo(m_tupletId) );
+//        pDoc->delete_relation(pTuplet);
+//        m_tupletId = k_no_imoid;
+//    }
+//}
 
 
 //=======================================================================================
@@ -1048,10 +1015,8 @@ CmdBreakBeam::CmdBreakBeam(const string& name)
 int CmdBreakBeam::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
                              SelectionSet* UNUSED(pSelection))
 {
-    ImoObj* pParent = pCursor->get_parent_object();
     if (pCursor->get_parent_object()->is_score())
     {
-        m_idChk = pParent->get_id();
         ImoNoteRest* pBeforeNR = dynamic_cast<ImoNoteRest*>( pCursor->get_pointee() );
         if (pBeforeNR)
         {
@@ -1072,9 +1037,6 @@ void CmdBreakBeam::log_command(ostream &logger)
 //---------------------------------------------------------------------------------------
 int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Checkpoint.
-    //TODO: Posible optimization: minimal checkpoint: save only source code for beam
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     //it is previously verified that pBeforeNR is beamed and it is not the first one
@@ -1211,7 +1173,6 @@ void CmdChangeAccidentals::log_command(ostream &logger)
 //---------------------------------------------------------------------------------------
 int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies restoring accidentals
     //AWARE: changing accidentals in one note could affect many notes in the
     //same measure
 
@@ -1236,31 +1197,6 @@ int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* UNUSED(pCurs
     return k_success;
 }
 
-//---------------------------------------------------------------------------------------
-void CmdChangeAccidentals::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    //AWARE: restoring pitch of selected notes is not enough as changing accidentals
-    // in one note could affect many notes in the same measure. Therefore, it is
-    // necessary to recompute pitch of all notes
-
-    ImoScore* pScore = nullptr;
-    list<ImoId>::iterator itN;
-    list<FPitch>::iterator itP = m_oldPitch.begin();
-    for (itN = m_notes.begin(); itN != m_notes.end(); ++itN, ++itP)
-    {
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*itN) );
-        FPitch fp = *itP;
-        pNote->set_notated_accidentals( fp.accidentals() );
-        pNote->set_actual_accidentals( float(fp.num_accidentals()) );
-        pNote->set_dirty(true);
-        if (!pScore)
-            pScore = pNote->get_score();
-    }
-
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
-}
-
 
 //=======================================================================================
 // CmdChangeAttribute implementation
@@ -1272,9 +1208,7 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     , m_attrb(attrb)
     , m_dataType(k_type_string)
     , m_newString(value)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible;
@@ -1287,9 +1221,7 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_double)
-    , m_oldDouble(0.0)
     , m_newDouble(value)
-    , m_oldInt(0)
     , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible;
@@ -1302,9 +1234,7 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_int)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(value)
 {
     m_flags = k_recordable | k_reversible;
@@ -1317,9 +1247,7 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_color)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(0)
     , m_newColor(value)
 {
@@ -1334,9 +1262,7 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     , m_attrb(attrb)
     , m_dataType(k_type_string)
     , m_newString(value)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
@@ -1350,9 +1276,7 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_double)
-    , m_oldDouble(0.0)
     , m_newDouble(value)
-    , m_oldInt(0)
     , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
@@ -1366,9 +1290,7 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_int)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(value)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
@@ -1382,9 +1304,7 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
     , m_dataType(k_type_color)
-    , m_oldDouble(0.0)
     , m_newDouble(0.0)
-    , m_oldInt(0)
     , m_newInt(0)
     , m_newColor(value)
 {
@@ -1410,7 +1330,6 @@ int CmdChangeAttribute::set_target(ImoObj* pImo)
     if (pImo)
     {
         m_targetId = pImo->get_id();
-        save_current_value(pImo);
         return k_success;
     }
     return k_failure;
@@ -1419,8 +1338,6 @@ int CmdChangeAttribute::set_target(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies restoring attrib value
-
     ImoObj* pImo = pDoc->get_pointer_to_imo( m_targetId );
     switch (m_dataType)
     {
@@ -1438,49 +1355,6 @@ int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor
             return k_failure;
     }
     return k_success;
-}
-
-//---------------------------------------------------------------------------------------
-void CmdChangeAttribute::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    ImoObj* pImo = pDoc->get_pointer_to_imo( m_targetId );
-    switch (m_dataType)
-    {
-        case k_type_bool:
-            pImo->set_bool_attribute(m_attrb, m_oldInt != 0); break;
-        case k_type_color:
-            pImo->set_color_attribute(m_attrb, m_oldColor);    break;
-        case k_type_double:
-            pImo->set_double_attribute(m_attrb, m_oldDouble);  break;
-        case k_type_int:
-            pImo->set_int_attribute(m_attrb, m_oldInt);        break;
-        case k_type_string:
-            pImo->set_string_attribute(m_attrb, m_oldString);  break;
-        default:
-            return;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void CmdChangeAttribute::save_current_value(ImoObj* pImo)
-{
-    AttributesData data = AttributesTable::get_data_for(m_attrb);
-    m_dataType = data.type;
-    switch (m_dataType)
-    {
-        case k_type_bool:
-            m_oldInt = pImo->get_bool_attribute(m_attrb);       break;
-        case k_type_color:
-            m_oldColor = pImo->get_color_attribute(m_attrb);    break;
-        case k_type_double:
-            m_oldDouble = pImo->get_double_attribute(m_attrb);  break;
-        case k_type_int:
-            m_oldInt = pImo->get_int_attribute(m_attrb);        break;
-        case k_type_string:
-            m_oldString = pImo->get_string_attribute(m_attrb);  break;
-        default:
-            ;
-    }
 }
 
 //=======================================================================================
@@ -1508,15 +1382,10 @@ int CmdChangeDots::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor)
 //---------------------------------------------------------------------------------------
 int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: direct undo, as it only implies restoring dots
-
-    bool fSaveDots = (m_oldDots.size() == 0);
     list<ImoId>::iterator it;
     for (it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pDoc->get_pointer_to_imo(*it) );
-        if (fSaveDots)
-            m_oldDots.push_back( pNR->get_dots() );
         pNR->set_dots(m_dots);
         pNR->set_dirty(true);
     }
@@ -1527,23 +1396,6 @@ int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
     pScore->end_of_changes();
 
     return k_success;
-}
-
-//---------------------------------------------------------------------------------------
-void CmdChangeDots::undo_action(Document* pDoc, DocCursor* pCursor)
-{
-    list<ImoId>::iterator itNR;
-    list<int>::iterator itD = m_oldDots.begin();
-    for (itNR = m_noteRests.begin(); itNR != m_noteRests.end(); ++itNR, ++itD)
-    {
-        ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pDoc->get_pointer_to_imo(*itNR) );
-        pNR->set_dots(*itD);
-        pNR->set_dirty(true);
-    }
-
-    //rebuild StaffObjs collection
-    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-    pScore->end_of_changes();
 }
 
 
@@ -1634,8 +1486,6 @@ int CmdCursor::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
 //---------------------------------------------------------------------------------------
 int CmdCursor::perform_action(Document* UNUSED(pDoc), DocCursor* pCursor)
 {
-    //Undo strategy: this command is not reversible
-
     m_curState = pCursor->get_state();
     switch(m_operation)
     {
@@ -1694,7 +1544,6 @@ int CmdCursor::perform_action(Document* UNUSED(pDoc), DocCursor* pCursor)
 void CmdCursor::undo_action(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
     //CmdCursor is not reversible. Nothing to do here.
-    ////pCursor->restore_state(m_curState);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1773,10 +1622,6 @@ int CmdDeleteBlockLevelObj::set_target(Document* UNUSED(pDoc), DocCursor* pCurso
 //---------------------------------------------------------------------------------------
 int CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Checkpoint.
-    //TODO: Posible optimization: partial checkpoint: save only source code for deleted
-    //block
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     ImoBlockLevelObj* pImo = dynamic_cast<ImoBlockLevelObj*>(
@@ -1847,11 +1692,6 @@ int CmdDeleteRelation::set_target(Document* pDoc, DocCursor* UNUSED(pCursor),
 //---------------------------------------------------------------------------------------
 int CmdDeleteRelation::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: checkpoint, because the relation could have some attributes
-    //modified (color, user positioned, ...).
-    //TODO: OPTIMIZATION direct undo via partial checkpoint, that is, only relation
-    //      source code
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     list<ImoId>::iterator it;
@@ -1870,10 +1710,8 @@ int CmdDeleteRelation::set_score_id(Document* pDoc)
     ImoRelObj* pRO = static_cast<ImoRelObj*>( pDoc->get_pointer_to_imo(id) );
     ImoObj* pParent = pRO->find_block_level_parent();
     if (pParent && pParent->is_score())
-    {
-        m_idChk = pParent->get_id();
         return k_success;
-    }
+
     return k_failure;
 }
 
@@ -1928,9 +1766,6 @@ int CmdDeleteSelection::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCu
 //---------------------------------------------------------------------------------------
 int CmdDeleteSelection::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: As many objects could be deleted and many relations
-    //could be involved, the best approach is to use a checkpoint.
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     prepare_cursor_for_deletion(pCursor);
@@ -2116,7 +1951,6 @@ int CmdDeleteStaffObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
     ImoStaffObj* pImo = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
     if (pImo)
     {
-        m_idChk = pImo->get_score()->get_id();
         m_id = pImo->get_id();
         return k_success;
     }
@@ -2126,11 +1960,6 @@ int CmdDeleteStaffObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
 //---------------------------------------------------------------------------------------
 int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Deleted objects could have relations with other objects (for
-    //instance, beamed groups, ligatures, etc.). Therefore, an 'undo' operation
-    //would require to identify and rebuild these relations. As this can be complex,
-    //it is simpler to use checkpoints.
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     ImoStaffObj* pImo = dynamic_cast<ImoStaffObj*>( pDoc->get_pointer_to_imo(m_id) );
@@ -2241,23 +2070,8 @@ CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(const string& source,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    if (m_lastInsertedId != k_no_imoid)
-    {
-        ImoDocument* pImoDoc = pDoc->get_im_root();
-        ImoBlockLevelObj* pImo = static_cast<ImoBlockLevelObj*>(
-                                            pDoc->get_pointer_to_imo(m_lastInsertedId) );
-        pImoDoc->delete_block_level_obj(pImo);
-        m_lastInsertedId = k_no_imoid;
-    }
-}
-
-//---------------------------------------------------------------------------------------
 int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: direct undo, as it only implies to delete the inserted object
-
     if (m_fFromSource)
         perform_action_from_source(pDoc, pCursor);
     else
@@ -2308,7 +2122,6 @@ void CmdInsertBlockLevelObj::perform_action_from_source(Document* pDoc,
 //=======================================================================================
 CmdInsertManyStaffObjs::CmdInsertManyStaffObjs(const string& source,  const string& name)
     : CmdInsert(name)
-    , m_fSaved(false)
 {
     m_source = source;
     m_flags = k_recordable | k_reversible;
@@ -2321,7 +2134,6 @@ int CmdInsertManyStaffObjs::set_target(Document* UNUSED(pDoc), DocCursor* pCurso
     ImoObj* pParent = pCursor->get_parent_object();
     if (pParent->is_score())
     {
-        m_idChk = pParent->get_id();
         ScoreCursor* pSC = static_cast<ScoreCursor*>( pCursor->get_inner_cursor() );
         m_idAt = pSC->staffobj_id_internal();
         return k_success;
@@ -2333,11 +2145,6 @@ int CmdInsertManyStaffObjs::set_target(Document* UNUSED(pDoc), DocCursor* pCurso
 //---------------------------------------------------------------------------------------
 int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: The inserted objects can create relations with other objects (for
-    //instance, beamed groups, ligatures, etc.). Therefore, an 'undo' operation
-    //would require to identify and remove these relations before removing the
-    //staff objects. As this can be complex, it is simpler to use checkpoints.
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     //get instrument that will be modified
@@ -2355,30 +2162,12 @@ int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
         if (objects.size() > 0)
         {
             pScore->end_of_changes();        //update ColStaffObjs table
-            save_source_code_with_ids(pDoc, objects);
             m_lastInsertedId = objects.back()->get_id();
             objects.clear();
             return k_success;
         }
     }
     return k_failure;
-}
-
-//---------------------------------------------------------------------------------------
-void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* UNUSED(pDoc),
-                                            const list<ImoStaffObj*>& UNUSED(objects))
-{
-    //TODO: Remove this method
-    //This is not necessary. As undo/redo is based on checkpoints, the undo operation
-    //rebuilds the document and resets ImoId counter. Therefore, redo operation reassigns
-    //*the same* ids, without the need of saving them in this command source code.
-
-    if (!m_fSaved)
-    {
-        //generate source code with ids.
-
-        m_fSaved = true;
-    }
 }
 
 
@@ -2408,24 +2197,8 @@ int CmdInsertStaffObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
-{
-    if (m_lastInsertedId != k_no_imoid)
-    {
-        remove_object(pDoc, m_lastInsertedId);
-        //TODO: set document modified
-
-        //update ColStaffObjs
-        ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-        pScore->end_of_changes();
-    }
-}
-
-//---------------------------------------------------------------------------------------
 int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: direct undo, as it only implies to delete the inserted object
-
     if (validate_source(m_source) != k_success)
         return k_failure;
 
@@ -2518,9 +2291,6 @@ void CmdJoinBeam::log_command(ostream &logger)
 //---------------------------------------------------------------------------------------
 int CmdJoinBeam::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: Note/rests to be beamed could have beams. For now, it is
-    //simpler to use a checkpoint
-    create_checkpoint(pDoc);
     log_forensic_data(pDoc, pCursor);
 
     //get pointers to notes/rests
@@ -2575,8 +2345,6 @@ int CmdMoveObjectPoint::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCu
 //---------------------------------------------------------------------------------------
 int CmdMoveObjectPoint::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies restoring old position
-
     ImoObj* pImo = pDoc->get_pointer_to_imo(m_targetId);
     //TODO: This code is just a test. Assumes it is a Tie and it is the first bezier
     if (pImo && pImo->is_tie())
@@ -2761,9 +2529,6 @@ int CmdTranspose::set_target(Document* UNUSED(pDoc),
 //---------------------------------------------------------------------------------------
 int CmdTranspose::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
-    //Undo strategy: direct undo, as it only implies performing the symmetrical
-    //               transposition
-
     ImoScore* pScore = nullptr;
 
     //transpose notes
@@ -2796,41 +2561,6 @@ int CmdTranspose::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     tuner.assign_pitch(pScore);
 
     return k_success;
-}
-
-//---------------------------------------------------------------------------------------
-void CmdTranspose::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    ImoScore* pScore = nullptr;
-
-    //transpose notes back
-    list<ImoId>::iterator itN;
-    for (itN = m_notes.begin(); itN != m_notes.end(); ++itN)
-    {
-        //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*itN) );
-        if (!pScore)
-            pScore = pNote->get_score();
-        if (!pScore)
-            return;
-
-        //transpose note back
-        transpose_note_back(pNote);
-        pNote->set_dirty(true);
-    }
-
-    //transpose keys back
-    list<ImoId>::iterator itK;
-    for (itK=m_keys.begin(); itK != m_keys.end(); ++itK)
-    {
-        ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*itK) );
-        if (pKey)
-            transpose_key_back(pKey);
-    }
-
-    //assign pitch to all notes
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
 }
 
 //---------------------------------------------------------------------------------------

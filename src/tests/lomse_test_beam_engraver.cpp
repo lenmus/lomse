@@ -356,7 +356,7 @@ public:
             GmoShapeNote* pShapeNote =
                         static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
             LUnits incrStem = abs(pShapeNote1->get_pos_on_staff() - pShapeNote->get_pos_on_staff());
-            minStem = (2.5f + incrStem * 0.5f) * oneSpace;
+            minStem = (2.5f + LUnits(incrStem * 0.5f)) * oneSpace;
         }
         LUnits stem = pShapeNote1->get_stem_height();
         bool fBadStem = (stem >= minStem);
@@ -396,7 +396,7 @@ public:
             GmoShapeNote* pShapeNote =
                         static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
             LUnits incrStem = abs(pShapeNote2->get_pos_on_staff() - pShapeNote->get_pos_on_staff());
-            minStem = (2.5f + incrStem * 0.5f) * oneSpace;
+            minStem = (2.5f + LUnits(incrStem * 0.5f)) * oneSpace;
         }
         stem = pShapeNote2->get_stem_height();
         fBadStem = (stem >= minStem);

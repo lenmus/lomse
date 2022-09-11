@@ -100,6 +100,19 @@ SUITE(IdAssignerTest)
 // Document tests
 //=======================================================================================
 
+//---------------------------------------------------------------------------------------
+// MyDocument4:  Helper class to use Document protected members
+class MyDocument4 : public Document
+{
+public:
+    MyDocument4(LibraryScope& libraryScope) : Document(libraryScope) {}
+   ~MyDocument4() override {}
+
+    void my_clear_dirty() { clear_dirty(); }
+};
+
+
+//---------------------------------------------------------------------------------------
 class DocumentTestFixture
 {
 public:
@@ -448,7 +461,7 @@ SUITE(DocumentTest)
     {
         //112. set and get @xml:id string
 
-        Document doc(m_libraryScope);
+        MyDocument4 doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0)"
             "(instrument (musicData (n c4 q))))))");
         //cout << doc.to_string(k_save_ids) << endl;
@@ -464,12 +477,12 @@ SUITE(DocumentTest)
     TEST_FIXTURE(DocumentTestFixture, dirty_bit_120)
     {
         //120. dirty bit can be cleared
-        Document doc(m_libraryScope);
+        MyDocument4 doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0)"
             "(instrument (musicData (n c4 q))))))");
         CHECK( doc.is_dirty() == true );
 
-        doc.clear_dirty();
+        doc.my_clear_dirty();
 
         CHECK( doc.is_dirty() == false );
     }
@@ -485,46 +498,6 @@ SUITE(DocumentTest)
 
         WpDocument wpDoc(spDoc);
         CHECK( wpDoc.expired() == false );
-    }
-
-
-    //@ checkpoints ---------------------------------------------------------------------
-
-//    TEST_FIXTURE(DocumentTestFixture, checkpoints_210)
-//    {
-//        //@210. get checkpoint data for score
-//        SpDocument spDoc( LOMSE_NEW Document(m_libraryScope) );
-//        spDoc->from_file(m_scores_path + "09007-score-in-exercise.lmd",
-//                         Document::k_format_lmd );
-//
-//        cout << "DocumentTest 210: " << spDoc->get_checkpoint_data_for(64L);     //score
-//    }
-
-    TEST_FIXTURE(DocumentTestFixture, checkpoints_211)
-    {
-        //@211. replace object from checkpoint data
-        create_document_1();
-        ImoObj* pImo = m_pDoc->get_pointer_to_imo(121L);
-        CHECK( pImo->is_clef() );
-        string data =
-            "<ldpmusic>"
-            "(score#180 (vers 2.0)(instrument#215L (musicData#222L (n#243 c4 q) )))"
-            "</ldpmusic>";
-
-        m_pDoc->replace_object_from_checkpoint_data(94L, data);
-
-        //"(lenmusdoc#0 (vers 0.0) (content "
-        //    "(score#94 (vers 2.0) "
-        //        "(instrument#120 (musicData#121 (clef#122 G)(key#123 C)"
-        //        "(time#124 2 4)(n#125 c4 q)(r#126 q) )))"
-        //    "(para#127 (txt#128 \"Hello world!\"))"
-        //"))"
-
-        //cout << m_pDoc->get_checkpoint_data();
-        pImo = m_pDoc->get_pointer_to_imo(121L);
-        CHECK( pImo == nullptr );
-        pImo = m_pDoc->get_pointer_to_imo(243L);
-        CHECK( pImo->is_note() );
     }
 
 };

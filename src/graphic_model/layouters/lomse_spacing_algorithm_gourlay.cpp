@@ -537,7 +537,7 @@ void SpAlgGourlay::determine_spacing_parameters()
         float q = float(pCol->num_quarter_noterests());
         float e = float(pCol->num_eighth_noterests());
         float s = float(pCol->num_16th_noterests());
-        int dmin = pCol->min_note_duration();
+        float dmin = pCol->min_note_duration();
         float total = float(h + q + e + s);
 
         //m_dmin should be selected based on notes in the score, not a fixed value.

@@ -1094,6 +1094,7 @@ SUITE(ChordEngraverTest)
         CHECK( pChord0->is_stem_up() == true );
         CHECK( pChord1->is_stem_direction_decided() == true );
         CHECK( pChord1->is_stem_up() == true );
+        delete pPresenter;
     }
 
     TEST_FIXTURE(ChordEngraverTestFixture, chord_engraver_460)

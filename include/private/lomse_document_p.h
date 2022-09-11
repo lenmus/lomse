@@ -622,7 +622,6 @@ public:
 
 
 
-
 //methods excluded from documented public API. Only for internal use.
 
     //support for IM API methods
@@ -644,14 +643,6 @@ public:
         return m_pModel->m_pImoDoc->add_multicolumn_wrapper(numCols, pStyle);
     }
 
-        //dirty
-
-    //TODO: public to be used by exercises (reconfigure buttons), To be changed to
-    //protected as soon as buttons changed to controls
-    inline void set_dirty() { m_pModel->set_dirty(); }
-
-    inline void clear_dirty() { m_pModel->clear_dirty(); }
-
         //events
     /** Mandatory override from Observable. Returns the EventNotifier associated to
         this Observable object. For %Document class the EventNotifier is itself, so
@@ -662,14 +653,10 @@ public:
     Observable* get_observable_child(int childType, ImoId childId) override;
 
     //undo/redo support based on re-running all commands
+    DocModel* create_model_copy();
+    void replace_model(DocModel* pNewModel);
     void create_backup_copy();
     void restore_from_backup_copy();
-
-    //undo/redo support based on checkpoints
-    int from_checkpoint(const std::string& data);
-    int replace_object_from_checkpoint_data(ImoId id, const std::string& data);
-    std::string get_checkpoint_data();
-    std::string get_checkpoint_data_for(ImoId id);
 
     //modified since last 'save to file' operation
     inline void clear_modified() { m_modified = 0; }
@@ -685,15 +672,20 @@ public:
     inline DocModel* debug_get_backup_copy() { return m_pModelCopy; }
     inline DocModel* get_doc_model() { return m_pModel; }
 
-    //inherited from LenMos 3.0. Not yet used
+    //inherited from LenMus 3.0. Not yet used
     void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
-
-
 
 protected:
     void initialize();
     Compiler* get_compiler_for_format(int format);
     void fix_malformed_musicxml();
+
+    //dirty flag: need to rebuild GModel
+    friend class CheckboxCtrl;
+    friend class ImoObj;
+    friend class Interactor;
+    inline void set_dirty() { if(m_pModel) m_pModel->set_dirty(); }
+    inline void clear_dirty() { if(m_pModel) m_pModel->clear_dirty(); }
 
     //There is a design bug: ImoControl constructor needs to access ImoDocument for
     //setting the language. But when the control is created (in LdpAnalyser or

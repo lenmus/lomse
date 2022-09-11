@@ -70,8 +70,6 @@ protected:
                  LibraryScope& libraryScope);
 
 public:
-    ~GmoShapeNote();
-
 
 	//overrides
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;

@@ -402,7 +402,7 @@ void PitchAssigner::reset_accidentals(ImoKeySignature* pKey, int idx)
                 if (is_equal_float(acc.alter, 0.0f) || is_equal_float(acc.alter, 1.0f)
                     || is_equal_float(acc.alter, -1.0f))
                 {
-                    m_context[idx][acc.step] = acc.alter;
+                    m_context[idx][acc.step] = int(acc.alter);
                 }
                 else
                     m_context[idx][acc.step] = 0;

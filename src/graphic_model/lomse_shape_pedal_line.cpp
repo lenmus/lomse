@@ -42,7 +42,7 @@ void GmoShapePedalLine::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yStar
     if (!m_components.empty())
         bbox.Union(get_bounds());
 
-    const int xDiff = bbox.x - get_left();
+    const LUnits xDiff = bbox.x - get_left();
     m_origin = bbox.get_top_left();
     m_size.width = bbox.get_width();
     m_size.height = bbox.get_height();
