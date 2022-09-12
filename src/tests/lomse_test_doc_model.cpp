@@ -259,8 +259,7 @@ SUITE(DocModelTest)
         ImoDocument* pImo = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, &doc, 27L));
         doc.my_set_imo_doc(pImo);
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -270,6 +269,8 @@ SUITE(DocModelTest)
         IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
         CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_02)
@@ -282,8 +283,7 @@ SUITE(DocModelTest)
                 ")))" );
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -293,6 +293,8 @@ SUITE(DocModelTest)
         IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
         CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_03)
@@ -305,8 +307,7 @@ SUITE(DocModelTest)
                 ")))" );
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -316,6 +317,8 @@ SUITE(DocModelTest)
         IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
         CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_04)
@@ -328,8 +331,7 @@ SUITE(DocModelTest)
                       Document::k_format_mxl);
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -339,6 +341,8 @@ SUITE(DocModelTest)
         IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
         CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_05)
@@ -350,8 +354,7 @@ SUITE(DocModelTest)
                       Document::k_format_ldp);
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -361,6 +364,8 @@ SUITE(DocModelTest)
         IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
         CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_06)
@@ -372,8 +377,7 @@ SUITE(DocModelTest)
                       Document::k_format_ldp);
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -385,6 +389,8 @@ SUITE(DocModelTest)
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
 //        dump_tree(pImoCopy);
 //        cout << pAssignerCopy->dump() << endl;
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_07)
@@ -396,8 +402,7 @@ SUITE(DocModelTest)
                       Document::k_format_mxl);
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -410,6 +415,8 @@ SUITE(DocModelTest)
 //        dump_tree(pImo);
 //        dump_tree(pImoCopy);
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_08)
@@ -421,8 +428,7 @@ SUITE(DocModelTest)
                       Document::k_format_mxl);
         ImoObj* pImo = doc.get_im_root();
 
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -447,6 +453,8 @@ SUITE(DocModelTest)
             "<sound dynamics=\"54\"/>"
             "</direction>";
         CHECK( check_result(source, expected) );
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_09)
@@ -459,8 +467,7 @@ SUITE(DocModelTest)
 
         DocModel* pModel = doc.get_doc_model();
         ImoObj* pImo = pModel->get_im_root();
-        doc.create_backup_copy();
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -477,6 +484,8 @@ SUITE(DocModelTest)
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << test_name() << endl << pTable->dump();
+
+        delete pModelCopy;
     }
 
     TEST_FIXTURE(DocModelTestFixture, clone_099)
@@ -487,14 +496,12 @@ SUITE(DocModelTest)
         doc.from_file(m_scores_path + "unit-tests/conversion/20-wedge.xml",
                       Document::k_format_mxl);
 
-        doc.create_backup_copy();
-        doc.restore_from_backup_copy();
+        doc.replace_model( doc.create_model_copy() );
 
         DocModel* pModel = doc.get_doc_model();
         ImoObj* pImo = pModel->get_im_root();
-        doc.create_backup_copy();
 
-        DocModel* pModelCopy = doc.debug_get_backup_copy();
+        DocModel* pModelCopy = doc.create_model_copy();
         ImoDocument* pImoCopy = pModelCopy->get_im_root();
 
         CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -507,6 +514,8 @@ SUITE(DocModelTest)
 //        dump_tree(pImo);
 //        dump_tree(pImoCopy);
         CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+
+        delete pModelCopy;
     }
 
 //    TEST_FIXTURE(DocModelTestFixture, clone_999)
@@ -539,12 +548,11 @@ SUITE(DocModelTest)
 //        ImoObj* pImo = doc.get_im_root();
 //
 //        t1 = high_resolution_clock::now();
-//        doc.create_backup_copy();
+//        DocModel* pModelCopy = doc.create_model_copy();
 //        t2 = high_resolution_clock::now();
 //        timeSpan = duration_cast<duration<double>>(t2 - t1);
 //        cout << "        Clone requires " << timeSpan.count() << " seconds." << endl << endl;;
 //
-//        DocModel* pModelCopy = doc.debug_get_backup_copy();
 //        ImoDocument* pImoCopy = pModelCopy->get_im_root();
 //
 //        CHECK( pImoCopy->get_doc_model() == pModelCopy );
@@ -553,6 +561,8 @@ SUITE(DocModelTest)
 //        IdAssigner* pAssignerCopy = pModelCopy->get_id_assigner();
 //        CHECK( check_equal_id_assigners(pAssigner, pAssignerCopy) );
 //        CHECK( check_tree_owner(pImoCopy, pModelCopy) );
+//
+//        delete pModelCopy;
 //    }
 
 }

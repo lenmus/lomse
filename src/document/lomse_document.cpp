@@ -310,22 +310,18 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_docScope(reporter)
     , m_modified(0)
     , m_pModel( LOMSE_NEW DocModel(this) )
-    , m_pModelCopy(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
 Document::~Document()
 {
-    //set pointers to nullptr to avoid callbacks (e.g. set_dirty()) while deleting them
+    //set ptr to nullptr to avoid callbacks (e.g. set_dirty()) while deleting the model
     DocModel* pModel = m_pModel;
-    DocModel* pModelCopy = m_pModelCopy;
     m_pModel = nullptr;
-    m_pModelCopy = nullptr;
 
-    //now it is safe to delete the models
+    //now it is safe to delete the model
     delete pModel;
-    delete pModelCopy;
 
     delete_observers();
 }
@@ -375,11 +371,6 @@ int Document::from_file(const string& filename, int format)
 
     if (m_pModel->m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
         fix_malformed_musicxml();
-
-
-//    //DEBUG: Force to use a cloned copy
-//    create_backup_copy();
-//    restore_from_backup_copy();
 
     return numErrors;
 }
@@ -483,13 +474,6 @@ string Document::to_string(bool fWithIds)
 }
 
 //---------------------------------------------------------------------------------------
-void Document::create_backup_copy()
-{
-    delete m_pModelCopy;
-    m_pModelCopy = LOMSE_NEW DocModel(*m_pModel);
-}
-
-//---------------------------------------------------------------------------------------
 DocModel* Document::create_model_copy()
 {
     return LOMSE_NEW DocModel(*m_pModel);
@@ -500,20 +484,6 @@ void Document::replace_model(DocModel* pNewModel)
 {
     delete m_pModel;
     m_pModel = pNewModel;
-
-    delete m_pModelCopy;
-    m_pModelCopy = nullptr;
-}
-
-//---------------------------------------------------------------------------------------
-void Document::restore_from_backup_copy()
-{
-    if (m_pModelCopy)
-    {
-        delete m_pModel;
-        m_pModel = m_pModelCopy;
-        m_pModelCopy = nullptr;
-    }
 }
 
 //---------------------------------------------------------------------------------------

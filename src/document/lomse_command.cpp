@@ -225,7 +225,6 @@ void DocCmdComposite::update_selection(SelectionSet* pSelection,
 DocCommandExecuter::DocCommandExecuter(Document* target)
     : m_pDoc(target)
 {
-    m_pModelStart = target->create_model_copy();
 }
 
 //---------------------------------------------------------------------------------------
@@ -238,6 +237,9 @@ DocCommandExecuter::~DocCommandExecuter()
 int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
                                 SelectionSet* pSelection)
 {
+    if (m_pModelStart == nullptr)
+        m_pModelStart = m_pDoc->create_model_copy();
+
     int result = k_success;
     if (!pCmd->is_target_set_in_constructor())
         result = pCmd->set_target(m_pDoc, pCursor, pSelection);
