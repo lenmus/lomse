@@ -507,8 +507,8 @@ void ChordEngraver::shift_acc_if_confict_with_shape(GmoShapeAccidentals* pCurAcc
     if (xOverlap > 0.0f)
     {
         LUnits space = tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS);
-        LUnits shift = pCurAcc->get_right() - pShape->get_left();
-        xOverlap = - (shift + space);
+        LUnits xShift = pCurAcc->get_right() - pShape->get_left();
+        xOverlap = - (xShift + space);
         if (xOverlap != 0.0f)
         {
             USize shift(xOverlap, 0.0f);

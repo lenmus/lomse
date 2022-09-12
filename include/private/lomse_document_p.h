@@ -198,9 +198,8 @@ protected:
     LibraryScope&   m_libraryScope;
     ostream&        m_reporter;
     DocumentScope   m_docScope;
-    int             m_modified;         //modified since last 'save to file' operation
-    DocModel*       m_pModel = nullptr;         //the document content
-    DocModel*       m_pModelCopy = nullptr;     //backup
+    int             m_modified = 0;         //modified since last 'save to file' operation
+    DocModel*       m_pModel = nullptr;     //the document content
 
 public:
     /// Constructor
@@ -655,8 +654,6 @@ public:
     //undo/redo support based on re-running all commands
     DocModel* create_model_copy();
     void replace_model(DocModel* pNewModel);
-    void create_backup_copy();
-    void restore_from_backup_copy();
 
     //modified since last 'save to file' operation
     inline void clear_modified() { m_modified = 0; }
@@ -669,7 +666,6 @@ public:
     size_t id_assigner_size() const;
     std::string dump_tree() const;
     std::string to_string(bool fWithIds = false);
-    inline DocModel* debug_get_backup_copy() { return m_pModelCopy; }
     inline DocModel* get_doc_model() { return m_pModel; }
 
     //inherited from LenMus 3.0. Not yet used
