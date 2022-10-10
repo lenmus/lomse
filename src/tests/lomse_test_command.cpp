@@ -1302,7 +1302,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( idNote2 == static_cast<ImoNote*>( *cursor )->get_id() );
@@ -1566,7 +1566,7 @@ SUITE(DocCommandTest)
 //        cout << doc.id_assigner_size() << endl;
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
@@ -1653,7 +1653,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_notated_accidentals() == 0 );
@@ -1734,7 +1734,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         ImoObj* pImo = doc.get_pointer_to_imo(id);
@@ -1806,7 +1806,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoObj* pImo = doc.get_pointer_to_imo(id);
@@ -1883,7 +1883,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);      //cursor is pointing to note2
 
         executer.undo(&cursor, &sel);     //cursor restored to note2
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         pNote2 = static_cast<ImoNote*>( doc.get_pointer_to_imo(idNote2) );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_dots() == 0 );
@@ -1974,7 +1974,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
         executer.undo(&cursor, &sel);
         CHECK( m_pDoc->get_im_root()->get_num_content_items() == 2 );
-        CHECK( m_pDoc->is_dirty() == false );
+        CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
 
@@ -2081,7 +2081,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2145,7 +2145,7 @@ SUITE(DocCommandTest)
         CHECK( pNote->is_tied_prev() == false );
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2231,7 +2231,7 @@ SUITE(DocCommandTest)
 //        cout << pTable->dump();
 
         executer.undo(&cursor, &sel);
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );      // f4
         pNote = static_cast<ImoNote*>( *cursor );
@@ -2525,7 +2525,7 @@ SUITE(DocCommandTest)
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == 126L );
-        CHECK( m_pDoc->is_dirty() == false );
+        CHECK( m_pDoc->is_dirty() == true );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2003)
@@ -3016,7 +3016,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
@@ -3029,7 +3029,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_block_2102)
@@ -3082,7 +3082,7 @@ SUITE(DocCommandTest)
         pImoDoc = doc.get_im_root();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 0 );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_block_2103)
@@ -3111,7 +3111,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
@@ -3124,7 +3124,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_im_root()->get_num_content_items() == 0 );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
     }
 
     // CmdInsertManyStaffObjs -----------------------------------------------------------
@@ -3187,7 +3187,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->time() == 0 );
 //        cout << pSC->dump_cursor() << endl;
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument P1 (staves 1)(musicData)))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
@@ -3342,7 +3342,7 @@ SUITE(DocCommandTest)
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         string expected = "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
             "(instrument P1 (staves 1)(musicData)))))";
         CHECK( doc.to_string() == expected );
@@ -3537,7 +3537,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
 
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
@@ -3789,7 +3789,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
@@ -3954,7 +3954,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
@@ -4227,7 +4227,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( m_pDoc->is_dirty() == false );
+        CHECK( m_pDoc->is_dirty() == true );
 
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -4313,7 +4313,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
 
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -4588,7 +4588,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4714,7 +4714,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4842,7 +4842,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -4968,7 +4968,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -5143,7 +5143,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -5197,7 +5197,7 @@ SUITE(DocCommandTest)
         CHECK( cursor.get_pointee_id() == idCur );
 
         //the score is transposed
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         DocCursor c(&doc);
         c.enter_element();     //points to clef
         c.move_next();         //points to key
@@ -5253,7 +5253,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        CHECK( doc.is_dirty() == false );
+        CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( *cursor == nullptr );
         pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );

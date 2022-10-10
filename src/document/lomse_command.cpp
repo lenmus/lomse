@@ -383,6 +383,7 @@ void DocCommandExecuter::undo(DocCursor* pCursor, SelectionSet* pSelection)
             pCursor->restore_state( pUE->cursorState );
             pSelection->restore_state( pUE->selState );
         }
+        m_pDoc->set_dirty();
     }
 }
 
@@ -436,6 +437,7 @@ void DocCommandExecuter::redo(DocCursor* pCursor, SelectionSet* pSelection)
 
         update_cursor(pCursor, cmd);
         update_selection(pSelection, cmd);
+        m_pDoc->set_dirty();
 
         //by design, all commands that modify the document are reversible
         if (cmd->is_reversible())

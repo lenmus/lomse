@@ -680,6 +680,7 @@ protected:
     friend class CheckboxCtrl;
     friend class ImoObj;
     friend class Interactor;
+    friend class DocCommandExecuter;
     inline void set_dirty() { if(m_pModel) m_pModel->set_dirty(); }
     inline void clear_dirty() { if(m_pModel) m_pModel->clear_dirty(); }
 
