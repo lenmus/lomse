@@ -2220,8 +2220,7 @@ void FreeFlowView::zoom_in(Pixels UNUSED(x), Pixels UNUSED(y))
     //increase scale
     m_transform *= agg::trans_affine_scaling(1.05);
 
-    //invalidate view width
-    m_viewportSize.width = 0;
+    m_fUpdateGModel = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2230,8 +2229,7 @@ void FreeFlowView::zoom_out(Pixels UNUSED(x), Pixels UNUSED(y))
     //decrease scale
     m_transform *= agg::trans_affine_scaling(1.0/1.05);
 
-    //invalidate view width
-    m_viewportSize.width = 0;
+    m_fUpdateGModel = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2259,8 +2257,7 @@ void FreeFlowView::set_scale(double scale, Pixels UNUSED(x), Pixels UNUSED(y))
     double factor = scale / m_transform.scale();
     m_transform *= agg::trans_affine_scaling(factor);
 
-    //invalidate view width
-    m_viewportSize.width = 0;
+    m_fUpdateGModel = true;
 }
 
 
