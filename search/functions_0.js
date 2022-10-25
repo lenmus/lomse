@@ -16,5 +16,6 @@ var searchData=
   ['add_5fsemitone',['add_semitone',['../classFPitch.html#ae3409e308ab5422baf9ec32892990921',1,'FPitch::add_semitone(EKeySignature nKey)'],['../classFPitch.html#a4f53f348868666cad91bef6fd48c9fdf',1,'FPitch::add_semitone(bool fUseSharps)']]],
   ['aobject',['AObject',['../classAObject.html#a1773aea3dc61de960e1ba2811ce38e92',1,'AObject']]],
   ['append_5fchild',['append_child',['../classADocument.html#ad2de460e2778142fa39a6e3a258c714c',1,'ADocument']]],
-  ['append_5fnew_5finstrument',['append_new_instrument',['../classAScore.html#aaac87595fab3fc92469729320a9bdbcf',1,'AScore']]]
+  ['append_5fnew_5finstrument',['append_new_instrument',['../classAScore.html#aaac87595fab3fc92469729320a9bdbcf',1,'AScore']]],
+  ['areainfo',['AreaInfo',['../classAreaInfo.html#a5d455ce5f64ed71cd940552b9126ba4d',1,'AreaInfo']]]
 ];

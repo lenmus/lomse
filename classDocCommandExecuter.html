@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.3</span>
+   &#160;<span id="projectnumber">0.30.0</span>
    </div>
   </td>
  </tr>
@@ -93,20 +93,34 @@ $(document).ready(function(){initNavTree('classDocCommandExecuter.html','');});
 
 <p><code>#include &lt;lomse_command.h&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Keeps the stack of executed commands and performs undo/redo. </p>
+<div class="textblock"><p>DocCommandExecuter class is responsible of maintaining the stack of executed commands and performing undo/redo. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ace74bb66b123eb229fa1f2e66f598a2c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#ace74bb66b123eb229fa1f2e66f598a2c">DocCommandExecuter</a> (Document *target)</td></tr>
 <tr class="separator:ace74bb66b123eb229fa1f2e66f598a2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae49629830293826c1678f2c921dab77a"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#ae49629830293826c1678f2c921dab77a">~DocCommandExecuter</a> ()</td></tr>
+<tr class="separator:ae49629830293826c1678f2c921dab77a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a020c6c0f585364f6852997e1d37b9f87"><td class="memItemLeft" align="right" valign="top"><a id="a020c6c0f585364f6852997e1d37b9f87"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DocCommandExecuter</b> (const ImoStyles &amp;)=delete</td></tr>
+<tr class="separator:a020c6c0f585364f6852997e1d37b9f87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79543955c9a618b6c38199e2a6fbc6e3"><td class="memItemLeft" align="right" valign="top"><a id="a79543955c9a618b6c38199e2a6fbc6e3"></a>
+<a class="el" href="classDocCommandExecuter.html">DocCommandExecuter</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const ImoStyles &amp;)=delete</td></tr>
+<tr class="separator:a79543955c9a618b6c38199e2a6fbc6e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18135eac01c6a6568b7be9d36d9000d7"><td class="memItemLeft" align="right" valign="top"><a id="a18135eac01c6a6568b7be9d36d9000d7"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DocCommandExecuter</b> (ImoStyles &amp;&amp;)=delete</td></tr>
+<tr class="separator:a18135eac01c6a6568b7be9d36d9000d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb9fdb064f18cd5b91791e7d6ffab393"><td class="memItemLeft" align="right" valign="top"><a id="aeb9fdb064f18cd5b91791e7d6ffab393"></a>
+<a class="el" href="classDocCommandExecuter.html">DocCommandExecuter</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (ImoStyles &amp;&amp;)=delete</td></tr>
+<tr class="separator:aeb9fdb064f18cd5b91791e7d6ffab393"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fb19b64759c038f349f88188527e5a1"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a0fb19b64759c038f349f88188527e5a1">execute</a> (DocCursor *pCursor, <a class="el" href="classDocCommand.html">DocCommand</a> *pCmd, SelectionSet *pSelection)</td></tr>
 <tr class="separator:a0fb19b64759c038f349f88188527e5a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2bfb6f697dc51f54fba3a12cdcfd7d58"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a2bfb6f697dc51f54fba3a12cdcfd7d58">undo</a> (DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
 <tr class="separator:a2bfb6f697dc51f54fba3a12cdcfd7d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7097c7794a72b27d9c8e026684c9f8d5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a7097c7794a72b27d9c8e026684c9f8d5">redo</a> (DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
 <tr class="separator:a7097c7794a72b27d9c8e026684c9f8d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3be9798a32af61136ae4eeab5583a580"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a3be9798a32af61136ae4eeab5583a580">get_error</a> ()</td></tr>
-<tr class="separator:a3be9798a32af61136ae4eeab5583a580"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ec61b9709d89bba5c3077b895ffee6d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a9ec61b9709d89bba5c3077b895ffee6d">get_error</a> ()</td></tr>
+<tr class="separator:a9ec61b9709d89bba5c3077b895ffee6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8a974ad847bba165e51471dff5cf552"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#ac8a974ad847bba165e51471dff5cf552">is_undo_possible</a> ()</td></tr>
 <tr class="separator:ac8a974ad847bba165e51471dff5cf552"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b0e2a24ffe21e2b4ec5440543d10127"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommandExecuter.html#a4b0e2a24ffe21e2b4ec5440543d10127">is_redo_possible</a> ()</td></tr>
@@ -138,6 +152,33 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
 </div><div class="memdoc">
 
 <p>Constructor. </p>
+
+</div>
+</div>
+<a id="ae49629830293826c1678f2c921dab77a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae49629830293826c1678f2c921dab77a">&#9670;&nbsp;</a></span>~DocCommandExecuter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual DocCommandExecuter::~DocCommandExecuter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>the five special </p>
 
 </div>
 </div>
@@ -181,12 +222,12 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Executes a command and saves the necessary information for undo/redo operation. Returns value 0 if the command successfully executed. Otherwise returns value 1 and a relevant error message can be retrieved by invoking method <a class="el" href="classDocCommandExecuter.html#a3be9798a32af61136ae4eeab5583a580" title="In case and execute() operation Returns an string with the error message. ">get_error()</a>. </p>
+<p>Executes a command and saves the necessary information for undo/redo operations. Returns value 0 if the command successfully executed. Otherwise returns value 1 and a relevant error message can be retrieved by invoking method <a class="el" href="classDocCommandExecuter.html#a9ec61b9709d89bba5c3077b895ffee6d">get_error()</a>. </p>
 
 </div>
 </div>
-<a id="a3be9798a32af61136ae4eeab5583a580"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3be9798a32af61136ae4eeab5583a580">&#9670;&nbsp;</a></span>get_error()</h2>
+<a id="a9ec61b9709d89bba5c3077b895ffee6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ec61b9709d89bba5c3077b895ffee6d">&#9670;&nbsp;</a></span>get_error()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -195,7 +236,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">string DocCommandExecuter::get_error </td>
+          <td class="memname">std::string DocCommandExecuter::get_error </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -207,8 +248,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p>In case and <a class="el" href="classDocCommandExecuter.html#a0fb19b64759c038f349f88188527e5a1">execute()</a> operation Returns an string with the error message. </p>
+<p>In case an comand failed, this method provides an string with the error message </p>
 
 </div>
 </div>
@@ -300,7 +340,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
 </table>
 </div><div class="memdoc">
 
-<p>Redo the command. </p>
+<p>Redo the last undo command. </p>
 
 </div>
 </div>
@@ -338,7 +378,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
 </table>
 </div><div class="memdoc">
 
-<p>Undo the command. </p>
+<p>Pop a command from the stack and undo it. </p>
 
 </div>
 </div>
@@ -375,7 +415,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b><
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocCommandExecuter.html">DocCommandExecuter</a></li>
-    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Oct 25 2022 19:12:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

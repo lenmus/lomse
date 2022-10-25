@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.3</span>
+   &#160;<span id="projectnumber">0.30.0</span>
    </div>
   </td>
  </tr>
@@ -95,7 +95,7 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 <p><code>#include &lt;lomse_import_options.h&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class <a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> stores and manages the settings for dealing and fixing malformed imported files. The only instance of this class is stored in the LibraryScope object. You can access it and modify its settings either from <a class="el" href="classLomseDoorway.html">LomseDoorway</a> object or from the LibraryScope object:</p>
-<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div><div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div></div><!-- fragment --><div class="fragment"><div class="line">LibraryScope&amp; lomse = ...</div><div class="line">MusicXmlOptions* opt = lomse.get_musicxml_options();</div></div><!-- fragment --><p>Example of use:</p>
+<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div><div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div></div><!-- fragment --><div class="fragment"><div class="line">LibraryScope&amp; lomse = ...</div><div class="line">MusicXmlOptions* opt = lomse.<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div></div><!-- fragment --><p>Example of use:</p>
 <div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div><div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div><div class="line">opt-&gt;<a class="code" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams</a>(<span class="keyword">true</span>);</div><div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a999ff150d71094b9798aee411742161a">open_document</a>(k_view_vertical_book,</div><div class="line">                                              <span class="stringliteral">&quot;my_score.xml&quot;</span>);</div><div class="line">...</div><div class="line">opt-&gt;fix_beams(<span class="keyword">false</span>);</div><div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a999ff150d71094b9798aee411742161a">open_document</a>(k_view_vertical_book,</div><div class="line">                                              <span class="stringliteral">&quot;other_score.xml&quot;</span>);</div></div><!-- fragment --><p>Settings description and default values for Lomse library are described in the following table:</p>
 <table class="doxtable">
 <tr>
@@ -237,7 +237,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LibraryScope</b></td
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a></li>
-    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Oct 25 2022 19:12:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

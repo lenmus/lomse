@@ -18,6 +18,7 @@ var searchData=
   ['emutetype',['EMuteType',['../group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e',1,'lomse_internal_model.h']]],
   ['eobservedchild',['EObservedChild',['../classObservable.html#aeba2229fd6aa952b9d2e67b22444682e',1,'Observable']]],
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
+  ['epointtype',['EPointType',['../group__enumerations.html#gaee8d8ac2e49737b55f9d1eff3fdce844',1,'lomse_graphical_model.h']]],
   ['erenderoptions',['ERenderOptions',['../group__enumerations.html#ga1903a90921a42ab8abc8857c21f08c15',1,'lomse_drawer.h']]],
   ['erequesttype',['ERequestType',['../group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc',1,'lomse_events.h']]],
   ['eselectionaction',['ESelectionAction',['../classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec',1,'CmdSelection']]],

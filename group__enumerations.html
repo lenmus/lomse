@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.3</span>
+   &#160;<span id="projectnumber">0.30.0</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,8 @@ Enumerations</h2></td></tr>
 <tr class="separator:ga0dc84b6205af6b43ac7867cd9779dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaad40cbca030c13d3d8e319ce26d462e1"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gaad40cbca030c13d3d8e319ce26d462e1">EFragmentMark</a> </td></tr>
 <tr class="separator:gaad40cbca030c13d3d8e319ce26d462e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaee8d8ac2e49737b55f9d1eff3fdce844"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gaee8d8ac2e49737b55f9d1eff3fdce844">EPointType</a> </td></tr>
+<tr class="separator:gaee8d8ac2e49737b55f9d1eff3fdce844"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga27f5a7e67fbf1c82ab6217e6fec0ecea"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea">EViewType</a> </td></tr>
 <tr class="separator:ga27f5a7e67fbf1c82ab6217e6fec0ecea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6d2f4212f1b35b75797fd57153826029"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029">EImoAttribute</a> </td></tr>
@@ -594,6 +596,42 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a id="gaee8d8ac2e49737b55f9d1eff3fdce844"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaee8d8ac2e49737b55f9d1eff3fdce844">&#9670;&nbsp;</a></span>EPointType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#gaee8d8ac2e49737b55f9d1eff3fdce844">EPointType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the flags for mouse events, indicating which regions of the score are valid for mouse interaction.</p>
+<p>#include &lt;lomse_graphical_model.h&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a11cf6c0dbc3d79e315f490c735e0a36d"></a>k_point_unknown&#160;</td><td class="fielddoc"><p>not yet determined </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a53d1d71d59088d347cae8785ee559374"></a>k_point_on_staff&#160;</td><td class="fielddoc"><p>pointing to an staff shape </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a5fedeaf486fe00dc660505c2d5df3a41"></a>k_point_above_staff&#160;</td><td class="fielddoc"><p>pointing to top margin of GmoBoxSliceInstr </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a315011adbd66ebc4358df984ee2bc03d"></a>k_point_below_staff&#160;</td><td class="fielddoc"><p>pointing to bottom margin of GmoBoxSliceInstr </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a8d7ab9211acd15cadc193478f19a4766"></a>k_point_on_other_shape&#160;</td><td class="fielddoc"><p>pointing to a shape other than staff </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a92fc2da8d00b9a00aa539b298e36f5f1"></a>k_point_on_other_box&#160;</td><td class="fielddoc"><p>pointing to a box, other cases </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844af4d0a31b3549e572f4e50bb49d872899"></a>k_point_on_other&#160;</td><td class="fielddoc"><p>pointing to other place (score paper) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844a4e787f1c76cf174252feaaa7469635ef"></a>k_point_on_note_or_rest&#160;</td><td class="fielddoc"><p>pointing to a note or a rest </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaee8d8ac2e49737b55f9d1eff3fdce844aad678317602671b5db29d2cf5e4be895"></a>k_point_on_any&#160;</td><td class="fielddoc"><p>any region is valid (all score is valid) </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a id="ga1903a90921a42ab8abc8857c21f08c15"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga1903a90921a42ab8abc8857c21f08c15">&#9670;&nbsp;</a></span>ERenderOptions</h2>
 
@@ -701,7 +739,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Oct 25 2022 19:12:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

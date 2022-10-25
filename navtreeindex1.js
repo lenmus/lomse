@@ -1,5 +1,20 @@
 var NAVTREEINDEX1 =
 {
+"page-render-overview.html#page-render-overview-wxwidgets":[0,1,8,1],
+"page-render-overview.html#page-render-overview-x11":[0,1,8,3],
+"page-render-overview.html#rendering-bitmap":[0,1,3],
+"page-render-overview.html#rendering-display":[0,1,5],
+"page-render-overview.html#rendering-svg":[0,1,2],
+"page-render-svg.html":[0,2],
+"page-render-svg.html#rendering-svg-attributes":[0,2,2],
+"page-render-svg.html#rendering-svg-formatting":[0,2,1],
+"page-render-svg.html#rendering-svg-many-shapes":[0,2,3],
+"page-render-svg.html#svg-rendering":[0,2,0],
+"page-sound-generation.html":[0,6],
+"page-sound-generation.html#page-sound-generation-events":[0,6,2],
+"page-sound-generation.html#page-sound-generation-external-player":[0,6,6],
+"page-sound-generation.html#page-sound-generation-overview":[0,6,0],
+"page-sound-generation.html#page-sound-generation-play-score":[0,6,3],
 "page-sound-generation.html#page-sound-generation-player-gui":[0,6,5],
 "page-sound-generation.html#page-sound-generation-summary":[0,6,1],
 "page-sound-generation.html#page-sound-generation-tracking":[0,6,4],
@@ -14,6 +29,9 @@ var NAVTREEINDEX1 =
 "page-tasks.html#task-selection-rectangle":[0,7,1,3],
 "page-tasks.html#tasks-overview":[0,7,1],
 "page-tutorials-license.html":[5],
+"page-user-drawers.html":[6],
+"page-user-drawers.html#page-user-drawers-overview":[6,0],
+"page-user-drawers.html#page-user-drawers-use":[6,1],
 "pages.html":[],
-"todo.html":[6]
+"todo.html":[7]
 };

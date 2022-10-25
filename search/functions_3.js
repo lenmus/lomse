@@ -8,7 +8,7 @@ var searchData=
   ['device_5fpoint_5fto_5fmodel',['device_point_to_model',['../classDrawer.html#a9434f7bb5dd43e27a99fe8e3d96cfa1d',1,'Drawer']]],
   ['device_5funits_5fto_5fmodel',['device_units_to_model',['../classDrawer.html#a04960eb3cb3f70addd65ad9f96c00aa6',1,'Drawer']]],
   ['diatonicpitch',['DiatonicPitch',['../classDiatonicPitch.html#a9772777ca30014eb1071805a7288fd09',1,'DiatonicPitch::DiatonicPitch(int value)'],['../classDiatonicPitch.html#af8b966fcc878c1e99fac249039c9f9df',1,'DiatonicPitch::DiatonicPitch(int step, int octave)'],['../classDiatonicPitch.html#aed65086b03227b66a43321fd99fd15b0',1,'DiatonicPitch::DiatonicPitch()']]],
-  ['doccmdcomposite',['DocCmdComposite',['../classDocCmdComposite.html#a1fdd3d58f52985e89499e6c9ec89afdc',1,'DocCmdComposite']]],
+  ['doccmdcomposite',['DocCmdComposite',['../classDocCmdComposite.html#a5c4d925fcf64a101e6d345e0a3eda45f',1,'DocCmdComposite']]],
   ['doccommandexecuter',['DocCommandExecuter',['../classDocCommandExecuter.html#ace74bb66b123eb229fa1f2e66f598a2c',1,'DocCommandExecuter']]],
   ['downcast_5fto_5fdynamic',['downcast_to_dynamic',['../classAObject.html#ae02e1f015cbe845fc3b98c927c8d6850',1,'AObject']]],
   ['downcast_5fto_5finstr_5fgroup',['downcast_to_instr_group',['../classAObject.html#ab5b7c1b86f8f935bf5d8bc4fb66cb930',1,'AObject']]],

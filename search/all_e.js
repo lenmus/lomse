@@ -17,7 +17,9 @@ var searchData=
   ['page_5ftop_5fmargin_5fodd',['page_top_margin_odd',['../classADocument.html#a382f9c46b05770d7afb78e2310f4c01a',1,'ADocument']]],
   ['page_5fwidth',['page_width',['../classADocument.html#a3c9c16964ec416ee0ab720337a6b80be',1,'ADocument']]],
   ['pan',['pan',['../classAMidiInfo.html#aee954195e2a3902fc71b8e842bcc4a5e',1,'AMidiInfo']]],
+  ['pbsi',['pBSI',['../classAreaInfo.html#a2faf3ad7c2e6429c35a8f8c00a04af88',1,'AreaInfo']]],
   ['pcmd',['pCmd',['../classUndoElement.html#a0d14ca3d9880e381be70626e87f7871b',1,'UndoElement']]],
+  ['pgmo',['pGmo',['../classAreaInfo.html#a3b77687b3e7ff392d6423ecc4c1a1e8f',1,'AreaInfo']]],
   ['playbackhighlight',['PlaybackHighlight',['../classPlaybackHighlight.html',1,'']]],
   ['polygon',['polygon',['../classDrawer.html#a8ff8f96c3d76751fd140d374ac48413b',1,'Drawer']]],
   ['port',['port',['../classAMidiInfo.html#a1f39e1fa88e061ddd4dc15a3be1a0450',1,'AMidiInfo']]],
@@ -25,5 +27,6 @@ var searchData=
   ['print_5fpage',['print_page',['../classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d',1,'Interactor']]],
   ['program',['program',['../classAMidiInfo.html#a62ba47043223363e75f306bcb11347ac',1,'AMidiInfo']]],
   ['program_5fname',['program_name',['../classAMidiInfo.html#a4fbbf9d24d656165149ff6dbf45e74e5',1,'AMidiInfo']]],
+  ['pshapestaff',['pShapeStaff',['../classAreaInfo.html#ae70806dadedb8f2286368887a54f37c9',1,'AreaInfo']]],
   ['public_20typedefs',['Public typedefs',['../group__typedefs.html',1,'']]]
 ];

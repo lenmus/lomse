@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.29.3</span>
+   &#160;<span id="projectnumber">0.30.0</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ $(document).ready(function(){initNavTree('page-tasks.html','');});
 </div>
 <div class="textblock"><h1><a class="anchor" id="gui-interaction"></a>
 Interactors and Tasks</h1>
-<p>The <a class="el" href="classInteractor.html">Interactor</a> is the key object to interact with the document (here the name 'Interactor') and, currently, a lot of functionality is programmed for doing the most common tasks for renderization, edition and scores playback. But managing user interaction with your application GUI is something totally dependent on GUI design, platform API and framework used for building your application. As Lomse knows nothing about your application and about the operating sytem used, Lomse cannot directly handle mouse and keyboard events and manage user interaction with your application GUI. But can help to reduce the necessary coding in your application.</p>
+<p>The <a class="el" href="classInteractor.html">Interactor</a> is the key object to interact with the document (here the name 'Interactor') and, currently, a lot of functionality is programmed for doing the most common tasks for rendition, edition and scores playback. But managing user interaction with your application GUI is something totally dependent on GUI design, platform API and framework used for building your application. As Lomse knows nothing about your application and about the operating sytem used, Lomse cannot directly handle mouse and keyboard events and manage user interaction with your application GUI. But can help to reduce the necessary coding in your application.</p>
 <p>There are certain interaction patterns that are often used in applications. For instance: selecting objects by clicking with the mouse and dragging a <em>selection rectangle</em> on the rendered document; or changing the viewed part of the document by clicking with the mouse and dragging the document. And Lomse provides some support methods for helping your application to manage all these typical interaction patterns and reduce the necessary code in your application.</p>
 <p>In Lomse, user interaction patterns are encoded by objects derived from Task base class. Lomse offers some predefined Tasks, such as TaskDragView (for dragging the View with the mouse) or TaskSelection (for selecting objects with the mouse). By using these predefined Task objects your application can be relieved of coding the supported interaction patterns.</p>
 <p>All Task derivatives are finite state machines. The events that drive the finite state machine are mouse and keyboard events that are delegated by the Interactor to the Task. Indeed, the Task class consists of little more than a set of pure virtual functions dealing with these events.</p>
@@ -279,7 +279,7 @@ TaskDataEntry class</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sun Aug 7 2022 17:33:20 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Oct 25 2022 19:12:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

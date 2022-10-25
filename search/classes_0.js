@@ -10,6 +10,7 @@ var searchData=
   ['aobject',['AObject',['../classAObject.html',1,'']]],
   ['aparagraph',['AParagraph',['../classAParagraph.html',1,'']]],
   ['applicationmark',['ApplicationMark',['../classApplicationMark.html',1,'']]],
+  ['areainfo',['AreaInfo',['../classAreaInfo.html',1,'']]],
   ['ascore',['AScore',['../classAScore.html',1,'']]],
   ['asoundinfo',['ASoundInfo',['../classASoundInfo.html',1,'']]],
   ['atextitem',['ATextItem',['../classATextItem.html',1,'']]]

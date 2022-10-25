@@ -26,7 +26,10 @@ var searchData=
   ['append_5fchild',['append_child',['../classADocument.html#ad2de460e2778142fa39a6e3a258c714c',1,'ADocument']]],
   ['append_5fnew_5finstrument',['append_new_instrument',['../classAScore.html#aaac87595fab3fc92469729320a9bdbcf',1,'AScore']]],
   ['applicationmark',['ApplicationMark',['../classApplicationMark.html',1,'']]],
+  ['areainfo',['AreaInfo',['../classAreaInfo.html',1,'AreaInfo'],['../classAreaInfo.html#a5d455ce5f64ed71cd940552b9126ba4d',1,'AreaInfo::AreaInfo()']]],
+  ['areatype',['areaType',['../classAreaInfo.html#ae633982d5a1f69a2c2e8dee887608a6a',1,'AreaInfo']]],
   ['ascore',['AScore',['../classAScore.html',1,'']]],
   ['asoundinfo',['ASoundInfo',['../classASoundInfo.html',1,'']]],
-  ['atextitem',['ATextItem',['../classATextItem.html',1,'']]]
+  ['atextitem',['ATextItem',['../classATextItem.html',1,'']]],
+  ['application_20specific_20_25drawer_20objects',['Application specific %Drawer objects',['../page-user-drawers.html',1,'']]]
 ];

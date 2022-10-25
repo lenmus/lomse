@@ -150,6 +150,17 @@ var group__enumerations =
       [ "k_pix_format_abgr64", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a08b3cabdd9014b26263f9f30db00cf89", null ],
       [ "k_pix_format_bgra64", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a5c306355c43b341159ebe34ff0b7c85f", null ]
     ] ],
+    [ "EPointType", "group__enumerations.html#gaee8d8ac2e49737b55f9d1eff3fdce844", [
+      [ "k_point_unknown", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a11cf6c0dbc3d79e315f490c735e0a36d", null ],
+      [ "k_point_on_staff", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a53d1d71d59088d347cae8785ee559374", null ],
+      [ "k_point_above_staff", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a5fedeaf486fe00dc660505c2d5df3a41", null ],
+      [ "k_point_below_staff", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a315011adbd66ebc4358df984ee2bc03d", null ],
+      [ "k_point_on_other_shape", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a8d7ab9211acd15cadc193478f19a4766", null ],
+      [ "k_point_on_other_box", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a92fc2da8d00b9a00aa539b298e36f5f1", null ],
+      [ "k_point_on_other", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844af4d0a31b3549e572f4e50bb49d872899", null ],
+      [ "k_point_on_note_or_rest", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844a4e787f1c76cf174252feaaa7469635ef", null ],
+      [ "k_point_on_any", "group__enumerations.html#ggaee8d8ac2e49737b55f9d1eff3fdce844aad678317602671b5db29d2cf5e4be895", null ]
+    ] ],
     [ "ERenderOptions", "group__enumerations.html#ga1903a90921a42ab8abc8857c21f08c15", [
       [ "k_option_draw_box_doc_page_content", "group__enumerations.html#gga1903a90921a42ab8abc8857c21f08c15a3968001100da165219d71555d2e50697", null ],
       [ "k_option_draw_box_container", "group__enumerations.html#gga1903a90921a42ab8abc8857c21f08c15a39ff1f3c32fd1d243ac890ba067d49c0", null ],
