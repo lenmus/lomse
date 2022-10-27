@@ -24,7 +24,7 @@ class GmoBoxSystem;
 
 //---------------------------------------------------------------------------------------
 /** %GmMeasuresTable object is responsible for storing and managing a table with
-    the measures graphical information.
+    the graphical information about the measures in the score.
 */
 class GmMeasuresTable
 {

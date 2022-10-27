@@ -32,6 +32,7 @@ If you are new to Lomse, @b please read the @subpage page-introduction and then 
 - @subpage page-sound-generation
 - @subpage page-tasks
 - @subpage page-api-internal-model
+- @subpage page-graphical-model
 
 
 ## Other topics

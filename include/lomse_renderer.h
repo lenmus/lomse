@@ -378,10 +378,10 @@ protected:
                 //TODO apply 'opacity' received param to gradient colors
                 //------------------------------------
                 //define a linear interpolator, to interpolate colors
-                TransAffine mtx = attr.fill_gradient->transform;
-                mtx *= m_transform;
-                mtx.invert();
-                agg::span_interpolator_linear<> interpolator(mtx);
+                TransAffine mtx1 = attr.fill_gradient->transform;
+                mtx1 *= m_transform;
+                mtx1.invert();
+                agg::span_interpolator_linear<> interpolator(mtx1);
 
                 //define the gradien function, linear in this case
                 agg::gradient_x     gradientFunction;
