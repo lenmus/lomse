@@ -1129,8 +1129,8 @@ SUITE(GraphicModelTest)
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
-        spDoc->from_file(m_scores_path + "unit-tests/other/03-BeetAnGeSample.mxl",
-                         Document::k_format_mxl_compressed);
+        spDoc->from_file(m_scores_path + "unit-tests/other/03-BeetAnGeSample.xml",
+                         Document::k_format_mxl);
         VerticalBookView* pView = static_cast<VerticalBookView*>(
         Injector::inject_View(libraryScope, k_view_vertical_book) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
