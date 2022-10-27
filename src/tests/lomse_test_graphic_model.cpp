@@ -1121,6 +1121,39 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
+    TEST_FIXTURE(GraphicModelTestFixture, gm_api_001)
+    {
+        //@001. Get num. systems and system box
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_file(m_scores_path + "unit-tests/other/03-BeetAnGeSample.mxl",
+                         Document::k_format_mxl_compressed);
+        VerticalBookView* pView = static_cast<VerticalBookView*>(
+        Injector::inject_View(libraryScope, k_view_vertical_book) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+
+        CHECK( pGModel->get_num_systems(scoreId) == 4 );
+
+        GmoBoxSystem* pBSys = pGModel->get_system_box(0, scoreId);
+        CHECK( pBSys != nullptr );
+        pBSys = pGModel->get_system_box(3, scoreId);
+        CHECK( pBSys != nullptr );
+        pBSys = pGModel->get_system_box(4, scoreId);
+        CHECK( pBSys == nullptr );
+
+        cout << "num.systems =" << pGModel->get_num_systems(scoreId) << endl;
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=160.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(192.0) << endl;
+
+        delete pIntor;
+    }
+
 };
 
 

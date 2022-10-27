@@ -19,7 +19,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Lomse library. API documentation"
-PROJECT_NUMBER         = 0.29.3
+PROJECT_NUMBER         = 0.30.0
 PROJECT_BRIEF          =
 PROJECT_LOGO           = ./images/logo_100x195.png
 OUTPUT_DIRECTORY       = ../../zz_build-api
@@ -642,6 +642,7 @@ INPUT     = mainpages \
 			../../include/lomse_drawer.h \
 			../../include/lomse_events.h \
 			../../include/lomse_fragment_mark.h \
+			../../include/lomse_graphical_model.h \
 			../../include/lomse_graphic_view.h \
 			../../include/lomse_half_page_view.h \
 			../../include/lomse_im_attributes.h \

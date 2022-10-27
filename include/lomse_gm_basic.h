@@ -19,8 +19,10 @@
 #include <ostream>
 #include <map>
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class GmoObj;
@@ -47,6 +49,10 @@ class Control;
 class ScoreStub;
 class GraphicModel;
 class GmMeasuresTable;
+
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
 
 //---------------------------------------------------------------------------------------
 /** %ScoreStub is a helper class containing information related to graphical model for
@@ -85,11 +91,13 @@ public:
     inline GmMeasuresTable* get_measures_table() { return m_measures; }
 
 };
-
+///@endcond
 
 
 //---------------------------------------------------------------------------------------
-//Abstract class from which all graphic objects must derive
+/** Abstract class from which all graphical objects derive. All graphical objects
+    have a bounding box and a position, and know how to draw themselves.
+*/
 class GmoObj
 {
 protected:
@@ -100,8 +108,74 @@ protected:
     ImoObj* m_pCreatorImo;
     GmoBox* m_pParentBox;
 
+    GmoObj(int objtype, ImoObj* pCreatorImo);
+
 public:
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
     virtual ~GmoObj();
+
+    ///@endcond
+
+
+    //size and position
+    /// @name Size and position
+    //@{
+
+    /** Returns the width of the bounding box, in logical units. */
+    inline LUnits get_width() { return m_size.width; }
+
+    /** Returns the height of the bounding box, in logical units. */
+    inline LUnits get_height() { return m_size.height; }
+
+    /** Returns the x coordinate for the left border of the bounding box. The returned
+        value is in logical units, relative to top left corner of GmoDocPage containing
+        this object.
+    */
+    LUnits get_left() const { return m_origin.x; }
+
+    /** Returns the y coordinate for the top border of the bounding box. The returned
+        value is in logical units, relative to top left corner of GmoDocPage containing
+        this object.
+    */
+    LUnits get_top() const { return m_origin.y; }
+
+    /** Returns the x coordinate for the right border of the bounding box. The returned
+        value is in logical units, relative to top left corner of GmoDocPage containing
+        this object.
+    */
+    LUnits get_right() const { return m_origin.x + m_size.width; }
+
+    /** Returns the y coordinate for the bottom border of the bounding box. The returned
+        value is in logical units, relative to top left corner of GmoDocPage containing
+        this object.
+    */
+    LUnits get_bottom() const { return m_origin.y + m_size.height; }
+
+    /** Returns @true if the point is inside this object bounding box rectangle.
+        @param p The point to be tested, in logical units.
+    */
+    bool bounds_contains_point(UPoint& p);
+
+    /** Returns the bounding box rectangle, in logical units. Origin (top left corner)
+        is relative to top left corner of GmoDocPage containing this object.
+    */
+    URect get_bounds();
+
+    /** Returns the top left corner of the bounding box rectangle. The point is in
+        logical units relative to top left corner of GmoDocPage containing this object.
+    */
+    inline UPoint get_origin() { return m_origin; }
+
+    /** Returns the width and heigh of the bounding box rectangle (in logical units).
+    */
+    inline USize get_size() { return m_size; }
+
+    //@}    //size and position
+
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
 
     //flag values
     enum {
@@ -254,28 +328,16 @@ public:
     inline bool is_shape_word() { return m_objtype == k_shape_word; }
 
     //size
-    inline LUnits get_width() { return m_size.width; }
-    inline LUnits get_height() { return m_size.height; }
     inline void set_width(LUnits width) { m_size.width = width; }
     inline void set_height(LUnits height) { m_size.height = height; }
 
     //position
-    LUnits get_left() const { return m_origin.x; }
-    LUnits get_top() const { return m_origin.y; }
-    LUnits get_right() const { return m_origin.x + m_size.width; }
-    LUnits get_bottom() const { return m_origin.y + m_size.height; }
     void set_origin(UPoint& pos);
     void set_origin(const UPoint& pos);
     void set_origin(LUnits xLeft, LUnits yTop);
     void set_left(LUnits xLeft);
     void set_top(LUnits yTop);
     virtual void shift_origin(const USize& shift);
-
-    //bounds
-    bool bounds_contains_point(UPoint& p);
-    URect get_bounds();
-    inline UPoint get_origin() { return m_origin; }
-    inline USize get_size() { return m_size; }
 
     //creator
     inline bool was_created_by(ImoObj* pImo) { return m_pCreatorImo == pImo; }
@@ -302,8 +364,9 @@ public:
     static const std::string& get_name(int objtype);
     inline const std::string& get_name() { return get_name(m_objtype); }
 
+    ///@endcond
+
 protected:
-    GmoObj(int objtype, ImoObj* pCreatorImo);
     void propagate_dirty();
 
 };
@@ -319,6 +382,9 @@ protected:
 
 public:
     ~GmoShape() override;
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
 
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
@@ -378,6 +444,8 @@ public:
     virtual void set_color(Color color) { m_color = color; }
     virtual Color get_normal_color() { return m_color; }
 
+    ///@endcond
+
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
     virtual Color determine_color_to_use(RenderOptions& opt);
@@ -400,8 +468,19 @@ protected:
     LUnits m_uLeftMargin;
     LUnits m_uRightMargin;
 
-public:
+    GmoBox(int objtype, ImoObj* pCreatorImo);
     ~GmoBox() override;
+
+public:
+
+    //margins
+    inline LUnits get_top_margin() { return m_uTopMargin; }
+    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
+    inline LUnits get_left_margin() { return m_uLeftMargin; }
+    inline LUnits get_right_margin() { return m_uRightMargin; }
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
 
     //child boxes
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
@@ -428,10 +507,6 @@ public:
     void add_shapes_to_tables();
 
     //margins
-    inline LUnits get_top_margin() { return m_uTopMargin; }
-    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
-    inline LUnits get_left_margin() { return m_uLeftMargin; }
-    inline LUnits get_right_margin() { return m_uRightMargin; }
     inline void set_top_margin(LUnits space) { m_uTopMargin = space; }
     inline void set_bottom_margin(LUnits space) { m_uBottomMargin = space; }
     inline void set_left_margin(LUnits space) { m_uLeftMargin = space; }
@@ -466,8 +541,9 @@ public:
     void dump_boxes_shapes(ostream& outStream, int level);
     void dump_shapes(ostream& outStream, int level);
 
+    ///@endcond
+
 protected:
-    GmoBox(int objtype, ImoObj* pCreatorImo);
     void delete_boxes();
     void delete_shapes();
     void draw_border(Drawer* pDrawer, RenderOptions& opt);
@@ -490,6 +566,10 @@ public:
     explicit StaffObjShapeCursor(GmoBox* pBox);
     explicit StaffObjShapeCursor(GmoShape* pShape);
 
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
+
+
     GmoShape* get_shape() const { return (*m_it); }
     TimeUnits get_time() const;
 
@@ -500,6 +580,8 @@ public:
     bool prev();
     bool prev(TimeUnits minTime);
     bool prevBefore(TimeUnits time);
+
+    ///@endcond
 
 protected:
     GmoBox* m_pCurrentBox;
@@ -517,6 +599,10 @@ public:
     GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo);
     ~GmoBoxDocument() override {}
 
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
+
+
     //doc pages
     GmoBoxDocPage* add_new_page();
     GmoBoxDocPage* get_page(int i);     //i = 0..n-1
@@ -526,6 +612,8 @@ public:
 
     //overrides
     GraphicModel* get_graphic_model() override { return m_pGModel; }
+
+    ///@endcond
 
 };
 
@@ -539,6 +627,10 @@ protected:
 public:
     GmoBoxDocPage(ImoObj* pCreatorImo);
     ~GmoBoxDocPage() override {}
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
+
 
     //page number
     inline void set_number(int num) { m_numPage = num; }
@@ -560,6 +652,8 @@ public:
     //selection
     void select_objects_in_rectangle(SelectionSet* selection, const URect& selRect,
                                      unsigned flags=0);
+
+    ///@endcond
 
 protected:
     void draw_page_background(Drawer* pDrawer, RenderOptions& opt);
@@ -589,6 +683,10 @@ public:
     GmoBoxScorePage(ImoScore* pScore);
     virtual ~GmoBoxScorePage();
 
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
+
     inline void set_page_number(int iPage) { m_iPage = iPage; }
 
 	//systems
@@ -608,6 +706,8 @@ public:
 
     //hit tests related
     int nearest_system_to_point(LUnits y);
+
+    ///@endcond
 };
 
 //---------------------------------------------------------------------------------------
@@ -659,6 +759,10 @@ public:
 
     ~GmoBoxControl() override {}
 
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
+
+
     inline void set_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
     void notify_event(SpEventInfo pEvent);
 
@@ -667,6 +771,8 @@ public:
 
     //accessors
     inline Control* get_creator_control() { return m_pControl; }
+
+    ///@endcond
 
 protected:
     //overrides

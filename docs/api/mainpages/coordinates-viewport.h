@@ -25,7 +25,7 @@ Interactor::zoom_fit_width().
 
 @section viewport-concept Scrolling: the Viewport
 
-In Lomse, the GraphicModel represents what in computer graphics theory is named the <i>real world</i>, a virtual renderization of the full document at real size (e.g. millimeters). It is a virtual image of the full document organized as expected by the chosen View type. For instance, when you choose a View of type <i>VerticalBook View</i> the graphic model will be a model for this renderization:
+In Lomse, the GraphicModel represents what in computer graphics theory is named the <i>real world</i>, a virtual rendition of the full document at real size (e.g. millimeters). It is a virtual image of the full document organized as expected by the chosen View type. For instance, when you choose a View of type <i>VerticalBook View</i> the graphic model will be a model for this rendition:
 
 @image html world-model.png "Image: The 'real world' when using a 'VerticalBook' View"
 

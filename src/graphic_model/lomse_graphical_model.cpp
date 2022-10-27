@@ -347,10 +347,38 @@ GmoBoxSystem* GraphicModel::get_system_for_staffobj(ImoId id)
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem* GraphicModel::get_system_box(int UNUSED(iSystem))
+GmoBoxSystem* GraphicModel::get_system_box(int iSystem, ImoId scoreId)
 {
-    //TODO
+    ScoreStub* pStub = get_stub_for(scoreId);
+    if (pStub == nullptr)
+        return nullptr;
+
+    std::vector<GmoBoxScorePage*>& pages = pStub->get_pages();
+    for (auto page : pages)
+    {
+        if (iSystem >= page->get_num_first_system()
+            && iSystem <= page->get_num_last_system())
+        {
+            return page->get_system(iSystem);
+        }
+    }
     return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+int GraphicModel::get_num_systems(ImoId scoreId)
+{
+    ScoreStub* pStub = get_stub_for(scoreId);
+    if (pStub == nullptr)
+        return 0;
+
+    std::vector<GmoBoxScorePage*>& pages = pStub->get_pages();
+    int numSystems = 0;
+    for (auto page : pages)
+    {
+        numSystems += page->get_num_systems();
+    }
+    return numSystems;
 }
 
 //---------------------------------------------------------------------------------------
@@ -509,7 +537,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
 //=======================================================================================
 GmoBoxSystem* GModelAlgorithms::get_box_system_for(GmoObj* pGmo, LUnits y)
 {
-    //mouse point is over inner box pGmo. Find box system
+    //mouse point is over box pGmo. Find box system
 
     if (pGmo)
     {
