@@ -1,10 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"page-render-overview.html#page-render-overview-wxwidgets":[0,1,8,1],
-"page-render-overview.html#page-render-overview-x11":[0,1,8,3],
-"page-render-overview.html#rendering-bitmap":[0,1,3],
-"page-render-overview.html#rendering-display":[0,1,5],
-"page-render-overview.html#rendering-svg":[0,1,2],
 "page-render-svg.html":[0,2],
 "page-render-svg.html#rendering-svg-attributes":[0,2,2],
 "page-render-svg.html#rendering-svg-formatting":[0,2,1],

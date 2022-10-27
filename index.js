@@ -77,12 +77,6 @@ var index =
       ] ],
       [ "The structure of a music score", "page-api-internal-model.html#api-internal-model-scores", null ]
     ] ],
-    [ "The Graphical Model", "page-graphical-model.html", [
-      [ "Structure of the Graphical Model", "page-graphical-model.html#graphical-model-intro", null ],
-      [ "Traversing the Graphical Model", "page-graphical-model.html#graphical-model-traversing", null ],
-      [ "Drawing bounding boxes", "page-graphical-model.html#graphical-model-boxes", null ],
-      [ "Scrolling the View", "page-graphical-model.html#graphical-model-scroll", null ]
-    ] ],
     [ "File formats supported by Lomse", "page-file-formats.html", [
       [ "Supported file formats", "page-file-formats.html#page-file-formats-overview", [
         [ "MusicXML format", "page-file-formats.html#mxl-format", null ],

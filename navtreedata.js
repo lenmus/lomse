@@ -23,7 +23,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "classes.html",
-"page-render-overview.html#page-render-overview-wxwidgets"
+"page-render-svg.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
