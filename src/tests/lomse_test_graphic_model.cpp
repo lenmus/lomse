@@ -1146,11 +1146,6 @@ SUITE(GraphicModelTest)
         pBSys = pGModel->get_system_box(4, scoreId);
         CHECK( pBSys == nullptr );
 
-        cout << "num.systems =" << pGModel->get_num_systems(scoreId) << endl;
-//        cout << test_name() << endl;
-//        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(192.0) << endl;
-
         delete pIntor;
     }
 
