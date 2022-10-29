@@ -1149,6 +1149,31 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
+    TEST_FIXTURE(GraphicModelTestFixture, gm_api_002)
+    {
+        //@002. System: get num. measures and measure number
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_file(m_scores_path + "unit-tests/other/04-multimetric.lms",
+                         Document::k_format_ldp);
+        VerticalBookView* pView = static_cast<VerticalBookView*>(
+        Injector::inject_View(libraryScope, k_view_vertical_book) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+
+        GmoBoxSystem* pBSys = pGModel->get_system_box(1, scoreId);
+        CHECK( pBSys->get_first_measure(0) == 4 );
+        CHECK( pBSys->get_first_measure(1) == 6 );
+        CHECK( pBSys->get_num_measures(0) == 4 );
+        CHECK( pBSys->get_num_measures(1) == 6 );
+
+        delete pIntor;
+    }
+
 };
 
 

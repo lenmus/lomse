@@ -15,8 +15,10 @@
 #include <list>
 using namespace std;
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 ////---------------------------------------------------------------------------------------
 ////level of shape
@@ -38,25 +40,50 @@ namespace lomse
 // enums for common values: aligment, justification, placement, etc.
 
 //line styles
+/** @ingroup enumerations
+
+	This enum describes the different supported styles for lines.
+
+	@#include <lomse_shape_base.h>
+*/
 enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
                   k_line_short_dash, k_line_dot, k_line_dot_dash, };
 
 //line termination styles
+/** @ingroup enumerations
+
+	This enum describes the different terminal symbols for lines.
+
+	@#include <lomse_shape_base.h>
+*/
 enum ELineCap { k_cap_none = 0, k_cap_arrowhead, k_cap_arrowtail,
                 k_cap_circle, k_cap_square, k_cap_diamond, };
 
 //line edges
+/** @ingroup enumerations
+
+	This enum describes the different possibilities for ending a line stroke.
+
+	@#include <lomse_shape_base.h>
+*/
 enum ELineEdge
 {
-    k_edge_normal = 0,        // edge is perpendicular to line
-    k_edge_vertical,          // edge is always a vertical line
-    k_edge_horizontal         // edge is always a horizontal line
+    k_edge_normal = 0,        ///< Edge is perpendicular to line
+    k_edge_vertical,          ///< Edge is always a vertical line
+    k_edge_horizontal         ///< Edge is always a horizontal line
 };
 
 
 //---------------------------------------------------------------------------------------
 //EVAlign is used to indicate vertical alignment within a block: to the top,
 //middle or bottom
+/** @ingroup enumerations
+
+	This enum describes the different possibilities for vertical alignment of an object
+	within a block.
+
+	@#include <lomse_shape_base.h>
+*/
 enum EVAlign
 {
     k_valign_default = 0,   //alignment is not specified
@@ -67,16 +94,23 @@ enum EVAlign
 
 //---------------------------------------------------------------------------------------
 // EHAlign is used to indicate object justification
+/** @ingroup enumerations
+
+	This enum describes the different object justification possibilities.
+
+	@#include <lomse_shape_base.h>
+*/
 enum EHAlign
 {
-    k_halign_default = 0,   //alignment is not specified
-    k_halign_left,          //object aligned on left side
-    k_halign_right,         //object aligned on right side
-    k_halign_justify,       //object justified on both sides
-    k_halign_center,        //object centered
+    k_halign_default = 0,   ///< Alignment is not specified
+    k_halign_left,          ///> Object aligned on left side
+    k_halign_right,         ///> Object aligned on right side
+    k_halign_justify,       ///> Object justified on both sides
+    k_halign_center,        ///> Object centered
 };
 
 //---------------------------------------------------------------------------------------
+///@cond INTERNALS
 enum ELinkType
 {
 	k_link_simple = 0,
@@ -84,9 +118,11 @@ enum ELinkType
 	k_link_middle,
 	k_link_end,
 };
+///@endcond
 
 
 
+///@cond INTERNALS
 //---------------------------------------------------------------------------------------
 // auxiliary, to identify staffobjs associated to a voice and manage voice data
 class VoiceRelatedShape
@@ -105,27 +141,47 @@ public:
     inline void set_voice(int voice) { m_voice = voice; }
     inline int get_voice() { return m_voice; }
 };
+///@endcond
 
 
 
 //---------------------------------------------------------------------------------------
+/** %GmoSimpleShape is a basic shape that is not made made by combining other GmoShape
+    objects. Represents an <i>atomic</i> shape object, e.g. a line, a rectangle or
+    a glyph. See @ref GmoCompositeShape
+*/
 class GmoSimpleShape : public GmoShape
 {
-public:
-    virtual ~GmoSimpleShape();
-
 protected:
     GmoSimpleShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
+
+public:
+///@cond INTERNALS
+    virtual ~GmoSimpleShape();
+///@endcond
+
 };
 
 //---------------------------------------------------------------------------------------
+/** %GmoCompositeShape is a shape that is made from a combination of other GmoShape
+    objects. It is just a container for other GmoShape objects.
+    Its bounding box is the union of contained shapes bounding boxes.
+*/
 class GmoCompositeShape : public GmoShape
 {
 protected:
 	std::list<GmoShape*> m_components;	//constituent shapes
 
+    GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
+
 public:
+///@cond INTERNALS
     ~GmoCompositeShape() override;
+///@endcond
+
+
+///@cond INTERNALS
+    //excluded from public API. Only for internal use.
 
     virtual int add(GmoShape* pShape);
 
@@ -141,8 +197,9 @@ public:
     inline std::list<GmoShape*>& get_components() { return m_components; }
     void set_color(Color color) override;
 
+///@endcond
+
 protected:
-    GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
 	void recompute_bounds();
 };
 
