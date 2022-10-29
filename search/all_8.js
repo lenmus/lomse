@@ -4,6 +4,7 @@ var searchData=
   ['index_5fto_5ffirst_5finstrument',['index_to_first_instrument',['../classAInstrGroup.html#a8735a99d05a80c475d7f54a1ed92c3cb',1,'AInstrGroup']]],
   ['index_5fto_5flast_5finstrument',['index_to_last_instrument',['../classAInstrGroup.html#a326dddff4ebc11ae9b35f22d8f51a807',1,'AInstrGroup']]],
   ['init_5flibrary',['init_library',['../classLomseDoorway.html#af65c535236e088710cf055c9180f34fa',1,'LomseDoorway']]],
+  ['instr_5fnumber_5ffor_5fstaff',['instr_number_for_staff',['../classGmoBoxSystem.html#ad197b34c60593de0853073935c09d7d7',1,'GmoBoxSystem']]],
   ['instrument_5fat',['instrument_at',['../classAInstrGroup.html#a424072486701ac5384b55b081b4e53b1',1,'AInstrGroup::instrument_at()'],['../classAScore.html#a8d13afa60f66cbad8c1882722e73ce8f',1,'AScore::instrument_at()']]],
   ['instruments_5fgroup_5fat',['instruments_group_at',['../classAScore.html#a3aea66cc6c2c71a48fd34e795b10a51b',1,'AScore']]],
   ['interactor',['Interactor',['../classInteractor.html',1,'']]],

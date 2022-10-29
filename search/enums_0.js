@@ -11,10 +11,14 @@ var searchData=
   ['eeventtype',['EEventType',['../group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d',1,'lomse_events.h']]],
   ['efragmentmark',['EFragmentMark',['../group__enumerations.html#gaad40cbca030c13d3d8e319ce26d462e1',1,'lomse_fragment_mark.h']]],
   ['egroupsymbol',['EGroupSymbol',['../group__enumerations.html#ga1ac603296fabf17c64fa8eb9c8a9382b',1,'lomse_internal_model.h']]],
+  ['ehalign',['EHAlign',['../group__enumerations.html#ga450afa03449d518abde5dd2408e1ad8e',1,'lomse_shape_base.h']]],
   ['eimoattribute',['EImoAttribute',['../group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029',1,'lomse_im_attributes.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
   ['eintervaltype',['EIntervalType',['../group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4',1,'lomse_interval.h']]],
   ['ejoinbarlines',['EJoinBarlines',['../group__enumerations.html#ga391ee07675002e9ed01d8f5adfb18804',1,'lomse_internal_model.h']]],
+  ['elinecap',['ELineCap',['../group__enumerations.html#ga8e2614c2486892f19b2892e5c5177018',1,'lomse_shape_base.h']]],
+  ['elineedge',['ELineEdge',['../group__enumerations.html#ga2df716fee2c63397880e773e62a006bd',1,'lomse_shape_base.h']]],
+  ['elinestyle',['ELineStyle',['../group__enumerations.html#ga7092c0c4616367016b70d54e5c680a69',1,'lomse_shape_base.h']]],
   ['emutetype',['EMuteType',['../group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e',1,'lomse_internal_model.h']]],
   ['eobservedchild',['EObservedChild',['../classObservable.html#aeba2229fd6aa952b9d2e67b22444682e',1,'Observable']]],
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
@@ -24,6 +28,7 @@ var searchData=
   ['eselectionaction',['ESelectionAction',['../classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec',1,'CmdSelection']]],
   ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
   ['etrackingevent',['ETrackingEvent',['../classEventVisualTracking.html#a62388a1f4bdf67d6146471807251f721',1,'EventVisualTracking']]],
+  ['evalign',['EVAlign',['../group__enumerations.html#ga603556c34c6f1348a98ba0293ae38305',1,'lomse_shape_base.h']]],
   ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]],
   ['evisualtrackingmode',['EVisualTrackingMode',['../group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9',1,'lomse_interactor.h']]]
 ];

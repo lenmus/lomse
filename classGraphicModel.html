@@ -91,15 +91,15 @@ $(document).ready(function(){initNavTree('classGraphicModel.html','');});
 
 <p><code>#include &lt;lomse_graphical_model.h&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The GraphicModel represents the visual representation of the document. It is a tree of objects representing the graphical elements (lines, arcs, shapes, etc.) that describe the final appearance of the document from a purely geometric point of view. The graphical model objects (GmoShape and GmoBox derived objects) behave as vertex sources, providing the coordinates for the polygons that define the visual representation of the document.</p>
+<div class="textblock"><p>The GraphicModel represents the visual representation of the document. It is a tree of objects representing the graphical elements (lines, arcs, shapes, etc.) that describe the final appearance of the document from a purely geometric point of view. The graphical model objects (<a class="el" href="classGmoShape.html">GmoShape</a> and <a class="el" href="classGmoBox.html">GmoBox</a> derived objects) behave as vertex sources, providing the coordinates for the polygons that define the visual representation of the document.</p>
 <p>The GraphicModel is a representation of what in computer graphics theory is named the <em>real world</em>, a virtual rendition of the full document at real size (e.g. millimeters). It is a virtual image of the full document organized as expected by the chosen View type.</p>
-<p>The <em>Graphic Model</em> subdivides the document layout in regions or <em>boxes</em>, represented by objects derived from GmoBox. The boxes are organized in a tree so that each box is also a container for other boxes. For instance, the main boxes for an score are depicted in following picture:</p>
+<p>The <em>Graphic Model</em> subdivides the document layout in regions or <em>boxes</em>, represented by objects derived from <a class="el" href="classGmoBox.html">GmoBox</a>. The boxes are organized in a tree so that each box is also a container for other boxes. For instance, the main boxes for an score are depicted in following picture:</p>
 <div class="image">
 <img src="graphical-model-boxes.png" alt="graphical-model-boxes.png" width="700px"/>
 <div class="caption">
 Image: Some boxes in the Graphical Model</div></div>
 <ul>
-<li>GmoBoxSystem - Represents a line of music in the printed score and encloses all its content.</li>
+<li><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> - Represents a line of music in the printed score and encloses all its content.</li>
 <li>GmoBoxSlice - Systems are vertically split in columns or vertical slices. Normally, for music with time signature, a slice corresponds to a measure. GmoBoxSlice is a container for all boxes and shapes in that system column.</li>
 <li>GmoBoxSliceInstr - GmoBoxSlice is horizontally subdivided in regions for each instrument in the system. GmoBoxSliceInstr represents a column of an instrument. It is a container for GmoBoxSliceStaff objects that contain the shapes for the slice.</li>
 </ul>
@@ -115,40 +115,40 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a14a5d0188c0e525038ea5b933b6dd397"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4d16c7ef960810f6494d1746619aba0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#aa4d16c7ef960810f6494d1746619aba0">get_num_systems</a> (ImoId scoreId)</td></tr>
 <tr class="separator:aa4d16c7ef960810f6494d1746619aba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d21ace5ef0c3a0e675b50fc387e2857"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a2d21ace5ef0c3a0e675b50fc387e2857">get_page_number_containing</a> (GmoObj *pGmo)</td></tr>
+<tr class="memitem:a2d21ace5ef0c3a0e675b50fc387e2857"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a2d21ace5ef0c3a0e675b50fc387e2857">get_page_number_containing</a> (<a class="el" href="classGmoObj.html">GmoObj</a> *pGmo)</td></tr>
 <tr class="separator:a2d21ace5ef0c3a0e675b50fc387e2857"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adaf639cb875f48835fe5894b640c33a2"><td class="memItemLeft" align="right" valign="top">GmMeasuresTable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#adaf639cb875f48835fe5894b640c33a2">get_measures_table</a> (ImoId scoreId)</td></tr>
 <tr class="separator:adaf639cb875f48835fe5894b640c33a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Access to main boxes</div></td></tr>
-<tr class="memitem:aa39828d5370b8d22af8bdb625235a9cc"><td class="memItemLeft" align="right" valign="top">GmoBoxDocument *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#aa39828d5370b8d22af8bdb625235a9cc">get_root</a> ()</td></tr>
+<tr class="memitem:aa39828d5370b8d22af8bdb625235a9cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxDocument.html">GmoBoxDocument</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#aa39828d5370b8d22af8bdb625235a9cc">get_root</a> ()</td></tr>
 <tr class="separator:aa39828d5370b8d22af8bdb625235a9cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a875df689f41efdc4bfd8a34c874f6e1b"><td class="memItemLeft" align="right" valign="top">GmoBoxDocPage *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a875df689f41efdc4bfd8a34c874f6e1b">get_page</a> (int i)</td></tr>
+<tr class="memitem:a875df689f41efdc4bfd8a34c874f6e1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxDocPage.html">GmoBoxDocPage</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a875df689f41efdc4bfd8a34c874f6e1b">get_page</a> (int i)</td></tr>
 <tr class="separator:a875df689f41efdc4bfd8a34c874f6e1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7be6137ef9d73972f3bcd6e01fc72ae7"><td class="memItemLeft" align="right" valign="top">GmoBoxSystem *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a7be6137ef9d73972f3bcd6e01fc72ae7">get_system_for</a> (ImoId scoreId, TimeUnits timepos)</td></tr>
+<tr class="memitem:a7be6137ef9d73972f3bcd6e01fc72ae7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a7be6137ef9d73972f3bcd6e01fc72ae7">get_system_for</a> (ImoId scoreId, TimeUnits timepos)</td></tr>
 <tr class="separator:a7be6137ef9d73972f3bcd6e01fc72ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7eda4a010bebd4e3b61725a047cbf914"><td class="memItemLeft" align="right" valign="top">GmoBoxSystem *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a7eda4a010bebd4e3b61725a047cbf914">get_system_box</a> (int iSystem, ImoId scoreId)</td></tr>
+<tr class="memitem:a7eda4a010bebd4e3b61725a047cbf914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a7eda4a010bebd4e3b61725a047cbf914">get_system_box</a> (int iSystem, ImoId scoreId)</td></tr>
 <tr class="separator:a7eda4a010bebd4e3b61725a047cbf914"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af57af2070f8c73d6cb7b5a30e9672fd8"><td class="memItemLeft" align="right" valign="top">GmoBoxSystem *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#af57af2070f8c73d6cb7b5a30e9672fd8">get_system_for</a> (ImoScore *pScore, const MeasureLocator &amp;ml)</td></tr>
+<tr class="memitem:af57af2070f8c73d6cb7b5a30e9672fd8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#af57af2070f8c73d6cb7b5a30e9672fd8">get_system_for</a> (ImoScore *pScore, const MeasureLocator &amp;ml)</td></tr>
 <tr class="separator:af57af2070f8c73d6cb7b5a30e9672fd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92189147b4e6ce6b6e03e689c69fa79e"><td class="memItemLeft" align="right" valign="top">GmoBoxSystem *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a92189147b4e6ce6b6e03e689c69fa79e">get_system_for_staffobj</a> (ImoId id)</td></tr>
+<tr class="memitem:a92189147b4e6ce6b6e03e689c69fa79e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a92189147b4e6ce6b6e03e689c69fa79e">get_system_for_staffobj</a> (ImoId id)</td></tr>
 <tr class="separator:a92189147b4e6ce6b6e03e689c69fa79e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1399c2117b554f3d1dfacac8997e790"><td class="memItemLeft" align="right" valign="top">GmoShapeStaff *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#ad1399c2117b554f3d1dfacac8997e790">get_shape_for_first_staff_in_first_system</a> (ImoId scoreId)</td></tr>
+<tr class="memitem:ad1399c2117b554f3d1dfacac8997e790"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShapeStaff.html">GmoShapeStaff</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#ad1399c2117b554f3d1dfacac8997e790">get_shape_for_first_staff_in_first_system</a> (ImoId scoreId)</td></tr>
 <tr class="separator:ad1399c2117b554f3d1dfacac8997e790"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Access to shapes and boxes related to an ImoObj</div></td></tr>
-<tr class="memitem:aa449d514add87c1e8d1aad97c183ec82"><td class="memItemLeft" align="right" valign="top">GmoShape *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#aa449d514add87c1e8d1aad97c183ec82">get_shape_for_imo</a> (ImoId imoId, ShapeId shapeId)</td></tr>
+<tr class="memitem:aa449d514add87c1e8d1aad97c183ec82"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShape.html">GmoShape</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#aa449d514add87c1e8d1aad97c183ec82">get_shape_for_imo</a> (ImoId imoId, ShapeId shapeId)</td></tr>
 <tr class="separator:aa449d514add87c1e8d1aad97c183ec82"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e37c73cf5785b521baafabaa3fcfeae"><td class="memItemLeft" align="right" valign="top">GmoShape *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a3e37c73cf5785b521baafabaa3fcfeae">get_main_shape_for_imo</a> (ImoId id)</td></tr>
+<tr class="memitem:a3e37c73cf5785b521baafabaa3fcfeae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShape.html">GmoShape</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a3e37c73cf5785b521baafabaa3fcfeae">get_main_shape_for_imo</a> (ImoId id)</td></tr>
 <tr class="separator:a3e37c73cf5785b521baafabaa3fcfeae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a024639776a91275c8dce764ca904478a"><td class="memItemLeft" align="right" valign="top">GmoShape *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a024639776a91275c8dce764ca904478a">find_shape_for_object</a> (ImoStaffObj *pSO)</td></tr>
+<tr class="memitem:a024639776a91275c8dce764ca904478a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShape.html">GmoShape</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a024639776a91275c8dce764ca904478a">find_shape_for_object</a> (ImoStaffObj *pSO)</td></tr>
 <tr class="separator:a024639776a91275c8dce764ca904478a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82d9cf87b19560cc0ce878804476dc88"><td class="memItemLeft" align="right" valign="top">GmoShape *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a82d9cf87b19560cc0ce878804476dc88">get_shape_for_noterest</a> (ImoNoteRest *pNR)</td></tr>
+<tr class="memitem:a82d9cf87b19560cc0ce878804476dc88"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShape.html">GmoShape</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a82d9cf87b19560cc0ce878804476dc88">get_shape_for_noterest</a> (ImoNoteRest *pNR)</td></tr>
 <tr class="separator:a82d9cf87b19560cc0ce878804476dc88"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fd47914473c0b202eb1dadd99d13b36"><td class="memItemLeft" align="right" valign="top">GmoBox *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a2fd47914473c0b202eb1dadd99d13b36">get_box_for_imo</a> (ImoId id)</td></tr>
+<tr class="memitem:a2fd47914473c0b202eb1dadd99d13b36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBox.html">GmoBox</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a2fd47914473c0b202eb1dadd99d13b36">get_box_for_imo</a> (ImoId id)</td></tr>
 <tr class="separator:a2fd47914473c0b202eb1dadd99d13b36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Information for clicked point</div></td></tr>
-<tr class="memitem:a557c1414afa27b3826a1a0c5c1254180"><td class="memItemLeft" align="right" valign="top">GmoShape *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a557c1414afa27b3826a1a0c5c1254180">find_shape_at</a> (int iPage, LUnits x, LUnits y)</td></tr>
+<tr class="memitem:a557c1414afa27b3826a1a0c5c1254180"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoShape.html">GmoShape</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a557c1414afa27b3826a1a0c5c1254180">find_shape_at</a> (int iPage, LUnits x, LUnits y)</td></tr>
 <tr class="separator:a557c1414afa27b3826a1a0c5c1254180"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ffa01ce7e1c45c84a5fbe6812e8d143"><td class="memItemLeft" align="right" valign="top">GmoBox *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a4ffa01ce7e1c45c84a5fbe6812e8d143">find_inner_box_at</a> (int iPage, LUnits x, LUnits y)</td></tr>
+<tr class="memitem:a4ffa01ce7e1c45c84a5fbe6812e8d143"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classGmoBox.html">GmoBox</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#a4ffa01ce7e1c45c84a5fbe6812e8d143">find_inner_box_at</a> (int iPage, LUnits x, LUnits y)</td></tr>
 <tr class="separator:a4ffa01ce7e1c45c84a5fbe6812e8d143"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae772d33b463a203b7acc3ed9da83894b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAreaInfo.html">AreaInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGraphicModel.html#ae772d33b463a203b7acc3ed9da83894b">get_info_for_point</a> (int iPage, LUnits x, LUnits y)</td></tr>
 <tr class="separator:ae772d33b463a203b7acc3ed9da83894b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,7 +161,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBox* GraphicModel::find_inner_box_at </td>
+          <td class="memname"><a class="el" href="classGmoBox.html">GmoBox</a>* GraphicModel::find_inner_box_at </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>iPage</em>, </td>
@@ -185,7 +185,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the innermost GmoBox located in the given cordinates of a document page. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the innermost <a class="el" href="classGmoBox.html">GmoBox</a> located in the given cordinates of a document page. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iPage</td><td>The number of the page (0..n-1). </td></tr>
     <tr><td class="paramname">x,y</td><td>The relative coordinates for the point (logical units referred to the top-left corner of the page). </td></tr>
@@ -202,7 +202,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShape* GraphicModel::find_shape_at </td>
+          <td class="memname"><a class="el" href="classGmoShape.html">GmoShape</a>* GraphicModel::find_shape_at </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>iPage</em>, </td>
@@ -243,7 +243,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShape* GraphicModel::find_shape_for_object </td>
+          <td class="memname"><a class="el" href="classGmoShape.html">GmoShape</a>* GraphicModel::find_shape_for_object </td>
           <td>(</td>
           <td class="paramtype">ImoStaffObj *&#160;</td>
           <td class="paramname"><em>pSO</em></td><td>)</td>
@@ -251,7 +251,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the main GmoShape generated by an ImoStaffObj. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the main <a class="el" href="classGmoShape.html">GmoShape</a> generated by an ImoStaffObj. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pSO</td><td>Pointer to the ImoStaffObj to which the request is referring. </td></tr>
   </table>
@@ -267,7 +267,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBox* GraphicModel::get_box_for_imo </td>
+          <td class="memname"><a class="el" href="classGmoBox.html">GmoBox</a>* GraphicModel::get_box_for_imo </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -275,7 +275,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the innermost GmoBox in which the shape for an ImoObj is contained. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the innermost <a class="el" href="classGmoBox.html">GmoBox</a> in which the shape for an ImoObj is contained. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">id</td><td>The Id of the ImoObj to which the request is referring. </td></tr>
   </table>
@@ -332,7 +332,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShape* GraphicModel::get_main_shape_for_imo </td>
+          <td class="memname"><a class="el" href="classGmoShape.html">GmoShape</a>* GraphicModel::get_main_shape_for_imo </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -340,7 +340,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the main GmoShape generated by an ImoObj. It is equivalent to get_shape_for_imo(imoId, 0). </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the main <a class="el" href="classGmoShape.html">GmoShape</a> generated by an ImoObj. It is equivalent to get_shape_for_imo(imoId, 0). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">id</td><td>The Id of the ImoObj to which the request is referring. </td></tr>
   </table>
@@ -422,7 +422,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxDocPage* GraphicModel::get_page </td>
+          <td class="memname"><a class="el" href="classGmoBoxDocPage.html">GmoBoxDocPage</a>* GraphicModel::get_page </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>i</em></td><td>)</td>
@@ -430,9 +430,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns the GmoBoxDocPage for the given page number. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns the <a class="el" href="classGmoBoxDocPage.html">GmoBoxDocPage</a> for the given page number. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">i</td><td>The number of the page (0..n-1) for which the GmoBoxDocPage is requested. </td></tr>
+    <tr><td class="paramname">i</td><td>The number of the page (0..n-1) for which the <a class="el" href="classGmoBoxDocPage.html">GmoBoxDocPage</a> is requested. </td></tr>
   </table>
   </dd>
 </dl>
@@ -448,15 +448,15 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">int GraphicModel::get_page_number_containing </td>
           <td>(</td>
-          <td class="paramtype">GmoObj *&#160;</td>
+          <td class="paramtype"><a class="el" href="classGmoObj.html">GmoObj</a> *&#160;</td>
           <td class="paramname"><em>pGmo</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns the number of the page (0..n-1) that contains the given GmoObj. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns the number of the page (0..n-1) that contains the given <a class="el" href="classGmoObj.html">GmoObj</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pGmo</td><td>Pointer to the GmoObj to which the request is referring. </td></tr>
+    <tr><td class="paramname">pGmo</td><td>Pointer to the <a class="el" href="classGmoObj.html">GmoObj</a> to which the request is referring. </td></tr>
   </table>
   </dd>
 </dl>
@@ -473,7 +473,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxDocument* GraphicModel::get_root </td>
+          <td class="memname"><a class="el" href="classGmoBoxDocument.html">GmoBoxDocument</a>* GraphicModel::get_root </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -485,7 +485,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the root object of the Graphical Model. It is always a GmoBoxDocument object. </p>
+<p>Returns the root object of the Graphical Model. It is always a <a class="el" href="classGmoBoxDocument.html">GmoBoxDocument</a> object. </p>
 
 </div>
 </div>
@@ -496,7 +496,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system </td>
+          <td class="memname"><a class="el" href="classGmoShapeStaff.html">GmoShapeStaff</a>* GraphicModel::get_shape_for_first_staff_in_first_system </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>scoreId</em></td><td>)</td>
@@ -504,7 +504,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoShapeStaff for the first staff in first system. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the <a class="el" href="classGmoShapeStaff.html">GmoShapeStaff</a> for the first staff in first system. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scoreId</td><td>The Id of the score to which the request is referring. </td></tr>
   </table>
@@ -520,7 +520,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShape* GraphicModel::get_shape_for_imo </td>
+          <td class="memname"><a class="el" href="classGmoShape.html">GmoShape</a>* GraphicModel::get_shape_for_imo </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>imoId</em>, </td>
@@ -538,7 +538,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoShape generated by an ImoObj. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the <a class="el" href="classGmoShape.html">GmoShape</a> generated by an ImoObj. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">imoId</td><td>The Id of the ImoObj to which the request is referring. </td></tr>
     <tr><td class="paramname">shapeId</td><td>As any ImoObj can generate several shapes it is necessary to provide the shape index. The first generated shape has index 0, the next one index 1, and so on. </td></tr>
@@ -555,7 +555,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoShape* GraphicModel::get_shape_for_noterest </td>
+          <td class="memname"><a class="el" href="classGmoShape.html">GmoShape</a>* GraphicModel::get_shape_for_noterest </td>
           <td>(</td>
           <td class="paramtype">ImoNoteRest *&#160;</td>
           <td class="paramname"><em>pNR</em></td><td>)</td>
@@ -563,7 +563,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the main GmoShape generated by an ImoNoteRest. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the main <a class="el" href="classGmoShape.html">GmoShape</a> generated by an ImoNoteRest. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pNR</td><td>Pointer to the ImoNoteRest to which the request is referring. </td></tr>
   </table>
@@ -579,7 +579,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxSystem* GraphicModel::get_system_box </td>
+          <td class="memname"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a>* GraphicModel::get_system_box </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>iSystem</em>, </td>
@@ -597,9 +597,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoBoxSystem for the given system number. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> for the given system number. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">iSystem</td><td>The number of the system (0..n-1) for which the GmoBoxSystem is requested. </td></tr>
+    <tr><td class="paramname">iSystem</td><td>The number of the system (0..n-1) for which the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> is requested. </td></tr>
     <tr><td class="paramname">scoreId</td><td>The Id of the score to which the request is referring. </td></tr>
   </table>
   </dd>
@@ -614,7 +614,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxSystem* GraphicModel::get_system_for </td>
+          <td class="memname"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a>* GraphicModel::get_system_for </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>scoreId</em>, </td>
@@ -632,7 +632,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoBoxSystem that contains the specified timepos. If there is no system for the given timepos, returns <span class="literal">nullptr</span>.</p>
+<p>Returns pointer to the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> that contains the specified timepos. If there is no system for the given timepos, returns <span class="literal">nullptr</span>.</p>
 <p>This method gives preference to finding a system containing a note/rest at the given <code>tiempos</code> instead of non-timed staff objects. For example, the last barline in one system has the same <code>timepos</code> than the first note/rest in next system. Therefore, this method will return the second system not the one containing the barline.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -651,7 +651,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxSystem* GraphicModel::get_system_for </td>
+          <td class="memname"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a>* GraphicModel::get_system_for </td>
           <td>(</td>
           <td class="paramtype">ImoScore *&#160;</td>
           <td class="paramname"><em>pScore</em>, </td>
@@ -669,10 +669,10 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoBoxSystem that contains the specified MeasureLocator. If there is no system for the given location, returns <span class="literal">nullptr</span>. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> that contains the specified MeasureLocator. If there is no system for the given location, returns <span class="literal">nullptr</span>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pScore</td><td>The score to which the request is referring. </td></tr>
-    <tr><td class="paramname">ml</td><td>The MeasureLocator for which the GmoBoxSystem is requested. </td></tr>
+    <tr><td class="paramname">ml</td><td>The MeasureLocator for which the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> is requested. </td></tr>
   </table>
   </dd>
 </dl>
@@ -686,7 +686,7 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">GmoBoxSystem* GraphicModel::get_system_for_staffobj </td>
+          <td class="memname"><a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a>* GraphicModel::get_system_for_staffobj </td>
           <td>(</td>
           <td class="paramtype">ImoId&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -694,7 +694,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns pointer to the GmoBoxSystem that contains the specified ImoStaffObj. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Returns pointer to the <a class="el" href="classGmoBoxSystem.html">GmoBoxSystem</a> that contains the specified ImoStaffObj. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">id</td><td>The Id of the ImoStaffObj to which the request is referring. </td></tr>
   </table>
@@ -709,7 +709,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classGraphicModel.html">GraphicModel</a></li>
-    <li class="footer">Generated on Thu Oct 27 2022 16:09:41 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Oct 29 2022 18:35:55 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

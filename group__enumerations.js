@@ -78,6 +78,12 @@ var group__enumerations =
       [ "k_group_symbol_bracket", "group__enumerations.html#gga1ac603296fabf17c64fa8eb9c8a9382ba1a8158a44527666d0d91724af3cc3e16", null ],
       [ "k_group_symbol_line", "group__enumerations.html#gga1ac603296fabf17c64fa8eb9c8a9382ba37f3225871df5fa33bb35a7191d0f3c8", null ]
     ] ],
+    [ "EHAlign", "group__enumerations.html#ga450afa03449d518abde5dd2408e1ad8e", [
+      [ "k_halign_default", "group__enumerations.html#gga450afa03449d518abde5dd2408e1ad8ea06372f0a10b629e0285c2bfca4fa4494", null ],
+      [ "k_halign_right", "group__enumerations.html#gga450afa03449d518abde5dd2408e1ad8eaf9d77af3e0d1ebaa31b6e772df59e444", null ],
+      [ "k_halign_justify", "group__enumerations.html#gga450afa03449d518abde5dd2408e1ad8eaf54d4a864c5decf82fb58a8b28889849", null ],
+      [ "k_halign_center", "group__enumerations.html#gga450afa03449d518abde5dd2408e1ad8eaea2f32b9b5375bcdd0c553b20adf4ec0", null ]
+    ] ],
     [ "EImoAttribute", "group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029", [
       [ "k_attr_barline", "group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029aff5b02773adb5e5d382bfd738d865230", null ],
       [ "k_attr_color", "group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029a7679a62ff03867c78c82e13c5995db88", null ],
@@ -110,6 +116,13 @@ var group__enumerations =
       [ "k_joined_barlines", "group__enumerations.html#gga391ee07675002e9ed01d8f5adfb18804ab917fd54e52945368980419718e098c4", null ],
       [ "k_mensurstrich_barlines", "group__enumerations.html#gga391ee07675002e9ed01d8f5adfb18804aceadece5287a005301fd85e6a7e2278e", null ]
     ] ],
+    [ "ELineCap", "group__enumerations.html#ga8e2614c2486892f19b2892e5c5177018", null ],
+    [ "ELineEdge", "group__enumerations.html#ga2df716fee2c63397880e773e62a006bd", [
+      [ "k_edge_normal", "group__enumerations.html#gga2df716fee2c63397880e773e62a006bdab1dd814f863a986bad16b1228d366094", null ],
+      [ "k_edge_vertical", "group__enumerations.html#gga2df716fee2c63397880e773e62a006bda5d48b9e73e211673c28afad14a1558e8", null ],
+      [ "k_edge_horizontal", "group__enumerations.html#gga2df716fee2c63397880e773e62a006bda75f2c3733ffb0cf9b62721ea0028199d", null ]
+    ] ],
+    [ "ELineStyle", "group__enumerations.html#ga7092c0c4616367016b70d54e5c680a69", null ],
     [ "EMuteType", "group__enumerations.html#ga61b4687bf419e0e7cae37296f7ee4d3e", [
       [ "k_mute_off", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3ead91c2adbead8de7fc5ebc62c9c8479f4", null ],
       [ "k_mute_on", "group__enumerations.html#gga61b4687bf419e0e7cae37296f7ee4d3eaa1ac35dfea3607f071ec818cba1a754a", null ],
@@ -173,6 +186,7 @@ var group__enumerations =
     [ "ERequestType", "group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc", [
       [ "k_get_font_filename", "group__enumerations.html#gga0dc84b6205af6b43ac7867cd9779dfcca478758eacf0fde44f569dc2b7ead827e", null ]
     ] ],
+    [ "EVAlign", "group__enumerations.html#ga603556c34c6f1348a98ba0293ae38305", null ],
     [ "EViewType", "group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea", null ],
     [ "EVisualTrackingMode", "group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9", [
       [ "k_tracking_none", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a5a9a08498fdc5cac9b5b32fc56e8b57e", null ],
