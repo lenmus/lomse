@@ -637,11 +637,13 @@ WARN_LOGFILE           = ../../zz_build-api/doxygen.log
 # with spaces.
 
 INPUT     = mainpages \
+			../../include/lomse_box_system.h \
 			../../include/lomse_command.h \
 			../../include/lomse_doorway.h \
 			../../include/lomse_drawer.h \
 			../../include/lomse_events.h \
 			../../include/lomse_fragment_mark.h \
+			../../include/lomse_gm_basic.h \
 			../../include/lomse_graphical_model.h \
 			../../include/lomse_graphic_view.h \
 			../../include/lomse_half_page_view.h \
@@ -657,6 +659,8 @@ INPUT     = mainpages \
 			../../include/lomse_pixel_formats.h \
 			../../include/lomse_presenter.h \
 			../../include/lomse_score_player.h \
+			../../include/lomse_shape_base.h \
+			../../include/lomse_shape_staff.h \
 			../../include/lomse_tempo_line.h \
 			../../include/lomse_view.h \
 			../../include/lomse_visual_effect.h \

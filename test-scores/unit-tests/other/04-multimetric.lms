@@ -1,0 +1,197 @@
+(score (vers 2.0)
+(opt Score.JustifyLastSystem 3)  //3 = always
+(instrument 
+   (name "Viol.")
+   (staves 1)
+   (musicData 
+
+      /* measure 1 */
+      (clef G p1 )
+      (key G)
+      (time 3 4)
+      (chord 
+         (n g3 q v1  p1 )
+         (n d4 q v1  p1 )
+      )
+      (r e v1  p1 )
+      (n g5 e v1  p1 )
+      (n g5 s v1  p1 (beam 35 ++))
+      (n f5 s v1  p1 (beam 35 =-))
+      (n g5 e v1  p1 (beam 35 -))
+      (barline simple)
+
+      /* measure 2 */
+      (r h. v1  p1 )
+      (barline simple)
+
+      /* measure 3 */
+      (chord 
+         (n g3 h v1  p1 )
+         (n d4 h v1  p1 )
+      )
+      (chord 
+         (n g3 q v1  p1 )
+         (n d4 q v1  p1 )
+      )
+      (barline simple)
+
+      /* measure 4 */
+      (chord 
+         (n a4 q v1  p1 )
+         (n e5 q v1  p1 )
+      )
+      (r q v1  p1 )
+      (chord 
+         (n d4 q v1  p1 )
+         (n g4 q v1  p1 )
+         (n f5 q v1  p1 )
+      )
+      (barline simple)
+
+      /* measure 5 */
+      (chord 
+         (n g3 q v1  p1 )
+         (n d4 q v1  p1 )
+      )
+      (r e v1  p1 )
+      (n g5 e v1  p1 )
+      (n g5 s v1  p1 (beam 35 ++))
+      (n f5 s v1  p1 (beam 35 =-))
+      (n g5 e v1  p1 (beam 35 -))
+      (barline simple)
+
+      /* measure 6 */
+      (r h. v1  p1 )
+      (barline simple)
+
+      /* measure 7 */
+      (chord 
+         (n g3 h v1  p1 )
+         (n d4 h v1  p1 )
+      )
+      (chord 
+         (n g3 q v1  p1 )
+         (n d4 q v1  p1 )
+      )
+      (barline simple)
+
+      /* measure 8 */
+      (chord 
+         (n a4 q v1  p1 )
+         (n e5 q v1  p1 )
+      )
+      (r q v1  p1 )
+      (chord 
+         (n d4 q v1  p1 )
+         (n g4 q v1  p1 )
+         (n f5 q v1  p1 )
+      )
+      (barline simple)
+   )
+)
+(instrument 
+   (name "Viol.")
+   (staves 1)
+   (musicData 
+
+      /* measure 1 */
+      (clef G p1 )
+      (key G)
+      (time 2 4)
+      (n g4 q v1  p1 )
+      (n d5 e v1  p1 (beam 79 +))
+      (n d5 e v1  p1 (beam 79 -))
+      (barline simple)
+
+      /* measure 2 */
+      (n b5 e v1  p1 (beam 88 +))
+      (n a5 s v1  p1 (beam 88 =+))
+      (n g5 s v1  p1 (beam 88 --))
+      (n g5 e v1  p1 (beam 97 +))
+      (n g5 e v1  p1 (beam 97 -))
+      (barline simple)
+
+      /* measure 3 */
+      (n e5 e v1  p1 (beam 106 +))
+      (n d5 s v1  p1 (beam 106 =+))
+      (n c5 s v1  p1 (beam 106 --))
+      (n e5 e v1  p1 (beam 115 +))
+      (n e5 e v1  p1 (beam 115 -))
+      (barline simple)
+
+      /* measure 4 */
+      (n d5 e v1  p1 (beam 125 +))
+      (n g5 e v1  p1 (beam 125 =))
+      (n g5 e v1  p1 (beam 125 =))
+      (n g5 e v1  p1 (beam 125 -))
+      (barline simple)
+
+      /* measure 5 */
+      (n b5 e v1  p1 (beam 137 +))
+      (n g5 e v1  p1 (beam 137 -))
+      (n e5 s v1  p1 (beam 146 ++))
+      (n c5 s v1  p1 (beam 146 ==))
+      (n e5 s v1  p1 (beam 146 ==))
+      (n c5 s v1  p1 (beam 146 --))
+      (barline simple)
+
+      /* measure 6 */
+      (n b4 s v1  p1 (beam 160 ++))
+      (n d5 s v1  p1 (beam 160 ==))
+      (n b4 s v1  p1 (beam 160 ==))
+      (n d5 s v1  p1 (beam 160 --))
+      (n c5 e v1  p1 (beam 172 +))
+      (n b4 s v1  p1 (beam 172 =+))
+      (n a4 s v1  p1 (beam 172 --))
+      (barline simple)
+
+      /* measure 7 */
+      (n g4 q v1  p1 )
+      (n d5 e v1  p1 (beam 79 +))
+      (n d5 e v1  p1 (beam 79 -))
+      (barline simple)
+
+      /* measure 8 */
+      (n b5 e v1  p1 (beam 88 +))
+      (n a5 s v1  p1 (beam 88 =+))
+      (n g5 s v1  p1 (beam 88 --))
+      (n g5 e v1  p1 (beam 97 +))
+      (n g5 e v1  p1 (beam 97 -))
+      (barline simple)
+
+      /* measure 9 */
+      (n e5 e v1  p1 (beam 106 +))
+      (n d5 s v1  p1 (beam 106 =+))
+      (n c5 s v1  p1 (beam 106 --))
+      (n e5 e v1  p1 (beam 115 +))
+      (n e5 e v1  p1 (beam 115 -))
+      (barline simple)
+
+      /* measure 10 */
+      (n d5 e v1  p1 (beam 125 +))
+      (n g5 e v1  p1 (beam 125 =))
+      (n g5 e v1  p1 (beam 125 =))
+      (n g5 e v1  p1 (beam 125 -))
+      (barline simple)
+
+      /* measure 11 */
+      (n b5 e v1  p1 (beam 137 +))
+      (n g5 e v1  p1 (beam 137 -))
+      (n e5 s v1  p1 (beam 146 ++))
+      (n c5 s v1  p1 (beam 146 ==))
+      (n e5 s v1  p1 (beam 146 ==))
+      (n c5 s v1  p1 (beam 146 --))
+      (barline simple)
+
+      /* measure 12 */
+      (n b4 s v1  p1 (beam 160 ++))
+      (n d5 s v1  p1 (beam 160 ==))
+      (n b4 s v1  p1 (beam 160 ==))
+      (n d5 s v1  p1 (beam 160 --))
+      (n c5 e v1  p1 (beam 172 +))
+      (n b4 s v1  p1 (beam 172 =+))
+      (n a4 s v1  p1 (beam 172 --))
+      (barline simple)
+   )
+))
+

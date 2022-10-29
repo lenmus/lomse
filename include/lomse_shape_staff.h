@@ -12,14 +12,20 @@
 
 #include "lomse_shape_base.h"
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class ImoStaffInfo;
 
 
 //---------------------------------------------------------------------------------------
+/** %GmoShapeStaff represents the staff lines for an staff in a system. Its bounding box
+    origin is at top-left of upper most staff line. The bottom of its bounding box is
+    the lower most staff line.
+*/
 class GmoShapeStaff : public GmoSimpleShape
 {
 protected:
@@ -28,9 +34,18 @@ protected:
     LUnits m_lineThickness;
 
 public:
+
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
     GmoShapeStaff(ImoObj* pCreatorImo, ShapeId idx, ImoStaffInfo* m_pStaff, int iStaff,
                   LUnits width, Color color);
     ~GmoShapeStaff();
+
+    ///@endcond
+
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
 
 	//implementation of pure virtual methods in base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
@@ -62,6 +77,8 @@ public:
 //    int         m_nOldSteps;		//to clear leger lines while dragging
 //    LUnits    m_uxOldPos;
 //    int         m_nPosOnStaff;		//line/space on staff on which this note is placed
+
+///@endcond
 
 };
 

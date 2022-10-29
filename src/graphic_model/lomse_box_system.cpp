@@ -276,6 +276,12 @@ int GmoBoxSystem::get_first_measure(int iInstr)
 }
 
 //---------------------------------------------------------------------------------------
+int GmoBoxSystem::get_num_measures(int iInstr)
+{
+    return m_nMeasures[iInstr];
+}
+
+//---------------------------------------------------------------------------------------
 string GmoBoxSystem::dump_measures_info()
 {
     stringstream s;
