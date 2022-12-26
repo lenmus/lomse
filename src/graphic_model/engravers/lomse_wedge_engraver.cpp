@@ -19,6 +19,8 @@
 #include "lomse_aux_shapes_aligner.h"
 #include "lomse_vertical_profile.h"
 
+#include <limits>
+
 
 namespace lomse
 {
