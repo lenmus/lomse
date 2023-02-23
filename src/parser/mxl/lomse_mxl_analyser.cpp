@@ -5203,7 +5203,7 @@ public:
 
         // <beam>*
         while (get_optional("beam"))
-            analyse_beam(fIsGrace);
+            analyse_beam(voice, fIsGrace, fIsCue);
         add_beam_info(pNR);
 
         // <notations>*
@@ -5429,7 +5429,7 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-    void analyse_beam(bool fIsGrace)
+    void analyse_beam(int voice, bool fIsGrace, bool fIsCue)
     {
         //@ <!ELEMENT beam (#PCDATA)>
         //@ <!ATTLIST beam number %beam-level; "1" repeater %yes-no; #IMPLIED >
@@ -5475,18 +5475,16 @@ protected:
             m_pBeamInfo = LOMSE_NEW ImoBeamDto();
 
         //beam number is the beam reference. In MusicXML beams do not have a unique
-        //reference. The analyser assumes that during the analysis one beamed group
-        //can not begin until the end of the previous one is found. Therefore, as only
-        //one beam can be in process, we assing number "1" to any beam being processed.
-        //The exception I found was grace notes: grace notes can start a new beam while
-        //there is still an open beam for regular notes. So, as a by pass, I assign
-        //beam number "2" to grace notes beams. I in future, it is found that several
-        //beams can be open at the same time, it would be necessry to find an ad-hoc
-        //method to identify them and to assign a different beam number to each one.
-        if (fIsGrace)
-            m_pBeamInfo->set_beam_number(2);
-        else
-            m_pBeamInfo->set_beam_number(1);
+        //reference. Beams are distunguished by their voice and presence of "grace"
+        //and "cue" elements. Here this information is encoded into beam number by
+        //adding the property values multiplied by the following base values.
+        constexpr int bMin = 1; //minimal beam number value
+        constexpr int bCue = 2 * bMin;
+        constexpr int bGrace = 2 * bCue;
+        constexpr int bVoice = 2 * bGrace;
+
+        const int beamNumber = (bVoice * voice) + (fIsGrace ? bGrace : 0) + (fIsCue ? bCue : 0) + bMin;
+        m_pBeamInfo->set_beam_number(beamNumber);
 
         m_pBeamInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pBeamInfo->set_beam_type(--iLevel, iType);

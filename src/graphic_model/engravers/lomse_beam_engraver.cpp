@@ -37,6 +37,7 @@ BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     , m_fDoubleStemmed(false)
     , m_fGraceNotes(false)
     , m_fChord(false)
+    , m_firstNoteRestIndex(0)
     , m_numNotes(0)
     , m_maxStaff(0)
     , m_minStaff(0)
@@ -104,11 +105,20 @@ void BeamEngraver::add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 //---------------------------------------------------------------------------------------
 GmoShape* BeamEngraver::create_first_or_intermediate_shape(const RelObjEngravingContext& ctx)
 {
-    //TODO: It has been assumed that a beam cannot be split. This has to be revised
+    if (!m_numNotes)
+        return nullptr;
+
     m_color = ctx.color;
     m_pVProfile = ctx.pVProfile;
+    GmoShapeBeam* pPartialBeamShape = create_beam_shape();
 
-    return nullptr;
+    m_firstNoteRestIndex += m_noteRests.size();
+    m_numNotes = 0;
+    m_noteRests.clear();
+    m_segments.clear();
+    m_note.clear();
+
+    return pPartialBeamShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -122,7 +132,12 @@ GmoShape* BeamEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 
     m_color = ctx.color;
     m_pVProfile = ctx.pVProfile;
+    return create_beam_shape();
+}
 
+//---------------------------------------------------------------------------------------
+GmoShapeBeam* BeamEngraver::create_beam_shape()
+{
     decide_stems_direction();
     determine_number_of_beam_levels();
 
@@ -374,10 +389,13 @@ void BeamEngraver::decide_stems_direction_for_beams_with_chords()
     //compute flag m_fDoubleStemmed and transfer stems to note shapes
     m_fDoubleStemmed = false;
 
-    vector<int>* pStemsDir = m_pBeam->get_stems_direction();
-    bool fFirstUp = (pStemsDir->front() == k_computed_stem_forced_up
-                || pStemsDir->front() == k_computed_stem_up);
-    for (size_t i=0; i < pStemsDir->size(); ++i)
+    const vector<int>* pStemsDir = m_pBeam->get_stems_direction();
+    const size_t iStart = m_firstNoteRestIndex;
+    const size_t iEnd = m_firstNoteRestIndex + m_numNotes;
+
+    bool fFirstUp = (pStemsDir->at(iStart) == k_computed_stem_forced_up
+                || pStemsDir->at(iStart) == k_computed_stem_up);
+    for (size_t i = iStart; i < iEnd; ++i)
     {
         bool fUp = (pStemsDir->at(i) == k_computed_stem_forced_up
                     || pStemsDir->at(i) == k_computed_stem_up);
@@ -569,8 +587,9 @@ void BeamEngraver::engrave_beam_segments_for_simple_beams()
 
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& beamData
             = m_pBeam->get_related_objects();
-        std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itLD = beamData.begin();
+        std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itLD = std::next(beamData.begin(), m_firstNoteRestIndex);
         std::list< pair<ImoNoteRest*, GmoShape*> >::iterator itNR;
+        std::list< pair<ImoNoteRest*, GmoShape*> >::iterator itNRLast = std::prev(m_noteRests.end());
         for(itNR = m_noteRests.begin(); itNR != m_noteRests.end(); ++itNR, ++itLD)
         {
             ImoBeamData* pBeamData = static_cast<ImoBeamData*>( (*itLD).second );
@@ -591,8 +610,42 @@ void BeamEngraver::engrave_beam_segments_for_simple_beams()
                     fForwardPending = false;
                 }
 
+                int beamType = pBeamData->get_beam_type(iLevel);
+                if (beamType != ImoBeam::k_none)
+                {
+                    //force beam type for the first and last beam's note in the current system
+                    if (itNR == m_noteRests.begin())
+                    {
+                        if (m_note.size() == 1)
+                        {
+                            //special case: line is broken so that there is a single beamed note in this system
+                            uxStart = uxEnd = uxCur;
+                            uyStart = uyEnd = uyCur;
+
+                            if (m_firstNoteRestIndex)
+                                uxStart -= uBeamHookLength;
+                            else
+                                uxEnd += uBeamHookLength;
+
+                            fStartPointComputed = fEndPointComputed = true;
+                            beamType = ImoBeam::k_none; //avoid additional changes for the beam segment
+                        }
+                        else if (beamType != ImoBeam::k_forward) //k_forward is valid for the first note
+                        {
+                            beamType = ImoBeam::k_begin;
+                        }
+                    }
+                    else if (itNR == itNRLast)
+                    {
+                        if (beamType != ImoBeam::k_backward) //k_backward is valid for the last note
+                        {
+                            beamType = ImoBeam::k_end;
+                        }
+                    }
+                }
+
                 // now we can deal with current note
-                switch ( pBeamData->get_beam_type(iLevel) )
+                switch (beamType)
                 {
                     case ImoBeam::k_begin:
                         //start of segment. Compute initial point
@@ -1586,7 +1639,7 @@ void BeamEngraver::determine_segments(ImoBeam* pBeam, std::vector<SegmentData>* 
         GmoShapeNote* pEndNote = nullptr;
 
         list< pair<ImoStaffObj*, ImoRelDataObj*> >& beamData = pBeam->get_related_objects();
-        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itLD = beamData.begin();
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itLD = std::next(beamData.begin(), m_firstNoteRestIndex);
         for(size_t iNote = 0; iNote < m_note.size(); ++iNote, ++itLD)
         {
             ImoBeamData* pBeamData = static_cast<ImoBeamData*>( (*itLD).second );
@@ -1608,8 +1661,42 @@ void BeamEngraver::determine_segments(ImoBeam* pBeam, std::vector<SegmentData>* 
                 fForwardPending = false;
             }
 
+            int beamType = pBeamData->get_beam_type(iLevel);
+            if (beamType != ImoBeam::k_none)
+            {
+                //force beam type for the first and last beam's note in the current system
+                if (iNote == 0)
+                {
+                    if (m_note.size() == 1)
+                    {
+                        //special case: line is broken so that there is a single beamed note in this system
+                        uxStart = uxEnd = uxCur;
+                        uyStart = uyEnd = uyCur;
+
+                        if (m_firstNoteRestIndex)
+                            uxStart -= uBeamHookLength;
+                        else
+                            uxEnd += uBeamHookLength;
+
+                        pStartNote = pEndNote = pShapeNote;
+                        beamType = ImoBeam::k_none; //avoid additional changes for the beam segment
+                    }
+                    else if (beamType != ImoBeam::k_forward) //k_forward is valid for the first note
+                    {
+                        beamType = ImoBeam::k_begin;
+                    }
+                }
+                else if (iNote == m_note.size() - 1)
+                {
+                    if (beamType != ImoBeam::k_backward) //k_backward is valid for the last note
+                    {
+                        beamType = ImoBeam::k_end;
+                    }
+                }
+            }
+
             // now we can deal with current note
-            switch ( pBeamData->get_beam_type(iLevel) )
+            switch (beamType)
             {
                 case ImoBeam::k_begin:
                     //start of segment. Compute initial point
