@@ -108,6 +108,7 @@ protected:
     void layout_accidentals();
     void layout_arpeggio();
     void determine_stem_x_left();
+    void determine_stem_flag_color();
     void add_stem_and_flag();
     void add_stem_flag_segment(StemFlagEngraver* engrv);
     void add_stem_link_segment();
