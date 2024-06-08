@@ -33,7 +33,7 @@ jobs:
             elif [ "$RUNNER_OS" == "macOS" ]; then
                 brew install unittest-cpp
                 brew tap homebrew/cask-fonts
-                brew install --cask font-noto-sans-cjk 
+                brew install font-noto-sans-cjk 
             else
                 echo "$RUNNER_OS not supported"
                 exit 1
