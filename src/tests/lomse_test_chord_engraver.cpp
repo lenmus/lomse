@@ -845,6 +845,36 @@ SUITE(ChordEngraverTest)
         delete_chord();
     }
 
+    TEST_FIXTURE(ChordEngraverTestFixture, chord_engraver_406)
+    {
+        //@406 - stem color black when noteheads with different colors
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "(score (vers 2.1)(instrument (musicData (clef G)"
+            "(chord (n a4 q (color #ff0000))(n e5 q (color #00ff00)))"
+            ")))", Document::k_format_ldp);
+        ImoChord* pChord = get_imochord_for_chord(0, &doc);
+        CHECK( pChord != nullptr );
+
+        load_notes_in_chord_engraver(pChord);
+        m_pChordEngrv->create_shapes();
+        Color colorNote = m_pChordEngrv->get_base_note_shape()->get_normal_color();
+        CHECK ( is_equal(colorNote, Color(255,0,0)) );
+        CHECK ( is_equal(m_pShape1->get_normal_color(), Color(255,0,0)) );
+        CHECK ( is_equal(m_pShape2->get_normal_color(), Color(0,255,0)) );
+
+        GmoShapeStem* pStem = m_pChordEngrv->get_flag_stem_shape();
+        Color colorStem = pStem->get_normal_color();
+        CHECK( is_equal(colorStem, Color(0,0,0)) );
+
+        pStem = m_pChordEngrv->get_link_stem_shape();
+        colorStem = pStem->get_normal_color();
+        CHECK( is_equal(colorStem, Color(0,0,0)) );
+
+        delete_chord();
+    }
+
     TEST_FIXTURE(ChordEngraverTestFixture, chord_engraver_410)
     {
         //@410 - collect_chord_notes()
