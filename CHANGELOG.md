@@ -10,7 +10,9 @@
 
 ##### COMPATIBLE CHANGES
 
-- None.
+- Color inheritance for stems, flags and beams when color has not been
+  explicitly specified for them in the source file(any source format, LDP, 
+  MusicXML,...) has been defined and implemented.
 
 
 
