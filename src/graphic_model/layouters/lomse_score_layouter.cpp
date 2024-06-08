@@ -234,7 +234,7 @@ void ScoreLayouter::layout_in_box()
                 set_layout_result(k_layout_success);
                 delete_system();
                 return;
-            #elseif (0)
+            #elif (0)
                 //Overrun paper
                 add_system_to_page();
                 fSystemsAdded = true;
