@@ -32,8 +32,8 @@ jobs:
                 sudo apt-get install --yes fonts-noto-cjk
             elif [ "$RUNNER_OS" == "macOS" ]; then
                 brew install unittest-cpp
-                brew tap homebrew/cask-fonts
-                brew install font-noto-sans-cjk 
+                brew tap homebrew/cask
+                brew install --cask font-noto-sans-cjk 
             else
                 echo "$RUNNER_OS not supported"
                 exit 1
