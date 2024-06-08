@@ -1,0 +1,15 @@
+(score (vers 2.0) 
+(instrument (musicData 
+    (clef F4)(key C)
+    (n e3 q)(n g3 q)
+    (chord (n b3 q (stem down)(color #ff0000))(n +d4 q (color #ff0000))(n +f4 q (color #ff0000)))
+    (n e4 q)(n g3 q (color #0000ff))
+    (chord (n b3 q (stem down)(color #ff0000))(n +d4 q (color #00ff00))(n +f4 q (color #0000ff)))
+    (n e4 e g+)(n g3 e g- (color #ff00ff))
+    (n e4 e g+ (color #ff00ff))(n g3 e g- (color #ff00ff))
+    (chord (n b3 e (stem down)(beam 1 +))(n +d4 e (color #ff0000))(n +f4 e))
+    (chord (n b3 e (stem down)(beam 1 -))(n +d4 e )(n +f4 e))
+    (chord (n b3 e (stem down)(beam 2 +)(color #ff0000))(n +d4 e (color #ff0000))(n +f4 e (color #ff0000)))
+    (chord (n b3 e (stem down)(beam 2 -)(color #ff0000))(n +d4 e (color #ff0000))(n +f4 e (color #ff0000)))
+)))
+
