@@ -5,10 +5,18 @@
 # 	UNITTEST++_FOUND
 # 	UNITTEST++_INCLUDE_DIR
 #
+include(FindPkgConfig)
+include(FindPackageHandleStandardArgs)
+
+# Use pkg-config to get hints about paths
+pkg_check_modules(UnitTest++_PKGCONF QUIET unittest++)
+
 find_path(UNITTEST++_INCLUDE_DIR 
 	NAME
 		UnitTest++.h
 	PATHS
+	    ${UnitTest++_PKGCONF_INCLUDE_DIRS}
+  	    ${CMAKE_SOURCE_DIR}/tests/UnitTest++/src
 		/usr/local/include
 		/usr/include
 		/usr/include/unittest++
@@ -25,12 +33,23 @@ find_path(UNITTEST++_INCLUDE_DIR
 		$ENV{UnitTest++_DIR}/include/UnitTest++						#Windows
 		"C:/Program Files (x86)/UnitTest++/include/UnitTest++"		#Windows
 		"C:/Program Files/UnitTest++/include/UnitTest++"		    #Windows
+        /usr/local/Cellar/                      # for macOS when UnitTest++ is installed using Homebrew
+        /usr/local/Cellar/include               # for macOS when UnitTest++ is installed using Homebrew
+        /usr/local/Cellar/include/unittest++    # for macOS when UnitTest++ is installed using Homebrew
+        /usr/local/Cellar/include/UnitTest++    # for macOS when UnitTest++ is installed using Homebrew
+    #By default, Homebrew will install all packages in the directory /usr/local/Cellar/ ,
+    #and also creates symbolic links at /usr/local/opt/ and /usr/local/bin/ (for executable files).
+    PATH_SUFFIXES
+	    unittest++
+	    UnitTest++
 )
 
 FIND_LIBRARY (UNITTEST++_LIBRARY
 	NAMES
-		UnitTest++
+		unittest++ UnitTest++
 	PATHS 
+  	    ${UnitTest++_PKGCONF_LIBRARY_DIRS}
+  	    ${CMAKE_SOURCE_DIR}/tests/UnitTest++
 		/usr/lib
 		/usr/local/lib
 		/usr/lib64/ 		# Fedora
@@ -41,6 +60,10 @@ FIND_LIBRARY (UNITTEST++_LIBRARY
 		$ENV{UnitTest++_DIR}/lib					#Windows
 		"C:/Program Files (x86)/UnitTest++/lib"		#Windows
 		"C:/Program Files/UnitTest++/lib"			#Windows
+        /usr/local/Cellar/          # for macOS when UnitTest++ is installed using Homebrew
+        /usr/local/Cellar/lib       # for macOS when UnitTest++ is installed using Homebrew
+    #By default, Homebrew will install all packages in the directory /usr/local/Cellar/ ,
+    #and also creates symbolic links at /usr/local/opt/ and /usr/local/bin/ (for executable files).
 )
 
 SET (UNITTEST++_FOUND FALSE)

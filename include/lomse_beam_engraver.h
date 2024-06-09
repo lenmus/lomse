@@ -110,6 +110,7 @@ public:
 protected:
     void add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape);
     void determine_number_of_beam_levels();
+    void determine_beam_color();
     void decide_stems_direction();
         void decide_stems_direction_for_beams_with_chords();
         void decide_stems_direction_for_beams_without_chords();

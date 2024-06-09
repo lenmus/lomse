@@ -234,7 +234,7 @@ void ScoreLayouter::layout_in_box()
                 set_layout_result(k_layout_success);
                 delete_system();
                 return;
-            #elseif (0)
+            #elif (0)
                 //Overrun paper
                 add_system_to_page();
                 fSystemsAdded = true;
@@ -1167,18 +1167,18 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         }
         case k_imo_clef:
         {
-            ImoClef* pClef = static_cast<ImoClef*>(pSO);
-            if (pClef->get_clef_type() == k_clef_none)
+            ImoClef* pClefSO = static_cast<ImoClef*>(pSO);
+            if (pClefSO->get_clef_type() == k_clef_none)
             {
                 return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
             }
             else
             {
                 bool fSmallClef = flags & k_flag_small_clef;
-                int clefSize = pClef->get_symbol_size();
+                int clefSize = pClefSO->get_symbol_size();
                 if (clefSize == k_size_default)
                     clefSize = fSmallClef ? k_size_cue : k_size_full;
-                Color color = pClef->get_color();
+                Color color = pClefSO->get_color();
                 ClefEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
                 return engrv.create_shape(pClef, pos, clefType, clefSize, color);
             }

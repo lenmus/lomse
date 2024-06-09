@@ -138,6 +138,7 @@ GmoShape* BeamEngraver::create_last_shape(const RelObjEngravingContext& ctx)
 //---------------------------------------------------------------------------------------
 GmoShapeBeam* BeamEngraver::create_beam_shape()
 {
+    determine_beam_color();
     decide_stems_direction();
     determine_number_of_beam_levels();
 
@@ -473,6 +474,39 @@ void BeamEngraver::decide_beam_position()
         }
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::determine_beam_color()
+{
+    Color color = m_color;
+
+    //find first stem
+    std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        if ((it->first)->is_note())      //ignore rests
+        {
+            GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(it->second);
+	        GmoShapeStem* pStemShape = pNoteShape->get_stem_shape();
+            color = pStemShape->get_normal_color();
+            ++it;
+            break;
+        }
+    }
+
+    //process all other stems
+    for (; it != m_noteRests.end(); ++it)
+    {
+        if ((it->first)->is_note())      //ignore rests
+        {
+            GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(it->second);
+	        GmoShapeStem* pStemShape = pNoteShape->get_stem_shape();
+            if (!is_equal(color, pStemShape->get_normal_color()))
+                return;
+        }
+    }
+    m_color = color;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1862,9 +1896,9 @@ void BeamEngraver::position_segments(std::vector<SegmentData>* pSegs)
         if (sgd.position == k_beam_above)
             yShift = - yShift;
 
-        LUnits yStart = sgd.yStart + yShift;
-        LUnits yEnd = sgd.yEnd + yShift;
-        add_segment(sgd.xStart, yStart, sgd.xEnd, yEnd);
+        LUnits yStart2 = sgd.yStart + yShift;
+        LUnits yEnd2 = sgd.yEnd + yShift;
+        add_segment(sgd.xStart, yStart2, sgd.xEnd, yEnd2);
 
         //increment stem lenght of start note
         if (sgd.pStartNote)

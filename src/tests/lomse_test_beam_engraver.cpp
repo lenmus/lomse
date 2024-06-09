@@ -145,7 +145,7 @@ public:
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(1) );
-        return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
+        return dynamic_cast<ImoBeam*>( pNote1->find_relation(k_imo_beam) );
     }
 
     //-----------------------------------------------------------------------------------
@@ -188,7 +188,9 @@ public:
             ImoNote* pNote = static_cast<ImoNote*>( (*it).first );
             GmoShapeNote* pShape = dynamic_cast<GmoShapeNote*>(
                 m_pNoteEngrv->create_shape(pNote, k_clef_G2, 0,
-                                           UPoint(10.0f, 15.0f)) );
+                                           UPoint(10.0f, 15.0f),
+                                           nullptr,
+                                           pNote->get_color()) );
             m_shapes.push_back(pShape);
         }
 
@@ -742,7 +744,41 @@ SUITE(BeamEngraverTest)
     }
 
 
+    // 04x. Tests for beam color --------------------------------------------------------
 
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_040)
+    {
+        //@040 - beam color same than stem color when all stems have the same color
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n e4 e g+ (color #ff00ff))(n g3 e g- (color #ff00ff))");
+        prepare_to_engrave_beam(pBeam);
+
+        RelObjEngravingContext ctx;
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape(ctx) );
+        CHECK( m_pBeamShape != nullptr );
+        Color colorBeam = m_pBeamShape->get_normal_color();
+        CHECK( is_equal(colorBeam, Color(255,0,255)) );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_041)
+    {
+        //@041 - beam color black when not all stems have the same color
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n e4 e g+ (color #ff00ff))(n g3 e g- (color #0000ff))");
+        prepare_to_engrave_beam(pBeam);
+
+        RelObjEngravingContext ctx;
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape(ctx) );
+        CHECK( m_pBeamShape != nullptr );
+        Color colorBeam = m_pBeamShape->get_normal_color();
+        CHECK( is_equal(colorBeam, Color(0,0,0)) );
+
+        delete_test_data();
+    }
 
 
     // 05x. Tests for stem length -------------------------------------------------------
