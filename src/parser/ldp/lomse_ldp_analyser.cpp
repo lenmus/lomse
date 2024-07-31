@@ -3700,6 +3700,7 @@ protected:
     ImoTupletDto* m_pTupletInfo;
     ImoBeamDto* m_pBeamInfo;
     ImoSlurDto* m_pSlurDto;
+    ImoOctaveShiftDto* m_pOctaveShiftDto;
     ImoFermata* m_pFermata;
     ImoTimeModificationDto* m_pTimeModifDto;
     std::string m_srcOldBeam;
@@ -3713,6 +3714,7 @@ public:
         , m_pTupletInfo(nullptr)
         , m_pBeamInfo(nullptr)
         , m_pSlurDto(nullptr)
+        , m_pOctaveShiftDto(nullptr)
         , m_pFermata(nullptr)
         , m_pTimeModifDto(nullptr)
         , m_srcOldBeam("")
@@ -3853,6 +3855,9 @@ public:
         //slur
         add_slur_info(pNote);
 
+        //octave-shift
+        add_octave_shift_info(pNR);
+
         //chord
         if (!fIsRest && fInChord)
         {
@@ -3880,7 +3885,7 @@ protected:
 
     void analyse_note_rest_options(ImoNoteRest* pNR)
     {
-        // { <beam> | <tuplet> | <timeModification> | <voice> }
+        // { <beam> | <tuplet> | <timeModification> | <voice> | <octaveShift> }
 
         while( more_params_to_analyse() )
         {
@@ -3904,6 +3909,10 @@ protected:
             else if (type == k_voice)
             {
                 set_voice_element(pNR);
+            }
+            else if (type == k_octave_shift)
+            {
+                m_pOctaveShiftDto = static_cast<ImoOctaveShiftDto*>( proceed(k_octave_shift, nullptr) );
             }
             else
                 break;
@@ -4203,6 +4212,112 @@ protected:
         }
     }
 
+    void add_octave_shift_info(ImoNoteRest* pNR)
+    {
+        if (m_pOctaveShiftDto)
+        {
+            m_pOctaveShiftDto->set_staffobj(pNR);
+            m_pAnalyser->add_relation_info(m_pOctaveShiftDto);
+        }
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
+//@ <octaveShift> = (octaveShift num <startStop>[<octaveShiftType>][color] )
+//@ num = octaveShift number. integer
+//@ <startStop> = { start | stop }
+//@ <octaveShiftType> = { 8u | 8d | 15u | 15d }
+//@
+//@ Example:
+//@     (octaveShift 18 start 8d)
+//@
+
+class octaveShiftAnalyser : public ElementAnalyser
+{
+protected:
+    ImoOctaveShiftDto* m_pInfo = nullptr;
+
+public:
+    octaveShiftAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis() override
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo = static_cast<ImoOctaveShiftDto*>(
+                                ImFactory::inject(k_imo_octave_shift_dto, pDoc));
+        m_pInfo->set_id( get_node_id() );
+        m_pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
+
+        // num
+        if (get_mandatory(k_number))
+            m_pInfo->set_octave_shift_number( get_integer_value(0) );
+
+        // <startStop> (label)
+        if (!get_mandatory(k_label) || !set_start_stop())
+        {
+            error_msg("Missing or invalid value for octaveShift start/stop. Octave-shift ignored.");
+            delete m_pInfo;
+            return;
+        }
+
+        // <octaveShiftType> (label)
+        if (m_pInfo->is_start())
+        {
+            if (get_optional(k_label))
+            {
+                set_octave_shift_type();
+
+              // [<color>]
+              if (get_optional(k_color))
+                  m_pInfo->set_color( get_color_param() );
+            }
+        }
+        else
+        {
+//            int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
+        }
+
+        error_if_more_elements();
+
+        m_pAnalysedNode->set_imo(m_pInfo);
+    }
+
+protected:
+
+    bool set_start_stop()
+    {
+        const std::string& value = m_pParamToAnalyse->get_value();
+        if (value == "start")
+            m_pInfo->set_start(true);
+        else if (value == "stop")
+            m_pInfo->set_start(false);
+        else
+            return false;   //error
+        return true;    //ok
+    }
+
+    void set_octave_shift_type()
+    {
+        const std::string& value = m_pParamToAnalyse->get_value();
+        int size = 0;       //any value, just to initialize it
+        if (value == "8u")
+            size =-7;
+        else if (value == "8d")
+            size = 7;
+        else if (value == "15u")
+            size = -14;
+        else if (value == "15d")
+            size = 14;
+        else
+        {
+            error_msg("Invalid octave-shift size '" + value + "'. Changed to 8u.");
+            size = -7;
+        }
+        m_pInfo->set_shift_steps(size);
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -6449,6 +6564,7 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pOldBeamsBuilder(nullptr)
     , m_pTupletsBuilder(nullptr)
     , m_pSlursBuilder(nullptr)
+    , m_pOctaveShifBuilder(nullptr)
     , m_pCurScore(nullptr)
     , m_pLastScore(nullptr)
     , m_pImoDoc(nullptr)
@@ -6495,6 +6611,7 @@ void LdpAnalyser::delete_relation_builders()
     delete m_pOldBeamsBuilder;
     delete m_pTupletsBuilder;
     delete m_pSlursBuilder;
+    delete m_pOctaveShifBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6507,6 +6624,7 @@ ImoObj* LdpAnalyser::analyse_tree_and_get_object(LdpTree* tree)
     m_pOldBeamsBuilder = LOMSE_NEW OldBeamsBuilder(m_reporter, this);
     m_pTupletsBuilder = LOMSE_NEW TupletsBuilder(m_reporter, this);
     m_pSlursBuilder = LOMSE_NEW SlursBuilder(m_reporter, this);
+    m_pOctaveShifBuilder = LOMSE_NEW OctaveShiftBuilder(m_reporter, this);
 
     m_pTree = tree;
     m_curStaff = 0;
@@ -6723,6 +6841,8 @@ void LdpAnalyser::add_relation_info(ImoObj* pDto)
         m_pBeamsBuilder->add_item_info(static_cast<ImoBeamDto*>(pDto));
     else if (pDto->is_tuplet_dto())
         m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
+    else if (pDto->is_octave_shift_dto())
+        m_pOctaveShifBuilder->add_item_info(static_cast<ImoOctaveShiftDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -6733,6 +6853,7 @@ void LdpAnalyser::clear_pending_relations()
     m_pBeamsBuilder->clear_pending_items();
     m_pOldBeamsBuilder->clear_pending_old_beams();
     m_pTupletsBuilder->clear_pending_items();
+    m_pOctaveShifBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -7101,6 +7222,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_name:            return LOMSE_NEW InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_newSystem:       return LOMSE_NEW ControlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_note:            return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_octave_shift:    return LOMSE_NEW octaveShiftAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_opt:             return LOMSE_NEW OptAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_orderedlist:     return LOMSE_NEW ListAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_pageLayout:      return LOMSE_NEW PageLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -7309,6 +7431,33 @@ void SlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
         ImoNote* pNote = (*it)->get_note();
         ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
         pNote->include_in_relation(pSlur, pData);
+    }
+}
+
+
+
+//=======================================================================================
+// OctaveShiftBuilder implementation
+//=======================================================================================
+void OctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo)
+{
+    m_matches.push_back(pEndInfo);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+    ImoOctaveShiftDto* pStartInfo = m_matches.front();
+    ImoOctaveShift* pShift = static_cast<ImoOctaveShift*>(
+                        ImFactory::inject(k_imo_octave_shift, pDoc, pStartInfo->get_id()) );
+    pShift->set_octave_shift_number( pStartInfo->get_octave_shift_number() );
+    pShift->set_shift_steps( pStartInfo->get_shift_steps() );
+    pShift->set_color( pStartInfo->get_color() );
+
+    std::list<ImoOctaveShiftDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoNoteRest* pNR = (*it)->get_staffobj();
+        //ImoOctaData* pData = ImFactory::inject_slur_data(pDoc, *it);
+        //pNote->include_in_relation(pShift, pData);
+        pNR->include_in_relation(pShift, nullptr);
     }
 }
 
