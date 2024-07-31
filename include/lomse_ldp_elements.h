@@ -65,6 +65,7 @@ enum ELdpElement
     k_textbox,
     k_line,
     k_lyric,
+    k_octave_shift,
     k_tie,
     k_tuplet,
     //pauses and breath marks

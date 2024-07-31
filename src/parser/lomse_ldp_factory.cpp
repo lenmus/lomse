@@ -161,7 +161,8 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_no] = "no";
     m_TypeToName[k_normal] = "normal";
     m_TypeToName[k_note] = "n";   //note
-    m_TypeToName[k_opt] = "opt";
+    m_TypeToName[k_slur] = "slur";
+    m_TypeToName[k_octave_shift] = "octaveShift";
     m_TypeToName[k_orderedlist] = "orderedlist";
     m_TypeToName[k_padding] = "padding";
     m_TypeToName[k_padding_top] = "padding-top";
@@ -368,6 +369,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["newSystem"] = LOMSE_NEW LdpElementFunctor<k_newSystem>;
     m_NameToFunctor["no"] = LOMSE_NEW LdpElementFunctor<k_no>;
     m_NameToFunctor["normal"] = LOMSE_NEW LdpElementFunctor<k_normal>;
+    m_NameToFunctor["octaveShift"] = LOMSE_NEW LdpElementFunctor<k_octave_shift>;
     m_NameToFunctor["opt"] = LOMSE_NEW LdpElementFunctor<k_opt>;
     m_NameToFunctor["orderedlist"] = LOMSE_NEW LdpElementFunctor<k_orderedlist>;
     m_NameToFunctor["padding"] = LOMSE_NEW LdpElementFunctor<k_padding>;

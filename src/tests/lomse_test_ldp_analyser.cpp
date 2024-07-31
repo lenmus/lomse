@@ -2042,6 +2042,175 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+    // octaveShift ----------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, octaveShift_01)
+    {
+        //@01. octaveShift start: minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(octaveShift 18 start 8d)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_octave_shift_dto() == true );
+        CHECK( check_errormsg(errormsg, expected) );
+        ImoOctaveShiftDto* pInfo = dynamic_cast<ImoOctaveShiftDto*>( pRoot );
+        CHECK( pInfo != nullptr );
+        if (pInfo)
+        {
+            CHECK( pInfo->is_start() == true );
+            CHECK( pInfo->get_octave_shift_number() == 18 );
+            CHECK( pInfo->get_shift_steps() == 7 );
+            CHECK( !is_different(pInfo->get_color(), Color(0,0,0)) );
+            CHECK( pInfo->get_staff() == 0 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, octaveShift_02)
+    {
+        //@02. invalid shift octaves
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid octave-shift size '12u'. Changed to 8u." << endl;
+        parser.parse_text("(octaveShift 18 start 12u)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_octave_shift_dto() == true );
+        CHECK( check_errormsg(errormsg, expected) );
+        ImoOctaveShiftDto* pInfo = dynamic_cast<ImoOctaveShiftDto*>( pRoot );
+        CHECK( pInfo != nullptr );
+        if (pInfo)
+        {
+            CHECK( pInfo->is_start() == true );
+            CHECK( pInfo->get_octave_shift_number() == 18 );
+            CHECK( pInfo->get_shift_steps() == -7 );
+            CHECK( !is_different(pInfo->get_color(), Color(0,0,0)) );
+            CHECK( pInfo->get_staff() == 0 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, octaveShift_03)
+    {
+        //@03. invalid start/stop value
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Missing or invalid value for octaveShift start/stop. Octave-shift ignored." << endl;
+        parser.parse_text("(octaveShift 18 end)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot == nullptr );
+        CHECK( check_errormsg(errormsg, expected) );
+
+        delete tree->get_root();
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, octaveShift_04)
+    {
+        //@04. Octave-shift relationship correctly built
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(musicData (n c4 q (octaveShift 12 start 15u)) (n c4 e (octaveShift 12 stop)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        ImoOctaveShift* pShift = static_cast<ImoOctaveShift*>( pNote->find_relation(k_imo_octave_shift) );
+        CHECK( pShift->get_octave_shift_number() == 12 );
+        CHECK( pShift->get_num_objects() == 2 );
+        CHECK( pShift->get_shift_steps() == -14 );
+        CHECK( !is_different(pShift->get_color(), Color(0,0,0)) );
+
+        ImoNote* pStartNote = dynamic_cast<ImoNote*>( pShift->get_start_object() );
+        ImoNote* pEndNote = dynamic_cast<ImoNote*>( pShift->get_end_object() );
+
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1 == pStartNote );
+
+        ++it;
+        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote2 == pEndNote );
+
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, octaveShift_05)
+    {
+        //@05. Octave-shift has color
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(musicData (n c4 q (octaveShift 5 start 8d (color #ff0000))) "
+            "(n c4 e (octaveShift 5 stop)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        CHECK( check_errormsg(errormsg, expected) );
+
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        ImoOctaveShift* pShift = static_cast<ImoOctaveShift*>( pNote->find_relation(k_imo_octave_shift) );
+        CHECK( pShift->get_octave_shift_number() == 5 );
+        CHECK( pShift->get_num_objects() == 2 );
+        CHECK( pShift->get_shift_steps() == 7 );
+        CHECK( !is_different(pShift->get_color(), Color(255,0,0)) );
+
+        ImoNote* pStartNote = dynamic_cast<ImoNote*>( pShift->get_start_object() );
+        ImoNote* pEndNote = dynamic_cast<ImoNote*>( pShift->get_end_object() );
+
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1 == pStartNote );
+
+        ++it;
+        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote2 == pEndNote );
+
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+
     // rest -----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest)

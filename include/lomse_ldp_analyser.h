@@ -103,6 +103,19 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
+// helper class to save octave-shift info items, match them and build the octave-shift lines
+class OctaveShiftBuilder : public RelationBuilder<ImoOctaveShiftDto, LdpAnalyser>
+{
+public:
+    OctaveShiftBuilder(ostream& reporter, LdpAnalyser* pAnalyser)
+        : RelationBuilder<ImoOctaveShiftDto, LdpAnalyser>(reporter, pAnalyser, "octaveShift", "octave-shift") {}
+    virtual ~OctaveShiftBuilder() {}
+
+    void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo) override;
+};
+
+
 
 //---------------------------------------------------------------------------------------
 // helper class to save beam info items, match them and build the beams
@@ -174,6 +187,7 @@ protected:
     OldBeamsBuilder* m_pOldBeamsBuilder;
     TupletsBuilder* m_pTupletsBuilder;
     SlursBuilder*   m_pSlursBuilder;
+    OctaveShiftBuilder* m_pOctaveShifBuilder;
     map<string, int> m_lyricIndex;
     vector<ImoLyric*>  m_lyrics;
     vector<int>     m_lyricsPlacement;
