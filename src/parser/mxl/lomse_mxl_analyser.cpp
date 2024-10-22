@@ -1065,9 +1065,14 @@ protected:
 
     Color get_attribute_color()
     {
-        if (has_attribute(&m_analysedNode, "color"))
+        return get_attribute_color(&m_analysedNode);
+    }
+
+    Color get_attribute_color(XmlNode* node)
+    {
+        if (has_attribute(node, "color"))
         {
-            string value = m_analysedNode.attribute_value("color");
+            string value = node->attribute_value("color");
             bool fError = false;
             ImoColorDto color;
             if (value.length() == 7)
@@ -2561,8 +2566,12 @@ public:
 
         //@ bar-style?
         string barStyle = "";
+        Color color = Color(0,0,0);
         if (get_optional("bar-style"))
+        {
             barStyle = m_childToAnalyse.value();
+            color = get_attribute_color(&m_childToAnalyse);
+        }
         if (barStyle.empty())
             barStyle = (location == "left" ? "none" : "regular");
 
@@ -2586,6 +2595,7 @@ public:
 
         EBarline type = find_barline_type(barStyle);
         combine_barlines(m_pBarline, type);
+        m_pBarline->set_color(color);
         set_num_repeats();
 
         //TODO: do anything with m_wings
@@ -3494,6 +3504,9 @@ public:
         // attrib: %placement;
         pImo->set_placement(get_attribute_placement());
 
+        //attrib: %print-style-align;
+        get_attributes_for_print_style_align(pImo);
+
         //inherit placement from parent <direction> if not set in this <dynamics>
         if (pImo->get_placement() == k_placement_default && m_pAnchor->is_direction())
             pImo->set_placement( (static_cast<ImoDirection*>(m_pAnchor))->get_placement() );
@@ -4179,7 +4192,7 @@ public:
         }
 
         //attrb: %print-style;
-            //TODO
+        get_attributes_for_print_style(pKey);
 
         //attrb: %print-object;
             //TODO
@@ -4614,7 +4627,7 @@ public:
                     ImFactory::inject(k_imo_metronome_mark, pDoc) );
 
         //attrb: %print-style;
-            //TODO
+        //get_attributes_for_print_style(pMtr);
 
         //attrb: parentheses %yes-no; #IMPLIED
             //TODO
@@ -5067,6 +5080,9 @@ public:
     {
             //attribs
 
+        //attrb: color
+        Color color = get_attribute_color();
+
         //attrb: print-object
         bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
 
@@ -5123,6 +5139,7 @@ public:
             else
                 analyse_mandatory("pitch", pNote);
         }
+        pNR->set_color(color);
 
         // <duration>, except for grace notes
         int duration = 0;
@@ -5185,6 +5202,7 @@ public:
         // [<notehead>]
         if (get_optional("notehead"))
         {
+            pNR->set_color( get_attribute_color(&m_childToAnalyse) );
         }
 
         // [<notehead-text>]
@@ -8346,8 +8364,11 @@ public:
         if (has_attribute("symbol"))
             set_symbol(pTime);
 
-        //TODO  attrib: %time-separator;
-        //TODO  attrib: %print-style-align;
+        //attrib: %time-separator;
+            //TODO
+
+        //attrib: %print-style-align;
+        get_attributes_for_print_style_align(pTime);
 
         //attrb: %print-object;
         bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
@@ -8957,9 +8978,13 @@ public:
         // attrib: %line-type;
         // attrib: %dashed-formatting;
         // attrib: %position;
+            //TODO
+
         // attrib: %color;
+        m_pInfo1->set_color(get_attribute_color());
+
         // attrib: %optional-unique-id;
-        //TODO
+            //TODO
 
         set_wedge_type_and_id(type, num);
 
